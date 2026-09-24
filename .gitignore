@@ -1,0 +1,11 @@
+# Godot 4 のキャッシュ・一時ファイル（.uid と .import は残す）
+.godot/
+*.tmp
+# Python
+__pycache__/
+*.pyc
+# エディタ・OS
+.vs/
+.vscode/
+Thumbs.db
+desktop.ini

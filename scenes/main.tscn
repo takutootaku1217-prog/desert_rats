@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://uplk3sd6ulvt"]
+
+[ext_resource type="Script" uid="uid://dd5gcnx8tae8" path="res://scripts/main.gd" id="1_o5qli"]
+
+[node name="Main" type="Node2D" unique_id=2135147132]
+script = ExtResource("1_o5qli")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=1433754215]
