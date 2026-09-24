@@ -145,3 +145,13 @@
 ## 作業ログ
 - 2026-09-25 PC: スマホ側の書き込み（狩猟・燃料・修理のループ）でPC側の変更が上書きされた。動かなくなっていた原因は、PC側が消した `ui/ui_kit.gd`・`ui/crew_picker.gd` とネズミの絵 `mouse_*.png`。これらを復元し、スマホ側の版が起動できる状態に戻した（エラーなし）。PC側の個体システム・部屋・人間の絵は上の「休眠」として残してある。統合の方針はユーザーの判断待ち。
 - 2026-09-25 PC: ユーザーの指示（ゲームのコアとなる資源管理・バトル・天候・トラブルへの対処）で「旅の出来事」を追加した（上の「旅の出来事」の節）。天候3種・襲撃2種・故障・好機2種、対処方針、迎撃、車体0でゲームオーバー。自己診断とシミュレーションは通過。新しいファイル: data/events.gd, scripts/director.gd, scripts/weather_fx.gd, ui/event_hud.gd, tools/test_events.gd, tools/sim_events.gd, tools/shot_events.gd。未着手: ボス戦、遺跡の探索（遠征）。PC側の休眠ファイル（個体・部屋・人間の絵）は引き続き未統合。
+
+## GitHub 連携（2026-09-25〜）: PCとスマホの作業を安全につなぐ
+- リポジトリ: https://github.com/takutootaku1217-prog/desert_rats （**非公開**）。**正本は GitHub の `main`**。これで、ファイルの丸ごと上書きではなく、履歴と統合（マージ）で同期する。
+- **PC側（このフォルダ）**: 作業の最初に `git fetch` → `git log HEAD..origin/main --oneline` でスマホ側の新しい変更を確認し、あれば `git pull`（衝突したら中身を読んで統合する。どちらかを勝手に捨てない）。作業の終わりに `git add -A` → `git commit -m "<何をしたか>"` → `git push`。
+  - git と gh は PATH に入っていないことがある: `C:\Program Files\Git\cmd\git.exe`、`C:\Users\user\AppData\Local\Microsoft\WinGet\Packages\GitHub.cli_Microsoft.Winget.Source_8wekyb3d8bbwe\bin\gh.exe`。Godot のエディタを開いたまま作業しない。
+  - コミットの著者は `desert_rats-PC`。
+- **スマホ側（クラウド環境）**: 作業の最初に最新の `main` を取り込む。作業は `phone/<内容>` のような枝（ブランチ）で行い、終わりに push する。`main` へ強制 push（`--force`）はしない。PC側がその枝を取り込んで統合する（ユーザーが GitHub 上でマージしてもよい）。
+- どちらの側も、作業の終わりに下の「作業ログ」へ 日付・環境・何をしたか・未完了 を追記して push する。
+- 従来のルール（自分が作っていないファイルは消さない、既存ファイルは丸ごと書き直さず Edit する）は引き続き守る。
+- 2026-09-25 PC: GitHub に非公開リポジトリ desert_rats を作り、履歴（最初のコミット eac905f）を push した。以後は上の「GitHub 連携」の手順で同期する。スマホ側は、リポジトリを選んで phone/… の枝で作業する。
