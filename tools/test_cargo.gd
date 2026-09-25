@@ -32,6 +32,7 @@ func _reset() -> void:
 	main.director.enabled = false
 	main.director.active.clear()
 	main.director.forecast.clear()
+	main.scroll_speed = 0.0                    # 世界を止めて、回収の「選び方」だけを確かめる（追いつけるかは test_gather.gd で）
 	for w in main.workers:
 		if w.away:
 			w.arrive(100.0)

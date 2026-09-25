@@ -291,12 +291,30 @@ func _one(n: int, minutes: float, scale: float, seed_base: int, events_on: bool,
 	paused = false
 	# ---- 画面の数字と実際の個数が合っているか ----
 	main.status._process(0.0)
-	var text: String = main.status._stock.text
+	var text: String = main.status._stock.text + "\n" + main.status._cargo.text
 	var rx := RegEx.new()
-	rx.compile("食料 (\\d+)")
-	var m := rx.search(text)
-	if m != null and int(m.get_string(1)) != st.count_of(GameData.Item.FOOD):
-		errors.append("右上の食料の数（%s）が倉庫の個数（%d）と違う" % [m.get_string(1), st.count_of(GameData.Item.FOOD)])
+	var labels := [["食料", GameData.Item.FOOD], ["燃料", GameData.Item.FUEL], ["修理資材", GameData.Item.REPAIR_KIT], ["肉", GameData.Item.MEAT],
+			["皮", GameData.Item.HIDE], ["骨", GameData.Item.BONE], ["脂", GameData.Item.FAT], ["木", GameData.Item.WOOD], ["石", GameData.Item.STONE],
+			["鉱", GameData.Item.IRON_ORE], ["鉄", GameData.Item.IRON]]
+	var ui_ok := true
+	for lb in labels:
+		rx.compile(str(lb[0]) + " ?(\\d+)")
+		var m := rx.search(text)
+		if m == null or int(m.get_string(1)) != st.count_of(lb[1]):
+			ui_ok = false
+			errors.append("右上の表示（%s %s）が倉庫の個数（%d）と違う" % [lb[0], m.get_string(1) if m != null else "なし", st.count_of(lb[1])])
+	rx.compile("素材棚 (\\d+)/(\\d+)")
+	var m2 := rx.search(text)
+	if m2 == null or int(m2.get_string(1)) != st.used_in(CargoDB.Bay.RAW) or int(m2.get_string(2)) != st.capacity_of(CargoDB.Bay.RAW):
+		ui_ok = false
+		errors.append("右上の素材棚の表示が、実際の積載量と違う")
+	rx.compile("加工品 (\\d+)/(\\d+)")
+	var m3 := rx.search(text)
+	if m3 == null or int(m3.get_string(1)) != st.used_in(CargoDB.Bay.PRODUCT) or int(m3.get_string(2)) != st.capacity_of(CargoDB.Bay.PRODUCT):
+		ui_ok = false
+		errors.append("右上の加工品置き場の表示が、実際の積載量と違う")
+	if ui_ok:
+		notes.append("右上の表示（素材・加工品の個数、素材棚・加工品置き場の積載量）は、実際の倉庫と一致している")
 
 	# ---- 出力 ----
 	var over: bool = main.game_over

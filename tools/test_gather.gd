@@ -32,6 +32,7 @@ func _reset() -> void:
 	main.director.enabled = false
 	main.director.active.clear()
 	main.director.forecast.clear()
+	main.scroll_speed = 0.0                    # 世界を止めて、採取ポイントの「選び方」だけを確かめる（追いつけるかは専用の診断で）
 	for w in main.workers:
 		if w.away:
 			w.arrive(100.0)
@@ -158,8 +159,36 @@ func _run() -> void:
 	pt.remaining = 0
 	check(pt.frame() == 2 and not pt.available(), "尽きると「枯れた」絵になり、もう採れない")
 	var x0: float = pt.position.x
+	main.scroll_speed = 60.0
 	pt._process(0.5)
+	main.scroll_speed = 0.0
 	check(pt.position.x < x0, "採取ポイントも、砂漠と一緒に後ろへ流れる")
+
+	print("== 流れる資源に追いつけるか ==")
+	_reset()
+	var far := _point("rock", 1200.0, 10)         # 右の端（これから流れてくる）
+	var under := _point("rock", 600.0, 10)        # 拠点の真下（もう左へ流れていく）
+	W[0].floor_i = 1
+	W[0].position = Vector2(640.0, GameData.LO_Y)
+	main.scroll_speed = 0.0
+	check(W[0].ai._can_reach(under) and W[0].ai._can_reach(far), "世界が止まっているときは、どの資源にも追いつける")
+	main.scroll_speed = 60.0
+	check(W[0].ai._can_reach(far), "通常の速さ（60）: 右から流れてくる資源には追いつける")
+	check(not W[0].ai._can_reach(under), "通常の速さ（60）: 拠点の真下を左へ流れていく資源には、拠点の中から出ても追いつけない")
+	main.scroll_speed = 200.0
+	check(not W[0].ai._can_reach(far) and not W[0].ai._can_reach(under), "速さが仲間の足を超える（200）と、どの資源にも追いつけない")
+	main.scroll_speed = 60.0
+	W[0].floor_i = 0
+	W[0].position = Vector2(1000.0, 560.0)
+	check(W[0].ai._can_reach(_point("rock", 900.0, 10)), "地面にいて、すぐ近くの資源には、通常の速さで追いつける")
+	# 追いつけない資源しかないとき、回収に入らず取り消しも起きない（往復しない）
+	_reset()
+	W[0].floor_i = 1
+	W[0].position = Vector2(640.0, GameData.LO_Y)
+	_point("rock", 600.0, 10)
+	main.scroll_speed = 60.0
+	check(not W[0].ai._try_start(GameData.Job.GATHER), "追いつけない資源しかないときは、回収の仕事に入らない（見つけて取り消す往復をしない）")
+	main.scroll_speed = 0.0
 
 	print("== 回収AIの判断 ==")
 	_reset()
