@@ -19,6 +19,9 @@ var palette := "grey"
 var priorities := {}          # Job -> 0..MAX_PRIORITY（0 = やらない）
 var carrying := -1            # 持っている Item（-1 = なし）
 var carrying_species := ""   # 獲物を運んでいるときの生物の種類
+var carry_n := 1              # 持っている個数（採取ポイントでは袋いっぱいまで。それ以外は1）
+var carry_bonus := {}         # 採取の副産物 {Item: 個数}（倉庫に運ぶとき一緒に入れる）
+var tools := {}               # 持っている採取の道具 {枠: Item}（data/gathering.gd。持たない枠は素手）
 var speed := 120.0
 var target := Vector2.ZERO
 var slot_offset := Vector2.ZERO   # 作業場所で重ならないようにするずらし
@@ -98,9 +101,13 @@ func depart() -> void:
 		if carrying == GameData.Item.CARCASS:
 			game.storage.butcher(carrying_species)
 		else:
-			game.storage.add_item(carrying)
+			game.storage.add_item(carrying, carry_n)
+			for it in carry_bonus:
+				game.storage.add_item(it, carry_bonus[it])
 		carrying = -1
 		carrying_species = ""
+		carry_n = 1
+		carry_bonus = {}
 	a._release_task()
 	a._set_state(CharacterAI.State.IDLE)
 	a.timer = 9999.0
@@ -121,6 +128,16 @@ func arrive(new_energy: float) -> void:
 	target = position
 	ai.timer = 0.0
 	ai._set_state(CharacterAI.State.SEARCH)
+
+
+## 採取ポイント kind に使う道具（-1 = 素手）。道具は枠（採掘・伐採）ごとに1つ。
+func tool_for(kind: String) -> int:
+	return int(tools.get(GatherDB.slot_of_point(kind), -1))
+
+
+## 採取ポイント kind を掘るときの結果（採取ポイント × 道具 × 自分の能力）。data/gathering.gd の evaluate() を使う。
+func gather_eval(kind: String) -> Dictionary:
+	return GatherDB.evaluate(kind, tool_for(kind), ranks.get(GameData.Field.GATHERER, 0), field_mult(GameData.Field.GATHERER))
 
 
 ## 仕事の速さの倍率。分野ランク・得意分野・レベル・拠点の分野レベルで決まる。
@@ -279,6 +296,11 @@ func _draw() -> void:
 	draw_set_transform(snap + lift, 0.0, Vector2(facing, 1.0))
 	draw_texture_rect_region(_sheet, Rect2(-32, -64, 64, 64), Rect2(fr * 16, 0, 16, 16))
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	# 採取ポイントを掘っているあいだは、手にした道具が見える
+	if pose == "pick" and ai.res is GatherPoint and not sleeping:
+		var tl: int = tool_for(ai.res.kind)
+		if tl >= 0:
+			GameData.draw_item(self, tl, snap + Vector2(facing * 26.0, -34.0), 0.75)
 	var top := -70.0
 	if carrying == GameData.Item.CARCASS and carrying_species != "":
 		GameData.draw_creature(self, carrying_species, 0, snap + Vector2(0, top + 6), facing, true, 0.6)

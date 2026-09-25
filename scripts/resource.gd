@@ -9,6 +9,7 @@ var game
 var item: int = GameData.Item.WOOD
 var species := ""       # item が獲物（CARCASS）のときの生物の種類
 var claimed_by = null   # 回収予約している Worker
+var reserved := 1       # 回収に向かっている仲間が倉庫に持ち込む予定の個数（積載量の空き枠から引く。採取ポイントは袋の大きさ）
 var gather_progress := 0.0
 var age := 0.0
 

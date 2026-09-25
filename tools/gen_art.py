@@ -2,7 +2,7 @@
 使い方: python3 tools/gen_art.py   （PIL が必要。生成済みPNGを使うだけなら実行不要）"""
 import os
 from pxlib import *
-import art_chars, art_items, art_env, art_base, art_machine, art_creatures
+import art_chars, art_items, art_env, art_base, art_machine, art_creatures, art_gather
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "assets")
 
@@ -28,3 +28,4 @@ out("base", "ramp.png", art_base.ramp())
 out("base", "machine.png", art_machine.build_machine_sheet())
 for k, (fn, w, h) in art_creatures.CREATURES.items():
     out("creatures", f"{k}.png", art_creatures.sheet(fn, w, h))
+art_gather.write_all(ROOT)        # 採取ポイント（岩場・鉱床・枯れ木）と採取の道具のアイコン

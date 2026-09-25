@@ -75,6 +75,9 @@ func _rebuild() -> void:
 	if _page == 1:
 		_build_cargo_page()
 		return
+	if _page == 2:
+		_build_tools_page()
+		return
 	var cols := HBoxContainer.new()
 	cols.add_theme_constant_override("separation", 30)
 	_body.add_child(cols)
@@ -155,13 +158,13 @@ func _rebuild() -> void:
 func _tabs() -> Control:
 	var h := HBoxContainer.new()
 	h.add_theme_constant_override("separation", 6)
-	for spec in [[0, "方針（加工・回収・狩猟）"], [1, "積載の割り当て"]]:
+	for spec in [[0, "方針（加工・回収・狩猟）"], [1, "積載の割り当て"], [2, "採取の道具"]]:
 		var p: int = spec[0]
 		var b := UIKit.button(spec[1], func():
 			_page = p
 			_rebuild())
 		b.alignment = HORIZONTAL_ALIGNMENT_CENTER
-		b.custom_minimum_size = Vector2(240, 30)
+		b.custom_minimum_size = Vector2(220, 30)
 		UIKit.style(b, _page == p)
 		h.add_child(b)
 	return h
@@ -196,6 +199,111 @@ func _build_cargo_page() -> void:
 	for it in GameData.STOCK_TARGET:
 		tgt.append("%s%d" % [GameData.ITEM_NAMES[it], GameData.STOCK_TARGET[it]])
 	_body.add_child(UIKit.lbl("加工品の「作り置きの上限」（%s）は、枠がそれより小さければ枠に合わせます。" % "・".join(PackedStringArray(tgt)), 12, UIKit.C_DIM))
+
+
+## 採取の道具: 誰に何を持たせるか・道具の性能・結果の目安。採取の結果は「採取ポイント × 道具 × 仲間の能力」で決まる（data/gathering.gd）。
+func _build_tools_page() -> void:
+	var st = game.storage
+	_body.add_child(UIKit.lbl("木材・石・鉄鉱石は、採取ポイント（岩場・鉱床・枯れ木）から道具で掘ります。取れる量は「採取ポイント × 道具 × 仲間の能力」で決まります。"
+			+ "\n道具は加工でつくります（誰かの道具の更新になるときだけ作ります）。良い道具は、回収ランクの高い仲間に持たせると活きます。", 13, UIKit.C_DIM))
+	var auto_btn := UIKit.button("道具の自動割り当て: %s" % ("ON（倉庫の道具を、効果の大きい仲間へ自動で持たせる）" if game.tool_auto else "OFF（下のボタンで手動）"), func():
+		game.tool_auto = not game.tool_auto
+		_rebuild())
+	auto_btn.custom_minimum_size = Vector2(560, 28)
+	UIKit.style(auto_btn, game.tool_auto)
+	_body.add_child(auto_btn)
+	var cols := HBoxContainer.new()
+	cols.add_theme_constant_override("separation", 30)
+	_body.add_child(cols)
+	var left := VBoxContainer.new()
+	left.add_theme_constant_override("separation", 4)
+	left.custom_minimum_size = Vector2(640, 0)
+	cols.add_child(left)
+	var right := VBoxContainer.new()
+	right.add_theme_constant_override("separation", 3)
+	cols.add_child(right)
+
+	# ---- 左: 仲間ごとの道具と、結果の目安 ----
+	left.add_child(UIKit.lbl("── 仲間の道具（掘り出し10単位あたりの取れる個数の目安） ──", 14, UIKit.C_DIM))
+	for w in game.workers:
+		var rank: int = w.ranks.get(GameData.Field.GATHERER, 0)
+		var ab: float = w.field_mult(GameData.Field.GATHERER)
+		left.add_child(UIKit.lbl("%s　回収ランク %s（能力値 %.2f）%s" % [w.char_name, GameData.RANKS[rank], ab,
+				"" if game._uses_tools(w) else "　※回収をしない設定"], 15, UIKit.C_ACCENT))
+		for slot in GatherDB.SLOTS:
+			var s: String = slot
+			var cur: int = int(w.tools.get(s, -1))
+			var row := HBoxContainer.new()
+			row.add_theme_constant_override("separation", 4)
+			left.add_child(row)
+			row.add_child(UIKit.lbl("　%s: %s" % [GatherDB.SLOTS[s], GatherDB.tool_def(cur)["name"]], 14, UIKit.C_TEXT, 200))
+			# 持たせられる道具（倉庫にあるもの）
+			for it in GameData.TOOL_ITEMS:
+				var item: int = it
+				if GatherDB.slot_of_tool(item) != s or st.count_of(item) <= 0:
+					continue
+				var b := UIKit.button("%s（在庫%d）" % [GameData.ITEM_NAMES[item], st.count_of(item)], func():
+					game.equip_tool(w, item)
+					_rebuild())
+				b.custom_minimum_size = Vector2(0, 24)
+				row.add_child(b)
+			if cur >= 0:
+				var off := UIKit.button("外す", func():
+					game.unequip_tool(w, s)
+					_rebuild())
+				off.custom_minimum_size = Vector2(0, 24)
+				row.add_child(off)
+			# この枠で掘れる採取ポイントごとの結果の目安
+			var parts: Array = []
+			for k in GatherDB.POINTS:
+				if GatherDB.POINTS[k]["slot"] != s:
+					continue
+				var ev: Dictionary = w.gather_eval(k)
+				parts.append("%s %.1f個" % [GatherDB.POINTS[k]["name"], float(ev["eff"]) * 10.0])
+			left.add_child(UIKit.lbl("　　　" + "　".join(PackedStringArray(parts)), 13, UIKit.C_DIM))
+
+	# ---- 右: 道具の性能・在庫・作り方 ----
+	right.add_child(UIKit.lbl("── 道具の性能（取れる割合＝掘り出した量のうち手に入る割合） ──", 14, UIKit.C_DIM))
+	right.add_child(UIKit.lbl("素手　　　　岩場%d%% 鉱床%d%% 枯れ木%d%%　速さ×%.1f" % [
+			int(GatherDB.HANDS["eff"]["rock"] * 100.0), int(GatherDB.HANDS["eff"]["vein"] * 100.0),
+			int(GatherDB.HANDS["eff"]["tree"] * 100.0), GatherDB.HANDS["speed"]], 13, UIKit.C_DIM))
+	for it in GameData.TOOL_ITEMS:
+		var item: int = it
+		var t: Dictionary = GatherDB.TOOLS[item]
+		var effs: Array = []
+		for k in GatherDB.POINTS:
+			if t["eff"].has(k):
+				effs.append("%s%d%%" % [GatherDB.POINTS[k]["name"], int(float(t["eff"][k]) * 100.0)])
+		var bonus := ""
+		for k in t["bonus"]:
+			for bi in t["bonus"][k]:
+				bonus += "　副産物: %s→%s" % [GatherDB.POINTS[k]["name"], GameData.ITEM_NAMES[bi]]
+		right.add_child(UIKit.lbl("%s（在庫%d）" % [t["name"], st.count_of(item)], 14, UIKit.C_TEXT))
+		right.add_child(UIKit.lbl("　%s　速さ×%.1f　必要ランク %s%s" % [" ".join(PackedStringArray(effs)), t["speed"],
+				GameData.RANKS[int(t["need_rank"])], bonus], 12, UIKit.C_DIM))
+		for r in GameData.RECIPES:
+			if r["out"] == item:
+				right.add_child(UIKit.lbl("　作り方: " + GameData.recipe_text(r), 12, UIKit.C_DIM))
+	right.add_child(UIKit.lbl("回収ランクが「必要ランク」に届かないと、取れる割合が下がります。", 12, UIKit.C_DIM))
+	# テスト用（生物の購入と同じ扱い）: 道具を倉庫に入れて、性能の違いをすぐ試せる
+	var sp := Control.new()
+	sp.custom_minimum_size = Vector2(0, 6)
+	right.add_child(sp)
+	right.add_child(UIKit.lbl("── テスト用: 道具を倉庫に入れる（加工でも作れます） ──", 14, UIKit.C_DIM))
+	var flow := HFlowContainer.new()
+	flow.add_theme_constant_override("h_separation", 6)
+	flow.add_theme_constant_override("v_separation", 4)
+	flow.custom_minimum_size = Vector2(520, 0)
+	right.add_child(flow)
+	for it in GameData.TOOL_ITEMS:
+		var item: int = it
+		var b := UIKit.button(GameData.ITEM_NAMES[item], func():
+			st.add_item(item, 1, Inventory.SOURCE_PURCHASE)
+			game.manage_tools()
+			_rebuild())
+		b.alignment = HORIZONTAL_ALIGNMENT_CENTER
+		b.custom_minimum_size = Vector2(124, 28)
+		flow.add_child(b)
 
 
 ## 素材ひとつぶんの行: 名前 [－] 枠 [＋]  置いてある量のバー

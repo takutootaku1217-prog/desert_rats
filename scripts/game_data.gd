@@ -10,6 +10,9 @@ extends RefCounted
 const ENABLE_COMBAT := false
 ## 襲撃（出来事の一種。scripts/director.gd）で戦う。ENABLE_COMBAT（一定間隔で敵が湧く旧方式）とは別。
 const ENABLE_RAIDS := true
+## 木材・石・鉄鉱石を「採取ポイント」（岩場・鉱床・枯れ木。data/gathering.gd）から道具で採る。
+## false なら、従来の「地面に落ちている物を1個ずつ拾う」方式に戻る（敵の落とし物・漂流物・獲物はどちらでも落ちている物として拾う）。
+static var ENABLE_GATHER_POINTS := true         # 実行中に切り替えられる（tools/sim_gather.gd が従来方式と比べるため）
 
 const PX := 4                       # ドット絵1pxを画面の何pxで描くか
 
@@ -116,7 +119,9 @@ static func job_list() -> Array:
 # アイテム（第1段階: 生物資源と基本資源）
 # 狩猟・採取・購入・捕獲・探索の持ち帰りは、すべて同じ Item / Inventory に集約する。
 # ------------------------------------------------------------------
-enum Item { MEAT, HIDE, BONE, FAT, WOOD, STONE, IRON_ORE, IRON, FOOD, FUEL, REPAIR_KIT, CARCASS }
+enum Item { MEAT, HIDE, BONE, FAT, WOOD, STONE, IRON_ORE, IRON, FOOD, FUEL, REPAIR_KIT, CARCASS,
+		HAMMER, PICKAXE, ADV_PICK, AXE, IRON_AXE }        # 後ろの5つは採取の道具（data/gathering.gd）。倉庫の積載量の対象外
+const TOOL_ITEMS := [Item.HAMMER, Item.PICKAXE, Item.ADV_PICK, Item.AXE, Item.IRON_AXE]
 const CREATURE_ITEMS := [Item.MEAT, Item.HIDE, Item.BONE, Item.FAT]   # 生物から取れる素材
 const GROUND_ITEMS := [Item.WOOD, Item.STONE, Item.IRON_ORE]          # 地面で採取する基本資源
 const RAW_ITEMS := [Item.MEAT, Item.HIDE, Item.BONE, Item.FAT, Item.WOOD, Item.STONE, Item.IRON_ORE]
@@ -126,12 +131,15 @@ const ITEM_NAMES := {
 	Item.WOOD: "木材", Item.STONE: "石", Item.IRON_ORE: "鉄鉱石",
 	Item.IRON: "鉄", Item.FOOD: "食料", Item.FUEL: "燃料", Item.REPAIR_KIT: "修理資材",
 	Item.CARCASS: "獲物",
+	Item.HAMMER: "簡易ハンマー", Item.PICKAXE: "鉄製ピッケル", Item.ADV_PICK: "高性能ピッケル",
+	Item.AXE: "簡易の斧", Item.IRON_AXE: "鉄の斧",
 }
 const ITEM_FILES := {
 	Item.MEAT: "meat", Item.HIDE: "hide", Item.BONE: "bone", Item.FAT: "fat",
 	Item.WOOD: "wood", Item.STONE: "stone", Item.IRON_ORE: "iron_ore",
 	Item.IRON: "iron", Item.FOOD: "ration", Item.FUEL: "fuel", Item.REPAIR_KIT: "repair_kit",
 	Item.CARCASS: "meat",
+	Item.HAMMER: "hammer", Item.PICKAXE: "pickaxe", Item.ADV_PICK: "adv_pick", Item.AXE: "axe", Item.IRON_AXE: "iron_axe",
 }
 ## 地面の資源の出やすさ（木材は多く、鉄鉱石は少ない）
 const GROUND_WEIGHTS := {Item.WOOD: 4.0, Item.STONE: 3.0, Item.IRON_ORE: 1.5}
@@ -154,12 +162,30 @@ const RECIPES := [
 		"time": 3.0, "tank_fuel": 0.0, "field": Field.DEV},
 	{"id": "repair_hide", "name": "簡易修理（皮＋骨）", "in": {Item.HIDE: 1, Item.BONE: 1}, "out": Item.REPAIR_KIT, "n": 1,
 		"time": 3.0, "tank_fuel": 0.0, "field": Field.DEV},
+	# ---- 採取の道具（data/gathering.gd）。誰かの道具の更新になるときだけ作る（Main.tool_wanted）----
+	{"id": "tool_hammer", "name": "簡易ハンマー", "in": {Item.STONE: 2, Item.WOOD: 1}, "out": Item.HAMMER, "n": 1,
+		"time": 3.0, "tank_fuel": 0.0, "field": Field.DEV},
+	{"id": "tool_axe", "name": "簡易の斧", "in": {Item.STONE: 1, Item.WOOD: 2}, "out": Item.AXE, "n": 1,
+		"time": 3.0, "tank_fuel": 0.0, "field": Field.DEV},
+	# 鉄は修理部品（鉄＋木材）にもすぐ使われて溜まらないので、道具に要る鉄は1個にしてある（修理資材や木材で高価さを出す）
+	{"id": "tool_pick", "name": "鉄製ピッケル", "in": {Item.IRON: 1, Item.WOOD: 2}, "out": Item.PICKAXE, "n": 1,
+		"time": 4.0, "tank_fuel": 0.0, "field": Field.DEV},
+	{"id": "tool_iron_axe", "name": "鉄の斧", "in": {Item.IRON: 1, Item.WOOD: 2}, "out": Item.IRON_AXE, "n": 1,
+		"time": 4.0, "tank_fuel": 0.0, "field": Field.DEV},
+	{"id": "tool_adv_pick", "name": "高性能ピッケル", "in": {Item.IRON: 1, Item.REPAIR_KIT: 3}, "out": Item.ADV_PICK, "n": 1,
+		"time": 6.0, "tank_fuel": 0.0, "field": Field.DEV},
 ]
+## 道具に使う鉄を精錬で優先するのは、倉庫の食料がこの個数以上あるときだけ（調理を後回しにして空腹にならないように）
+const TOOL_IRON_FOOD_MIN := 4
 ## 加工品をどこまで作り置きするか（これ以上あれば、そのレシピは作らない）
-const STOCK_TARGET := {Item.FOOD: 12, Item.FUEL: 8, Item.REPAIR_KIT: 6, Item.IRON: 4}
-## 最初の加工方針（★0〜5。0 = 作らない）
+const STOCK_TARGET := {Item.FOOD: 12, Item.FUEL: 8, Item.REPAIR_KIT: 6, Item.IRON: 4,
+	Item.HAMMER: 1, Item.PICKAXE: 1, Item.ADV_PICK: 1, Item.AXE: 1, Item.IRON_AXE: 1}
+## 最初の加工方針（★0〜5。0 = 作らない）。道具は、誰かの更新になるときだけ作られる（Main.tool_wanted）ので、
+## 食料・燃料・修理と同じ★3にしてある（同点なら、在庫の少ない物＝道具のほうが先になるが、食料が0のときなど、同点で先に並んでいる物が勝つ）。
+## 高性能ピッケルは、修理資材を3個使うので★2。
 const DEFAULT_RECIPE_PRIORITY := {
 	"cook": 3, "tallow": 3, "firewood": 3, "smelt": 2, "repair_iron": 3, "repair_stone": 3, "repair_hide": 3,
+	"tool_hammer": 3, "tool_axe": 3, "tool_pick": 3, "tool_iron_axe": 3, "tool_adv_pick": 2,
 }
 
 

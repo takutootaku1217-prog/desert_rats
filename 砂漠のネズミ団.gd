@@ -37,6 +37,8 @@ var _food_clock := 0.0
 var total_gathered := 0
 var total_hunted := 0
 var total_eaten := 0
+var tool_auto := true             # 採取の道具を、倉庫から自動で仲間に持たせる（方針の「道具」で切り替え）
+var _tool_clock := 0.0
 var total_wasted := 0             # 倉庫に入りきらず捨てた数（積載量。data/cargo.gd）
 var _waste_note_at := -999.0      # 最後に「捨てた」を記録へ出した時刻（記録が増えすぎないように）
 var last_carcass = null           # 直前に倒した生物の獲物（倒した仲間がそのまま運ぶ）
@@ -92,6 +94,8 @@ func _ready() -> void:
 	storage.add_item(GameData.Item.FOOD, 8)
 	storage.add_item(GameData.Item.FUEL, 2)
 	storage.add_item(GameData.Item.REPAIR_KIT, 2)
+	storage.add_item(GameData.Item.HAMMER, 1)      # 採取の道具の初期セット（あとは加工で作る）
+	storage.add_item(GameData.Item.AXE, 1)
 
 	resources_root = Node2D.new()
 	resources_root.name = "Resources"
@@ -166,12 +170,19 @@ func _process(delta: float) -> void:
 	base.wear_by(delta, dist)
 	director.tick(delta, dist)                 # 出来事の進行（予報・発生・終了）
 	expedition.tick(delta)                     # 調査隊の進行（遺跡の探索）
+	_tool_clock += delta                       # 倉庫の道具を、仲間に持たせ直す（採取の道具）
+	if _tool_clock >= GatherDB.TOOL_CHECK_SECONDS:
+		_tool_clock = 0.0
+		manage_tools()
 	_eat(delta)
 	# 地面の資源と生物は、進んだ距離に応じて現れる（天候で出にくくなる）
 	_spawn_dist -= dist * director.spawn_mult()
 	if _spawn_dist <= 0.0:
 		_spawn_ground_resource()
-		_spawn_dist = randf_range(GameData.SPAWN_DIST_MIN, GameData.SPAWN_DIST_MAX)
+		if GameData.ENABLE_GATHER_POINTS:
+			_spawn_dist = randf_range(GatherDB.SPAWN_DIST_MIN, GatherDB.SPAWN_DIST_MAX)
+		else:
+			_spawn_dist = randf_range(GameData.SPAWN_DIST_MIN, GameData.SPAWN_DIST_MAX)
 	_creature_dist -= dist * director.spawn_mult()
 	if _creature_dist <= 0.0:
 		_spawn_creature()
@@ -213,11 +224,11 @@ func gather_room() -> Dictionary:
 	var inflight := {}
 	for r in resources_root.get_children():
 		if r.claimed_by != null and r.item != GameData.Item.CARCASS:
-			inflight[r.item] = inflight.get(r.item, 0) + 1
+			inflight[r.item] = inflight.get(r.item, 0) + r.reserved         # 採取ポイントは袋の大きさぶん
 	for w in workers:
 		if w.carrying >= 0 and w.carrying != GameData.Item.CARCASS \
 				and w.ai.state in [CharacterAI.State.MOVE_TO_STORAGE, CharacterAI.State.STORE]:
-			inflight[w.carrying] = inflight.get(w.carrying, 0) + 1
+			inflight[w.carrying] = inflight.get(w.carrying, 0) + w.carry_n
 	return inflight
 
 
@@ -231,6 +242,128 @@ func has_room_for(r, inflight: Dictionary) -> bool:
 ## その生物を狩ってよいか（倒した獲物の素材が倉庫に入るか）
 func hunt_has_room(species: String) -> bool:
 	return storage.drop_fit(species) >= CargoDB.MIN_DROP_FIT
+
+
+# ---------------------------------------------------------------- 採取の道具（data/gathering.gd）
+## 仲間 w が、枠 slot の道具 tool_item（-1 = 素手）を持っているときの総合点（回収ランク・能力値で変わる）
+func _tool_score(w, slot: String, tool_item: int) -> float:
+	return GatherDB.tool_score(slot, tool_item, w.ranks.get(GameData.Field.GATHERER, 0), w.field_mult(GameData.Field.GATHERER))
+
+
+## 道具を使う仲間か（回収の優先度が0でなく、遠征に出ていない）
+func _uses_tools(w) -> bool:
+	return not w.away and w.priorities.get(GameData.Job.GATHER, 0) > 0
+
+
+## 枠 slot の道具の割り当てを考える。使える道具 = 倉庫の予備 ＋ 道具を使う仲間がいま持っている物 ＋ extra（作る予定の物など）。
+## 「仲間 × 道具」の組み合わせを総合点の高い順に決めていく（いちばん腕のいい仲間に、いちばん相性のよい道具）。
+## 回収ランクが低い仲間には、高性能な道具より扱いやすい道具のほうが総合点が高いことがある（適性）。
+## 戻り値: {"target": {仲間: 道具}（素手は含まない）, "total": 全員の総合点, "users": 道具を使う仲間}
+func _assign_tools(slot: String, extra: Array = []) -> Dictionary:
+	var users: Array = []
+	for w in workers:
+		if _uses_tools(w):
+			users.append(w)
+	var pool: Array = extra.duplicate()
+	for it in GameData.TOOL_ITEMS:
+		if GatherDB.slot_of_tool(it) == slot:
+			for _i in storage.count_of(it):
+				pool.append(it)
+	for w in users:
+		var cur: int = int(w.tools.get(slot, -1))
+		if cur >= 0:
+			pool.append(cur)
+	var target := {}
+	var used := {}                                       # pool の番号 -> 割り当て済み
+	for _round in users.size():
+		var best_s := -1.0
+		var best_w = null
+		var best_j := -1
+		for w in users:
+			if target.has(w):
+				continue
+			var base: float = _tool_score(w, slot, -1)   # 素手のときの点。これより良くなる組み合わせだけ
+			for j in pool.size():
+				if used.has(j):
+					continue
+				var s: float = _tool_score(w, slot, int(pool[j]))
+				if s > base + GatherDB.TOOL_MIN_GAIN and s > best_s:
+					best_s = s
+					best_w = w
+					best_j = j
+		if best_w == null:
+			break
+		target[best_w] = int(pool[best_j])
+		used[best_j] = true
+	var total := 0.0
+	for w in users:
+		total += _tool_score(w, slot, int(target.get(w, -1)))
+	return {"target": target, "total": total, "users": users}
+
+
+## 倉庫の道具を、総合点がいちばん高くなるように仲間へ持たせる（自動）。持っていた古い道具は倉庫に戻り、次の仲間へ回る。
+## 割り当てが「いまより TOOL_MIN_GAIN 以上」よくなるときだけ持たせ替える（行ったり来たりを防ぐ）。
+func manage_tools() -> void:
+	if not tool_auto:
+		return
+	for slot in GatherDB.SLOTS:
+		var a: Dictionary = _assign_tools(slot)
+		var cur_total := 0.0
+		for w in a["users"]:
+			cur_total += _tool_score(w, slot, int(w.tools.get(slot, -1)))
+		if float(a["total"]) - cur_total <= GatherDB.TOOL_MIN_GAIN:
+			continue
+		var changing: Array = []
+		for w in a["users"]:
+			if int(a["target"].get(w, -1)) != int(w.tools.get(slot, -1)):
+				changing.append(w)
+		for w in changing:                               # まず古い道具を倉庫へ戻し、そこから新しい道具を取る
+			unequip_tool(w, slot)
+		for w in changing:
+			var t: int = int(a["target"].get(w, -1))
+			if t >= 0:
+				equip_tool(w, t)
+
+
+## 倉庫の道具を仲間に持たせる。すでに同じ枠の道具を持っていれば、それは倉庫に戻る。
+func equip_tool(w, item: int) -> bool:
+	if not GatherDB.is_tool_item(item) or not storage.take_item(item):
+		return false
+	var slot := GatherDB.slot_of_tool(item)
+	var old: int = int(w.tools.get(slot, -1))
+	w.tools[slot] = item
+	if old >= 0:
+		storage.add_item(old)
+	return true
+
+
+## 持っている道具を外して倉庫に戻す。
+func unequip_tool(w, slot: String) -> void:
+	var old: int = int(w.tools.get(slot, -1))
+	if old >= 0:
+		w.tools.erase(slot)
+		storage.add_item(old)
+
+
+## その道具を作る意味があるか（もう1つ増えると、全員の総合点が上がり、予備も作りかけもない）。加工の選択（choose_recipe）で使う。
+func tool_wanted(item: int) -> bool:
+	if storage.count_of(item) + processor.pending_of(item) > 0:
+		return false
+	var slot := GatherDB.slot_of_tool(item)
+	var without: Dictionary = _assign_tools(slot)
+	var with_it: Dictionary = _assign_tools(slot, [item])
+	return float(with_it["total"]) - float(without["total"]) > GatherDB.TOOL_MIN_GAIN
+
+
+## 作る意味のある道具で、鉄が足りなくて作れない物があるか（あれば精錬を優先する。鉄は修理部品にもすぐ使われて溜まらないため）
+func _tools_need_iron() -> bool:
+	var iron_have: int = storage.count_of(GameData.Item.IRON) + processor.pending_of(GameData.Item.IRON)
+	for r in GameData.RECIPES:
+		if not (r["out"] in GameData.TOOL_ITEMS) or not r["in"].has(GameData.Item.IRON):
+			continue
+		if recipe_priority.get(r["id"], 0) > 0 and iron_have < int(r["in"][GameData.Item.IRON]) and tool_wanted(r["out"]):
+			return true
+	return false
 
 
 ## 倉庫に入りきらず捨てたとき（記録には、他の出来事を押し出さないよう、60秒に1回だけ出す）
@@ -247,15 +380,21 @@ func _on_overflow(item: int, amount: int) -> void:
 func choose_recipe() -> Dictionary:
 	var best := {}
 	var best_key := -1.0
+	# 道具に使う鉄が足りないときは精錬を優先する。ただし食料に余裕があるときだけ（調理が後回しになって空腹になるのを防ぐ）
+	var smelt_boost := not hungry and storage.count_of(GameData.Item.FOOD) >= GameData.TOOL_IRON_FOOD_MIN and _tools_need_iron()
 	for r in GameData.RECIPES:
 		var pr: int = recipe_priority.get(r["id"], 0)
 		if pr <= 0:
 			continue
+		if smelt_boost and r["id"] == "smelt":
+			pr = maxi(pr, 4)
 		if not storage.has_set(r["in"]):
 			continue
 		# 炉を使うレシピは、タンクの燃料に余裕があるときだけ（移動用の燃料を守る）
 		if r["tank_fuel"] > 0.0 and base.fuel < 25.0:
 			continue
+		if r["out"] in GameData.TOOL_ITEMS and not tool_wanted(r["out"]):
+			continue                                                        # 誰の道具の更新にもならない道具は作らない
 		var have: int = storage.count_of(r["out"]) + processor.pending_of(r["out"])
 		var room: int = storage.quota_of(r["out"])                          # 積載量の枠。作り置きの上限も枠を超えない
 		var target: int = mini(GameData.STOCK_TARGET.get(r["out"], 5), room)
@@ -270,6 +409,13 @@ func choose_recipe() -> Dictionary:
 
 # ---------------------------------------------------------------- 出現
 func _spawn_ground_resource() -> void:
+	if GameData.ENABLE_GATHER_POINTS:
+		# 木材・石・鉄鉱石は、落ちている物ではなく採取ポイント（岩場・鉱床・枯れ木）から採る
+		var pt := GatherPoint.new()
+		pt.setup(self, GatherDB.pick_kind())
+		pt.position = Vector2(SPAWN_X, randf_range(SPAWN_Y_MIN + 6.0, SPAWN_Y_MAX - 6.0))
+		resources_root.add_child(pt)
+		return
 	var r := ResourceNode.new()
 	r.game = self
 	r.item = _random_ground_item()

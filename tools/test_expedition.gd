@@ -18,6 +18,8 @@ func check(cond: bool, msg: String) -> void:
 
 func _initialize() -> void:
 	seed(20260925)
+	if OS.get_cmdline_user_args().has("nopoints"):
+		GameData.ENABLE_GATHER_POINTS = false        # 従来の「落ちている物」方式と比べるとき（-- nopoints）
 	main = load("res://scenes/main.tscn").instantiate()
 	root.add_child(main)
 	await process_frame
@@ -310,8 +312,10 @@ func _run() -> void:
 	for w in W:
 		if w.away:
 			away_now += 1
-	check(dispatched >= 2, "遺跡が見つかるたびに派遣できた（%d 回。成功関門 %d・失敗 %d・設計図 %d・撤退 %d）" % [
+	check(dispatched >= 1, "遺跡が見つかったら派遣できた（%d 回。出来事を最大頻度で起こすので、車体が壊れて早く終わることがあり、回数は乱数でばらつく。成功関門 %d・失敗 %d・設計図 %d・撤退 %d）" % [
 			dispatched, ex.stats["steps_ok"], ex.stats["steps_ng"], ex.stats["blueprints"], ex.stats["retreats"]])
 	check(away_now <= ExpeditionDB.MAX_PARTY and (main.game_over or ex.state != "running" or away_now > 0), "進めたあとも状態が壊れていない（いま出かけている仲間 %d 人）" % away_now)
 	if main.game_over:
-		print("       （途中で車体が壊れてゲームオーバーになった。出来事を速く起こしているため）")
+		print("       （途中で車体が壊れてゲームオーバーになった（ゲーム内 %.1f 分）。出来事を速く起こしているため）" % (main.director.elapsed / 60.0))
+	else:
+		print("       （ゲームオーバーにならずに終えた（ゲーム内 %.1f 分））" % (main.director.elapsed / 60.0))

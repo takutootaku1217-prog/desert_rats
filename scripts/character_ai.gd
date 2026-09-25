@@ -53,6 +53,9 @@ var res = null          # 対象の ResourceNode
 var haul_item := -1
 var haul_recipe := {}   # 運搬中のレシピ
 var repair_part := -1
+var gather_ev := {}     # 採取ポイントを掘っている間の結果（GatherDB.evaluate。1回の袋ごとに決める）
+var bag_limit := 1      # この袋に入れる最大の個数（倉庫の空き枠と袋の大きさで決まる）
+var bag_frac := 0.0     # 取れる割合の端数（1.0 たまるごとに1個）
 var enemy = null        # 対象の Enemy（戦闘用・現段階では未使用）
 var prey = null         # 狩りの対象の Creature
 const ATTACK_DPS := 14.0
@@ -109,16 +112,31 @@ func tick(delta: float) -> void:
 				_set_state(State.GATHER)
 		State.GATHER:
 			if not _res_valid():
+				if res is GatherPoint and ch.carrying >= 0:
+					_finish_trip()             # 天候などで中断しても、掘った分は倉庫へ運ぶ
+					return
 				_release_task()
 				_set_state(State.SEARCH)
+				return
+			if res is GatherPoint and ch.priorities.get(GameData.Job.COMBAT, 0) > 0 and game.director.raid_pressing():
+				# 敵が拠点を攻撃している間、戦闘担当は採取を切り上げる（掘った分は倉庫へ。何もなければすぐ迎撃へ）
+				if ch.carrying >= 0:
+					_finish_trip()
+				else:
+					_release_task()
+					_set_state(State.SEARCH)
 				return
 			ch.target = _res_target()
 			ch.move_to_target(delta)   # 流れる資源に付いていく
 			ch.pose = "pick"
+			if res is GatherPoint:
+				_work_point(delta)         # 採取ポイント: 道具と能力で掘る（data/gathering.gd）
+				return
 			res.gather_progress += delta * ch.skill_mult(GameData.Job.GATHER) * game.director.outdoor_mult()
 			if res.gather_progress >= ResourceNode.GATHER_TIME:
 				ch.carrying = res.item
 				ch.carrying_species = res.species
+				ch.carry_n = 1
 				game.total_gathered += 1
 				res.queue_free()
 				res = null
@@ -134,9 +152,13 @@ func tick(delta: float) -> void:
 				if ch.carrying == GameData.Item.CARCASS:
 					game.storage.butcher(ch.carrying_species)       # 獲物は倉庫で解体
 				else:
-					game.storage.add_item(ch.carrying)
+					game.storage.add_item(ch.carrying, ch.carry_n)
+					for it in ch.carry_bonus:                       # 採取の副産物も一緒に入れる
+						game.storage.add_item(it, ch.carry_bonus[it])
 				ch.carrying = -1
 				ch.carrying_species = ""
+				ch.carry_n = 1
+				ch.carry_bonus = {}
 				_set_state(State.SEARCH)
 
 		# ---- 狩猟 ----
@@ -292,6 +314,53 @@ func tick(delta: float) -> void:
 				_set_state(State.SEARCH)
 
 
+## 採取ポイントを掘る（1フレームぶん）。掘るたびに残量が減り、取れる割合ぶんだけ袋に入る。
+## 袋がいっぱい・残量が尽きたら倉庫へ運ぶ。1単位を掘る時間・取れる割合は 採取ポイント × 道具 × 自分の能力（data/gathering.gd）。
+func _work_point(delta: float) -> void:
+	var pt: GatherPoint = res
+	if gather_ev.is_empty():
+		gather_ev = ch.gather_eval(pt.kind)
+	pt.work += delta * game.director.outdoor_mult() / maxf(0.05, float(gather_ev["seconds"]))
+	while pt.work >= 1.0 and pt.remaining > 0 and _bag_n() < bag_limit:
+		pt.work -= 1.0
+		pt.remaining -= 1                                        # 1単位を掘り出した
+		bag_frac += float(gather_ev["eff"])                      # そのうち手に入る割合ぶんが袋に入る
+		while bag_frac >= 1.0 and _bag_n() < bag_limit:
+			bag_frac -= 1.0
+			if ch.carrying < 0:
+				ch.carrying = pt.item
+				ch.carry_n = 1
+			else:
+				ch.carry_n += 1
+			for it in gather_ev["bonus"]:                       # 副産物（道具によっては見つかる）
+				if randf() < float(gather_ev["bonus"][it]):
+					ch.carry_bonus[it] = ch.carry_bonus.get(it, 0) + 1
+	if _bag_n() >= bag_limit or (pt.remaining <= 0 and _bag_n() > 0):
+		_finish_trip()
+	elif pt.remaining <= 0:
+		_release_task()                                          # 掘り尽くしたが、1個も取れなかった
+		_set_state(State.SEARCH)
+
+
+## いま袋に入っている個数（何も持っていなければ 0）
+func _bag_n() -> int:
+	return ch.carry_n if ch.carrying >= 0 else 0
+
+
+## 掘るのを終えて、袋の中身を倉庫へ運ぶ。
+func _finish_trip() -> void:
+	game.total_gathered += ch.carry_n
+	if res != null and is_instance_valid(res) and res.claimed_by == ch:
+		res.claimed_by = null
+		res.reserved = 1
+		if res is GatherPoint:
+			res.work = 0.0
+	res = null
+	gather_ev = {}
+	bag_frac = 0.0
+	_go_storage()
+
+
 func _res_target() -> Vector2:
 	# 資源の少し手前（拠点側）。地面の範囲に収める。
 	var p: Vector2 = res.position + Vector2(-40, 0)
@@ -391,6 +460,15 @@ func _try_start(job: int) -> bool:
 					continue
 				if not game.has_room_for(r, inflight):
 					continue               # 倉庫の枠がいっぱい（積載量）。拾っても置き場がない
+				if r is GatherPoint:
+					# 採取ポイント: 掘り尽くされていない・自分の道具と能力で取れる割合が低すぎない（無駄になる）こと。
+					# 取れる割合が高いポイントほど優先（道具や能力に合った仕事を選ぶ）
+					if not r.available():
+						continue
+					var eff: float = ch.gather_eval(r.kind)["eff"]
+					if eff < GatherDB.MIN_EFF:
+						continue
+					w *= clampf(eff, 0.3, 1.3)
 				var score: float = w / (120.0 + r.position.distance_to(ch.position))
 				if score > best_score:
 					best_score = score
@@ -399,6 +477,12 @@ func _try_start(job: int) -> bool:
 				return false
 			res = best
 			res.claimed_by = ch
+			if res is GatherPoint:
+				# 袋の大きさ: 倉庫の空き枠（ほかの人が運んでいる分を除く）と袋の上限のうち小さいほう
+				bag_limit = clampi(game.storage.free_for(res.item) - int(inflight.get(res.item, 0)), 1, GatherDB.CARRY_MAX)
+				res.reserved = bag_limit
+				gather_ev = {}
+				bag_frac = 0.0
 			timer = 0.4
 			_set_state(State.NOTICE)
 			return true
@@ -470,7 +554,12 @@ func _release_task() -> void:
 	if res != null and is_instance_valid(res) and res.claimed_by == ch:
 		res.claimed_by = null
 		res.gather_progress = 0.0
+		res.reserved = 1
+		if res is GatherPoint:
+			res.work = 0.0
 	res = null
+	gather_ev = {}
+	bag_frac = 0.0
 	if prey != null and is_instance_valid(prey) and prey.hunted_by == ch:
 		prey.hunted_by = null
 	prey = null
