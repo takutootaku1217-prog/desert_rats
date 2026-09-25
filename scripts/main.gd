@@ -37,6 +37,8 @@ var _food_clock := 0.0
 var total_gathered := 0
 var total_hunted := 0
 var total_eaten := 0
+var total_wasted := 0             # 倉庫に入りきらず捨てた数（積載量。data/cargo.gd）
+var _waste_note_at := -999.0      # 最後に「捨てた」を記録へ出した時刻（記録が増えすぎないように）
 var last_carcass = null           # 直前に倒した生物の獲物（倒した仲間がそのまま運ぶ）
 
 var _spawn_dist := 40.0           # 次の地面の資源までの残り距離
@@ -84,6 +86,7 @@ func _ready() -> void:
 	base.game = self
 	add_child(base)
 	storage = base.storage
+	storage.overflowed.connect(_on_overflow)
 	processor = base.processor
 	# 最初の蓄え（すぐに詰まないよう、少しだけ持って出発する）
 	storage.add_item(GameData.Item.FOOD, 8)
@@ -193,15 +196,50 @@ func _eat(delta: float) -> void:
 
 
 # ---------------------------------------------------------------- 方針
-## 回収の方針。獲物は常に拾う（★5相当）。
+## 回収の方針。獲物は常に拾う（★5相当）。方針にない物（敵の落とした肉・皮など）は★3で拾う。
 func gather_weight(item: int) -> float:
 	if item == GameData.Item.CARCASS:
 		return 5.0
-	return float(gather_policy.get(item, 0))
+	return float(gather_policy.get(item, 3))
 
 
 func hunt_allowed(species: String) -> bool:
 	return hunt_policy.get(species, false)
+
+
+# ---------------------------------------------------------------- 積載量（data/cargo.gd）
+## いま倉庫へ向かっている物の数（回収に向かっている・運んでいる）。空き枠から引いて、入りきらない無駄足を防ぐ。
+func gather_room() -> Dictionary:
+	var inflight := {}
+	for r in resources_root.get_children():
+		if r.claimed_by != null and r.item != GameData.Item.CARCASS:
+			inflight[r.item] = inflight.get(r.item, 0) + 1
+	for w in workers:
+		if w.carrying >= 0 and w.carrying != GameData.Item.CARCASS \
+				and w.ai.state in [CharacterAI.State.MOVE_TO_STORAGE, CharacterAI.State.STORE]:
+			inflight[w.carrying] = inflight.get(w.carrying, 0) + 1
+	return inflight
+
+
+## 資源 r を回収してよいか（倉庫に置き場があるか）。inflight は gather_room() の結果。
+func has_room_for(r, inflight: Dictionary) -> bool:
+	if r.item == GameData.Item.CARCASS:
+		return storage.drop_fit(r.species) >= CargoDB.MIN_DROP_FIT
+	return storage.free_for(r.item) - int(inflight.get(r.item, 0)) > 0
+
+
+## その生物を狩ってよいか（倒した獲物の素材が倉庫に入るか）
+func hunt_has_room(species: String) -> bool:
+	return storage.drop_fit(species) >= CargoDB.MIN_DROP_FIT
+
+
+## 倉庫に入りきらず捨てたとき（記録には、他の出来事を押し出さないよう、60秒に1回だけ出す）
+func _on_overflow(item: int, amount: int) -> void:
+	total_wasted += amount
+	var now: float = director.elapsed
+	if now - _waste_note_at >= 60.0:
+		_waste_note_at = now
+		director.note("倉庫がいっぱいで捨てた（%s）" % GameData.ITEM_NAMES[item])
 
 
 ## 加工の方針に従って、次に作るレシピを選ぶ（材料が揃っていて、作り置きが足りないもの）。
@@ -219,9 +257,10 @@ func choose_recipe() -> Dictionary:
 		if r["tank_fuel"] > 0.0 and base.fuel < 25.0:
 			continue
 		var have: int = storage.count_of(r["out"]) + processor.pending_of(r["out"])
-		var target: int = GameData.STOCK_TARGET.get(r["out"], 5)
-		if have >= target:
-			continue
+		var room: int = storage.quota_of(r["out"])                          # 積載量の枠。作り置きの上限も枠を超えない
+		var target: int = mini(GameData.STOCK_TARGET.get(r["out"], 5), room)
+		if have >= target or have + int(r["n"]) > room:
+			continue                                                        # 作り足りている、または置き場に入りきらない
 		var key: float = pr * 10.0 + (1.0 - float(have) / float(target))
 		if key > best_key:
 			best_key = key

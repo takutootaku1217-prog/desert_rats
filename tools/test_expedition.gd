@@ -22,6 +22,7 @@ func _initialize() -> void:
 	root.add_child(main)
 	await process_frame
 	await process_frame
+	main.storage.enforce = false      # 遠征の診断では、倉庫の積載量（data/cargo.gd）の制限を外す（積載は test_cargo.gd で確認）
 	await _run()
 	print("== 結果: %s ==" % ("すべて成功" if fails == 0 else "%d 件失敗" % fails))
 	quit(1 if fails > 0 else 0)

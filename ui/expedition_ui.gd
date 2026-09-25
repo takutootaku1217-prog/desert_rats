@@ -15,10 +15,14 @@ var _timer := 0.0
 
 func _ready() -> void:
 	layer = 22
+	# 右のボタンは低い層に置く（運営の方針・仲間の管理などの画面を開いたとき、その下に隠れるように）
+	var btn_layer := CanvasLayer.new()
+	btn_layer.layer = 12
+	add_child(btn_layer)
 	var btn := UIKit.button("遠征 (X)", toggle)
 	btn.position = Vector2(1000, 326)
 	btn.custom_minimum_size = Vector2(272, 32)
-	add_child(btn)
+	btn_layer.add_child(btn)
 	_overlay = Control.new()
 	_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_overlay.visible = false

@@ -6,6 +6,7 @@ extends CanvasLayer
 var game
 var _head: Label
 var _stock: Label
+var _cargo: Label
 var _proc: Label
 var _totals: Label
 var _bars := {}        # key -> ProgressBar
@@ -30,6 +31,8 @@ func _ready() -> void:
 		v.add_child(_bar_row(spec[0], spec[1]))
 	_stock = UIKit.lbl("", 13, Color("fff7dc"))
 	v.add_child(_stock)
+	_cargo = UIKit.lbl("", 12, Color("cfe6ff"))       # 積載量（素材棚・加工品置き場）
+	v.add_child(_cargo)
 	_proc = UIKit.lbl("", 13, Color("fde68a"))
 	v.add_child(_proc)
 	_totals = UIKit.lbl("", 12, UIKit.C_DIM)
@@ -54,6 +57,11 @@ func _bar_row(key: String, name: String) -> Control:
 	_bars[key] = bar
 	_nums[key] = n
 	return h
+
+
+## 個数の表示。枠がいっぱいの素材には「満」を付ける（積載量）。
+func _n(st, item: int) -> String:
+	return "%d%s" % [st.count_of(item), "満" if st.is_full(item) else ""]
 
 
 func _set_bar(key: String, value: float) -> void:
@@ -82,13 +90,22 @@ func _process(_d: float) -> void:
 	_set_bar("drive", b.condition(GameData.Part.DRIVE))
 	_set_bar("machine", b.condition(GameData.Part.MACHINE))
 	var st = game.storage
-	_stock.text = "食料 %d%s ／ 燃料 %d ／ 修理資材 %d\n肉%d 皮%d 骨%d 脂%d 木%d 石%d 鉱%d 鉄%d" % [
-			st.count_of(GameData.Item.FOOD), "（空腹!）" if game.hungry else "",
-			st.count_of(GameData.Item.FUEL), st.count_of(GameData.Item.REPAIR_KIT),
-			st.count_of(GameData.Item.MEAT), st.count_of(GameData.Item.HIDE), st.count_of(GameData.Item.BONE),
-			st.count_of(GameData.Item.FAT), st.count_of(GameData.Item.WOOD), st.count_of(GameData.Item.STONE),
-			st.count_of(GameData.Item.IRON_ORE), st.count_of(GameData.Item.IRON)]
+	_stock.text = "食料 %s%s ／ 燃料 %s ／ 修理資材 %s\n肉%s 皮%s 骨%s 脂%s 木%s 石%s 鉱%s 鉄%s" % [
+			_n(st, GameData.Item.FOOD), "（空腹!）" if game.hungry else "",
+			_n(st, GameData.Item.FUEL), _n(st, GameData.Item.REPAIR_KIT),
+			_n(st, GameData.Item.MEAT), _n(st, GameData.Item.HIDE), _n(st, GameData.Item.BONE),
+			_n(st, GameData.Item.FAT), _n(st, GameData.Item.WOOD), _n(st, GameData.Item.STONE),
+			_n(st, GameData.Item.IRON_ORE), _n(st, GameData.Item.IRON)]
 	_stock.add_theme_color_override("font_color", Color("ff9a86") if game.hungry else Color("fff7dc"))
+	# 積載量: 区画ごとの「置いてある量／積載量」。8割を超えると橙、枠がすべて埋まると赤。捨てた数も出す
+	var raw_used: int = st.used_in(CargoDB.Bay.RAW)
+	var prod_used: int = st.used_in(CargoDB.Bay.PRODUCT)
+	var raw_cap: int = st.capacity_of(CargoDB.Bay.RAW)
+	var prod_cap: int = st.capacity_of(CargoDB.Bay.PRODUCT)
+	_cargo.text = "積載 素材棚 %d/%d ・ 加工品 %d/%d%s" % [raw_used, raw_cap, prod_used, prod_cap,
+			(" ・ 捨てた%d" % game.total_wasted) if game.total_wasted > 0 else ""]
+	var worst := maxf(float(raw_used) / float(maxi(1, raw_cap)), float(prod_used) / float(maxi(1, prod_cap)))
+	_cargo.add_theme_color_override("font_color", Color("ff8a70") if worst >= 0.999 else (Color("ffc266") if worst >= CargoDB.WARN_RATIO else Color("cfe6ff")))
 	var p = game.processor
 	var ptxt := "待機中"
 	if not p.current.is_empty():

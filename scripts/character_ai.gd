@@ -364,8 +364,8 @@ func _try_start(job: int) -> bool:
 			for c in game.creatures_root.get_children():
 				if c.dead or c.hunted_by != null or c.position.x < 60.0 or c.position.x > 1180.0:
 					continue
-				if not game.hunt_allowed(c.species):
-					continue
+				if not game.hunt_allowed(c.species) or not game.hunt_has_room(c.species):
+					continue                   # 見逃す設定、または倒しても素材が倉庫に入らない
 				var d: float = c.position.distance_to(ch.position)
 				if d < best_d:
 					best_d = d
@@ -382,12 +382,15 @@ func _try_start(job: int) -> bool:
 			# 回収の方針（★）が高いほど、遠くても優先する。★0 の資源は拾わない。獲物は常に拾う。
 			var best = null
 			var best_score := 0.0
+			var inflight: Dictionary = game.gather_room()
 			for r in game.resources_root.get_children():
 				if r.claimed_by != null or r.position.x < 60.0 or r.position.x > 1250.0:
 					continue
 				var w: float = game.gather_weight(r.item)
 				if w <= 0.0:
 					continue
+				if not game.has_room_for(r, inflight):
+					continue               # 倉庫の枠がいっぱい（積載量）。拾っても置き場がない
 				var score: float = w / (120.0 + r.position.distance_to(ch.position))
 				if score > best_score:
 					best_score = score

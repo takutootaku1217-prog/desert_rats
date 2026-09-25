@@ -17,7 +17,8 @@ var step_i := 0
 var step_left := 0.0
 var step_time := 1.0
 var energy := {}                 # Worker -> 遠征中の元気
-var loot := {}                   # Item -> 個数
+var loot := {}                   # Item -> 個数（倉庫に持ち帰れた分）
+var lost := {}                   # Item -> 個数（積載量がいっぱいで持ち帰れなかった分）
 var blueprint := ""              # 見つけた設計図のid
 var ok_count := 0
 var ng_count := 0
@@ -93,6 +94,7 @@ func start(members: Array, appr: String, bring_kit: bool) -> bool:
 	kit = bring_kit
 	kit_used = false
 	loot.clear()
+	lost.clear()
 	blueprint = ""
 	ok_count = 0
 	ng_count = 0
@@ -216,9 +218,15 @@ func _finish() -> void:
 			if blueprint == "":
 				loot[GameData.Item.IRON] = loot.get(GameData.Item.IRON, 0) + 3
 		_add_log("遺跡を踏破した！" if not retreated else "")
-	# 戦利品を倉庫へ
-	for it in loot:
-		game.storage.add_item(it, loot[it], Inventory.SOURCE_EXPEDITION)
+	# 戦利品を倉庫へ。積載量（枠）がいっぱいの分は持ち帰れない
+	lost.clear()
+	for it in loot.keys():
+		var stored: int = game.storage.add_item(it, loot[it], Inventory.SOURCE_EXPEDITION)
+		if stored < loot[it]:
+			lost[it] = loot[it] - stored
+			loot[it] = stored
+		if loot[it] <= 0:
+			loot.erase(it)
 	if blueprint != "":
 		game.blueprints[blueprint] = true
 		stats["blueprints"] += 1
@@ -239,6 +247,11 @@ func summary() -> String:
 	s += "・".join(PackedStringArray(parts)) if not parts.is_empty() else "戦利品なし"
 	if blueprint != "":
 		s += "　★設計図「%s」を入手！" % _blueprint_name(blueprint)
+	if not lost.is_empty():
+		var l: Array = []
+		for it in lost:
+			l.append("%s×%d" % [GameData.ITEM_NAMES[it], lost[it]])
+		s += "　（倉庫がいっぱいで持ち帰れず: %s）" % "・".join(PackedStringArray(l))
 	return s
 
 

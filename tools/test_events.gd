@@ -157,7 +157,7 @@ func _run() -> void:
 	main.base.parts[H] = 100.0
 	d.trigger("raid_scorpion", false)
 	var spawned: int = d.active[0]["spawned"]
-	check(spawned >= 2 and main.enemies_root.get_child_count() == spawned, "襲撃で敵が %d体 現れる" % spawned)
+	check(spawned >= 1 and main.enemies_root.get_child_count() == spawned, "襲撃で敵が %d体 現れる" % spawned)   # 敵の数は EventDB の count（1〜2体）でランダム
 	check(d.active[0]["stance"] == "fight" and is_equal_approx(d.speed_mult(), 0.5) and is_equal_approx(d.hull_dmg_mult(), 1.0),
 			"初期の対処は「迎え撃つ」（速度×0.5・被害はそのまま）")
 	var wk = main.workers[0]
@@ -172,13 +172,14 @@ func _run() -> void:
 	# 敵の攻撃は車体に当たる
 	d.set_stance("raid_scorpion", "fight")
 	var en0 = main.enemies_root.get_child(0)
-	en0.position.x = en0.hold_x
+	en0.position.x = en0.hold_x - 1.0             # 境界ぴったりだと、位置の小数の丸めで攻撃に入らないことがある
 	main.base.parts[H] = 100.0
 	en0._atk_timer = 0.0
 	en0._process(0.01)
 	check(is_equal_approx(main.base.parts[H], 100.0 - en0.damage), "敵が攻撃すると車体が傷む（-%.0f）" % en0.damage)
 	d.set_stance("raid_scorpion", "guard")
 	main.base.parts[H] = 100.0
+	en0.position.x = en0.hold_x - 1.0
 	en0._atk_timer = 0.0
 	en0._process(0.01)
 	check(is_equal_approx(main.base.parts[H], 100.0 - en0.damage * 0.4), "防備を固めていると被害は 0.4 倍")
