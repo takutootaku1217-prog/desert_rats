@@ -1,9 +1,16 @@
 """人間の仲間キャラの24x24版（試作。ゲームにはまだ使っていない）。すべてオリジナルのドット絵をコードで描く（PILのみ）。
-出力: assets/characters/crew24_<key>.png … 24x24 のコマを横に13コマ並べた1枚（コマの順番は 16x16 版・scripts/character.gd の F_* と同じ）。
-   0-1 待機 / 2-5 歩き / 6 かがむ(拾う・掘る) / 7-8 作業(道具を振る) / 9-10 はしご / 11 睡眠 / 12 荷物を抱える
+出力: assets/characters/crew24_<key>.png … 24x24 のコマを横に30コマ並べた1枚。
+   コマの順番（0〜12は 16x16 版・scripts/character.gd の F_* と同じ。13以降が追加のモーション）:
+   0-1 待機 / 2-5 歩き / 6 かがむ(拾う) / 7-8 作業(道具を振る・共通) / 9-10 はしご / 11 睡眠 / 12 荷物を抱える
+   13-16 木を切る（斧: 振りかぶる→振り上げ→命中(木くず)→戻す）
+   17-20 岩・鉱石を掘る（ピッケル: 振り上げ→振り下ろし途中→命中(火花)→戻す）
+   21-23 叩く（ハンマー: 振り上げ→命中(火花)→跳ね返り）
+   24-26 攻撃（棍棒: 振りかぶる→振る→振り抜く）
+   27-28 疲れ（へたり込み・ひざに手） / 29 被弾（のけぞり）
 向きは右向き（ゲーム側で左右反転する）。足元は下から2行目(22)、最下行(23)は輪郭。色は art_chars.PALETTES を使う（6種類）。
 使い方: python tools/art_chars24.py            … assets/ に書き出す
         python tools/art_chars24.py --preview  … tools/_preview_chars24.png に拡大した確認用の画像を書く"""
+import math
 import os
 import sys
 from pxlib import *
@@ -16,9 +23,14 @@ METAL = hexc("9aa3ad")
 METAL_L = hexc("dfe5ea")
 METAL_D = hexc("6d757d")
 WOOD = hexc("8b5a32")
+WOOD_L = hexc("c99a5c")
+WOOD_D = hexc("6e4726")
+SPARK = hexc("f0c040")
+SPARK_L = hexc("fff2b0")
 LENS = hexc("f6d36a")
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "assets")
-FRAMES = 13
+BASE_FRAMES = 13        # 16x16版と共通のコマ
+FRAMES = 30             # 追加のモーションを含む全部のコマ
 
 
 def shade(c, k):
@@ -127,32 +139,101 @@ def arm(p, sh, hand, sleeve, skin):
     p.rect(hand[0], hand[1], 2, 2, skin)
 
 
-def tool(p, hand, tip):
-    """手から先まで、木の柄と金属の頭のある道具（ハンマー/つるはしのような形）。"""
-    p.line(hand[0] + 1, hand[1] + 1, tip[0], tip[1], WOOD)
-    p.rect(tip[0] - 2, tip[1] - 1, 5, 3, METAL)
-    p.hline(tip[0] - 2, tip[1] - 1, 5, METAL_L)
-    p.hline(tip[0] - 2, tip[1] + 1, 5, METAL_D)
+def tool(p, hand, tip, kind="generic"):
+    """手から先まで、木の柄と道具の頭。kind = generic(共通のハンマー風) / axe(斧) / pick(ピッケル) / hammer(ハンマー) / club(棍棒)。
+    頭は柄の先に付き、柄と直角（斧は片側だけ）に向く。向きは柄の傾きから決める。"""
+    a = (hand[0] + 1, hand[1] + 1)
+    if kind == "generic":
+        p.line(a[0], a[1], tip[0], tip[1], WOOD)
+        p.rect(tip[0] - 2, tip[1] - 1, 5, 3, METAL)
+        p.hline(tip[0] - 2, tip[1] - 1, 5, METAL_L)
+        p.hline(tip[0] - 2, tip[1] + 1, 5, METAL_D)
+        return
+    dx, dy = tip[0] - a[0], tip[1] - a[1]
+    n = math.hypot(dx, dy) or 1.0
+    dx, dy = dx / n, dy / n
+    nx, ny = -dy, dx
+    if nx < -0.01 or (abs(nx) <= 0.01 and ny < 0):        # 頭は前（右）か下に向ける
+        nx, ny = -nx, -ny
+    p.line(int(round(a[0] - dx * 2)), int(round(a[1] - dy * 2)), tip[0], tip[1], WOOD)     # 柄（手の後ろへも少し出す）
+
+    def put(t, u, c):
+        p.set(int(round(tip[0] + nx * t + dx * u)), int(round(tip[1] + ny * t + dy * u)), c)
+
+    if kind == "axe":
+        for t in range(0, 5):                                # 片刃の斧: 柄から横へ広がる刃
+            w = 1 if t < 3 else 2
+            for u in range(-w, w + 1):
+                put(t, u, METAL)
+        for u in range(-2, 3):
+            put(4, u, METAL_L)                               # 刃先
+        put(0, -1, METAL_D)
+        put(0, 1, METAL_D)
+    elif kind == "pick":
+        for t in range(-4, 5):                               # ピッケル: 柄の先で左右にのびる頭
+            put(t, 0, METAL)
+            put(t, 1, METAL_D)
+        for t in (-4, -3, 3, 4):
+            put(t, 2, METAL_D)                               # 両端は打つ方向へ曲がってとがる
+        for t in (-1, 0, 1):
+            put(t, -1, METAL_L)
+    elif kind == "hammer":
+        for t in range(-2, 4):                               # ハンマー: 四角い頭
+            for u in range(-1, 2):
+                put(t, u, METAL_D)
+            put(t, -1, METAL_L)
+    elif kind == "club":
+        for u in range(-1, 4):                               # 棍棒: 先が太い木の棒
+            for t in range(-1, 2):
+                put(t, u, WOOD_L if t == -1 else WOOD)
+        for t in range(-1, 2):
+            put(t, 3, WOOD_D)
 
 
-def figure(pal, s=0, lean=0, hdx=0, legs=(9, 12), lift=(0, 0), front=(0, 6), back=(0, 6), wield=None):
-    """立ち姿・歩き・作業など。front / back = 手の位置（肩からの差）。wield = 道具の先の位置（肩からの差）。"""
+def effect_pixels(tip, fx):
+    """道具が当たった瞬間の火花・木くず（輪郭を付けたあとに重ねる）。"""
+    if fx == "sparks":
+        offs = [((1, -3), SPARK), ((3, -2), SPARK_L), ((-1, -4), SPARK_L), ((4, 0), SPARK), ((0, -2), SPARK_L), ((-2, -2), SPARK)]
+    elif fx == "chips":
+        offs = [((-1, -3), WOOD_L), ((1, -4), WOOD), ((3, -3), WOOD_L), ((-3, -1), WOOD), ((2, -1), WOOD_L), ((4, 1), WOOD)]
+    else:
+        return []
+    return [(tip[0] + o[0], tip[1] + o[1], c) for o, c in offs]
+
+
+def figure(pal, s=0, lean=0, hdx=0, legs=(9, 12), lift=(0, 0), front=(0, 6), back=(0, 6), wield=None, kind="generic", fx=None,
+           two_hand=False, tool_behind=False):
+    """立ち姿・歩き・作業など。front / back = 手の位置（肩からの差）。wield = 道具の先の位置（肩からの差）。
+    kind = 道具の種類、fx = 命中の演出（sparks / chips）、two_hand = 奥の手も柄を握る、
+    tool_behind = 道具を頭より奥に描く（背中側へ振りかぶるとき、柄が顔を横切らないように）。"""
     p = Px(S, S)
     x, y0 = 8 + lean, 11 + s
     pants = pal["pants"]
     leg(p, legs[0], lift[0], shade(pants, 0.72), shade(pal["boots"], 0.8))
     leg(p, legs[1], lift[1], pants, pal["boots"])
-    # 奥の腕（暗い）
     bs = (x + 2, y0 + 2)
-    arm(p, bs, (bs[0] + back[0], bs[1] + back[1] - 1), shade(pal["jacket"], 0.7), shade(pal["skin"], 0.85))
-    torso(p, pal, s, lean)
-    back_hair(p, pal, s, lean + hdx)
     fs = (x + 4, y0 + 2)
     fh = (fs[0] + front[0], fs[1] + front[1] - 1)
-    arm(p, fs, fh, shade(pal["jacket"], 1.14), pal["skin"])       # 手前の腕（胴より少し明るい）。上げた腕が顔を隠さないよう頭より先に描く
-    head(p, pal, s, lean + hdx)
+    bh = (bs[0] + back[0], bs[1] + back[1] - 1)
+    tip = None
     if wield is not None:
-        tool(p, fh, (fs[0] + wield[0], fs[1] + wield[1]))
+        tip = (fs[0] + wield[0], fs[1] + wield[1])
+        if two_hand:                                          # 奥の手は、柄の手前（先と反対側）を握る
+            n = math.hypot(tip[0] - fh[0], tip[1] - fh[1]) or 1.0
+            bh = (int(round(fh[0] - (tip[0] - fh[0]) / n * 3)), int(round(fh[1] - (tip[1] - fh[1]) / n * 3)))
+    arm(p, bs, bh, shade(pal["jacket"], 0.7), shade(pal["skin"], 0.85))          # 奥の腕（暗い）
+    torso(p, pal, s, lean)
+    back_hair(p, pal, s, lean + hdx)
+    arm(p, fs, fh, shade(pal["jacket"], 1.14), pal["skin"])       # 手前の腕（胴より少し明るい）。上げた腕が顔を隠さないよう頭より先に描く
+    if tip is not None and tool_behind:
+        tool(p, fh, tip, kind)
+    head(p, pal, s, lean + hdx)
+    p.fx_list = []
+    if tip is not None:
+        if not tool_behind:
+            tool(p, fh, tip, kind)
+        if fx:
+            p.fx_list = effect_pixels(tip, fx)
     return p
 
 
@@ -203,7 +284,37 @@ def frames(pal):
     f.append(sleeping(pal))
     # 12 荷物を抱える（荷物の絵はゲーム側が頭の上に描く）
     f.append(figure(pal, s=0, lean=-1, front=(6, 3), back=(5, 2)))
-    return [q.outline(OUT) for q in f]
+    # ---- 13以降: 追加のモーション ----
+    # 13-16 木を切る（斧）: 振りかぶる → 振り上げ → 命中（木くず）→ 戻す
+    f.append(figure(pal, s=0, lean=-1, legs=(8, 13), front=(-3, -3), wield=(-8, -11), kind="axe", two_hand=True, tool_behind=True))
+    f.append(figure(pal, s=0, lean=0, legs=(8, 13), front=(2, -8), wield=(6, -11), kind="axe", two_hand=True))
+    f.append(figure(pal, s=1, lean=1, hdx=1, legs=(8, 13), front=(5, 2), wield=(7, 6), kind="axe", fx="chips", two_hand=True))
+    f.append(figure(pal, s=0, lean=0, legs=(8, 13), front=(3, -1), wield=(7, -4), kind="axe", two_hand=True))
+    # 17-20 岩・鉱石を掘る（ピッケル）: 振り上げ → 振り下ろし途中 → 命中（火花）→ 戻す
+    f.append(figure(pal, s=0, lean=0, legs=(8, 13), front=(3, -8), wield=(4, -11), kind="pick", two_hand=True))
+    f.append(figure(pal, s=0, lean=0, legs=(8, 13), front=(5, -1), wield=(8, -3), kind="pick", two_hand=True))
+    f.append(figure(pal, s=1, lean=1, hdx=1, legs=(8, 13), front=(5, 2), wield=(7, 7), kind="pick", fx="sparks", two_hand=True))
+    f.append(figure(pal, s=0, lean=0, legs=(8, 13), front=(4, -3), wield=(7, -6), kind="pick", two_hand=True))
+    # 21-23 叩く（ハンマー）: 振り上げ → 命中（火花）→ 跳ね返り
+    f.append(figure(pal, s=0, lean=1, legs=(8, 12), front=(4, -7), wield=(6, -10), kind="hammer"))
+    f.append(figure(pal, s=1, lean=2, legs=(8, 12), front=(5, 3), wield=(7, 7), kind="hammer", fx="sparks"))
+    f.append(figure(pal, s=0, lean=1, legs=(8, 12), front=(4, -2), wield=(6, -4), kind="hammer"))
+    # 24-26 攻撃（棍棒）: 振りかぶる → 振る → 振り抜く
+    f.append(figure(pal, s=0, lean=-2, hdx=-1, legs=(8, 13), front=(-2, -5), wield=(-6, -9), kind="club", tool_behind=True))
+    f.append(figure(pal, s=0, lean=1, legs=(8, 13), front=(5, -2), wield=(8, -3), kind="club"))
+    f.append(figure(pal, s=1, lean=2, hdx=1, legs=(8, 13), front=(4, 2), wield=(5, 6), kind="club"))
+    # 27-28 疲れ（へたり込み → ひざに手）
+    f.append(figure(pal, s=2, hdx=1, legs=(9, 12), front=(1, 3), back=(0, 3)))
+    f.append(figure(pal, s=3, lean=1, hdx=1, legs=(8, 12), front=(3, 3), back=(2, 3)))
+    # 29 被弾（のけぞり）: 頭を後ろへ、腕をはね上げ、足もとがよろける
+    f.append(figure(pal, s=1, lean=-3, hdx=-2, legs=(6, 13), lift=(0, 1), front=(-5, 0), back=(-3, -5)))
+    out = []
+    for q in f:
+        o = q.outline(OUT)
+        for (fx_, fy_, fc) in getattr(q, "fx_list", []):      # 火花・木くずは輪郭を付けたあとに重ねる
+            o.set(fx_, fy_, fc)
+        out.append(o)
+    return out
 
 
 def build_sheet(key):
