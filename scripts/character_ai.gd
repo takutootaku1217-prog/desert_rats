@@ -361,6 +361,29 @@ func _finish_trip() -> void:
 	_go_storage()
 
 
+## 流れていく資源 r に、画面の外へ出る前に追いつけるか。資源は scroll_speed で左へ流れ、仲間は current_speed で追う。
+## 資源が自分より左にあるときは、追いつく速さ＝仲間の速さ − 流れる速さ（速度が速いと追いつけない）。
+## 拠点の中にいるときは、斜路の下（地面への出口）まで歩く時間も数える。追いつけない資源を選ぶと、
+## 「見つけては取り消す」を繰り返して、何も回収できない（特に速度を上げたとき）。
+func _can_reach(r) -> bool:
+	var vs: float = game.scroll_speed
+	if vs <= 1.0:
+		return true
+	var vw: float = maxf(1.0, ch.current_speed())
+	var start: Vector2 = ch.position
+	var t0 := 0.0
+	if ch.floor_i != 0:
+		start = GameData.RAMP_FOOT
+		t0 = ch.position.distance_to(GameData.RAMP_FOOT) / vw          # 出口まで歩く間にも資源は流れる
+	var to := Vector2(r.position.x - 40.0 - vs * t0, r.position.y)     # 仲間が向かう位置（資源の少し手前）
+	var closing: float = vw + vs if to.x > start.x else vw - vs
+	if closing < vw * 0.2:
+		return false
+	var t_reach: float = t0 + start.distance_to(to) / closing
+	var work := 1.5                                                    # 拾う・掘り始めるのに要る時間の目安
+	return t_reach + work < (r.position.x - 60.0) / vs
+
+
 func _res_target() -> Vector2:
 	# 資源の少し手前（拠点側）。地面の範囲に収める。
 	var p: Vector2 = res.position + Vector2(-40, 0)
@@ -460,6 +483,8 @@ func _try_start(job: int) -> bool:
 					continue
 				if not game.has_room_for(r, inflight):
 					continue               # 倉庫の枠がいっぱい（積載量）。拾っても置き場がない
+				if not _can_reach(r):
+					continue               # 画面の外へ流れ去る前に追いつけない（追っては取り消す往復を防ぐ）
 				if r is GatherPoint:
 					# 採取ポイント: 掘り尽くされていない・自分の道具と能力で取れる割合が低すぎない（無駄になる）こと。
 					# 取れる割合が高いポイントほど優先（道具や能力に合った仕事を選ぶ）
