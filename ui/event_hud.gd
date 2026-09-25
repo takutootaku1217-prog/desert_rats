@@ -10,6 +10,9 @@ var _dist: Label
 var _slots: Array = []           # 出来事の枠 {title, row, note, btns, id, stance}
 var _log: Label
 var _test_box: VBoxContainer
+var _exp_box: VBoxContainer
+var _exp_label: Label
+var _exp_btn: Button
 
 const W := 420.0
 const LOG_SHOW_SEC := 40.0       # これより古い記録は消す
@@ -36,6 +39,17 @@ func _ready() -> void:
 	top.add_child(tb)
 	for i in SLOT_COUNT:
 		_slots.append(_make_slot(v))
+	# 遺跡（遠征）の欄
+	_exp_box = VBoxContainer.new()
+	_exp_box.add_theme_constant_override("separation", 2)
+	_exp_box.visible = false
+	v.add_child(_exp_box)
+	_exp_label = _wrapped("", 14, Color("9fd6ff"))
+	_exp_box.add_child(_exp_label)
+	_exp_btn = UIKit.button("調査隊を編成する (X)", func(): game.expedition_ui.open())
+	_exp_btn.alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_exp_btn.custom_minimum_size = Vector2(0, 28)
+	_exp_box.add_child(_exp_btn)
 	_log = _wrapped("", 13, Color("fff7dc"))
 	v.add_child(_log)
 	_test_box = VBoxContainer.new()
@@ -91,6 +105,7 @@ func _process(_delta: float) -> void:
 	var focus := d.focus_list()
 	for i in SLOT_COUNT:
 		_update_slot(_slots[i], focus[i] if i < focus.size() else {})
+	_update_expedition()
 	# 記録（新しいものだけ）
 	var lines: Array = []
 	for e in d.log:
@@ -100,6 +115,26 @@ func _process(_delta: float) -> void:
 	_log.text = "\n".join(PackedStringArray(lines))
 	# 左下に張り付ける
 	_panel.position = Vector2(12.0, 708.0 - _panel.size.y)
+
+
+## 遺跡の発見・調査隊の進行・結果の欄
+func _update_expedition() -> void:
+	var ex: Expedition = game.expedition
+	_exp_box.visible = ex.state != "idle"
+	match ex.state:
+		"offered":
+			_exp_label.text = "🗺 遺跡を発見: %s（あと %d秒）" % [ex.site()["name"], int(ceil(ex.offer_left))]
+			_exp_btn.visible = true
+		"running":
+			var names: Array = []
+			for w in ex.party:
+				names.append(w.char_name)
+			_exp_label.text = "調査隊 探索中 %d%%（%s）\n%s" % [int(ex.progress() * 100.0), "・".join(PackedStringArray(names)),
+					ex.log.back() if not ex.log.is_empty() else ""]
+			_exp_btn.visible = false
+		"done":
+			_exp_label.text = "調査隊が戻った: " + ex.summary()
+			_exp_btn.visible = false
 
 
 func _update_slot(s: Dictionary, f: Dictionary) -> void:

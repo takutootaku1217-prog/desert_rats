@@ -21,6 +21,8 @@ var policy: PolicyUI
 var status: StatusPanel
 var director: Director            # 旅の出来事（天候・トラブル・好機）。scripts/director.gd
 var event_hud: EventHUD
+var expedition: Expedition        # 遺跡の探索（調査隊）。scripts/expedition.gd
+var expedition_ui: ExpeditionUI
 
 # ---- プレイヤーの方針（運営の方針画面で変更する） ----
 var recipe_priority := GameData.DEFAULT_RECIPE_PRIORITY.duplicate()   # レシピid -> ★0〜5
@@ -72,6 +74,8 @@ func _ready() -> void:
 	randomize()
 	director = Director.new()       # 出来事（base や仲間より先に作る。倍率を読まれるため）
 	director.setup(self)
+	expedition = Expedition.new()
+	expedition.setup(self)
 	var bg := WorldScroll.new()
 	bg.game = self
 	add_child(bg)
@@ -130,6 +134,9 @@ func _ready() -> void:
 	event_hud = EventHUD.new()
 	event_hud.game = self
 	add_child(event_hud)
+	expedition_ui = ExpeditionUI.new()
+	expedition_ui.game = self
+	add_child(expedition_ui)
 
 
 func _process(delta: float) -> void:
@@ -155,6 +162,7 @@ func _process(delta: float) -> void:
 	base.burn(dist)
 	base.wear_by(delta, dist)
 	director.tick(delta, dist)                 # 出来事の進行（予報・発生・終了）
+	expedition.tick(delta)                     # 調査隊の進行（遺跡の探索）
 	_eat(delta)
 	# 地面の資源と生物は、進んだ距離に応じて現れる（天候で出にくくなる）
 	_spawn_dist -= dist * director.spawn_mult()

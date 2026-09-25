@@ -33,6 +33,7 @@ var gender := 0                   # GameData.GENDER_NAMES の番号
 var ranks := {}                   # Field -> 0..7（0=E, 7=SSS）
 var skills: Array = []
 var dept := -1                    # 配属している部署（GameData.Field）
+var away := false                 # 調査隊として拠点を離れている（scripts/expedition.gd）
 
 # 毎フレーム ai が設定する描画用の状態
 var moving := false
@@ -75,6 +76,51 @@ func setup(g, cname: String, pal: String, prios: Dictionary, slot: int, profile:
 func set_priority(job: int, value: int) -> void:
 	priorities[job] = clampi(value, 0, GameData.MAX_PRIORITY)
 	ai.on_priority_changed()   # 優先度が変わったら仕事を選び直す
+
+
+## 調査隊として出発する。仕事を中断して、持っていた物・予約を元に戻し、拠点から姿を消す。
+func depart() -> void:
+	var a := ai
+	match a.state:
+		CharacterAI.State.HAUL_MOVE:              # 加工設備へ運んでいる材料は倉庫へ戻す
+			if not a.haul_recipe.is_empty():
+				game.processor.cancel_reservation(a.haul_recipe)
+				for it in a.haul_recipe["in"]:
+					game.storage.add_item(it, a.haul_recipe["in"][it])
+				a.haul_recipe = {}
+				carrying = -1
+		CharacterAI.State.REFUEL_MOVE, CharacterAI.State.REFUEL:
+			game.base.refuel_reserved = false
+		CharacterAI.State.REPAIR_MOVE, CharacterAI.State.REPAIR:
+			game.base.repair_reserved.erase(a.repair_part)
+			a.repair_part = -1
+	if carrying >= 0:                              # 手に持っている物は倉庫へ
+		if carrying == GameData.Item.CARCASS:
+			game.storage.butcher(carrying_species)
+		else:
+			game.storage.add_item(carrying)
+		carrying = -1
+		carrying_species = ""
+	a._release_task()
+	a._set_state(CharacterAI.State.IDLE)
+	a.timer = 9999.0
+	away = true
+	visible = false
+	set_process(false)
+	position = Vector2(-2000.0, GameData.LO_Y)     # 敵の攻撃やクリックの対象にならない場所
+
+
+## 調査隊から戻る。斜路の下に現れ、元気を引き継ぐ。
+func arrive(new_energy: float) -> void:
+	away = false
+	visible = true
+	set_process(true)
+	energy = new_energy
+	floor_i = 0
+	position = GameData.RAMP_FOOT + Vector2(randf_range(-30.0, 30.0), 0.0)
+	target = position
+	ai.timer = 0.0
+	ai._set_state(CharacterAI.State.SEARCH)
 
 
 ## 仕事の速さの倍率。分野ランク・得意分野・レベル・拠点の分野レベルで決まる。

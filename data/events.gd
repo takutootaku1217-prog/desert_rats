@@ -103,6 +103,12 @@ const EVENTS := {
 		"text": {GameData.Part.DRIVE: "車軸に亀裂が入った！走行装置が損傷", GameData.Part.HULL: "車体の外板が裂けた！車体が損傷",
 			GameData.Part.MACHINE: "加工設備から火花が出た！加工設備が損傷"},
 	},
+	"ruins_small": {
+		"name": "遺跡（見張り台）", "kind": "site", "weight": 2.0, "min_distance": 3000.0,
+	},
+	"ruins_large": {
+		"name": "遺跡（古代）", "kind": "site", "weight": 1.0, "min_distance": 9000.0,
+	},
 	"herd": {
 		"name": "生物の群れ", "kind": "chance", "weight": 2.0, "species": "hare", "count": [5, 8],
 		"text": "スナウサギの群れを見つけた！ 狩りの好機",

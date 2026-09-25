@@ -270,6 +270,8 @@ func _pick() -> String:
 			continue                          # 天候と襲撃は、それぞれ同時に1つだけ
 		if d.get("min_distance", 0.0) > distance:
 			continue                          # 序盤には起きない出来事
+		if d["kind"] == "site" and game.expedition.state in ["offered", "running"]:
+			continue                          # 遺跡は、調査中・別の遺跡が出ている間は見つからない
 		ids.append(id)
 		weights.append(d["weight"])
 	if ids.is_empty():
@@ -323,8 +325,15 @@ func _apply_instant(id: String, d: Dictionary) -> void:
 				r.position = Vector2(game.SPAWN_X + i * 60.0, randf_range(game.SPAWN_Y_MIN + 4.0, game.SPAWN_Y_MAX - 4.0))
 				game.resources_root.add_child(r)
 			_log(d["text"])
+		"ruins_small", "ruins_large":
+			game.expedition.offer(id)                 # 遺跡が見つかる（scripts/expedition.gd）
 		_:
 			_log(d.get("text", d["name"]) if typeof(d.get("text", "")) == TYPE_STRING else d["name"])
+
+
+## 記録に一文を足す（他のシステム、たとえば遠征から）。
+func note(text: String) -> void:
+	_log(text)
 
 
 func _log(text: String) -> void:

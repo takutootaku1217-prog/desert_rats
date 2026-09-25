@@ -73,6 +73,8 @@ func setup(worker, g) -> void:
 
 
 func status_text() -> String:
+	if ch.away:
+		return "遠征中"
 	return STATE_TEXT[state]
 
 
