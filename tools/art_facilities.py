@@ -62,7 +62,8 @@ def bed(i):
 
 
 def hull():
-    return art_base.build_hull(furnish=False)
+    # 屋根の上の物は焼き込まない（外装パーツ art_exterior.py が、外装でも内装の断面図の上でも同じ絵を重ねる）
+    return art_base.build_hull(furnish=False, roof=False)
 
 
 def room_images():

@@ -2,7 +2,7 @@
 使い方: python3 tools/gen_art.py   （PIL が必要。生成済みPNGを使うだけなら実行不要）"""
 import os
 from pxlib import *
-import art_chars, art_items, art_env, art_base, art_machine, art_creatures, art_gather, art_facilities, art_ui
+import art_chars, art_items, art_env, art_base, art_machine, art_creatures, art_gather, art_facilities, art_ui, art_exterior
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "assets")
 
@@ -22,7 +22,8 @@ env = art_env.build()
 for k, px in env.items():
     out("environment", f"{k}.png", px)
 art_ui.write_all(ROOT)            # UIのアイコンゲージ（重り。assets/ui/）
-art_facilities.write_all(ROOT)    # 車体（ベッド・作業台を描かない版。hull.png）と、建設で増える設備（ワークベンチ・ベッド）
+art_facilities.write_all(ROOT)    # 車体（ベッド・作業台・屋根の上の物を描かない版。hull.png）と、建設で増える設備（ワークベンチ・ベッド）
+art_exterior.write_all(ROOT)      # 外装（外から見た車体・屋根や壁の外装パーツ・装甲。assets/base/exterior/）
 sh, S = art_base.wheels_sheet()
 out("base", "wheels.png", sh)
 out("base", "ramp.png", art_base.ramp())

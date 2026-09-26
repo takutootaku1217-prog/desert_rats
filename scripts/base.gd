@@ -1,11 +1,15 @@
 class_name MobileBase
 extends Node2D
-## 移動拠点（横から見た断面）。車体・車輪・斜路と、倉庫・加工設備・ベッドを持つ。
+## 移動拠点。車体・車輪・斜路と、倉庫・加工設備・ベッドを持つ。内装（横から見た断面）と外装（外から見た車体）の
+## 2つの見え方があり、どちらも「同じ拠点のデータ」（部屋の配置・建てた設備・耐久・燃料・走行距離）を読んで描く。
 ## 拠点自体は画面内に留まり、背景と資源が流れることで「進んでいる」ように見せる。
 ##
 ## 階: 上の階(加工室・寝室・操縦室) / 下の階(機関室・倉庫・搬入口)。ハシゴでつながる。
 ## 部屋の配置（4つの区画に何の部屋があるか）は Main.room_layout（data/rooms.gd）。部屋を変えると apply_layout で
 ## 加工設備・倉庫の位置が移り、設備（ワークベンチ・ベッド）の置き場所も facility_spots で新しい区画に追従する。
+## 見え方の切り替え（外装 ⇄ 内装）は scripts/base_view.gd。ここは view_exterior の旗と、描き分けだけを持つ。
+## 描く仕組み: このノードが車輪・煙・砂ぼこり（どちらの画面でも同じ）と、内装の断面図を描く。外装（車体・窓・外装パーツ）は
+## 子の BaseExterior（scripts/base_exterior.gd）が描く。
 
 var game
 var storage: BaseStorage
@@ -24,6 +28,11 @@ var total_refuel := 0                    # 補給した回数（確認用）
 var parts := {GameData.Part.HULL: 100.0, GameData.Part.DRIVE: 100.0, GameData.Part.MACHINE: 100.0}
 var repair_reserved := {}                # Part -> 修理に向かっている Worker
 var total_repair := 0                    # 修理した回数（確認用）
+var view_exterior := false               # true なら外から見る（外装）。false なら中を見る（内装の断面図）。切り替えは BaseView
+var exterior: BaseExterior               # 外装の描画（子）
+var body_bob := 0.0                      # 外装で、走っているときに車体が小さく跳ねる量（px。内装では 0）
+var _shake := Vector2.ZERO               # 被弾で揺れる量（このフレーム。内装・外装で同じ値を使う）
+var _body_t := 0.0
 var _wheel_t := 0.0
 var _puffs: Array = []                   # 煙・砂ぼこり
 var _puff_timer := 0.0
@@ -32,6 +41,7 @@ var _dust_timer := 0.0
 const WHEEL_X := [296.0, 424.0, 664.0, 792.0]
 const WHEEL_Y := 506.0
 const STACK_X := [664.0, 696.0]
+const HULL_H := 80                       # 車体の絵の高さ（ドット。内装の hull.png と外装の body.png で同じ）
 
 
 func _init() -> void:
@@ -43,7 +53,29 @@ func _ready() -> void:
 	add_child(storage)
 	processor = BaseProcessor.new()
 	add_child(processor)
+	exterior = BaseExterior.new()                # 加工設備・倉庫のあとに作る（外装は、それらより手前に描く）
+	exterior.base = self
+	add_child(exterior)
 	apply_layout()
+
+
+# ---- 見え方（外装 ⇄ 内装）。同じ拠点を、外から見るか中から見るかだけの違い（ゲームの状態は変わらない） ----
+## 外装（外から見る）にする／内装（断面図）に戻す。加工設備・倉庫は内装の物なので、外装では描かない（位置・中身はそのまま）。
+func set_view_exterior(on: bool) -> void:
+	view_exterior = on
+	processor.visible = not on
+	storage.visible = not on
+	queue_redraw()
+
+
+## 車体の揺れ（被弾・走行中の小さな跳ね）。外装の描画と共通。
+func body_offset() -> Vector2:
+	return _shake + Vector2(0.0, body_bob)
+
+
+## 車体の中（外から見たとき、姿が見えない場所）か。斜路の上・地面にいる仲間は外にいる。斜路の上の端（搬入口の入口）から中。
+func is_inside(p: Vector2) -> bool:
+	return p.x < GameData.RAMP_TOP.x + 1.0 and p.y < GameData.HULL_POS.y + float(HULL_H * GameData.PX)
 
 
 # ---- 部屋（区画。data/rooms.gd） ----
@@ -239,6 +271,13 @@ func _process(delta: float) -> void:
 	hit_timer = maxf(0.0, hit_timer - delta)
 	var spd: float = game.scroll_speed
 	_wheel_t += spd * delta / 13.6
+	_shake = Vector2(randf_range(-4, 4), 0) if hit_timer > 0.0 else Vector2.ZERO
+	# 外装: 走っているとき、車体（車輪は地面のまま）が段差で1ドットぶん跳ねる。内装は仲間の足元が動かないよう跳ねない
+	if view_exterior and spd > 5.0:
+		_body_t += delta * spd / 60.0
+		body_bob = -float(GameData.PX) if sin(_body_t * 2.1) + sin(_body_t * 3.7 + 1.0) > 1.3 else 0.0
+	else:
+		body_bob = 0.0
 	# 排気の煙
 	_puff_timer -= delta
 	if _puff_timer <= 0.0 and has_fuel():   # 燃料切れのときは煙が出ない
@@ -307,31 +346,33 @@ func _draw_facilities(off: Vector2) -> void:
 
 
 func _draw() -> void:
-	var shake := Vector2(randf_range(-4, 4), 0) if hit_timer > 0.0 else Vector2.ZERO
-	var bob := 0.0
-	# 車輪
+	var shake := _shake
+	var bob := 0.0                                  # 内装は跳ねない。外装の車体の跳ねは body_bob（BaseExterior が使う）
+	# 車輪（どちらの画面でも同じ。外装の車体は、この上に重ねて描かれる）
 	var wheels := GameData.tex("res://assets/base/wheels.png")
 	var f := int(_wheel_t) % 4
 	for wx in WHEEL_X:
 		draw_texture_rect_region(wheels, Rect2(Vector2(wx - 56.0, WHEEL_Y - 56.0 + bob), Vector2(112, 112)),
 				Rect2(f * 30, 0, 28, 28))
-	var hull := GameData.tex("res://assets/base/hull.png")
-	draw_texture_rect(hull, Rect2(GameData.HULL_POS + shake + Vector2(0, bob), Vector2(hull.get_size()) * GameData.PX), false)
-	_draw_rooms(shake + Vector2(0, bob))
-	# 斜路
-	var ramp := GameData.tex("res://assets/base/ramp.png")
-	draw_texture_rect(ramp, Rect2(Vector2(900, 482) + Vector2(0, bob), Vector2(ramp.get_size()) * GameData.PX), false)
-	_draw_facilities(shake + Vector2(0, bob))
-	# 燃料計（燃料を入れる場所の上。機関室があればその炉、なければ搬入口）
-	var ex := engine_point().x
-	var gx := ex - 44.0
-	var gy := 392.0
-	var r := fuel / GameData.FUEL_CAP
-	var fc := Color("7be07b") if r > 0.5 else (Color("f0c040") if r > 0.2 else Color("e0533d"))
-	draw_rect(Rect2(gx, gy, 88, 12), Color(0.08, 0.07, 0.06, 0.95))
-	draw_rect(Rect2(gx + 4, gy + 4, 80.0 * r, 4), fc)
-	GameData.draw_text(self, Vector2(ex, gy - 4), "燃料" if has_fuel() else "燃料切れ", 12,
-			Color("fde68a") if has_fuel() else Color("ff8a70"), 90.0)
+	if not view_exterior:
+		# 内装: 横から見た断面（車体・部屋・斜路・設備・燃料計）。屋根の上の物は、子の BaseExterior が重ねて描く
+		var hull := GameData.tex("res://assets/base/hull.png")
+		draw_texture_rect(hull, Rect2(GameData.HULL_POS + shake + Vector2(0, bob), Vector2(hull.get_size()) * GameData.PX), false)
+		_draw_rooms(shake + Vector2(0, bob))
+		# 斜路
+		var ramp := GameData.tex("res://assets/base/ramp.png")
+		draw_texture_rect(ramp, Rect2(Vector2(900, 482) + Vector2(0, bob), Vector2(ramp.get_size()) * GameData.PX), false)
+		_draw_facilities(shake + Vector2(0, bob))
+		# 燃料計（燃料を入れる場所の上。機関室があればその炉、なければ搬入口）
+		var ex := engine_point().x
+		var gx := ex - 44.0
+		var gy := 392.0
+		var r := fuel / GameData.FUEL_CAP
+		var fc := Color("7be07b") if r > 0.5 else (Color("f0c040") if r > 0.2 else Color("e0533d"))
+		draw_rect(Rect2(gx, gy, 88, 12), Color(0.08, 0.07, 0.06, 0.95))
+		draw_rect(Rect2(gx + 4, gy + 4, 80.0 * r, 4), fc)
+		GameData.draw_text(self, Vector2(ex, gy - 4), "燃料" if has_fuel() else "燃料切れ", 12,
+				Color("fde68a") if has_fuel() else Color("ff8a70"), 90.0)
 	# 煙・砂ぼこり（ドットの格子に合わせた四角）
 	for pf in _puffs:
 		var k: float = pf["t"] / pf["life"]

@@ -25,6 +25,8 @@ var expedition: Expedition        # 遺跡の探索（調査隊）。scripts/exp
 var expedition_ui: ExpeditionUI
 var build_ui: BuildUI             # 建設の画面（Bキー）。ui/build_ui.gd
 var room_ui: BaseUI               # 部屋の変更の画面（Rキー・右の「部屋の変更」ボタン）。ui/base_ui.gd
+var base_view: BaseView           # 拠点の見え方（外装 ⇄ 内装）。scripts/base_view.gd
+var view_switch: ViewSwitchUI     # 外装・内装の切り替えボタン（Oキー・Iキー）。ui/view_switch.gd
 
 # ---- 部屋（車体の区画。data/rooms.gd） ----
 var room_layout: Dictionary = Rooms.default_layout()   # 区画 -> 部屋の種類。初期配置は、これまでのゲームと同じ
@@ -163,6 +165,12 @@ func _ready() -> void:
 	room_ui = BaseUI.new()
 	room_ui.game = self
 	add_child(room_ui)
+	base_view = BaseView.new()                     # 外装 ⇄ 内装（仲間ができたあとに作る。仲間の見え方も決めるため）
+	base_view.game = self
+	add_child(base_view)
+	view_switch = ViewSwitchUI.new()
+	view_switch.game = self
+	add_child(view_switch)
 
 
 func _process(delta: float) -> void:

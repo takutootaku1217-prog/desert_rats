@@ -408,9 +408,11 @@ ROOM_FUNCS = {
 }
 
 
-def build_hull(layout=None, furnish=True):
+def build_hull(layout=None, furnish=True, roof=True):
     """車体の絵。layout は {区画: 部屋の種類}。省略すると初期配置（従来の hull.png と同じ絵）。
-    furnish=False にすると、建設で増える家具（ワークベンチ・ベッド）を描かない（ゲームで使う hull.png はこちら）。"""
+    furnish=False にすると、建設で増える家具（ワークベンチ・ベッド）を描かない（ゲームで使う hull.png はこちら）。
+    roof=False にすると、屋根の上の物（アンテナ・排気筒・タンクなど）を描かない。ゲームでは、屋根の上の物は外装パーツ
+    （tools/art_exterior.py の roof_parts.png。ゲームの進み具合で増える）として、外装でも内装の断面図の上でも同じ絵を重ねて描く。"""
     global FURNISH
     FURNISH = furnish
     lay = dict(DEFAULT_LAYOUT)
@@ -425,7 +427,8 @@ def build_hull(layout=None, furnish=True):
     partition(p, 138, UP_TOP + 2, UP_FEET, 19)
     partition(p, 72, LO_TOP + 2, LO_FEET, 22); partition(p, 81, LO_TOP + 2, LO_FEET, 22)
     partition(p, 150, LO_TOP + 2, LO_FEET, 22)
-    roof_details(p)
+    if roof:
+        roof_details(p)
     return p
 
 
