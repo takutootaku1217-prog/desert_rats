@@ -14,7 +14,9 @@ const ENABLE_RAIDS := true
 ## false なら、従来の「地面に落ちている物を1個ずつ拾う」方式に戻る（敵の落とし物・漂流物・獲物はどちらでも落ちている物として拾う）。
 static var ENABLE_GATHER_POINTS := true         # 実行中に切り替えられる（tools/sim_gather.gd が従来方式と比べるため）
 
-const PX := 4                       # ドット絵1pxを画面の何pxで描くか
+## 論理ユニット1つ（基準の長さ。今の絵の「1ドット」と同じ大きさ）を、画面の何pxで描くか。定義は ArtSpec.UNIT_PX（ここは同じ値の別名）。
+## 絵の細かさ（1ユニットを何ドットで描いているか）とは関係がない。詳しくは data/art_spec.gd。
+const PX := ArtSpec.UNIT_PX
 
 # ------------------------------------------------------------------
 # 仕事
@@ -312,12 +314,24 @@ static var _tex_cache := {}
 static var _font: SystemFont = null
 
 
+## 画像のキャッシュを捨てる（絵の置き場所を差し替えたとき。ArtSpec.set_root_override）
+static func clear_tex_cache() -> void:
+	_tex_cache.clear()
+
+
 ## PNGを直接読み込む（インポート前でも動くようにするため）。
+## テスト用に、絵の置き場所を差し替えられる（ArtSpec.root_override。高精細な絵に替えたときの動作確認）。
 static func tex(path: String) -> Texture2D:
 	if _tex_cache.has(path):
 		return _tex_cache[path]
 	var t: Texture2D = null
-	if ResourceLoader.exists(path):
+	var alt := ArtSpec.overridden(path)
+	if alt != "":
+		var ob := FileAccess.get_file_as_bytes(alt)
+		var oimg := Image.new()
+		if not ob.is_empty() and oimg.load_png_from_buffer(ob) == OK:
+			t = ImageTexture.create_from_image(oimg)
+	elif ResourceLoader.exists(path):
 		t = load(path)                       # インポート済みならこちら（書き出しにも対応）
 	else:
 		# エディタがまだインポートしていない場合でも動くよう、PNGを直接読む
@@ -371,24 +385,36 @@ static func draw_text(canvas: CanvasItem, pos: Vector2, text: String, size: int 
 	canvas.draw_string(f, pos, text, align, width, size, color)
 
 
+## 生物の絵の基準（ユニット。1コマの大きさは CREATURES の "size"）。絵の細かさ（dpu）は、絵の幅から自動で決まる。
+static func creature_spec(species: String) -> Dictionary:
+	var sz: Vector2 = CREATURES[species]["size"]
+	return ArtSpec.spec_of(Vector2i(int(sz.x), int(sz.y)), ArtSpec.CREATURE_FRAMES)
+
+
+## 生物の絵1コマの、画面上の高さ（px。絵の細かさに依存しない）。名前や体力を出す位置の基準。
+static func creature_height_px(species: String) -> float:
+	return float(CREATURES[species]["size"].y) * float(PX)
+
+
 ## 生物を描く。feet = 足元の位置。dead なら仰向け（獲物）で描く。
+## 画面上の大きさは、基準の大きさ（CREATURES の size ユニット）× PX。絵の細かさ（1ユニットのドット数）は絵から自動で決まる。
 static func draw_creature(canvas: CanvasItem, species: String, frame: int, feet: Vector2, facing: float = 1.0,
 		dead: bool = false, s: float = 1.0, modulate: Color = Color.WHITE) -> void:
 	var sz: Vector2 = CREATURES[species]["size"]
 	var size := sz * PX * s
 	var t := tex("res://assets/creatures/%s.png" % species)
+	var spec := creature_spec(species)
 	if dead:
 		canvas.draw_set_transform(feet + Vector2(0, -size.y / 2.0), 0.0, Vector2(facing, -1.0))
-		canvas.draw_texture_rect_region(t, Rect2(-size / 2.0, size), Rect2(2 * sz.x, 0, sz.x, sz.y), modulate)
+		canvas.draw_texture_rect_region(t, Rect2(-size / 2.0, size), ArtSpec.frame_src(t, spec, 2), modulate)
 	else:
 		canvas.draw_set_transform(feet, 0.0, Vector2(facing, 1.0))
-		canvas.draw_texture_rect_region(t, Rect2(Vector2(-size.x / 2.0, -size.y), size),
-				Rect2(frame * sz.x, 0, sz.x, sz.y), modulate)
+		canvas.draw_texture_rect_region(t, Rect2(Vector2(-size.x / 2.0, -size.y), size), ArtSpec.frame_src(t, spec, frame), modulate)
 	canvas.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 
-## アイテムのアイコンを中心 pos に描く。s=1 で 12px*PX、s=0.5 で半分。
+## アイテムのアイコンを中心 pos に描く。s=1 で 基準の大きさ（ArtSpec.ITEM）× PX、s=0.5 で半分。絵全体を描くので、絵の細かさには依存しない。
 ## canvas の _draw() の中から呼ぶこと。
 static func draw_item(canvas: CanvasItem, item: int, pos: Vector2, s: float = 1.0) -> void:
-	var size := Vector2(12, 12) * PX * s
+	var size := ArtSpec.px_size(ArtSpec.ITEM) * s
 	canvas.draw_texture_rect(item_tex(item), Rect2(pos - size / 2.0, size), false)

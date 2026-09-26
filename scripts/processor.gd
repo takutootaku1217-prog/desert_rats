@@ -194,7 +194,9 @@ func _draw() -> void:
 	if active:
 		frame = 1 + (int(Time.get_ticks_msec() / 220) % 2)
 	var sheet := GameData.tex("res://assets/base/machine.png")
-	draw_texture_rect_region(sheet, Rect2(-56, -96, 112, 96), Rect2(frame * 30, 0, 28, 24))
+	var mspec := ArtSpec.MACHINE                                    # 基準の大きさ（ユニット）。絵の細かさは絵の幅から自動で決まる
+	var msize := ArtSpec.px_size(mspec["cell"])
+	draw_texture_rect_region(sheet, Rect2(Vector2(-msize.x / 2.0, -msize.y), msize), ArtSpec.frame_src(sheet, mspec, frame))
 	# 進捗バー（作業している設備の足元。加工設備なら床の上、ワークベンチならその足元）
 	var r := progress / float(current["time"]) if not current.is_empty() else 0.0
 	var bx := 0.0

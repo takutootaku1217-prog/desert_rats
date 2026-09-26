@@ -18,7 +18,7 @@ const C_DIM := UIKit.C_DIM
 const C_ACCENT := UIKit.C_ACCENT
 const C_OK := Color("86efac")
 const C_BAD := Color("f87171")
-const HULL_SCALE := 2                 # 断面図の拡大（ドット1つを何pxで描くか）
+const HULL_SCALE := 2                 # 断面図の拡大（論理ユニット1つを何pxで描くか）
 
 
 func _ready() -> void:
@@ -170,16 +170,17 @@ func _rebuild_left() -> void:
 ## 選んでいる区画は枠で囲む。部屋を建てると、次の更新でここの絵も変わる。
 func _hull_view() -> Control:
 	var hull := GameData.tex("res://assets/base/hull.png")
-	var sc := float(HULL_SCALE)
+	var sc := float(HULL_SCALE)                                     # 論理ユニット1つを画面の何pxで描くか（絵の細かさとは関係がない）
+	var hull_units := Vector2(ArtSpec.HULL)
 	var view := Control.new()
-	view.custom_minimum_size = Vector2(hull.get_size()) * sc
+	view.custom_minimum_size = hull_units * sc
 	view.clip_contents = true
-	view.add_child(_tex_rect(hull, Vector2.ZERO, Vector2(hull.get_size()) * sc))
+	view.add_child(_tex_rect(hull, Vector2.ZERO, hull_units * sc))
 	for s in Rooms.SLOT_ORDER:
 		var rt: String = game.room_layout.get(s, "empty")
 		var r: Rect2 = Rooms.overlay_rect(s)
-		var pos: Vector2 = (r.position - GameData.HULL_POS) / float(Rooms.PX) * sc
-		var size: Vector2 = r.size / float(Rooms.PX) * sc
+		var pos: Vector2 = (r.position - GameData.HULL_POS) / float(Rooms.UNIT) * sc
+		var size: Vector2 = r.size / float(Rooms.UNIT) * sc
 		view.add_child(_tex_rect(GameData.tex(Rooms.overlay_path(s, rt)), pos, size))
 		var b := Button.new()                                       # 区画の上の透明なボタン（枠は選択中だけ）
 		b.position = pos
@@ -287,7 +288,7 @@ func _type_row(t: String, cur: String) -> Control:
 	pv.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	pv.stretch_mode = TextureRect.STRETCH_SCALE
 	pv.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	pv.custom_minimum_size = Vector2(tex.get_size()) * 2.0
+	pv.custom_minimum_size = Rooms.slot_size(_slot) * 2.0        # この区画の大きさ（ユニット）×2。絵の細かさに依存しない
 	pv.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	h.add_child(pv)
 	var v := VBoxContainer.new()

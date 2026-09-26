@@ -37,14 +37,15 @@ func frame() -> int:
 
 
 func _draw() -> void:
-	var snap := ((position / 4.0).round() * 4.0) - position
-	var sz: Vector2i = GatherDB.POINTS[kind]["size"]
-	var w := float(sz.x * GameData.PX)
+	var sz: Vector2i = GatherDB.POINTS[kind]["size"]                 # 1コマの基準の大きさ（ユニット）
+	var t := GameData.tex("res://assets/gather/%s.png" % kind)
+	var spec := ArtSpec.spec_of(sz, ArtSpec.GATHER_FRAMES)
+	var snap := ArtSpec.snap_offset(position, ArtSpec.dot_px(t, ArtSpec.sheet_units_w(spec)))   # 絵のドットの格子に合わせる
+	var w := float(sz.x * GameData.PX)                               # 画面上の大きさ（絵の細かさに依存しない）
 	var h := float(sz.y * GameData.PX)
 	# 影
 	draw_rect(Rect2(snap + Vector2(-w / 2.0 - 4.0, -8), Vector2(w + 8.0, 8)), Color(0.35, 0.22, 0.1, 0.30))
-	var t := GameData.tex("res://assets/gather/%s.png" % kind)
-	draw_texture_rect_region(t, Rect2(snap + Vector2(-w / 2.0, -h), Vector2(w, h)), Rect2(frame() * sz.x, 0, sz.x, sz.y))
+	draw_texture_rect_region(t, Rect2(snap + Vector2(-w / 2.0, -h), Vector2(w, h)), ArtSpec.frame_src(t, spec, frame()))
 	if remaining <= 0:
 		return
 	if claimed_by == null:

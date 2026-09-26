@@ -1,7 +1,7 @@
 class_name IconGauge
 extends Control
 ## アイコン自体がゲージになる表示部品。「アイコンそのものが状態を表す」構造（横長ゲージ＋アイコンの並びではない）。
-## 絵はすべてオリジナルのドット絵（tools/art_ui.py が作る 16x16）。
+## 絵はすべてオリジナルのドット絵（tools/art_ui.py が作る。基準の大きさは 16x16 ユニット = ArtSpec.UI_ICON。絵を高精細にしても、画面上の大きさは変わらない）。
 ##  - 絵は2枚: 枠（assets/ui/<名前>.png。輪郭や縁。中は透明）と、充填してよい範囲（<名前>_mask.png。不透明なドットだけ）。
 ##    絵を差し替えるだけで、盾・しずく・ハートなど別の形のゲージになる（見た目は後で大きく変えられる）。
 ##  - 充填は「実際のドットの面積」が基準。範囲のドットを下の行から順に埋め、埋めた数 = 割合 × 範囲のドット数（fill_count）。
@@ -12,7 +12,8 @@ extends Control
 
 var ratio := 0.0                              # 充填率 0〜1（set_value が決める）
 var text := ""                                # 絵の内側に出す数字
-var pixel := GameData.PX                      # ドット1つを画面の何pxで描くか
+var pixel := float(GameData.PX)              # 絵のドット1つを画面の何pxで描くか（表示の大きさ ÷ 絵の幅。絵の細かさから自動で決まる）
+var display_size := Vector2.ZERO             # 画面上の大きさ（px）= 基準の大きさ（ユニット）× UNIT_PX。絵の細かさに依存しない
 var color_stages: Array = UIKit.GAUGE_STAGES_LOAD
 var empty_color := Color(0.07, 0.08, 0.10, 0.92)   # 充填していない範囲の色
 var blink := false                            # true なら点滅する（危険域のゲージ用）
@@ -32,15 +33,17 @@ func _init() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP   # ツールチップを出すため
 
 
-## 絵（assets/ui/<icon_name>.png と <icon_name>_mask.png）を読み込む。
-func setup(icon_name: String, px: int = GameData.PX) -> IconGauge:
-	pixel = px
+## 絵（assets/ui/<icon_name>.png と <icon_name>_mask.png）を読み込む。size_units = 絵の基準の大きさ（ユニット）。
+## 画面上の大きさは size_units × UNIT_PX で決まり、絵のドット数には依存しない（充填は絵のドットの面積が基準なので、細かい絵ほど細かく埋まる）。
+func setup(icon_name: String, size_units: Vector2i = ArtSpec.UI_ICON) -> IconGauge:
 	_frame = GameData.tex("res://assets/ui/%s.png" % icon_name)
 	var mask := _load_image("res://assets/ui/%s_mask.png" % icon_name)
 	_icon_size = Vector2i(mask.get_width(), mask.get_height())
+	display_size = ArtSpec.px_size(size_units)
+	pixel = display_size.x / float(maxi(1, _icon_size.x))
 	_order = fill_order(mask)
 	_text_center = _center_of(mask)
-	custom_minimum_size = Vector2(_icon_size) * pixel
+	custom_minimum_size = display_size
 	size = custom_minimum_size
 	_refresh()
 	return self
@@ -173,13 +176,13 @@ func _process(delta: float) -> void:
 func _draw() -> void:
 	if _interior == null or _frame == null:
 		return
-	var sz := Vector2(_icon_size) * pixel
+	var sz := display_size
 	var a := 1.0
 	if blink:
 		a = 0.55 + 0.45 * (0.5 + 0.5 * sin(_t * 8.0))
 	draw_texture_rect(_interior, Rect2(Vector2.ZERO, sz), false, Color(1, 1, 1, a))
 	draw_texture_rect(_frame, Rect2(Vector2.ZERO, sz), false)
 	if text != "":
-		var fs := maxi(10, int(float(pixel) * 3.5))
-		var c := _text_center * float(pixel)
+		var fs := maxi(10, int(float(ArtSpec.UNIT_PX) * 3.5))            # 数字の大きさは、画面上の基準の大きさに合わせる（絵のドット数に依存しない）
+		var c := _text_center * pixel
 		GameData.draw_text(self, Vector2(c.x, c.y + float(fs) * 0.36), text, fs, Color.WHITE, sz.x, HORIZONTAL_ALIGNMENT_CENTER)

@@ -2,8 +2,7 @@ class_name Worker
 extends Node2D
 ## 仲間のネズミ。移動（階をまたぐ移動含む）・ドット絵の描画・疲労を持ち、判断は CharacterAI に任せる。
 
-const PX := GameData.PX
-# mouse_*.png のコマ番号
+# mouse_*.png のコマ番号（1コマの基準の大きさ・コマ数は ArtSpec.WORKER）
 const F_IDLE0 := 0
 const F_IDLE1 := 1
 const F_WALK0 := 2       # 2..5
@@ -285,7 +284,9 @@ func _frame() -> int:
 
 
 func _draw() -> void:
-	var snap := ((position / 4.0).round() * 4.0) - position
+	# 絵の1ドットの格子に合わせて描く（絵の細かさは、絵の幅から自動で決まる。data/art_spec.gd）
+	var spec := ArtSpec.WORKER
+	var snap := ArtSpec.snap_offset(position, ArtSpec.dot_px(_sheet, ArtSpec.sheet_units_w(spec)))
 	var lift := Vector2(0, -24) if sleeping else Vector2.ZERO
 	var fr := _frame()
 	if not sleeping:
@@ -295,7 +296,8 @@ func _draw() -> void:
 		draw_rect(Rect2(snap + Vector2(-28, 0), Vector2(56, 4)), c)
 		draw_rect(Rect2(snap + Vector2(-20, 4), Vector2(40, 4)), c)
 	draw_set_transform(snap + lift, 0.0, Vector2(facing, 1.0))
-	draw_texture_rect_region(_sheet, Rect2(-32, -64, 64, 64), Rect2(fr * 16, 0, 16, 16))
+	var cell_px := ArtSpec.px_size(spec["cell"])                     # 画面上の大きさ（基準の大きさ×UNIT_PX。絵の細かさに依存しない）
+	draw_texture_rect_region(_sheet, Rect2(Vector2(-cell_px.x / 2.0, -cell_px.y), cell_px), ArtSpec.frame_src(_sheet, spec, fr))
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	# 採取ポイントを掘っているあいだは、手にした道具が見える
 	if pose == "pick" and ai.res is GatherPoint and not sleeping:

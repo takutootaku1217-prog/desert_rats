@@ -91,6 +91,13 @@ func _run() -> void:
 	await _test_soak()
 
 
+## 画像の大きさ px が、基準の大きさ units の縦横同じ整数倍か（絵の細かさ = その倍率。今は1）
+func _uniform_multiple(px: Vector2, units: Vector2) -> bool:
+	var kx := px.x / units.x
+	var ky := px.y / units.y
+	return absf(kx - ky) < 0.0001 and absf(kx - roundf(kx)) < 0.0001 and kx >= 1.0
+
+
 func _png_size(path: String) -> Vector2i:
 	var bytes := FileAccess.get_file_as_bytes(path)
 	var img := Image.new()
@@ -118,14 +125,14 @@ func _test_tables() -> void:
 	keys.sort()
 	check(order == keys, "画面に並べる順番（TYPE_ORDER）が、部屋の表と過不足なく一致する")
 	# 重ね絵: 全ての（区画, 置ける部屋）に絵があり、区画の大きさに合っている
-	var hull_sz := _png_size("res://assets/base/hull.png")
+	var hull_units := Vector2(ArtSpec.HULL)
 	var art_ok := true
 	var msg := ""
 	var n := 0
 	for slot in Rooms.SLOT_ORDER:
 		var r: Rect2 = Rooms.overlay_rect(slot)
-		var rel: Rect2 = Rect2((r.position - GameData.HULL_POS) / float(Rooms.PX), r.size / float(Rooms.PX))
-		if rel.position.x < 0 or rel.position.y < 0 or rel.end.x > hull_sz.x or rel.end.y > hull_sz.y:
+		var rel: Rect2 = Rect2((r.position - GameData.HULL_POS) / float(Rooms.UNIT), r.size / float(Rooms.UNIT))
+		if rel.position.x < 0 or rel.position.y < 0 or rel.end.x > hull_units.x or rel.end.y > hull_units.y:
 			art_ok = false
 			msg += " 車体からはみ出す:" + slot
 		for t in Rooms.TYPE_ORDER:
@@ -136,7 +143,7 @@ func _test_tables() -> void:
 			if sz.x < 0:
 				art_ok = false
 				msg += " 無い:" + Rooms.overlay_path(slot, t)
-			elif Vector2(sz) * float(Rooms.PX) != r.size:
+			elif not _uniform_multiple(Vector2(sz), Rooms.slot_size(slot)):        # 区画の大きさ（ユニット）の整数倍（絵の細かさは何倍でもよいが、縦横で同じ）
 				art_ok = false
 				msg += " 大きさ違い:" + Rooms.overlay_path(slot, t)
 	check(art_ok, "重ね絵 %d 枚がそろっていて、区画の大きさと一致する%s" % [n, msg])

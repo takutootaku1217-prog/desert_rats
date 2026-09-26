@@ -75,10 +75,12 @@ static func dir() -> String:
 	return DIR % Rooms.STYLE
 
 
-## parts.json（絵を作るときに書き出された、切り出し位置・置き場所・窓の位置）
+## parts.json（絵を作るときに書き出された、切り出し位置・置き場所・窓の位置）。
+## 置き場所・窓の位置などは論理ユニット（data/art_spec.gd）。絵の切り出し（frames）は画像のピクセル。
+## 各絵の "units" は、その画像の基準の大きさ（ユニット）で、画像のドット数 ÷ units が絵の細かさ（今は 1）。
 static func geo() -> Dictionary:
 	if _geo.is_empty() or _geo_style != Rooms.STYLE:
-		var txt := FileAccess.get_file_as_string(dir() + "parts.json")
+		var txt := ArtSpec.read_text(dir() + "parts.json")
 		var parsed = JSON.parse_string(txt)
 		if typeof(parsed) != TYPE_DICTIONARY:
 			push_warning("外装の parts.json を読めません: " + dir())
@@ -100,10 +102,39 @@ static func windows_tex() -> Texture2D:
 	return GameData.tex(dir() + String(geo()["sheets"]["windows"]["file"]))
 
 
-## パーツの切り出し範囲（絵の詰め合わせの中）
+## 読み込み済みの parts.json を捨てる（絵の置き場所を差し替えたとき。ArtSpec.set_root_override）
+static func reload() -> void:
+	_geo = {}
+	_geo_style = ""
+
+
+## 車体（body.png）の細かさ（1ユニットのドット数）。画像の幅 ÷ 基準の幅（parts.json の body の units）。
+static func body_dpu() -> float:
+	return float(body_tex().get_width()) / float(geo()["body"]["units"][0])
+
+
+## 絵の詰め合わせ sheet の細かさ（1ユニットのドット数）。画像の幅 ÷ 基準の幅（parts.json の units）。
+static func sheet_dpu(sheet: String) -> float:
+	return float(sheet_tex(sheet).get_width()) / float(geo()["sheets"][sheet]["units"][0])
+
+
+## パーツの切り出し範囲（絵の詰め合わせの中。画像のピクセル）
 static func frame_of(part: Dictionary) -> Rect2i:
 	var f: Array = geo()["sheets"][part["sheet"]]["frames"][part["id"]]
 	return Rect2i(int(f[0]), int(f[1]), int(f[2]), int(f[3]))
+
+
+## パーツの基準の大きさ（ユニット。画面上は ×ArtSpec.UNIT_PX。絵の細かさに依存しない）
+static func frame_units(part: Dictionary) -> Vector2i:
+	var f := frame_of(part)
+	var d := sheet_dpu(part["sheet"])
+	return Vector2i(int(round(float(f.size.x) / d)), int(round(float(f.size.y) / d)))
+
+
+## 窓の映り込みの絵（windows.png）の1コマの切り出し範囲（画像のピクセル）
+static func window_frame(name: String) -> Rect2:
+	var f: Array = geo()["sheets"]["windows"]["frames"][name]
+	return Rect2(float(f[0]), float(f[1]), float(f[2]), float(f[3]))
 
 
 static func window_rect(slot: String) -> Rect2i:
@@ -116,21 +147,21 @@ static func cab_rect() -> Rect2i:
 	return Rect2i(int(w[0]), int(w[1]), int(w[2]), int(w[3]))
 
 
-## 外装の車体の絵の左上（HULL_POS。内装の断面図と同じ）からの位置（ドット）。slot は "slot" の種類のパーツの区画。
-## fuel_port は、機関室のある区画の壁（なければ搬入口のそば）。
-static func at_of(part: Dictionary, slot: String = "", engine_dot_x := -1.0) -> Vector2i:
+## 外装の車体の絵の左上（HULL_POS。内装の断面図と同じ）からの位置（論理ユニット）。slot は "slot" の種類のパーツの区画。
+## fuel_port は、機関室のある区画の壁（なければ搬入口のそば）。engine_unit_x = 機関室の炉の口のユニット（なければ -1）。
+static func at_of(part: Dictionary, slot: String = "", engine_unit_x := -1.0) -> Vector2i:
 	var g := geo()
-	var f := frame_of(part)
+	var fu := frame_units(part)
 	match String(part.get("kind", "fixed")):
 		"slot":
 			if part["id"] == "roof_vent":
-				return Vector2i(int(g["roof_vent_x"][slot]), int(g["foot_row"]) + 1 - f.size.y)
+				return Vector2i(int(g["roof_vent_x"][slot]), int(g["foot_row"]) + 1 - fu.y)
 			var w := window_rect(slot)
 			var off: Array = g["slot_offsets"][part["id"]]
 			return Vector2i(w.position.x + int(off[0]), w.position.y + int(off[1]))
 		"fuel_port":
-			if engine_dot_x >= 0.0:
-				return Vector2i(int(round(engine_dot_x)) - f.size.x / 2, int(g["fuel_port_row"]))
+			if engine_unit_x >= 0.0:
+				return Vector2i(int(round(engine_unit_x)) - fu.x / 2, int(g["fuel_port_row"]))
 			return Vector2i(int(g["fuel_port_fallback_x"]), int(g["fuel_port_row"]))
 	var a: Array = g["at"][part["id"]]
 	return Vector2i(int(a[0]), int(a[1]))

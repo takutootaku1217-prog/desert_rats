@@ -28,8 +28,16 @@ func _process(delta: float) -> void:
 	queue_redraw()
 
 
+## いま描いている絵の1ドットの大きさ（px）。位置を、その格子に合わせるのに使う（絵の細かさは、絵の幅から自動で決まる）
+func _dot_px() -> float:
+	if item == GameData.Item.CARCASS:
+		var sheet := GameData.tex("res://assets/creatures/%s.png" % species)
+		return ArtSpec.dot_px(sheet, ArtSpec.sheet_units_w(GameData.creature_spec(species)))
+	return ArtSpec.dot_px(GameData.item_tex(item), float(ArtSpec.ITEM.x))
+
+
 func _draw() -> void:
-	var snap := ((position / 4.0).round() * 4.0) - position
+	var snap := ArtSpec.snap_offset(position, _dot_px())
 	# 影
 	draw_rect(Rect2(snap + Vector2(-24, -8), Vector2(48, 8)), Color(0.35, 0.22, 0.1, 0.35))
 	draw_rect(Rect2(snap + Vector2(-16, -12), Vector2(32, 4)), Color(0.35, 0.22, 0.1, 0.25))

@@ -33,22 +33,23 @@ const GATHER_BOOST := 3.0
 ##  - max: 建てられる数  / requires: 必要設備（"" = 手作業）  / station: その設備で製作できるか
 ##  - room / dx: どの部屋（data/rooms.gd の種類）の中に置くか / 置き場所（max 個ぶん）の、部屋の左端からのドット数（設備の中心）。
 ##    設備は部屋の中に建つ。部屋を別の区画へ移すと、設備も一緒に動く（実際の位置は MobileBase.facility_spots）。仲間はそこへ行って作る
-##  - sprite / frame / stride: 絵（見た目は差し替えやすいようにここに集める）。sprite の %d は置き場所の番号。
-##    frame = 1コマの大きさ（ドット）、stride = コマの間隔（横に並べた絵のとき。1枚絵は 0）
+##  - sprite / frame / stride / frames: 絵（見た目は差し替えやすいようにここに集める）。sprite の %d は置き場所の番号。
+##    frame = 1コマの基準の大きさ（ユニット。画面上は ×ArtSpec.UNIT_PX。絵を高精細にしても変えない）、stride = コマの間隔（ユニット。
+##    横に並べた絵のとき。1枚絵は 0）、frames = コマ数。絵の細かさ（1ユニットのドット数）は、絵の幅から自動で決まる（data/art_spec.gd）
 const FACILITIES := {
 	"workbench": {
 		"name": "ワークベンチ", "desc": "手作業では作れない道具・設備をつくる作業台",
 		"cost": {GameData.Item.WOOD: 3, GameData.Item.IRON: 1}, "time": 6.0, "field": GameData.Field.DEV,
 		"max": 1, "requires": "", "station": true,
 		"room": "workshop", "dx": [9.0],
-		"sprite": "res://assets/base/workbench.png", "frame": Vector2i(16, 9), "stride": 18,
+		"sprite": "res://assets/base/workbench.png", "frame": Vector2i(16, 9), "stride": 18, "frames": 3,
 	},
 	"bed": {
 		"name": "ベッド", "desc": "仲間が休める。多いほど同時に休める人数が増える",
 		"cost": {GameData.Item.HIDE: 2, GameData.Item.BONE: 1}, "time": 4.0, "field": GameData.Field.DEV,
 		"max": 3, "requires": "workbench", "station": false,
 		"room": "bedroom", "dx": [9.0, 24.0, 39.0],
-		"sprite": "res://assets/base/bed_%d.png", "frame": Vector2i(14, 9), "stride": 0,
+		"sprite": "res://assets/base/bed_%d.png", "frame": Vector2i(14, 9), "stride": 0, "frames": 1,
 	},
 }
 
@@ -88,6 +89,12 @@ static func room_of(id: String) -> String:
 
 static func sprite_path(id: String, slot: int) -> String:
 	return String(FACILITIES[id]["sprite"]).replace("%d", str(slot))
+
+
+## 絵の切り出しの基準（ArtSpec.frame_src に渡す。コマの大きさ・間隔・コマ数。ユニット）
+static func sprite_spec(id: String) -> Dictionary:
+	var d: Dictionary = FACILITIES[id]
+	return {"cell": d["frame"], "stride": d["stride"], "frames": d["frames"]}
 
 
 ## 建設を「レシピ」にしたもの。加工と同じ仕組み（運搬 → 加工設備／ワークベンチで作業）に流せる。

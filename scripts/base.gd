@@ -41,7 +41,7 @@ var _dust_timer := 0.0
 const WHEEL_X := [296.0, 424.0, 664.0, 792.0]
 const WHEEL_Y := 506.0
 const STACK_X := [664.0, 696.0]
-const HULL_H := 80                       # 車体の絵の高さ（ドット。内装の hull.png と外装の body.png で同じ）
+const HULL_H := ArtSpec.HULL.y           # 車体の高さ（ユニット。内装の断面図と外装の車体で同じ）
 
 
 func _init() -> void:
@@ -322,7 +322,8 @@ func _draw_facilities(off: Vector2) -> void:
 		var slots: Array = built.get(id, [])
 		var pend: int = game.build_pending(id)
 		var fs: Vector2i = d["frame"]
-		var size := Vector2(fs) * GameData.PX
+		var size := ArtSpec.px_size(fs)                                  # 画面上の大きさ（基準の大きさ×UNIT_PX。絵の細かさに依存しない）
+		var spec := FacilityDB.sprite_spec(id)                           # 絵の切り出しの基準（コマの大きさ・間隔・コマ数）
 		var spots: Array = facility_spots(id)                            # 設備を置く部屋がある区画の位置（部屋を移すと追従する）
 		for i in spots.size():
 			var spot: Vector2 = spots[i]
@@ -342,7 +343,7 @@ func _draw_facilities(off: Vector2) -> void:
 				col = Color(1, 1, 1, 0.13)
 				if i - slots.size() < pend:
 					col.a = 0.32 + 0.12 * sin(now / 260.0)
-			draw_texture_rect_region(tex, rect, Rect2(frame * int(d["stride"]), 0, fs.x, fs.y), col)
+			draw_texture_rect_region(tex, rect, ArtSpec.frame_src(tex, spec, frame), col)
 
 
 func _draw() -> void:
@@ -350,18 +351,19 @@ func _draw() -> void:
 	var bob := 0.0                                  # 内装は跳ねない。外装の車体の跳ねは body_bob（BaseExterior が使う）
 	# 車輪（どちらの画面でも同じ。外装の車体は、この上に重ねて描かれる）
 	var wheels := GameData.tex("res://assets/base/wheels.png")
-	var f := int(_wheel_t) % 4
+	var wspec := ArtSpec.WHEELS
+	var wsize := ArtSpec.px_size(wspec["cell"])                     # 画面上の大きさ（絵の細かさに依存しない）
+	var f := int(_wheel_t) % int(wspec["frames"])
 	for wx in WHEEL_X:
-		draw_texture_rect_region(wheels, Rect2(Vector2(wx - 56.0, WHEEL_Y - 56.0 + bob), Vector2(112, 112)),
-				Rect2(f * 30, 0, 28, 28))
+		draw_texture_rect_region(wheels, Rect2(Vector2(wx, WHEEL_Y + bob) - wsize / 2.0, wsize), ArtSpec.frame_src(wheels, wspec, f))
 	if not view_exterior:
 		# 内装: 横から見た断面（車体・部屋・斜路・設備・燃料計）。屋根の上の物は、子の BaseExterior が重ねて描く
 		var hull := GameData.tex("res://assets/base/hull.png")
-		draw_texture_rect(hull, Rect2(GameData.HULL_POS + shake + Vector2(0, bob), Vector2(hull.get_size()) * GameData.PX), false)
+		draw_texture_rect(hull, Rect2(GameData.HULL_POS + shake + Vector2(0, bob), ArtSpec.px_size(ArtSpec.HULL)), false)
 		_draw_rooms(shake + Vector2(0, bob))
 		# 斜路
 		var ramp := GameData.tex("res://assets/base/ramp.png")
-		draw_texture_rect(ramp, Rect2(Vector2(900, 482) + Vector2(0, bob), Vector2(ramp.get_size()) * GameData.PX), false)
+		draw_texture_rect(ramp, Rect2(Vector2(900, 482) + Vector2(0, bob), ArtSpec.px_size(ArtSpec.RAMP)), false)
 		_draw_facilities(shake + Vector2(0, bob))
 		# 燃料計（燃料を入れる場所の上。機関室があればその炉、なければ搬入口）
 		var ex := engine_point().x
@@ -373,10 +375,11 @@ func _draw() -> void:
 		draw_rect(Rect2(gx + 4, gy + 4, 80.0 * r, 4), fc)
 		GameData.draw_text(self, Vector2(ex, gy - 4), "燃料" if has_fuel() else "燃料切れ", 12,
 				Color("fde68a") if has_fuel() else Color("ff8a70"), 90.0)
-	# 煙・砂ぼこり（ドットの格子に合わせた四角）
+	# 煙・砂ぼこり（論理ユニットの格子に合わせた四角。絵ではなく描画で作るので、絵の細かさとは関係がない）
+	var grid := float(ArtSpec.UNIT_PX)
 	for pf in _puffs:
 		var k: float = pf["t"] / pf["life"]
-		var s: float = snappedf(float(pf["s"]) * (1.0 + k * 1.6), 4.0)
-		var p: Vector2 = (pf["p"] as Vector2).snapped(Vector2(4, 4))
+		var s: float = snappedf(float(pf["s"]) * (1.0 + k * 1.6), grid)
+		var p: Vector2 = (pf["p"] as Vector2).snapped(Vector2(grid, grid))
 		var col := Color(0.32, 0.3, 0.3, 0.55 * (1.0 - k)) if pf["smoke"] else Color(0.93, 0.78, 0.5, 0.6 * (1.0 - k))
 		draw_rect(Rect2(p - Vector2(s, s) / 2.0, Vector2(s, s)), col)

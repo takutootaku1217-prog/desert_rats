@@ -46,7 +46,7 @@ func _ready() -> void:
 	gh.add_theme_constant_override("separation", 10)
 	gp.add_child(gh)
 	_weight = IconGauge.new()
-	_weight.setup("weight", GameData.PX)
+	_weight.setup("weight")                        # 基準の大きさは ArtSpec.UI_ICON（絵を高精細にしても画面上の大きさは同じ）
 	gh.add_child(_weight)
 
 

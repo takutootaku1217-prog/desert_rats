@@ -9,8 +9,11 @@
   - wall_parts.png: 壁に付く物（工具かけ・物干し・十字の看板・燃料の口・後ろの荷台）。外から見たときだけ。
   - armor.png: 装甲（後半）。 windows.png: ガラスの上に重ねる映り込み。
   - parts.json: 上の絵の切り出し位置・置き場所・窓の位置。ゲーム（data/exterior.gd）はこれを読む＝絵と位置が食い違わない。
+    置き場所・窓・車輪の位置などは「論理ユニット」（ゲームの基準の長さ。data/art_spec.gd）で書く。絵の切り出し（frames）は画像のピクセル。
+    各絵の "units" は、その画像の基準の大きさ（ユニット）。画像のドット数 ÷ units が絵の細かさ（今は 1）。絵を高精細にするときは、
+    画像を大きくして frames（ピクセル）だけ増やし、units・置き場所（ユニット）は変えない。
 どの絵が、いつ（ゲームがどこまで進んだら）見えるかは、ゲーム側の表 data/exterior.gd。ここでは絵と置き場所だけを決める。
-座標はすべて「車体の絵の左上を原点としたドット」。車体の上端の行は 10（屋根の上の物は行9まで）。"""
+座標はすべて「車体の絵の左上を原点とした論理ユニット」（今は1ユニット=1ドット）。車体の上端の行は 10（屋根の上の物は行9まで）。"""
 import json
 import math
 import os
@@ -602,9 +605,10 @@ def build_all():
            "slot_offsets": {k: list(v) for k, v in SLOT_OFFSETS.items()},
            "roof_vent_x": ROOF_VENT_X, "sheets": {}, "at": {}}
     files["body.png"] = body()
+    geo["body"] = {"file": "body.png", "units": [IW, IH]}
     sh, fr = windows_sheet()
     files["windows.png"] = sh
-    geo["sheets"]["windows"] = {"file": "windows.png", "frames": fr}
+    geo["sheets"]["windows"] = {"file": "windows.png", "units": [sh.w, sh.h], "frames": fr}
     frames = {}
     imgs = []
     for name, fn, x in ROOF_PARTS:
@@ -612,21 +616,21 @@ def build_all():
         imgs.append((name, px))
         geo["at"][name] = [x, ROOF_FOOT_ROW + 1 - px.h]
     files["roof_parts.png"] = _pack(imgs, frames)
-    geo["sheets"]["roof_parts"] = {"file": "roof_parts.png", "frames": frames}
+    geo["sheets"]["roof_parts"] = {"file": "roof_parts.png", "units": [files["roof_parts.png"].w, files["roof_parts.png"].h], "frames": frames}
     frames = {}
     imgs = []
     for name, fn, at in WALL_PARTS:
         imgs.append((name, fn()))
         geo["at"][name] = list(at)
     files["wall_parts.png"] = _pack(imgs, frames)
-    geo["sheets"]["wall_parts"] = {"file": "wall_parts.png", "frames": frames}
+    geo["sheets"]["wall_parts"] = {"file": "wall_parts.png", "units": [files["wall_parts.png"].w, files["wall_parts.png"].h], "frames": frames}
     frames = {}
     imgs = []
     for name, fn, at in ARMOR_PARTS:
         imgs.append((name, fn()))
         geo["at"][name] = list(at)
     files["armor.png"] = _pack(imgs, frames)
-    geo["sheets"]["armor"] = {"file": "armor.png", "frames": frames}
+    geo["sheets"]["armor"] = {"file": "armor.png", "units": [files["armor.png"].w, files["armor.png"].h], "frames": frames}
     return files, geo
 
 

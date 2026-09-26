@@ -87,9 +87,10 @@ func is_moving() -> bool:
 
 
 func _draw() -> void:
-	var snap := ((position / 4.0).round() * 4.0) - position
 	var sz: Vector2 = GameData.CREATURES[species]["size"]
-	draw_rect(Rect2(snap + Vector2(-sz.x * 2.0, -4), Vector2(sz.x * 4.0, 6)), Color(0.35, 0.22, 0.1, 0.3))
+	var sheet := GameData.tex("res://assets/creatures/%s.png" % species)
+	var snap := ArtSpec.snap_offset(position, ArtSpec.dot_px(sheet, ArtSpec.sheet_units_w(GameData.creature_spec(species))))   # 絵のドットの格子に合わせる
+	draw_rect(Rect2(snap + Vector2(-sz.x * GameData.PX / 2.0, -4), Vector2(sz.x * GameData.PX, 6)), Color(0.35, 0.22, 0.1, 0.3))
 	var fr := 2 if _fleeing and int(_t * 6.0) % 3 == 0 else int(_t * (12.0 if _fleeing else 5.0)) % 2
 	var col := Color.WHITE if _flash <= 0.0 else Color(2.0, 2.0, 2.0)
 	GameData.draw_creature(self, species, fr, snap, _facing, false, 1.0, col)

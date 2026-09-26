@@ -15,25 +15,39 @@ extends RefCounted
 ## 加工設備・倉庫・ベッド・ワークベンチも新しい区画へ移る（MobileBase.apply_layout / facility_spots）。
 ## 部屋の変更は、その場で倉庫の材料を使って行う（仲間の作業は要らない。建設のような取り置きもしない）。
 
-const PX := GameData.PX
+## 座標の考え方（data/art_spec.gd）: この表の座標・大きさは、すべて「論理ユニット」（ゲームの基準の長さ。画面上は ×UNIT）で、
+## 絵が何ドットで描かれているか（絵の細かさ）とは関係がない。絵を高精細にしても、この表は変えない。
+##   ワールド座標（画面のpx）… 仲間・加工設備・倉庫の位置。下の processor_pos などが、ユニットから計算して返す。
+##   部屋の中の論理座標 … 区画の左端・床からのユニット（dx・dy）。設備の位置（FacilityDB の "dx"）・ANCHORS がこれ。
+##   絵のドット … 絵の画像のピクセル。描く側（ui・BaseExterior・MobileBase）が、絵ごとの細かさから計算する。
+const UNIT := ArtSpec.UNIT_PX          # 論理ユニット1つ = 画面の何px（ユニット → ワールド座標）
 const STYLE := "desert"        # 見た目の系統。将来サイバーパンクなどを足すときはここを切り替える
 
-## 入れ替え可能な区画。x0..x1 = 部屋の内側の列、top/feet = 部屋の上端行と床の行（hull.png のドット座標）。
+## 入れ替え可能な区画（論理ユニット。車体の左上 GameData.HULL_POS が原点）。x0..x1 = 部屋の内側の列、top/feet = 部屋の上端と床の行。
 ## floor は GameData の階（2=上 1=下）、side は "u"/"l"（部屋の "floors" と対応）。
+## door_x = ハシゴの側（隣の区画へ抜ける）入口の列。今は仲間の経路には使っていない（区画の間は自由に歩ける）が、将来、入口を通る経路にするときの基準。
 const SLOTS := {
-	"u1": {"name": "上階・左", "side": "u", "floor": 2, "x0": 8, "x1": 71, "top": 16, "feet": 40},
-	"u2": {"name": "上階・右", "side": "u", "floor": 2, "x0": 82, "x1": 137, "top": 16, "feet": 40},
-	"l1": {"name": "下階・左", "side": "l", "floor": 1, "x0": 8, "x1": 71, "top": 43, "feet": 72},
-	"l2": {"name": "下階・右", "side": "l", "floor": 1, "x0": 82, "x1": 149, "top": 43, "feet": 72},
+	"u1": {"name": "上階・左", "side": "u", "floor": 2, "x0": 8, "x1": 71, "top": 16, "feet": 40, "door_x": 72},
+	"u2": {"name": "上階・右", "side": "u", "floor": 2, "x0": 82, "x1": 137, "top": 16, "feet": 40, "door_x": 81},
+	"l1": {"name": "下階・左", "side": "l", "floor": 1, "x0": 8, "x1": 71, "top": 43, "feet": 72, "door_x": 72},
+	"l2": {"name": "下階・右", "side": "l", "floor": 1, "x0": 82, "x1": 149, "top": 43, "feet": 72, "door_x": 81},
 }
 const SLOT_ORDER := ["u1", "u2", "l1", "l2"]
 const DEFAULT_LAYOUT := {"u1": "workshop", "u2": "bedroom", "l1": "engine", "l2": "storage"}
 
-## 固定の部屋（表示用）
+## 固定の部屋（入れ替えできない。表示用）。anchors = 部屋の中の決まった位置（車体の左端からのユニット）
 const FIXED := [
 	{"name": "操縦室", "side": "u"},
-	{"name": "搬入口", "side": "l"},
+	{"name": "搬入口", "side": "l", "anchors": {"fuel": 165.0}},        # 機関室がないときの燃料の投入口
 ]
+
+## 部屋の種類ごとの「部屋の中の決まった位置」（区画の左端からのユニット）。加工設備・倉庫・炉の口は、部屋の見た目ではなく、ここで決まる。
+## 別の見た目（高精細・別の系統）の絵に替えても、機能の位置は変わらない。設備（ワークベンチ・ベッド）の位置は FacilityDB の "dx"。
+const ANCHORS := {
+	"workshop": {"processor": 33.0},       # 加工設備（機械の中心）
+	"storage": {"storage": 34.0},          # 倉庫（棚の中心）
+	"engine": {"furnace": 36.0},           # 燃料の投入口（炉の口）
+}
 
 ## 部屋の種類。
 ##  floors: 置ける階（u=上 l=下）  cost: 建てる費用（現行の GameData.Item だけ。倉庫の枠に収まる量）  min_base_level: 必要な拠点レベル
@@ -183,44 +197,59 @@ static func effect_text(rtype: String) -> String:
 
 
 # ------------------------------------------------------------------
-# 位置（ワールド座標）。hull.png の左上 GameData.HULL_POS からのドット座標 × PX
+# 位置（ワールド座標）。車体の左上 GameData.HULL_POS からの論理ユニット × UNIT。絵の細かさとは関係がない
 # ------------------------------------------------------------------
 static func slot_feet_y(slot: String) -> float:
-	return GameData.HULL_POS.y + float(SLOTS[slot]["feet"]) * PX
+	return GameData.HULL_POS.y + float(SLOTS[slot]["feet"]) * UNIT
 
 
-## 区画に重ねる絵の描画範囲（天井の吊り金具のぶん、上に2行広い）
+## 区画に重ねる絵の描画範囲（ワールド座標。天井の吊り金具のぶん、上に2ユニット広い。絵の細かさに依存しない）
 static func overlay_rect(slot: String) -> Rect2:
 	var s: Dictionary = SLOTS[slot]
-	var pos := Vector2(GameData.HULL_POS.x + float(s["x0"]) * PX, GameData.HULL_POS.y + float(s["top"] - 2) * PX)
-	var size := Vector2(float(s["x1"] - s["x0"] + 1), float(s["feet"] - s["top"] + 2)) * PX
-	return Rect2(pos, size)
+	var pos := Vector2(GameData.HULL_POS.x + float(s["x0"]) * UNIT, GameData.HULL_POS.y + float(s["top"] - 2) * UNIT)
+	return Rect2(pos, slot_size(slot) * float(UNIT))
 
 
 static func overlay_path(slot: String, rtype: String) -> String:
 	return "res://assets/base/rooms/%s/room_%s_%s.png" % [STYLE, slot, rtype]
 
 
-## 加工設備を置く位置（加工室の床。機械の中心は区画の左から33ドット）
+## 部屋の中の論理座標 → ワールド座標。dx = 区画の左端からのユニット、dy = 床からのユニット（上が正）。
+static func local_to_world(slot: String, dx: float, dy: float = 0.0) -> Vector2:
+	return Vector2(GameData.HULL_POS.x + (float(SLOTS[slot]["x0"]) + dx) * UNIT, slot_feet_y(slot) - dy * UNIT)
+
+
+## 区画の中の、足元の位置。dx = 区画の左端からのユニット（設備の中心。data/facilities.gd の "dx"）。
+static func floor_pos(slot: String, dx: float) -> Vector2:
+	return local_to_world(slot, dx)
+
+
+## その区画にある部屋の決まった位置（ANCHORS）の、足元のワールド座標。
+static func anchor_pos(slot: String, rtype: String, anchor: String) -> Vector2:
+	return local_to_world(slot, float(ANCHORS[rtype][anchor]))
+
+
+## 加工設備を置く位置（加工室の床。機械の中心）
 static func processor_pos(slot: String) -> Vector2:
-	return Vector2(GameData.HULL_POS.x + float(SLOTS[slot]["x0"] + 33) * PX, slot_feet_y(slot))
+	return anchor_pos(slot, "workshop", "processor")
 
 
-## 倉庫の中心（棚の中心は区画の左から34ドット）
+## 倉庫の中心（棚の中心）
 static func storage_pos(slot: String) -> Vector2:
-	return Vector2(GameData.HULL_POS.x + float(SLOTS[slot]["x0"] + 34) * PX, slot_feet_y(slot))
+	return anchor_pos(slot, "storage", "storage")
 
 
-## 機関室の燃料の投入口（炉の口。区画の左から36ドット）
+## 機関室の燃料の投入口（炉の口）
 static func engine_pos(slot: String) -> Vector2:
-	return Vector2(GameData.HULL_POS.x + float(SLOTS[slot]["x0"] + 36) * PX, slot_feet_y(slot))
+	return anchor_pos(slot, "engine", "furnace")
 
 
 ## 機関室がないときの燃料の投入口（下の階の搬入口の中。搬入口は入れ替えできない固定の部屋）
 static func fallback_fuel_pos() -> Vector2:
-	return Vector2(GameData.HULL_POS.x + 165.0 * PX, GameData.LO_Y)
+	return Vector2(GameData.HULL_POS.x + float(FIXED[1]["anchors"]["fuel"]) * UNIT, GameData.LO_Y)
 
 
-## 区画の中の、足元の位置。dx = 区画の左端からのドット数（設備の中心。data/facilities.gd の "dx"）。
-static func floor_pos(slot: String, dx: float) -> Vector2:
-	return Vector2(GameData.HULL_POS.x + (float(SLOTS[slot]["x0"]) + dx) * PX, slot_feet_y(slot))
+## 区画の大きさ（論理ユニット。幅・高さ）
+static func slot_size(slot: String) -> Vector2:
+	var s: Dictionary = SLOTS[slot]
+	return Vector2(float(s["x1"] - s["x0"] + 1), float(s["feet"] - s["top"] + 2))

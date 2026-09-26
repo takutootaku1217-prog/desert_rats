@@ -88,8 +88,10 @@ func _test_tables() -> void:
 	check(not g.is_empty() and String(g["style"]) == Rooms.STYLE, "parts.json が読め、系統（%s）が部屋の系統と同じ" % Rooms.STYLE)
 	var hull := _image("res://assets/base/hull.png")
 	var body := _image(ExteriorDB.dir() + "body.png")
-	check(body != null and hull != null and body.get_size() == hull.get_size() and body.get_height() == MobileBase.HULL_H,
-			"外装の車体の絵は、内装の断面図と同じ大きさ（%s）" % str(body.get_size() if body != null else "なし"))
+	var d := int(ExteriorDB.body_dpu())                          # 外装の車体の細かさ（1ユニットのドット数。今は1）
+	check(body != null and hull != null and Vector2(body.get_size()) == Vector2(ArtSpec.HULL) * float(d)
+			and Vector2(hull.get_size()) / Vector2(ArtSpec.HULL) == Vector2(hull.get_size()) / Vector2(ArtSpec.HULL) and body.get_height() == MobileBase.HULL_H * d,
+			"外装の車体の絵は、基準の大きさ（%s ユニット）の整数倍（細かさ %d）で、内装の断面図と同じ大きさの基準（%s）" % [str(ArtSpec.HULL), d, str(body.get_size() if body != null else "なし")])
 	var ids := {}
 	var layers_ok := true
 	var frames_ok := true
@@ -140,22 +142,22 @@ func _test_tables() -> void:
 		var sl: Dictionary = Rooms.SLOTS[s]
 		if w.position.x < sl["x0"] or w.end.x > sl["x1"] + 1 or w.position.y < sl["top"] or w.end.y > sl["feet"]:
 			win_ok = false
-		for y in w.size.y:
-			for x in w.size.x:
-				if body.get_pixel(w.position.x + x, w.position.y + y).a > 0.0:
+		for y in w.size.y * d:
+			for x in w.size.x * d:
+				if body.get_pixel(w.position.x * d + x, w.position.y * d + y).a > 0.0:
 					holes_ok = false
 	check(win_ok, "窓は、4つの区画それぞれの内側にある")
 	check(holes_ok, "窓の場所は、車体の絵で透明な穴になっている（ガラスの色が見える）")
 	var cab := ExteriorDB.cab_rect()
-	check(body.get_pixel(cab.position.x + 6, cab.position.y + 4).a == 0.0, "運転席の窓も穴になっている")
+	check(body.get_pixel((cab.position.x + 6) * d, (cab.position.y + 4) * d).a == 0.0, "運転席の窓も穴になっている")
 	var arches_ok := true
 	for cx in g["arches"]:
-		if body.get_pixel(int(cx), 78).a > 0.0 or body.get_pixel(int(cx), 70).a > 0.0:
+		if body.get_pixel(int(cx) * d, 78 * d).a > 0.0 or body.get_pixel(int(cx) * d, 70 * d).a > 0.0:
 			arches_ok = false
 	check(arches_ok, "車輪の覆い（穴）が、車輪の位置（%s）にある" % str(g["arches"]))
 	var wheel_ok := true
 	for i in MobileBase.WHEEL_X.size():
-		if absf((MobileBase.WHEEL_X[i] - float(GameData.HULL_POS.x)) / 4.0 - float(g["arches"][i])) > 0.5:
+		if absf((MobileBase.WHEEL_X[i] - float(GameData.HULL_POS.x)) / float(ArtSpec.UNIT_PX) - float(g["arches"][i])) > 0.5:
 			wheel_ok = false
 	check(wheel_ok, "覆いの位置が、車輪（MobileBase.WHEEL_X）と一致する")
 	for rt in Rooms.TYPES:
@@ -166,16 +168,17 @@ func _test_tables() -> void:
 	for p in ExteriorDB.PARTS:
 		if p["layer"] != "roof" or String(p.get("kind", "fixed")) != "fixed":
 			continue
-		var f := ExteriorDB.frame_of(p)
+		var fu := ExteriorDB.frame_units(p)                                        # 基準の大きさ（ユニット）
 		var at := ExteriorDB.at_of(p)
-		if at.y + f.size.y > int(g["foot_row"]) + 1:
+		if at.y + fu.y > int(g["foot_row"]) + 1:
 			roof_ok = false
-		if float(GameData.HULL_POS.y) + float(at.y) * 4.0 < 168.0:
+		if float(GameData.HULL_POS.y) + float(at.y) * float(ArtSpec.UNIT_PX) < 168.0:
 			top_ok = false
 	check(roof_ok, "屋根の上の物は、車体の上端の行の上に乗っている")
 	check(top_ok, "屋根の上の物は、画面上の状態表示（下端 y=165）にかからない")
 	var burned := 0
-	for y in 10:
+	var hd := int(float(hull.get_width()) / float(ArtSpec.HULL.x))              # 断面図の細かさ
+	for y in 10 * hd:
 		for x in hull.get_width():
 			if hull.get_pixel(x, y).a > 0.0:
 				burned += 1
@@ -184,11 +187,11 @@ func _test_tables() -> void:
 	for p in ExteriorDB.PARTS:
 		if p["id"] == "stack_a":
 			stack_a = p
-	var sf := ExteriorDB.frame_of(stack_a)
-	var sx: float = float(GameData.HULL_POS.x) + (float(ExteriorDB.at_of(stack_a).x) + float(sf.size.x) / 2.0) * 4.0
+	var sf := ExteriorDB.frame_units(stack_a)
+	var sx: float = float(GameData.HULL_POS.x) + (float(ExteriorDB.at_of(stack_a).x) + float(sf.x) / 2.0) * float(ArtSpec.UNIT_PX)
 	check(absf(sx - (float(MobileBase.STACK_X[0]) + 4.0)) <= 4.0, "排気管の位置が、煙が出る位置（MobileBase.STACK_X）と合っている（%.0f）" % sx)
 	var rr := ExteriorDB.at_of({"id": "rear_rack", "sheet": "wall_parts", "layer": "wall"})
-	check(float(GameData.HULL_POS.x) + float(rr.x) * 4.0 >= 0.0, "後ろの荷台は画面の内側に収まる")
+	check(float(GameData.HULL_POS.x) + float(rr.x) * float(ArtSpec.UNIT_PX) >= 0.0, "後ろの荷台は画面の内側に収まる")
 
 
 # ---------------------------------------------------------------- 最初の状態

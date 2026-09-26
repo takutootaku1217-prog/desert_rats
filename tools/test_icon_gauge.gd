@@ -197,10 +197,10 @@ func _test_colors() -> void:
 # ---------------------------------------------------------------- 部品の見た目
 func _test_gauge() -> void:
 	print("-- アイコンゲージの部品（充填数・色・数字の位置）")
-	var g := IconGauge.new().setup("weight", 4)
+	var g := IconGauge.new().setup("weight")
 	root.add_child(g)
 	await process_frame
-	check(g.custom_minimum_size == Vector2(64, 64), "ドット1つ＝画面4px（1px=4px）で 64x64")
+	check(g.custom_minimum_size == Vector2(64, 64) and g.display_size == ArtSpec.px_size(ArtSpec.UI_ICON), "画面上の大きさは、基準の大きさ（16ユニット）× 4px で 64x64（絵のドット数に依存しない）")
 	var total: int = g.fill_dots().size()
 	var read := func() -> Dictionary:
 		var img: Image = g.interior_image()

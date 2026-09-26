@@ -7,7 +7,7 @@ var game
 var scroll_x := 0.0
 
 const PX := GameData.PX
-## [ファイル名, 画像を置く行(ドット単位), スクロール倍率]
+## [ファイル名, 画像を置く行(ユニット単位。画面上は ×PX), スクロール倍率]。背景の1枚の基準の幅は ArtSpec.BACKGROUND_W（画面幅ぴったり）。
 const LAYERS := [
 	["sky", 0, 0.0],
 	["clouds", 20, 0.04],
@@ -31,9 +31,10 @@ func _process(delta: float) -> void:
 func _draw() -> void:
 	for l in LAYERS:
 		var t := GameData.tex("res://assets/environment/%s.png" % l[0])
-		var w := float(t.get_width() * PX)
-		var h := float(t.get_height() * PX)
-		var off := floorf(fposmod(scroll_x * float(l[2]), w) / PX) * PX   # ドットの格子に合わせる
+		var dot := ArtSpec.dot_px(t, float(ArtSpec.BACKGROUND_W))         # この絵の1ドットの大きさ（px）。細かい絵ほど小さい
+		var w := float(t.get_width()) * dot                              # 画面上の大きさ（絵の細かさに依存しない）
+		var h := float(t.get_height()) * dot
+		var off := floorf(fposmod(scroll_x * float(l[2]), w) / dot) * dot   # 絵のドットの格子に合わせる
 		var y := float(l[1] * PX)
 		draw_texture_rect(t, Rect2(-off, y, w, h), false)
 		if off > 0.0:

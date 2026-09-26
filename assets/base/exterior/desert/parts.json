@@ -92,6 +92,13 @@
    1
   ]
  },
+ "body": {
+  "file": "body.png",
+  "units": [
+   184,
+   80
+  ]
+ },
  "cab_side": [
   144,
   18,
@@ -127,7 +134,11 @@
      27,
      21
     ]
-   }
+   },
+   "units": [
+    41,
+    25
+   ]
   },
   "roof_parts": {
    "file": "roof_parts.png",
@@ -216,7 +227,11 @@
      18,
      9
     ]
-   }
+   },
+   "units": [
+    401,
+    20
+   ]
   },
   "wall_parts": {
    "file": "wall_parts.png",
@@ -251,7 +266,11 @@
      16,
      12
     ]
-   }
+   },
+   "units": [
+    76,
+    31
+   ]
   },
   "windows": {
    "file": "windows.png",
@@ -274,7 +293,11 @@
      18,
      9
     ]
-   }
+   },
+   "units": [
+    71,
+    16
+   ]
   }
  },
  "slot_offsets": {
