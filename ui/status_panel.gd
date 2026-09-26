@@ -6,13 +6,14 @@ extends CanvasLayer
 var game
 var _head: Label
 var _stock: Label
-var _cargo: Label
+var _weight: IconGauge      # 積載重量。重りのアイコンそのものがゲージ（ui/icon_gauge.gd）
 var _proc: Label
 var _totals: Label
 var _bars := {}        # key -> ProgressBar
 var _nums := {}        # key -> Label
 
 const W := 272.0
+const GAUGE_Y := 404.0      # アイコンゲージの枠の位置（右のボタン「建設 (B)」の下）
 
 
 func _ready() -> void:
@@ -31,12 +32,22 @@ func _ready() -> void:
 		v.add_child(_bar_row(spec[0], spec[1]))
 	_stock = UIKit.lbl("", 13, Color("fff7dc"))
 	v.add_child(_stock)
-	_cargo = UIKit.lbl("", 12, Color("cfe6ff"))       # 積載量（素材棚・加工品置き場）
-	v.add_child(_cargo)
 	_proc = UIKit.lbl("", 13, Color("fde68a"))
 	v.add_child(_proc)
 	_totals = UIKit.lbl("", 12, UIKit.C_DIM)
 	v.add_child(_totals)
+	# 拠点のアイコンゲージ（状態の下の小さな枠）。アイコンそのものがゲージで、数字はアイコンの内側。
+	# 耐久・燃料などのゲージも、ここへ横に並べていく想定（今は積載重量だけ）。
+	var gp := PanelContainer.new()
+	gp.add_theme_stylebox_override("panel", UIKit.box(Color("1b1e24", 0.92), Color("636b7a"), 4, 8))
+	gp.position = Vector2(1000, GAUGE_Y)
+	add_child(gp)
+	var gh := HBoxContainer.new()
+	gh.add_theme_constant_override("separation", 10)
+	gp.add_child(gh)
+	_weight = IconGauge.new()
+	_weight.setup("weight", GameData.PX)
+	gh.add_child(_weight)
 
 
 func _bar_row(key: String, name: String) -> Control:
@@ -97,15 +108,15 @@ func _process(_d: float) -> void:
 			_n(st, GameData.Item.FAT), _n(st, GameData.Item.WOOD), _n(st, GameData.Item.STONE),
 			_n(st, GameData.Item.IRON_ORE), _n(st, GameData.Item.IRON)]
 	_stock.add_theme_color_override("font_color", Color("ff9a86") if game.hungry else Color("fff7dc"))
-	# 積載量: 区画ごとの「置いてある量／積載量」。8割を超えると橙、枠がすべて埋まると赤。捨てた数も出す
-	var raw_used: int = st.used_in(CargoDB.Bay.RAW)
-	var prod_used: int = st.used_in(CargoDB.Bay.PRODUCT)
-	var raw_cap: int = st.capacity_of(CargoDB.Bay.RAW)
-	var prod_cap: int = st.capacity_of(CargoDB.Bay.PRODUCT)
-	_cargo.text = "積載 素材棚 %d/%d ・ 加工品 %d/%d%s" % [raw_used, raw_cap, prod_used, prod_cap,
-			(" ・ 捨てた%d" % game.total_wasted) if game.total_wasted > 0 else ""]
-	var worst := maxf(float(raw_used) / float(maxi(1, raw_cap)), float(prod_used) / float(maxi(1, prod_cap)))
-	_cargo.add_theme_color_override("font_color", Color("ff8a70") if worst >= 0.999 else (Color("ffc266") if worst >= CargoDB.WARN_RATIO else Color("cfe6ff")))
+	# 積載重量: 重りのアイコンが下から埋まり、増えるほど色が濃くなる。数字は正確な重量（アイコンの内側）。
+	# 区画ごとの内訳（素材棚・加工品置き場）と捨てた数は、アイコンにマウスを載せると出る。
+	_weight.set_value(st.current_weight(), st.max_weight(), str(st.current_weight()))
+	var tip := "積載重量 %d / %d" % [st.current_weight(), st.max_weight()]
+	for bay in CargoDB.BAY_NAMES:
+		tip += "\n　%s %d / %d" % [CargoDB.BAY_NAMES[bay], st.used_in(bay), st.capacity_of(bay)]
+	if game.total_wasted > 0:
+		tip += "\n　捨てた %d 個" % game.total_wasted
+	_weight.tooltip_text = tip
 	var p = game.processor
 	var ptxt := "待機中"
 	if not p.current.is_empty():

@@ -6,6 +6,13 @@ const C_TEXT := Color("ffe9b0")
 const C_DIM := Color("9aa3b2")
 const C_ACCENT := Color("f2c14e")
 
+## アイコンゲージ（ui/icon_gauge.gd）の色の表。[[割合の上限, 色], ...]（小さい順。割合 ≦ 上限 の最初の色を使う）。
+## ここを書き換えるだけで、ゲージの色の設計を変えられる（tools/art_ui.py の確認用の色も同じ値）。
+## 積載重量: 増えるほど濃くなる（0〜25% 薄い → 25〜50% 少し濃い → 50〜75% 中間 → 75〜90% 濃い → 90〜100% 非常に濃い）。
+const GAUGE_STAGES_LOAD := [
+	[0.25, Color("e6dcb4")], [0.50, Color("e3c072")], [0.75, Color("d99a3a")], [0.90, Color("c2691f")], [1.01, Color("9c3512")],
+]
+
 
 static func box(bg: Color, edge: Color, border: int = 2, margin: int = 6) -> StyleBoxFlat:
 	var sb := StyleBoxFlat.new()

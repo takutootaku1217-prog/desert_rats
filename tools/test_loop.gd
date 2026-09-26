@@ -306,7 +306,7 @@ func _one(n: int, minutes: float, scale: float, seed_base: int, events_on: bool,
 	paused = false
 	# ---- 画面の数字と実際の個数が合っているか ----
 	main.status._process(0.0)
-	var text: String = main.status._stock.text + "\n" + main.status._cargo.text
+	var text: String = main.status._stock.text + "\n" + main.status._weight.tooltip_text     # 素材棚・加工品置き場の内訳は、重りのアイコンのツールチップ
 	var rx := RegEx.new()
 	var labels := [["食料", GameData.Item.FOOD], ["燃料", GameData.Item.FUEL], ["修理資材", GameData.Item.REPAIR_KIT], ["肉", GameData.Item.MEAT],
 			["皮", GameData.Item.HIDE], ["骨", GameData.Item.BONE], ["脂", GameData.Item.FAT], ["木", GameData.Item.WOOD], ["石", GameData.Item.STONE],
@@ -318,12 +318,17 @@ func _one(n: int, minutes: float, scale: float, seed_base: int, events_on: bool,
 		if m == null or int(m.get_string(1)) != st.count_of(lb[1]):
 			ui_ok = false
 			errors.append("右上の表示（%s %s）が倉庫の個数（%d）と違う" % [lb[0], m.get_string(1) if m != null else "なし", st.count_of(lb[1])])
-	rx.compile("素材棚 (\\d+)/(\\d+)")
+	# 積載重量のアイコンゲージ: 数字（アイコンの内側）が実際の積載重量、充填率が実際の積載率と合っているか
+	var wg: IconGauge = main.status._weight
+	if wg.text != str(st.current_weight()) or absf(wg.ratio - st.weight_ratio()) > 0.001:
+		ui_ok = false
+		errors.append("積載重量のアイコン（数字 %s・充填 %.2f）が、実際の積載重量（%d・%.2f）と違う" % [wg.text, wg.ratio, st.current_weight(), st.weight_ratio()])
+	rx.compile("素材棚 (\\d+) / (\\d+)")
 	var m2 := rx.search(text)
 	if m2 == null or int(m2.get_string(1)) != st.used_in(CargoDB.Bay.RAW) or int(m2.get_string(2)) != st.capacity_of(CargoDB.Bay.RAW):
 		ui_ok = false
 		errors.append("右上の素材棚の表示が、実際の積載量と違う")
-	rx.compile("加工品 (\\d+)/(\\d+)")
+	rx.compile("加工品置き場 (\\d+) / (\\d+)")
 	var m3 := rx.search(text)
 	if m3 == null or int(m3.get_string(1)) != st.used_in(CargoDB.Bay.PRODUCT) or int(m3.get_string(2)) != st.capacity_of(CargoDB.Bay.PRODUCT):
 		ui_ok = false

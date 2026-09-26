@@ -43,6 +43,29 @@ func butcher(species: String, source: String = Inventory.SOURCE_HUNT) -> void:
 	total_butchered += 1
 
 
+# ---------------------------------------------------------------- 積載重量（画面のアイコンゲージが読む）
+## 積載重量 = いま置いてある量の合計（素材ごとの大きさ CargoDB.SIZES で数える。今は全部1なので個数と同じ）。
+## 素材棚・加工品置き場の2区画の合計。重さの計算そのものは used_in / capacity_of のまま（UIのための窓口だけ）。
+func current_weight() -> int:
+	var n := 0
+	for bay in CargoDB.BAY_NAMES:
+		n += used_in(bay)
+	return n
+
+
+## 積載できる重量の合計（区画ごとの積載量の合計。拠点の強化で増えた分 capacity_bonus を含む）
+func max_weight() -> int:
+	var n := 0
+	for bay in CargoDB.BAY_NAMES:
+		n += capacity_of(bay)
+	return n
+
+
+## 積載率 0〜1（画面のアイコンゲージの充填に使う）
+func weight_ratio() -> float:
+	return clampf(float(current_weight()) / float(maxi(1, max_weight())), 0.0, 1.0)
+
+
 # ---------------------------------------------------------------- 積載量
 func capacity_of(bay: int) -> int:
 	return int(CargoDB.CAPACITY[bay]) + int(capacity_bonus.get(bay, 0))

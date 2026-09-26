@@ -293,7 +293,8 @@ func _run() -> void:
 	pol.toggle()
 	pol._page = 0
 	main.status._process(0.0)
-	check(main.status._cargo.text.begins_with("積載 素材棚"), "右上の状態に積載量が出る: " + main.status._cargo.text)
+	check(main.status._weight.text == str(st.current_weight()) and main.status._weight.tooltip_text.contains("素材棚"),
+			"積載重量のアイコンゲージに重量が出る（数字は絵の内側）: " + main.status._weight.text)
 	st.add_item(GameData.Item.WOOD, 99)
 	main.status._process(0.0)
 	check(main.status._stock.text.contains("木%s満" % 8), "枠がいっぱいの素材に「満」が付く: " + main.status._stock.text.replace("\n", " / "))
