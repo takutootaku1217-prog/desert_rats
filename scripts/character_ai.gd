@@ -207,7 +207,7 @@ func tick(delta: float) -> void:
 					haul_recipe = {}
 					_set_state(State.SEARCH)
 		State.HAUL_MOVE:
-			ch.target = game.processor.access_point() + ch.slot_offset
+			ch.target = game.processor.station_point(haul_recipe) + ch.slot_offset   # そのレシピの設備（加工設備／ワークベンチ）へ
 			if ch.move_to_target(delta):
 				game.processor.receive(haul_recipe)
 				haul_recipe = {}
@@ -240,7 +240,7 @@ func tick(delta: float) -> void:
 
 		# ---- 加工 ----
 		State.MOVE_TO_MACHINE:
-			ch.target = game.processor.access_point() + ch.slot_offset
+			ch.target = game.processor.work_point() + ch.slot_offset      # 次に作る物の設備（加工設備／ワークベンチ）へ
 			if ch.move_to_target(delta):
 				_set_state(State.PROCESS)
 		State.PROCESS:
@@ -250,8 +250,10 @@ func tick(delta: float) -> void:
 				p.worker = null
 				_go_storage()
 			elif not p.current.is_empty() or (not p.orders.is_empty() and not p.only_blocked()):
-				p.work(delta, func(f): return ch.field_mult(f))
-				ch.pose = "work"
+				ch.target = p.work_point() + ch.slot_offset               # 設備が変わったら（加工設備 ⇄ ワークベンチ）そこへ歩く
+				if ch.move_to_target(delta):
+					p.work(delta, func(f): return ch.field_mult(f))
+					ch.pose = "work"
 			else:
 				p.worker = null
 				_set_state(State.SEARCH)
@@ -526,6 +528,8 @@ func _try_start(job: int) -> bool:
 			var r: Dictionary = game.choose_recipe()
 			if r.is_empty():
 				return false
+			if r.has("build"):
+				game.claim_build(r["build"])       # 建設の依頼を待ちから外す（運搬をやめたら Processor.cancel_reservation が戻す）
 			haul_recipe = r
 			p.reserve(r)
 			_set_state(State.HAUL_TAKE)

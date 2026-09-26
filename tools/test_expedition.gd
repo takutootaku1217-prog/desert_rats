@@ -20,6 +20,7 @@ func _initialize() -> void:
 	seed(20260925)
 	if OS.get_cmdline_user_args().has("nopoints"):
 		GameData.ENABLE_GATHER_POINTS = false        # 従来の「落ちている物」方式と比べるとき（-- nopoints）
+	FacilityDB.start_all = true      # 設備は最初から全部ある状態で確かめる（設備の建設は test_build.gd）
 	main = load("res://scenes/main.tscn").instantiate()
 	root.add_child(main)
 	await process_frame

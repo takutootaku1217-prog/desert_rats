@@ -17,6 +17,7 @@ func _initialize() -> void:
 
 func _one(n: int, limited: bool, minutes: float, scale: float) -> void:
 	seed(2000 + n)
+	FacilityDB.start_all = true      # 設備は最初から全部ある状態で確かめる（設備の建設は test_build.gd）
 	var main = load("res://scenes/main.tscn").instantiate()
 	root.add_child(main)
 	await process_frame

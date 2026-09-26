@@ -23,6 +23,7 @@ var director: Director            # 旅の出来事（天候・トラブル・�
 var event_hud: EventHUD
 var expedition: Expedition        # 遺跡の探索（調査隊）。scripts/expedition.gd
 var expedition_ui: ExpeditionUI
+var build_ui: BuildUI             # 建設の画面（Bキー）。ui/build_ui.gd
 
 # ---- プレイヤーの方針（運営の方針画面で変更する） ----
 var recipe_priority := GameData.DEFAULT_RECIPE_PRIORITY.duplicate()   # レシピid -> ★0〜5
@@ -39,6 +40,8 @@ var total_hunted := 0
 var total_eaten := 0
 var tool_auto := true             # 採取の道具を、倉庫から自動で仲間に持たせる（方針の「道具」で切り替え）
 var _tool_clock := 0.0
+var build_queue: Array = []       # 建設の依頼（設備 id。待ち）。材料と必要設備がそろうと、仲間が材料を運んで作る（data/facilities.gd）
+var total_built := 0              # 建設した設備の数（確認用）
 var total_wasted := 0             # 倉庫に入りきらず捨てた数（積載量。data/cargo.gd）
 var _waste_note_at := -999.0      # 最後に「捨てた」を記録へ出した時刻（記録が増えすぎないように）
 var last_carcass = null           # 直前に倒した生物の獲物（倒した仲間がそのまま運ぶ）
@@ -90,12 +93,17 @@ func _ready() -> void:
 	storage = base.storage
 	storage.overflowed.connect(_on_overflow)
 	processor = base.processor
+	if FacilityDB.start_all:
+		base.grant_all()            # 自己診断・放置比較ツール用。ゲームは設備なし（手作業）から始まる
 	# 最初の蓄え（すぐに詰まないよう、少しだけ持って出発する）
 	storage.add_item(GameData.Item.FOOD, 8)
 	storage.add_item(GameData.Item.FUEL, 2)
 	storage.add_item(GameData.Item.REPAIR_KIT, 2)
 	storage.add_item(GameData.Item.HAMMER, 1)      # 採取の道具の初期セット（あとは加工で作る）
 	storage.add_item(GameData.Item.AXE, 1)
+	if not FacilityDB.start_all:                   # 設備なしで始めるとき: 最初のワークベンチに要る鉄（data/facilities.gd）
+		for it in FacilityDB.START_STOCK:
+			storage.add_item(it, FacilityDB.START_STOCK[it])
 
 	resources_root = Node2D.new()
 	resources_root.name = "Resources"
@@ -144,6 +152,9 @@ func _ready() -> void:
 	expedition_ui = ExpeditionUI.new()
 	expedition_ui.game = self
 	add_child(expedition_ui)
+	build_ui = BuildUI.new()
+	build_ui.game = self
+	add_child(build_ui)
 
 
 func _process(delta: float) -> void:
@@ -211,7 +222,10 @@ func _eat(delta: float) -> void:
 func gather_weight(item: int) -> float:
 	if item == GameData.Item.CARCASS:
 		return 5.0
-	return float(gather_policy.get(item, 3))
+	var w := float(gather_policy.get(item, 3))
+	if w > 0.0 and build_short_of(item):
+		w *= FacilityDB.GATHER_BOOST               # 建設の依頼に足りない材料は、優先して集める
+	return w
 
 
 func hunt_allowed(species: String) -> bool:
@@ -361,9 +375,139 @@ func _tools_need_iron() -> bool:
 	for r in GameData.RECIPES:
 		if not (r["out"] in GameData.TOOL_ITEMS) or not r["in"].has(GameData.Item.IRON):
 			continue
+		if not has_facility(GameData.recipe_station(r)):
+			continue                                                     # 必要設備がまだない道具は、鉄があっても作れない
 		if recipe_priority.get(r["id"], 0) > 0 and iron_have < int(r["in"][GameData.Item.IRON]) and tool_wanted(r["out"]):
 			return true
 	return false
+
+
+# ---------------------------------------------------------------- 建設・必要設備（data/facilities.gd）
+## 流れ: プレイヤーが建設の画面で依頼 → build_queue（待ち）→ 材料と必要設備がそろうと、仲間が材料を運んで作る
+## （加工と同じ仕組み。choose_recipe が建設のレシピを最優先で返す）→ 完成すると設備が拠点にできる（finish_build）。
+## 待っている間は、その材料を、ほかの加工に使わせない（取り置き）。
+func has_facility(id: String) -> bool:
+	return base.has_facility(id)
+
+
+## 設備を建てる依頼の数（待ち ＋ 運搬中・作業中）。建てすぎないための計算に使う。
+func build_pending(id: String) -> int:
+	return build_queue.count(id) + processor.pending_build(id)
+
+
+## その設備の必要設備がそろっているか（建てられる状態か）
+func facility_unlocked(id: String) -> bool:
+	return has_facility(FacilityDB.def(id)["requires"])
+
+
+## 建設の依頼を出せない理由（出せるなら ""）
+func build_blocked_reason(id: String) -> String:
+	var d: Dictionary = FacilityDB.def(id)
+	if not facility_unlocked(id):
+		return "%sが必要" % FacilityDB.name_of(d["requires"])
+	if base.facility_count(id) >= int(d["max"]):
+		return "完成"
+	if base.facility_count(id) + build_pending(id) >= int(d["max"]):
+		return "建設の依頼中"
+	return ""
+
+
+## 建設を依頼する。出せたら true。
+func request_build(id: String) -> bool:
+	if build_blocked_reason(id) != "":
+		return false
+	build_queue.append(id)
+	return true
+
+
+## 待ちの建設の依頼を1つ取り消す（材料を取りに向かった後は取り消せない）
+func cancel_build(id: String) -> bool:
+	var i := build_queue.rfind(id)
+	if i < 0:
+		return false
+	build_queue.remove_at(i)
+	return true
+
+
+## 依頼を仲間が引き受けた（材料を取りに向かう）。待ちから外す。
+func claim_build(id: String) -> void:
+	var i := build_queue.find(id)
+	if i >= 0:
+		build_queue.remove_at(i)
+
+
+## 運搬をやめた（Processor.cancel_reservation）。依頼を待ちの先頭に戻す。
+func requeue_build(id: String) -> void:
+	build_queue.push_front(id)
+
+
+## 建設が終わった（Processor.work）。設備が拠点にできて、必要設備にしていた製作物・設備が作れるようになる。
+func finish_build(id: String) -> void:
+	if base.add_facility(id) < 0:
+		return
+	total_built += 1
+	director.note("%sができた" % FacilityDB.name_of(id))
+
+
+## 材料と必要設備がそろっていて、いま始められる建設のレシピ（なければ空）。待ちの先頭から順に。
+func _next_build_recipe() -> Dictionary:
+	for id in build_queue:
+		var d: Dictionary = FacilityDB.def(id)
+		if has_facility(d["requires"]) and storage.has_set(d["cost"]):
+			return FacilityDB.recipe_of(id)
+	return {}
+
+
+## 建設の依頼のために取っておく材料 {Item: 個数}（待ちの依頼と、材料を取りに向かっている依頼のぶん。倉庫にある量まで）。
+## 取り置きがないと、材料が集まるそばから薪や修理部品に使われて、いつまでも建てられない。
+func reserved_for_builds() -> Dictionary:
+	var need := {}
+	var costs: Array = []
+	for id in build_queue:
+		costs.append(FacilityDB.def(id)["cost"])
+	for w in workers:
+		if w.ai.state == CharacterAI.State.HAUL_TAKE and w.ai.haul_recipe.has("build"):
+			costs.append(w.ai.haul_recipe["in"])                 # まだ倉庫にあって、これから取りに行く材料
+	for c in costs:
+		for it in c:
+			need[it] = int(need.get(it, 0)) + int(c[it])
+	var res := {}
+	for it in need:
+		res[it] = mini(int(need[it]), storage.count_of(it))
+	return res
+
+
+## 建設の取り置きを避けて、レシピ r の材料が取れるか。燃料の在庫が0でタンクも尽きかけているときだけは、
+## 拠点が止まらないよう、取り置きに構わず燃料を作る（薪＝木材は建設の材料と重なるため）。
+func _spares_for(r: Dictionary, reserved: Dictionary) -> bool:
+	if reserved.is_empty():
+		return true
+	if r["out"] == GameData.Item.FUEL and storage.count_of(GameData.Item.FUEL) == 0 and base.fuel < 30.0:
+		return true
+	for it in r["in"]:
+		if storage.count_of(it) - int(reserved.get(it, 0)) < int(r["in"][it]):
+			return false
+	return true
+
+
+## 建設の依頼の材料で、まだ足りない物か（回収の優先度を上げる）。鉄は鉄鉱石を精錬して作るので、鉄鉱石が1個もないときに足りない扱い。
+func build_short_of(item: int) -> bool:
+	if build_queue.is_empty():
+		return false
+	if item == GameData.Item.IRON_ORE:
+		return _builds_need_iron() and storage.count_of(GameData.Item.IRON_ORE) == 0
+	var need := 0
+	for id in build_queue:
+		need += int(FacilityDB.def(id)["cost"].get(item, 0))
+	return need > storage.count_of(item)
+
+
+## 建設の依頼の材料に鉄があり、倉庫と加工中の鉄を足しても足りないか（あれば精錬を優先する。道具の場合と同じ理由）
+func _builds_need_iron() -> bool:
+	var need := 0
+	for id in build_queue:
+		need += int(FacilityDB.def(id)["cost"].get(GameData.Item.IRON, 0))
+	return need > storage.count_of(GameData.Item.IRON) + processor.pending_of(GameData.Item.IRON)
 
 
 ## 倉庫に入りきらず捨てたとき（記録には、他の出来事を押し出さないよう、60秒に1回だけ出す）
@@ -377,19 +521,28 @@ func _on_overflow(item: int, amount: int) -> void:
 
 ## 加工の方針に従って、次に作るレシピを選ぶ（材料が揃っていて、作り置きが足りないもの）。
 ## ★が高いものから。同じ★なら、在庫の少ない加工品を優先する。
+## プレイヤーが依頼した建設は、方針より先（材料と必要設備がそろっていれば）。必要設備（recipe の station）がまだない物は選ばない。
+## 選ぶだけで何も変えない（建設の依頼を待ちから外すのは、仲間が引き受けたとき claim_build）。
 func choose_recipe() -> Dictionary:
+	var build := _next_build_recipe()
+	if not build.is_empty():
+		return build
+	var reserved := reserved_for_builds()
 	var best := {}
 	var best_key := -1.0
-	# 道具に使う鉄が足りないときは精錬を優先する。ただし食料に余裕があるときだけ（調理が後回しになって空腹になるのを防ぐ）
-	var smelt_boost := not hungry and storage.count_of(GameData.Item.FOOD) >= GameData.TOOL_IRON_FOOD_MIN and _tools_need_iron()
+	# 道具・建設に使う鉄が足りないときは精錬を優先する。ただし食料に余裕があるときだけ（調理が後回しになって空腹になるのを防ぐ）
+	var smelt_boost := not hungry and storage.count_of(GameData.Item.FOOD) >= GameData.TOOL_IRON_FOOD_MIN \
+			and (_builds_need_iron() or _tools_need_iron())
 	for r in GameData.RECIPES:
 		var pr: int = recipe_priority.get(r["id"], 0)
 		if pr <= 0:
 			continue
+		if not has_facility(GameData.recipe_station(r)):
+			continue                                                        # 必要設備（ワークベンチなど）がまだない
 		if smelt_boost and r["id"] == "smelt":
 			pr = maxi(pr, 4)
-		if not storage.has_set(r["in"]):
-			continue
+		if not storage.has_set(r["in"]) or not _spares_for(r, reserved):
+			continue                                                        # 材料がない、または建設のために取ってある
 		# 炉を使うレシピは、タンクの燃料に余裕があるときだけ（移動用の燃料を守る）
 		if r["tank_fuel"] > 0.0 and base.fuel < 25.0:
 			continue

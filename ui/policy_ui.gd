@@ -99,7 +99,10 @@ func _rebuild() -> void:
 		row.add_child(_stepper(func(): return game.recipe_priority.get(id, 0),
 				func(v): game.recipe_priority[id] = v))
 		var extra := "（炉で燃料%d使用）" % int(r["tank_fuel"]) if r["tank_fuel"] > 0.0 else ""
-		row.add_child(UIKit.lbl(GameData.recipe_text(r) + extra, 13, UIKit.C_DIM))
+		var stn: String = GameData.recipe_station(r)
+		if stn != "":                                 # 必要設備。まだ建てていなければ作られない（建設の画面 B）
+			extra += "　【%s%s】" % [FacilityDB.name_of(stn), "" if game.has_facility(stn) else "が必要・まだない"]
+		row.add_child(UIKit.lbl(GameData.recipe_text(r) + extra, 13, UIKit.C_DIM if game.has_facility(stn) else Color("ff8a70")))
 	var tgt: Array = []
 	for it in GameData.STOCK_TARGET:
 		tgt.append("%s %d" % [GameData.ITEM_NAMES[it], GameData.STOCK_TARGET[it]])

@@ -18,6 +18,7 @@ func _initialize() -> void:
 	var dir: String = args[0] if args.size() > 0 else "."
 	var scale: float = float(args[1]) if args.size() > 1 else 3.0
 	seed(20260926)
+	FacilityDB.start_all = true      # 設備は最初から全部ある状態で確かめる（設備の建設は test_build.gd）
 	main = load("res://scenes/main.tscn").instantiate()
 	root.add_child(main)
 	await process_frame

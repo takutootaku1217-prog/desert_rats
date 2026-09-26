@@ -20,6 +20,7 @@ func _initialize() -> void:
 func _one(n: int, points: bool, minutes: float, scale: float, seed_base: int) -> void:
 	seed(seed_base + n)
 	GameData.ENABLE_GATHER_POINTS = points
+	FacilityDB.start_all = true      # 設備は最初から全部ある状態で確かめる（設備の建設は test_build.gd）
 	var main = load("res://scenes/main.tscn").instantiate()
 	root.add_child(main)
 	await process_frame

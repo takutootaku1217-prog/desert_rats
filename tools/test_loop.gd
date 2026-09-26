@@ -42,6 +42,7 @@ func _initialize() -> void:
 
 func _one(n: int, minutes: float, scale: float, seed_base: int, events_on: bool, scenario: String) -> void:
 	seed(seed_base + n)
+	FacilityDB.start_all = scenario != "build"      # 設備は最初から全部ある状態で確かめる（シナリオ build だけ、設備なしで始めて依頼していく）
 	var main = load("res://scenes/main.tscn").instantiate()
 	root.add_child(main)
 	await process_frame
@@ -134,6 +135,18 @@ func _one(n: int, minutes: float, scale: float, seed_base: int, events_on: bool,
 		last_t = t
 		if main.hungry:
 			hungry_t += dt
+		if scenario == "build":
+			for bid in FacilityDB.ids():             # 熱心なプレイヤー: 建てられるようになった設備を、すぐ依頼する
+				if main.build_blocked_reason(bid) == "":
+					main.request_build(bid)
+			if main.base.facility_count("workbench") > 0:
+				mark.call("B1 ワークベンチ完成")
+			if main.base.facility_count("bed") > 0:
+				mark.call("B2 最初のベッド完成")
+			if main.base.facility_count("bed") >= 3:
+				mark.call("B3 ベッド3つ完成")
+			if lasting.call("buildq", not main.build_queue.is_empty(), 240.0):
+				note.call("buildq", "建設の依頼が 4 分以上、待ったまま（材料が集まらない？）")
 		if scenario == "stop" and t >= 90.0:
 			main.target_speed = 0.0                  # 最初の90秒は普通に走り、そのあと拠点を止める（止まっても加工・運搬が回るか）
 		if scenario == "priostress" and t >= next_stress:
@@ -211,7 +224,9 @@ func _one(n: int, minutes: float, scale: float, seed_base: int, events_on: bool,
 			prev_state[w] = s
 			# 元気が0のまま
 			# （休憩の優先度を0にした仲間は休まないので、元気が0でも異常ではない）
-			if lasting.call("energy0_" + w.char_name, w.energy <= 0.5 and w.priorities.get(GameData.Job.REST, 0) > 0, 60.0):
+			# （シナリオ build では、ベッドを建てるまでは休めないので、元気が0でも異常ではない）
+			var can_rest: bool = scenario != "build" or main.base.facility_count("bed") > 0
+			if lasting.call("energy0_" + w.char_name, w.energy <= 0.5 and w.priorities.get(GameData.Job.REST, 0) > 0 and can_rest, 60.0):
 				err.call("energy0_" + w.char_name, "%s の元気が 60 秒以上 0 のまま（休憩に入れない？）" % w.char_name)
 
 		# ---- 予約の取り残し ----
@@ -329,6 +344,13 @@ func _one(n: int, minutes: float, scale: float, seed_base: int, events_on: bool,
 			line += "%s ★未達 / " % k
 			all_ok = false
 	print("  流れ: " + line.trim_suffix(" / "))
+	if scenario == "build":
+		var bl := ""
+		for k in ["B1 ワークベンチ完成", "B2 最初のベッド完成", "B3 ベッド3つ完成"]:
+			bl += ("%s %.0f秒 / " % [k, ms[k]]) if ms.has(k) else ("%s ★未達 / " % k)
+			if not ms.has(k):
+				notes.append("%s が最後まで起きなかった（運が悪い回。詰まりではないか確認）" % k)
+		print("  建設: " + bl.trim_suffix(" / "))
 	var sp: Array = []
 	for it in stored:
 		sp.append("%s%d" % [GameData.ITEM_NAMES[it], stored[it]])

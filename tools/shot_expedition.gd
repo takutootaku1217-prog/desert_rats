@@ -15,6 +15,7 @@ func _shot(dir: String, name: String, wait := 0.6) -> void:
 func _initialize() -> void:
 	var args := OS.get_cmdline_user_args()
 	var dir: String = args[0] if args.size() > 0 else "."
+	FacilityDB.start_all = true      # 設備は最初から全部ある状態で確かめる（設備の建設は test_build.gd）
 	main = load("res://scenes/main.tscn").instantiate()
 	root.add_child(main)
 	await process_frame

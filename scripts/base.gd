@@ -8,7 +8,9 @@ extends Node2D
 var game
 var storage: BaseStorage
 var processor: BaseProcessor
-var beds: Array = [null, null, null]     # ベッドを使っている Worker
+var beds: Array = [null, null, null]     # ベッドを使っている Worker（建てていない区画は使えない。built["bed"]）
+var built := {}                          # 建てた設備 {id: 建てた区画の番号の配列}（data/facilities.gd。建設は Main.finish_build）
+var built_at := {}                       # "id:区画" -> 完成した時刻（ミリ秒。完成の演出用）
 var max_hp := 100.0
 var hp := 100.0                          # 戦闘用（現段階では未使用）
 var hit_timer := 0.0
@@ -42,10 +44,50 @@ func _ready() -> void:
 	add_child(processor)
 
 
+# ---- 設備（建設。data/facilities.gd） ----
+## 設備 id が拠点にあるか。"" は手作業（加工設備）＝いつでもある。
+func has_facility(id: String) -> bool:
+	return id == "" or not built.get(id, []).is_empty()
+
+
+func facility_count(id: String) -> int:
+	return built.get(id, []).size()
+
+
+## 設備を1つ建てる（いちばん若い空き区画へ）。建てた区画の番号を返す。もう建てられなければ -1。
+func add_facility(id: String, silent := false) -> int:
+	var slots: Array = built.get(id, [])
+	if slots.size() >= FacilityDB.max_of(id):
+		return -1
+	var slot := 0
+	while slot in slots:
+		slot += 1
+	slots.append(slot)
+	built[id] = slots
+	if not silent:
+		built_at["%s:%d" % [id, slot]] = Time.get_ticks_msec()
+	return slot
+
+
+## 全設備を建てる（自己診断・放置比較ツール用。FacilityDB.start_all）
+func grant_all() -> void:
+	for id in FacilityDB.ids():
+		while add_facility(id, true) >= 0:
+			pass
+
+
+## 設備で作業する場所（足元）。建てていなければ加工設備の位置。
+func facility_point(id: String) -> Vector2:
+	if built.get(id, []).is_empty():
+		return processor.global_position
+	return FacilityDB.spots_of(id)[built[id][0]]
+
+
 # ---- ベッド ----
 func claim_bed(w) -> int:
+	var slots: Array = built.get("bed", [])
 	for i in beds.size():
-		if beds[i] == null or not is_instance_valid(beds[i]):
+		if i in slots and (beds[i] == null or not is_instance_valid(beds[i])):
 			beds[i] = w
 			return i
 	return -1
@@ -190,6 +232,37 @@ func _process(delta: float) -> void:
 	queue_redraw()
 
 
+## 建てた設備（ワークベンチ・ベッド）を車体の上に重ねて描く。まだ建てていない置き場所は、
+## 建てられるなら薄く（建てる予定なら少し濃く点滅）、必要設備がなければ何も描かない。作業中のワークベンチは槌を振る。
+func _draw_facilities(off: Vector2) -> void:
+	var now := Time.get_ticks_msec()
+	for id in FacilityDB.ids():
+		var d: Dictionary = FacilityDB.def(id)
+		var slots: Array = built.get(id, [])
+		var pend: int = game.build_pending(id)
+		var fs: Vector2i = d["frame"]
+		var size := Vector2(fs) * GameData.PX
+		for i in FacilityDB.spots_of(id).size():
+			var spot: Vector2 = FacilityDB.spots_of(id)[i]
+			var tex := GameData.tex(FacilityDB.sprite_path(id, i))
+			var rect := Rect2(spot + off - Vector2(size.x / 2.0, size.y), size)
+			var frame := 0
+			var col := Color.WHITE
+			if i in slots:
+				if d["station"] and processor.is_active_at(id):
+					frame = 1 + (int(now / 200.0) % 2)
+				var age := float(now - int(built_at.get("%s:%d" % [id, i], -99999))) / 1000.0
+				if age < 1.6:                                  # 完成の合図
+					GameData.draw_text(self, spot + off + Vector2(0, -size.y - 8.0 - age * 14.0), "完成!", 14, Color("fde68a"), 80.0)
+			else:
+				if not game.facility_unlocked(id):
+					continue
+				col = Color(1, 1, 1, 0.13)
+				if i - slots.size() < pend:
+					col.a = 0.32 + 0.12 * sin(now / 260.0)
+			draw_texture_rect_region(tex, rect, Rect2(frame * int(d["stride"]), 0, fs.x, fs.y), col)
+
+
 func _draw() -> void:
 	var shake := Vector2(randf_range(-4, 4), 0) if hit_timer > 0.0 else Vector2.ZERO
 	var bob := 0.0
@@ -204,6 +277,7 @@ func _draw() -> void:
 	# 斜路
 	var ramp := GameData.tex("res://assets/base/ramp.png")
 	draw_texture_rect(ramp, Rect2(Vector2(900, 482) + Vector2(0, bob), Vector2(ramp.get_size()) * GameData.PX), false)
+	_draw_facilities(shake + Vector2(0, bob))
 	# 機関室の燃料計
 	var gx := GameData.ENGINE_X - 44.0
 	var gy := 392.0

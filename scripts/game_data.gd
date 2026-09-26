@@ -147,6 +147,9 @@ const GROUND_WEIGHTS := {Item.WOOD: 4.0, Item.STONE: 3.0, Item.IRON_ORE: 1.5}
 ## 加工レシピ。1回の加工で in を消費して out を n 個作る。
 ##  - tank_fuel: 加工中に拠点の燃料タンクから使う量（炉を使う精錬など）
 ##  - field: 作業の速さに使う分野ランク
+##  - station: 必要設備（data/facilities.gd の設備の id）。書かなければ手作業（加工設備）でできる。
+##    その設備が拠点にないうちは作られず、あるときは仲間がその設備の場所で作る。
+## 設備の建設もレシピの形で流れる（FacilityDB.recipe_of。"out" が -1、"build" に設備の id）。
 const RECIPES := [
 	{"id": "cook", "name": "調理（食料）", "in": {Item.MEAT: 1}, "out": Item.FOOD, "n": 2, "time": 2.5,
 		"tank_fuel": 0.0, "field": Field.COOK},
@@ -157,7 +160,7 @@ const RECIPES := [
 	{"id": "smelt", "name": "精錬（鉄）", "in": {Item.IRON_ORE: 1}, "out": Item.IRON, "n": 1, "time": 3.5,
 		"tank_fuel": 3.0, "field": Field.DEV},
 	{"id": "repair_iron", "name": "修理部品（鉄＋木材）", "in": {Item.IRON: 1, Item.WOOD: 1}, "out": Item.REPAIR_KIT, "n": 2,
-		"time": 3.0, "tank_fuel": 0.0, "field": Field.DEV},
+		"time": 3.0, "tank_fuel": 0.0, "field": Field.DEV, "station": "workbench"},
 	{"id": "repair_stone", "name": "修理資材（石＋木材）", "in": {Item.STONE: 1, Item.WOOD: 1}, "out": Item.REPAIR_KIT, "n": 1,
 		"time": 3.0, "tank_fuel": 0.0, "field": Field.DEV},
 	{"id": "repair_hide", "name": "簡易修理（皮＋骨）", "in": {Item.HIDE: 1, Item.BONE: 1}, "out": Item.REPAIR_KIT, "n": 1,
@@ -169,11 +172,11 @@ const RECIPES := [
 		"time": 3.0, "tank_fuel": 0.0, "field": Field.DEV},
 	# 鉄は修理部品（鉄＋木材）にもすぐ使われて溜まらないので、道具に要る鉄は1個にしてある（修理資材や木材で高価さを出す）
 	{"id": "tool_pick", "name": "鉄製ピッケル", "in": {Item.IRON: 1, Item.WOOD: 2}, "out": Item.PICKAXE, "n": 1,
-		"time": 4.0, "tank_fuel": 0.0, "field": Field.DEV},
+		"time": 4.0, "tank_fuel": 0.0, "field": Field.DEV, "station": "workbench"},
 	{"id": "tool_iron_axe", "name": "鉄の斧", "in": {Item.IRON: 1, Item.WOOD: 2}, "out": Item.IRON_AXE, "n": 1,
-		"time": 4.0, "tank_fuel": 0.0, "field": Field.DEV},
+		"time": 4.0, "tank_fuel": 0.0, "field": Field.DEV, "station": "workbench"},
 	{"id": "tool_adv_pick", "name": "高性能ピッケル", "in": {Item.IRON: 1, Item.REPAIR_KIT: 3}, "out": Item.ADV_PICK, "n": 1,
-		"time": 6.0, "tank_fuel": 0.0, "field": Field.DEV},
+		"time": 6.0, "tank_fuel": 0.0, "field": Field.DEV, "station": "workbench"},
 ]
 ## 道具に使う鉄を精錬で優先するのは、倉庫の食料がこの個数以上あるときだけ（調理を後回しにして空腹にならないように）
 const TOOL_IRON_FOOD_MIN := 4
@@ -194,6 +197,11 @@ static func recipe_by_id(id: String) -> Dictionary:
 		if r["id"] == id:
 			return r
 	return {}
+
+
+## そのレシピの必要設備（"" = 手作業）
+static func recipe_station(r: Dictionary) -> String:
+	return r.get("station", "")
 
 
 static func recipe_text(r: Dictionary) -> String:

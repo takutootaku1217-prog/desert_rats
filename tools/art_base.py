@@ -163,6 +163,23 @@ def barrel(p, x, y, col=None):
     p.vline(x, y, 8, C["rust"]); p.hline(x, y, 6, C["copper"])
 
 
+# ---------------- 建設で増える家具（ベッド・ワークベンチ）----------------
+# 車体の絵（hull.png）には、建設で増える家具は描かない（furnish=False）。家具は art_facilities.py が別の絵にして、
+# ゲームが「建てた分だけ」重ねて描く。build_hull() を引数なしで呼ぶと、従来どおり家具つきの絵になる。
+FURNISH = True
+BED_BLANKETS = (C["red"], hexc("2fa3a0"), C["yellow"])       # 毛布の色は仲間のスカーフの色
+
+
+def draw_bed(p, bx, feet, blanket):
+    """ベッド1つ（幅14・高さ9）。bx は左端の列、feet は床の行。"""
+    p.rect(bx, feet - 6, 14, 2, C["steel_m"])            # フレーム
+    p.vline(bx, feet - 8, 8, C["steel_l"]); p.vline(bx + 13, feet - 7, 7, C["steel_l"])
+    p.rect(bx + 1, feet - 8, 12, 2, hexc("efe7d2"))      # マットレス
+    p.rect(bx + 5, feet - 8, 8, 2, blanket)              # 毛布
+    p.rect(bx + 1, feet - 9, 4, 1, hexc("fff6e0"))       # 枕
+    p.hline(bx, feet - 4, 14, C["steel_d"])
+
+
 # ---------------- 各部屋 ----------------
 # 入れ替え可能な部屋は room_xxx(p, s) の形。s は SLOTS の1区画（x0, x1, top, feet）。
 # 左側の物は x0 からの相対、右側の物は x1 からの相対、床の物は feet からの相対、壁の物は top からの相対で置く。
@@ -182,9 +199,10 @@ def room_workshop(p, s):
     for a in range(8):
         p.set(int(gx + 6 * math.cos(a * math.pi / 4)), int(gy + 6 * math.sin(a * math.pi / 4)), C["steel_m"])
     gauge(p, x0 + 24, top + 8)
-    # 作業台
-    p.rect(x0 + 1, feet - 7, 14, 2, hexc("8b5a32")); p.vline(x0 + 2, feet - 5, 5, C["wall_d"]); p.vline(x0 + 13, feet - 5, 5, C["wall_d"])
-    p.rect(x0 + 4, feet - 10, 3, 3, C["steel_l"]); p.rect(x0 + 9, feet - 9, 4, 2, C["red"])
+    # 作業台（建設するワークベンチは別の絵 art_facilities.py。furnish=False の車体には描かない）
+    if FURNISH:
+        p.rect(x0 + 1, feet - 7, 14, 2, hexc("8b5a32")); p.vline(x0 + 2, feet - 5, 5, C["wall_d"]); p.vline(x0 + 13, feet - 5, 5, C["wall_d"])
+        p.rect(x0 + 4, feet - 10, 3, 3, C["steel_l"]); p.rect(x0 + 9, feet - 9, 4, 2, C["red"])
     # 加工機のための影（機械本体は別スプライト。中心は x0+33）
     p.rect(x0 + 22, feet - 2, 24, 2, C["wall_d"])
 
@@ -198,13 +216,10 @@ def room_bedroom(p, s):
     p.ellipse(wx, wy, 5, 5, C["steel_h"]); p.ellipse(wx, wy, 4, 4, hexc("f0b878"))
     p.hline(wx - 4, wy + 1, 9, hexc("fbe0a8")); p.vline(wx, wy - 4, 9, C["steel_m"]); p.hline(wx - 4, wy, 9, C["steel_m"])
     # ベッド3つ（毛布の色は仲間のスカーフの色）。ベッドの間隔は15、先頭は x0+2
-    for bx, col in ((x0 + 2, C["red"]), (x0 + 17, hexc("2fa3a0")), (x0 + 32, C["yellow"])):
-        p.rect(bx, feet - 6, 14, 2, C["steel_m"])            # フレーム
-        p.vline(bx, feet - 8, 8, C["steel_l"]); p.vline(bx + 13, feet - 7, 7, C["steel_l"])
-        p.rect(bx + 1, feet - 8, 12, 2, hexc("efe7d2"))      # マットレス
-        p.rect(bx + 5, feet - 8, 8, 2, col)                  # 毛布
-        p.rect(bx + 1, feet - 9, 4, 1, hexc("fff6e0"))       # 枕
-        p.hline(bx, feet - 4, 14, C["steel_d"])
+    # furnish=False の車体には描かない（ベッドは建設で増える。art_facilities.py が同じ絵を1つずつ出力する）
+    if FURNISH:
+        for i in range(3):
+            draw_bed(p, x0 + 2 + 15 * i, feet, BED_BLANKETS[i])
     # 服・洗濯ロープ
     p.line(x0 + 2, top + 4, x0 + 26, top + 5, hexc("b8a890"))
     p.rect(x0 + 8, top + 5, 3, 4, C["red"]); p.rect(x0 + 14, top + 5, 3, 3, hexc("efe7d2"))
@@ -393,8 +408,11 @@ ROOM_FUNCS = {
 }
 
 
-def build_hull(layout=None):
-    """車体の絵。layout は {区画: 部屋の種類}。省略すると初期配置（従来の hull.png と同じ絵）。"""
+def build_hull(layout=None, furnish=True):
+    """車体の絵。layout は {区画: 部屋の種類}。省略すると初期配置（従来の hull.png と同じ絵）。
+    furnish=False にすると、建設で増える家具（ワークベンチ・ベッド）を描かない（ゲームで使う hull.png はこちら）。"""
+    global FURNISH
+    FURNISH = furnish
     lay = dict(DEFAULT_LAYOUT)
     lay.update(layout or {})
     p = Px(IW, IH)
