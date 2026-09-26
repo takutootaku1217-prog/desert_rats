@@ -64,6 +64,8 @@ func _run() -> void:
 		var downs := 0
 		var was_down := {}
 		var mental_t := [0.0, 0.0, 0.0, 0.0, 0.0]
+		var prev_hunger := {}
+		var meals: Array = []                          # 食事の記録（時刻・仲間・食べる前後の満腹度・そのときの食料の在庫）
 		while main.director.elapsed - t0 < minutes * 60.0 and not main.game_over:
 			await process_frame
 			var now: float = main.director.elapsed
@@ -98,6 +100,9 @@ func _run() -> void:
 							downs += 1
 					was_down[w] = w.down
 					mental_t[w.mental] += dt
+				if prev_hunger.has(w) and w.hunger > prev_hunger[w] + 5.0:
+					meals.append("%d分%02d秒 %s 満腹度 %.0f → %.0f（食料の在庫 %d）" % [int((now - t0) / 60.0), int(now - t0) % 60, w.char_name, prev_hunger[w], w.hunger, main.storage.count_of(GameData.Item.FOOD)])
+				prev_hunger[w] = w.hunger
 				var h = w.get("hunger")
 				if h != null:
 					hun_sum += h
@@ -121,6 +126,8 @@ func _run() -> void:
 				line += " ・HP 最低 %.0f 倒れた %d回（計%ds） ・精神状態 好調%.0f%% 普通%.0f%% 不安%.0f%% 不調%.0f%% 限界%.0f%%" % [hp_min, downs, int(down_t),
 						100.0 * mental_t[0] / mt, 100.0 * mental_t[1] / mt, 100.0 * mental_t[2] / mt, 100.0 * mental_t[3] / mt, 100.0 * mental_t[4] / mt]
 		print(line)
+		if not meals.is_empty():
+			print("     食事の記録: " + " ／ ".join(PackedStringArray(meals)))
 		for k in res:
 			sums[k] = float(sums.get(k, 0.0)) + float(res[k])
 	var out := "平均:"
