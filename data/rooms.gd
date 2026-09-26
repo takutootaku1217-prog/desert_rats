@@ -55,7 +55,7 @@ const ANCHORS := {
 ##  required: 最低1つは必要（最後の1つは壊せない）。加工室・寝室・倉庫は、なくなるとゲームが回らないので必須。
 ##    機関室は必須にしない（区画を空けるため）。ないときは、燃料を搬入口で補給する（MobileBase.engine_point）。
 ##  effects: [{kind, value}]  kind は host_processor / host_storage / rest_rate / drain_cut / train_xp
-##    rest_rate（休憩の回復）と drain_cut（元気の消耗）は Worker が読む（Main.room_effect）。train_xp は訓練の仕組みがまだないので未使用。
+##    rest_rate（休憩の回復）と drain_cut（スタミナの消耗）は Worker が読む（Main.room_effect）。train_xp は訓練の仕組みがまだないので未使用。
 ## 費用は、旧版の素材を今の素材に置き換えたもの（金属→鉄、板材→木材、布→皮、骨の加工品→骨）を、今の素材の集まりやすさに合わせて調整した。
 const TYPES := {
 	"workshop": {"name": "加工室", "floors": "ul", "unique": true, "required": true, "min_base_level": 1,
@@ -76,11 +76,11 @@ const TYPES := {
 		"effects": []},
 	"infirmary": {"name": "医務室", "floors": "ul", "unique": false, "required": false, "min_base_level": 1,
 		"cost": {GameData.Item.HIDE: 3, GameData.Item.BONE: 2},
-		"desc": "休憩中の元気の回復が早くなる（1室ごとに +25%）。",
+		"desc": "休憩中のスタミナの回復が早くなる（1室ごとに +25%）。",
 		"effects": [{"kind": "rest_rate", "value": 0.25}]},
 	"mess": {"name": "食堂", "floors": "ul", "unique": false, "required": false, "min_base_level": 1,
 		"cost": {GameData.Item.FOOD: 3, GameData.Item.WOOD: 2},
-		"desc": "仲間の元気が減りにくくなる（1室ごとに -12%。合計で最大 -50%）。",
+		"desc": "仲間のスタミナが減りにくくなる（1室ごとに -12%。合計で最大 -50%）。",
 		"effects": [{"kind": "drain_cut", "value": 0.12}]},
 	"training": {"name": "訓練室", "floors": "ul", "unique": false, "required": false, "min_base_level": 2,
 		"cost": {GameData.Item.IRON: 2, GameData.Item.BONE: 3},
@@ -94,7 +94,7 @@ const TYPES := {
 ## 一覧に並べる順番
 const TYPE_ORDER := ["workshop", "bedroom", "storage", "engine", "infirmary", "mess", "training", "empty"]
 
-const CAP_DRAIN_CUT := 0.5            # 食堂で元気の消耗を減らせる上限
+const CAP_DRAIN_CUT := 0.5            # 食堂でスタミナの消耗を減らせる上限
 
 
 # ------------------------------------------------------------------

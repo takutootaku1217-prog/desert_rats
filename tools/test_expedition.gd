@@ -135,7 +135,7 @@ func _run() -> void:
 		guard += 1
 		ex.tick(ex.step_time + 0.1)
 	check(ex.state == "done" and not w0.away and w0.visible and w0.is_processing(), "全ての関門が終わると調査隊が戻る")
-	check(w0.position.distance_to(GameData.RAMP_FOOT) < 60.0 and w0.energy >= 5.0 and w0.energy <= 100.0, "斜路の下に戻り、元気を引き継ぐ (%.0f)" % w0.energy)
+	check(w0.position.distance_to(GameData.RAMP_FOOT) < 60.0 and w0.stamina >= 5.0 and w0.stamina <= 100.0, "斜路の下に戻り、元気を引き継ぐ (%.0f)" % w0.stamina)
 	check(ex.summary() != "" and ex.result_left > 0.0, "結果の文が出る: " + ex.summary())
 	ex.tick(ExpeditionDB.RETURN_SECONDS + 1.0)
 	check(ex.state == "idle", "結果の表示が終わると、通常に戻る")
@@ -184,7 +184,7 @@ func _run() -> void:
 		for i in trips:
 			_reset()
 			for w in members:
-				w.energy = 100.0
+				w.stamina = 100.0
 			_run_trip(members, cfg[0], false)
 			all_steps += ex.ok_count + ex.ng_count
 			ok_steps += ex.ok_count
@@ -204,11 +204,11 @@ func _run() -> void:
 	var min_energy_ok := true
 	for i in 300:
 		_reset()
-		W[0].energy = 22.0
+		W[0].stamina = 22.0
 		_run_trip([W[0]], "bold", i % 2 == 0, "ruins_large")
 		if ex.retreated:
 			seen_retreat = true
-			if W[0].energy < 5.0:
+			if W[0].stamina < 5.0:
 				min_energy_ok = false
 		for line in ex.log:
 			if line.contains("修理資材で被害を防いだ"):
@@ -225,7 +225,7 @@ func _run() -> void:
 	for i in 600:
 		_reset()
 		for w in W:
-			w.energy = 100.0
+			w.stamina = 100.0
 		_run_trip(W.slice(0, 3), "bold", false, "ruins_large")
 		for it in ex.loot:
 			loot_total += ex.loot[it]

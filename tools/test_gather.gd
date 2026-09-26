@@ -42,7 +42,7 @@ func _reset() -> void:
 		w.carry_n = 1
 		w.carry_bonus = {}
 		w.tools = {}
-		w.energy = 100.0
+		w.stamina = 100.0
 		w.ai._set_state(CharacterAI.State.SEARCH)
 	for root_node in [main.resources_root, main.creatures_root, main.enemies_root]:
 		for c in root_node.get_children():

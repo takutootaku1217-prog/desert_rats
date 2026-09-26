@@ -70,8 +70,130 @@ def weight_shapes():
     return frame, interior
 
 
-ICONS = {"weight": weight_shapes}
+# ---------------------------------------------------------------- 仲間のステータス（HP・スタミナ・満腹度・疲労度）のアイコン
+# どれも「シルエット」から作る: 内側（縁を1ドット除いた所）が充填範囲、縁と外側の輪郭が枠。形は仮（差し替えできる）。
+STATUS_RIM = {"hp": hexc("d8848c"), "stamina": hexc("e8d27a"), "hunger": hexc("d9a066"), "fatigue": hexc("a9b7d0")}
+BONE = hexc("ece3cf")       # 骨（充填しない部分）
+BONE_SH = hexc("b8ad94")
 
+
+def silhouette_icon(sil, rim, extra=None):
+    """シルエット sil（不透明 = 体）から (frame, mask) を作る。内側 = 体のうち、上下左右がすべて体のドット（充填範囲）。
+    枠 = 体の縁（rim）＋ その外側の輪郭。extra は枠の上に足す絵（骨など。充填範囲の外に置く）。"""
+    interior = Px(SIZE, SIZE)
+    for y in range(SIZE):
+        for x in range(SIZE):
+            if sil.get(x, y)[3] == 0:
+                continue
+            if all(sil.get(x + dx, y + dy)[3] > 0 for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))):
+                interior.set(x, y, (255, 255, 255, 255))
+    ring = Px(SIZE, SIZE)
+    for y in range(SIZE):
+        for x in range(SIZE):
+            if sil.get(x, y)[3] > 0 and interior.get(x, y)[3] == 0:
+                ring.set(x, y, rim)
+    whole = Px(SIZE, SIZE)
+    whole.paste(sil, 0, 0)
+    if extra is not None:
+        whole.paste(extra, 0, 0)
+    edged = whole.outline(OUT)
+    frame = Px(SIZE, SIZE)
+    for y in range(SIZE):
+        for x in range(SIZE):
+            if interior.get(x, y)[3] > 0:
+                continue                                  # 充填範囲は透明のまま
+            c = edged.get(x, y)
+            if c[3] > 0:
+                frame.set(x, y, c)
+    frame.paste(ring, 0, 0)
+    if extra is not None:
+        for y in range(SIZE):
+            for x in range(SIZE):
+                if extra.get(x, y)[3] > 0 and interior.get(x, y)[3] == 0:
+                    frame.set(x, y, extra.get(x, y))
+    return frame, interior
+
+
+def hp_shapes():
+    """HP: ハート。"""
+    s = Px(SIZE, SIZE)
+    s.ellipse(4.6, 5.4, 3.7, 3.5, RIM)
+    s.ellipse(10.4, 5.4, 3.7, 3.5, RIM)
+    s.poly([(1, 6), (14, 6), (8, 14), (7, 14)], RIM)
+    return silhouette_icon(s, STATUS_RIM["hp"])
+
+
+def stamina_shapes():
+    """スタミナ: 稲妻（ずんぐりした形。細いと充填範囲が取れない）。"""
+    s = Px(SIZE, SIZE)
+    s.poly([(11, 0), (1, 9), (6, 9), (4, 15), (14, 6), (9, 6), (13, 0)], RIM)
+    return silhouette_icon(s, STATUS_RIM["stamina"])
+
+
+def hunger_shapes():
+    """満腹度: 骨つき肉。肉の部分だけが充填範囲、骨は枠の側に描く。"""
+    s = Px(SIZE, SIZE)
+    s.ellipse(6.2, 6.2, 5.6, 5.0, RIM)
+    bone = Px(SIZE, SIZE)
+    bone.line(9, 9, 13, 13, BONE)
+    bone.line(10, 9, 14, 13, BONE)
+    bone.ellipse(13.0, 11.6, 1.5, 1.4, BONE)
+    bone.ellipse(11.6, 13.2, 1.5, 1.4, BONE)
+    bone.set(14, 12, BONE_SH)
+    bone.set(12, 14, BONE_SH)
+    return silhouette_icon(s, STATUS_RIM["hunger"], bone)
+
+
+def fatigue_shapes():
+    """疲労度: 雲（眠そうな、どんよりした雲）。右上に小さな「z」（充填しない部分）。"""
+    s = Px(SIZE, SIZE)
+    s.ellipse(4.2, 10.4, 3.2, 3.0, RIM)
+    s.ellipse(7.8, 8.0, 3.8, 3.6, RIM)
+    s.ellipse(11.4, 10.4, 3.4, 3.0, RIM)
+    s.rect(4, 10, 8, 4, RIM)
+    z = Px(SIZE, SIZE)
+    zc = hexc("cfe6ff")
+    z.hline(11, 0, 4, zc)
+    z.set(13, 1, zc)
+    z.set(12, 2, zc)
+    z.hline(11, 3, 4, zc)
+    return silhouette_icon(s, STATUS_RIM["fatigue"], z)
+
+
+# ---------------------------------------------------------------- 精神状態の顔（5段階。色は色分け用に、白っぽく描いて画面側で染める）
+FACE = hexc("f4f4f4")
+FACE_SH = hexc("c9c9c9")
+INK = hexc("1c1f25")
+
+
+def face(kind):
+    """kind: good / normal / anxious / bad / limit。16x16。顔そのものが枠（充填はしない）。"""
+    p = Px(SIZE, SIZE)
+    p.ellipse(7.5, 7.5, 6.4, 6.4, FACE)
+    p.ellipse(7.5, 9.0, 5.6, 5.0, FACE_SH)
+    p.ellipse(7.5, 7.0, 5.6, 5.4, FACE)
+    if kind == "good":                      # にっこり（目は弧、口は大きい笑い）
+        p.hline(4, 6, 2, INK); p.set(4, 7, INK); p.set(5, 5, INK)
+        p.hline(9, 6, 2, INK); p.set(11, 7, INK); p.set(10, 5, INK)
+        p.hline(5, 10, 6, INK); p.set(4, 9, INK); p.set(11, 9, INK)
+    elif kind == "normal":                  # 無表情（点の目・一文字の口）
+        p.rect(5, 6, 2, 2, INK); p.rect(9, 6, 2, 2, INK)
+        p.hline(5, 10, 6, INK)
+    elif kind == "anxious":                 # 不安（縦長の目・小さな波の口）
+        p.rect(5, 5, 2, 3, INK); p.rect(9, 5, 2, 3, INK)
+        p.set(5, 11, INK); p.set(6, 10, INK); p.set(7, 11, INK); p.set(8, 10, INK); p.set(9, 11, INK); p.set(10, 10, INK)
+    elif kind == "bad":                     # 不調（目が細く、口がへの字。汗のしずく）
+        p.hline(4, 7, 3, INK); p.hline(9, 7, 3, INK)
+        p.hline(5, 11, 6, INK); p.set(4, 12, INK); p.set(11, 12, INK)
+    else:                                   # 限界（目がぐるぐる・口が開く）
+        p.rect(4, 5, 3, 3, INK); p.rect(9, 5, 3, 3, INK)
+        p.set(5, 6, FACE); p.set(10, 6, FACE)
+        p.rect(6, 10, 4, 3, INK)
+    return p.outline(OUT)
+
+
+ICONS = {"weight": weight_shapes, "hp": hp_shapes, "stamina": stamina_shapes, "hunger": hunger_shapes, "fatigue": fatigue_shapes}
+FACES = ["good", "normal", "anxious", "bad", "limit"]
 
 def all_images():
     """(フォルダ, ファイル名, 絵) の一覧"""
@@ -80,6 +202,8 @@ def all_images():
         frame, mask = fn()
         l.append(("ui", f"{name}.png", frame))
         l.append(("ui", f"{name}_mask.png", mask))
+    for k in FACES:
+        l.append(("ui", f"mental_{k}.png", face(k)))
     return l
 
 

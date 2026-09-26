@@ -525,7 +525,7 @@ func _test_soak() -> void:
 	Engine.time_scale = 1.0
 	print("   切り替え %d 回・ワークベンチ %s・ベッド %d・加工 %d 回・回収 %d 個・狩猟 %d・建設 %d・空腹 %s・仲間の元気 %s・1フレームの最大の動き %.0f" % [
 			switches, ("%.0f秒" % wb_at) if wb_at >= 0.0 else "なし", main.base.facility_count("bed"), main.processor.total_done,
-			main.total_gathered, main.total_hunted, main.total_built, "あり" if main.hungry else "なし", str(W.map(func(w): return int(w.energy))), max_step])
+			main.total_gathered, main.total_hunted, main.total_built, "あり" if main.hungry else "なし", str(W.map(func(w): return int(w.stamina))), max_step])
 	check(not main.game_over, "ゲームオーバーにならない")
 	check(switches >= 100, "切り替えを何度も行った（%d回）" % switches)
 	check(jump == 0, "切り替えで、仲間の位置が飛ばない（%d回）" % jump)

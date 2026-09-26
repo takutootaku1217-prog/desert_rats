@@ -224,10 +224,10 @@ func _one(n: int, minutes: float, scale: float, seed_base: int, events_on: bool,
 			prev_state[w] = s
 			# 元気が0のまま
 			# （休憩の優先度を0にした仲間は休まないので、元気が0でも異常ではない）
-			# （シナリオ build では、ベッドを建てるまでは休めないので、元気が0でも異常ではない）
-			var can_rest: bool = scenario != "build" or main.base.facility_count("bed") > 0
-			if lasting.call("energy0_" + w.char_name, w.energy <= 0.5 and w.priorities.get(GameData.Job.REST, 0) > 0 and can_rest, 60.0):
-				err.call("energy0_" + w.char_name, "%s の元気が 60 秒以上 0 のまま（休憩に入れない？）" % w.char_name)
+			# （シナリオ build では、空いているベッドができるまでは休めないので、スタミナが0でも異常ではない。溜まった疲労度が抜けるまで眠り続けるため、ベッドが1つだけの間は順番待ちで60秒を超えることがある）
+			var can_rest: bool = scenario != "build" or main.base.has_free_bed()
+			if lasting.call("energy0_" + w.char_name, w.stamina <= 0.5 and w.priorities.get(GameData.Job.REST, 0) > 0 and can_rest, 60.0):
+				err.call("energy0_" + w.char_name, "%s のスタミナが 60 秒以上 0 のまま（休憩に入れない？）" % w.char_name)
 
 		# ---- 予約の取り残し ----
 		for r in main.resources_root.get_children():

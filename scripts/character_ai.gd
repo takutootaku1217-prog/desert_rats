@@ -8,6 +8,7 @@ extends RefCounted
 ##         材料運び HAUL_TAKE(材料一式) -> HAUL_MOVE(加工設備へ)
 ##   加工: MOVE_TO_MACHINE -> PROCESS -> MOVE_TO_STORAGE -> STORE
 ##   修理: REPAIR_TAKE(修理資材) -> REPAIR_MOVE -> REPAIR
+##   食事: EAT_TAKE(倉庫の食料) -> EAT（満腹度が下がったとき、仕事より先に。scripts/crew_status.gd・data/crew_status.gd）
 ## 新しい仕事は _try_start() に分岐を足し、状態を増やすだけで拡張できる。
 
 enum State {
@@ -17,6 +18,7 @@ enum State {
 	REST_MOVE, REST,
 	REFUEL_TAKE, REFUEL_MOVE, REFUEL,
 	HUNT_MOVE, HUNT_ATTACK,
+	EAT_TAKE, EAT, DOWN,
 }
 
 const STATE_TEXT := {
@@ -43,6 +45,9 @@ const STATE_TEXT := {
 	State.REFUEL: "燃料を補給中",
 	State.HUNT_MOVE: "獲物を追う",
 	State.HUNT_ATTACK: "狩り中！",
+	State.EAT_TAKE: "食料を取りに行く",
+	State.EAT: "食事中",
+	State.DOWN: "倒れている",
 }
 
 var ch      # Worker
@@ -63,9 +68,9 @@ const HUNT_DPS := 16.0
 const HUNT_REACH := 44.0
 const REPAIR_TIME := 1.2
 const REFUEL_TIME := 0.6
-const REST_START_BELOW := 70.0    # 元気がこれ未満なら休憩に入れる
-const REST_UNTIL := 98.0
-const TIRED_BELOW := 25.0         # これ未満なら最優先で休憩する
+## 休憩の基準は data/crew_status.gd（CrewStatusDB）にまとめてある（スタミナ・疲労度・HP）
+var eat_wait := 0.0      # 食料が取れなかったあと、食べに行き直すまでの待ち（食事のループにならないように）
+var _eat_claimed := false   # 食料の在庫を1つ取り置いている（食べに向かっている間）
 var current_job := -1
 
 
@@ -87,6 +92,8 @@ func _set_state(s: int) -> void:
 
 
 func tick(delta: float) -> void:
+	if eat_wait > 0.0:
+		eat_wait -= delta
 	match state:
 		State.IDLE:
 			ch.move_to_target(delta)
@@ -185,8 +192,11 @@ func tick(delta: float) -> void:
 			var p = prey
 			p.take_damage(HUNT_DPS * ch.skill_mult(GameData.Job.HUNT) * game.director.outdoor_mult() * delta)
 			if p.dead:
-				# 倒した獲物は、そのまま自分で拠点へ運ぶ
 				prey = null
+				CrewStatus.hunt_injury(ch, p.species)                 # 狩りの事故（確率で少しケガをする。HP が尽きたら倒れる）
+				if ch.down:
+					return                                            # 獲物は落ちたまま。ほかの仲間が拾う
+				# 倒した獲物は、そのまま自分で拠点へ運ぶ
 				res = game.last_carcass
 				if _res_valid():
 					res.claimed_by = ch
@@ -245,6 +255,10 @@ func tick(delta: float) -> void:
 				_set_state(State.PROCESS)
 		State.PROCESS:
 			var p: BaseProcessor = game.processor
+			if _urgent_life_need():
+				p.worker = null                                       # 食事・休憩が急ぎなら加工を中断する（途中経過は設備に残り、次の人が続ける）
+				_set_state(State.SEARCH)
+				return
 			if not p.output.is_empty():
 				ch.carrying = p.take_output()
 				p.worker = null
@@ -283,6 +297,31 @@ func tick(delta: float) -> void:
 				ch.carrying = -1
 				_set_state(State.SEARCH)
 
+		# ---- 食事 ----
+		State.EAT_TAKE:
+			ch.target = game.storage.access_point() + ch.slot_offset
+			if ch.move_to_target(delta):
+				_release_eat_claim()
+				if game.storage.take_item(GameData.Item.FOOD):
+					ch.carrying = GameData.Item.FOOD
+					timer = CrewStatusDB.EAT_SECONDS
+					_set_state(State.EAT)
+				else:
+					eat_wait = CrewStatusDB.EAT_RETRY_SECONDS       # 取り合いで食料がなくなっていた。しばらく仕事を続ける
+					_set_state(State.SEARCH)
+		State.EAT:
+			timer -= delta                                          # 食料を持って、しばらく食べる（手に食料が見える）
+			if timer <= 0.0:
+				CrewStatus.eat(ch, ch.carrying)
+				game.total_eaten += 1
+				ch.carrying = -1
+				_set_state(State.SEARCH)
+
+		# ---- 戦闘不能（HP 0）。倒れて動けない。HP が戻ると起き上がる ----
+		State.DOWN:
+			if not ch.down:
+				_set_state(State.SEARCH)
+
 		# ---- 戦闘（現段階では未使用） ----
 		State.COMBAT_MOVE:
 			if not _enemy_valid():
@@ -301,7 +340,7 @@ func tick(delta: float) -> void:
 			ch.move_to_target(delta)
 			ch.attacking = true
 			enemy.take_damage(ATTACK_DPS * ch.skill_mult(GameData.Job.COMBAT) * delta)
-			ch.energy = maxf(0.0, ch.energy - 0.5 * delta)     # 戦うと疲れる
+			ch.stamina = maxf(0.0, ch.stamina - 0.5 * delta)     # 戦うと疲れる
 
 		# ---- 休憩 ----
 		State.REST_MOVE:
@@ -311,8 +350,8 @@ func tick(delta: float) -> void:
 		State.REST:
 			ch.sleeping = true
 			ch.target = game.base.bed_point(ch.bed_index)
-			if ch.energy >= REST_UNTIL:
-				_release_task()
+			if CrewStatus.rest_done(ch) or (CrewStatus.needs_to_eat_now(ch) and _wants_to_eat()):
+				_release_task()                                     # 回復しきった（スタミナ・疲労度・HP）。とても空腹なら、先に食べに行く
 				_set_state(State.SEARCH)
 
 
@@ -424,9 +463,8 @@ func _search() -> void:
 		if pa != pb:
 			return pa > pb
 		return a < b)
-	# とても疲れていたら（休憩が0でなければ）まず休む
-	if ch.energy < TIRED_BELOW and ch.priorities.get(GameData.Job.REST, 0) > 0 and _try_start(GameData.Job.REST):
-		current_job = GameData.Job.REST
+	# 生活の必要（休む・食べる）を、仕事より先に見る。行けないもの（食料がない・ベッドがない・休憩が★0）は飛ばして、仕事を続ける
+	if _try_life_need():
 		return
 	# 拠点の部位が壊れかけていたら（修理が0でなければ）まず直す
 	if ch.priorities.get(GameData.Job.REPAIR, 0) > 0 and game.base.has_critical_part() and _try_start(GameData.Job.REPAIR):
@@ -446,6 +484,57 @@ func _search() -> void:
 	timer = 0.8
 	ch.target = Vector2(randf_range(540.0, 860.0), GameData.LO_Y)
 	_set_state(State.IDLE)
+
+
+## 生活の必要（CrewStatus.life_needs の順）のうち、いま実際に行けるものを始める。始めたら true
+func _try_life_need() -> bool:
+	for need in CrewStatus.life_needs(ch):
+		if need == "eat":
+			if _try_start_eat():
+				return true
+		elif _can_start_rest() and _try_start(GameData.Job.REST):
+			current_job = GameData.Job.REST
+			return true
+	return false
+
+
+## 休憩を始められるか（休憩の優先度が0でなく、休むべき状態で、空いているベッドがある）
+func _can_start_rest() -> bool:
+	return ch.priorities.get(GameData.Job.REST, 0) > 0 and CrewStatus.can_rest(ch) and game.base.has_free_bed()
+
+
+## HP が 0 になった（戦闘不能）。仕事を中断して（荷物は倉庫へ戻し、予約は解放して）、その場に倒れる。
+func on_down() -> void:
+	ch.stop_work()
+	_set_state(State.DOWN)
+
+
+## 食べに行けるか（空腹で、食べられる食料が倉庫にあり、食べに行き直す待ちでもない）
+func _wants_to_eat() -> bool:
+	return CrewStatus.wants_to_eat(ch) and eat_wait <= 0.0 and game.food_for_eating() > 0
+
+
+## 食事に向かう。食料の在庫を1つ取り置く（同じ1個に2人が向かわない）。
+func _try_start_eat() -> bool:
+	if not _wants_to_eat():
+		return false
+	game.food_claims += 1
+	_eat_claimed = true
+	_set_state(State.EAT_TAKE)
+	return true
+
+
+func _release_eat_claim() -> void:
+	if _eat_claimed:
+		_eat_claimed = false
+		game.food_claims = maxi(0, game.food_claims - 1)
+
+
+## 加工などの途中でも、先に済ませるべき生活の必要があるか（とても空腹で食べられる食料がある／休みが危険なほど必要でベッドが使える）
+func _urgent_life_need() -> bool:
+	if CrewStatus.needs_to_eat_now(ch) and _wants_to_eat():
+		return true
+	return CrewStatus.rest_critical(ch) and _can_start_rest()
 
 
 func _try_start(job: int) -> bool:
@@ -552,7 +641,7 @@ func _try_start(job: int) -> bool:
 			_set_state(State.REPAIR_TAKE)
 			return true
 		GameData.Job.REST:
-			if ch.energy >= REST_START_BELOW:
+			if not CrewStatus.can_rest(ch):
 				return false
 			var bi: int = game.base.claim_bed(ch)
 			if bi < 0:
@@ -595,6 +684,7 @@ func _release_task() -> void:
 	enemy = null
 	game.base.release_bed(ch)
 	ch.bed_index = -1
+	_release_eat_claim()
 	if state == State.HAUL_TAKE and not haul_recipe.is_empty():
 		game.processor.cancel_reservation(haul_recipe)
 		haul_recipe = {}
@@ -615,7 +705,7 @@ func on_bedroom_moved() -> void:
 
 ## プレイヤーが優先度を変えたとき、荷物を持っていなければ即座に選び直す。
 func on_priority_changed() -> void:
-	if ch.carrying >= 0:
+	if ch.carrying >= 0 or ch.down:
 		return
 	if state in [State.IDLE, State.SEARCH]:
 		_set_state(State.SEARCH)

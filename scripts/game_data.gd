@@ -249,8 +249,6 @@ const CREATURE_DIST_MIN := 520.0            # 生物が現れる間隔（距離�
 const CREATURE_DIST_MAX := 820.0
 
 ## 食料: 仲間1人が何秒ごとに1個食べるか。なくなると空腹で作業と移動が遅くなる。
-const FOOD_INTERVAL := 50.0
-const HUNGRY_MULT := 0.65
 
 ## 耐久度（0〜100）。下がると不調になり、修理資材1個で REPAIR_AMOUNT 回復する。
 enum Part { HULL, DRIVE, MACHINE }

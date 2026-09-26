@@ -38,8 +38,8 @@ var gather_policy := {GameData.Item.WOOD: 3, GameData.Item.STONE: 3, GameData.It
 var hunt_policy := {"hare": true, "lizard": true, "hump": true}
 
 # ---- 維持の状態 ----
-var hungry := false               # 食料が尽きている
-var _food_clock := 0.0
+var hungry := false               # 空腹の仲間がいる（仲間ごとの満腹度 Worker.hunger から毎フレーム決まる。表示・作業の判断用）
+var food_claims := 0              # 食べに向かっている仲間の数（在庫から引く。1個の食料に2人が向かわないように）
 
 # ---- 確認用の累計 ----
 var total_gathered := 0
@@ -201,7 +201,7 @@ func _process(delta: float) -> void:
 	if _tool_clock >= GatherDB.TOOL_CHECK_SECONDS:
 		_tool_clock = 0.0
 		manage_tools()
-	_eat(delta)
+	_update_hungry_flag()
 	# 地面の資源と生物は、進んだ距離に応じて現れる（天候で出にくくなる）
 	_spawn_dist -= dist * director.spawn_mult()
 	if _spawn_dist <= 0.0:
@@ -216,21 +216,18 @@ func _process(delta: float) -> void:
 		_creature_dist = randf_range(GameData.CREATURE_DIST_MIN, GameData.CREATURE_DIST_MAX)
 
 
-## 仲間は時間とともに倉庫の食料を食べる。食料が尽きると空腹になる。
-func _eat(delta: float) -> void:
-	_food_clock += delta * workers.size() * director.food_mult()
-	while _food_clock >= GameData.FOOD_INTERVAL:
-		_food_clock -= GameData.FOOD_INTERVAL
-		if storage.take_item(GameData.Item.FOOD):
-			total_eaten += 1
-			hungry = false
-		else:
+## 食べに行ける食料の数（倉庫の在庫から、食べに向かっている仲間の分を引く）
+func food_for_eating() -> int:
+	return maxi(0, storage.count_of(GameData.Item.FOOD) - food_claims)
+
+
+## 空腹の仲間がいるかを更新する（表示・建設の判断用）。食事そのものは、空腹になった仲間が自分で倉庫へ食べに行く（scripts/character_ai.gd）。
+func _update_hungry_flag() -> void:
+	hungry = false
+	for w in workers:
+		if not w.away and CrewStatus.wants_to_eat(w):
 			hungry = true
-	if hungry and storage.count_of(GameData.Item.FOOD) > 0:
-		# 食料が入ったらすぐ食べて空腹を解消する
-		storage.take_item(GameData.Item.FOOD)
-		total_eaten += 1
-		hungry = false
+			break
 
 
 # ---------------------------------------------------------------- 方針

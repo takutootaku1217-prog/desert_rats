@@ -16,6 +16,7 @@ var pixel := float(GameData.PX)              # 絵のドット1つを画面の�
 var display_size := Vector2.ZERO             # 画面上の大きさ（px）= 基準の大きさ（ユニット）× UNIT_PX。絵の細かさに依存しない
 var color_stages: Array = UIKit.GAUGE_STAGES_LOAD
 var empty_color := Color(0.07, 0.08, 0.10, 0.92)   # 充填していない範囲の色
+var dark_empty := false                       # true なら、充填していない範囲を「いまの充填の色の暗い色」にする（どれだけ減ったかが色つきで見える）
 var blink := false                            # true なら点滅する（危険域のゲージ用）
 
 var _frame: Texture2D
@@ -156,16 +157,23 @@ static func _center_of(mask: Image) -> Vector2:
 func _refresh() -> void:
 	var n := filled_count()
 	var col := current_color()
-	var key := "%d|%s" % [n, col.to_html()]
+	var key := "%d|%s|%s" % [n, col.to_html(), str(dark_empty)]
 	if key != _key:                                # 充填の数か色の段階が変わったときだけ、絵を作り直す
 		_key = key
 		var img := Image.create(_icon_size.x, _icon_size.y, false, Image.FORMAT_RGBA8)
 		for i in _order.size():
 			var p: Vector2i = _order[i]
-			img.set_pixel(p.x, p.y, col if i < n else empty_color)
+			img.set_pixel(p.x, p.y, col if i < n else _empty_of(col))
 		_interior_img = img
 		_interior = ImageTexture.create_from_image(img)
 	queue_redraw()
+
+
+## 充填していないドットの色
+func _empty_of(fill: Color) -> Color:
+	if dark_empty:
+		return Color(fill.r * 0.28, fill.g * 0.28, fill.b * 0.28, 0.92)
+	return empty_color
 
 
 func _process(delta: float) -> void:
@@ -183,6 +191,6 @@ func _draw() -> void:
 	draw_texture_rect(_interior, Rect2(Vector2.ZERO, sz), false, Color(1, 1, 1, a))
 	draw_texture_rect(_frame, Rect2(Vector2.ZERO, sz), false)
 	if text != "":
-		var fs := maxi(10, int(float(ArtSpec.UNIT_PX) * 3.5))            # 数字の大きさは、画面上の基準の大きさに合わせる（絵のドット数に依存しない）
+		var fs := maxi(9, int(display_size.x * 0.22))                  # 数字の大きさは、画面上の表示の大きさに合わせる（絵のドット数に依存しない。64px なら 14）
 		var c := _text_center * pixel
 		GameData.draw_text(self, Vector2(c.x, c.y + float(fs) * 0.36), text, fs, Color.WHITE, sz.x, HORIZONTAL_ALIGNMENT_CENTER)

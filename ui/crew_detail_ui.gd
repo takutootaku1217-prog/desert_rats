@@ -210,16 +210,25 @@ func _build_detail() -> void:
 	var w = _worker
 	if w == null:
 		return
-	var head := HBoxContainer.new()
-	_body.add_child(head)
-	head.add_child(UIKit.lbl(w.char_name, 26, UIKit.C_ACCENT, 150))
-	head.add_child(UIKit.lbl("Lv %d   %s   個体ランク %s   得意分野: %s" % [w.level, GameData.GENDER_NAMES[w.gender],
+	# 上の段: 左に「名前・プロフィール」と「状態」、右に5つのステータス（HP・スタミナ・満腹度・疲労度・精神状態）。カードと同じ部品で、少し大きく出す
+	var top_row := HBoxContainer.new()
+	top_row.add_theme_constant_override("separation", 10)
+	_body.add_child(top_row)
+	var top_left := VBoxContainer.new()
+	top_left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	top_left.add_theme_constant_override("separation", 3)
+	top_row.add_child(top_left)
+	top_left.add_child(UIKit.lbl(w.char_name, 26, UIKit.C_ACCENT))
+	top_left.add_child(UIKit.lbl("Lv %d   %s   個体ランク %s   得意分野: %s" % [w.level, GameData.GENDER_NAMES[w.gender],
 			w.rank_letter(), w.best_fields_text()], 16))
 	var st := HBoxContainer.new()
-	_body.add_child(st)
+	top_left.add_child(st)
 	st.add_child(UIKit.lbl("状態", 14, UIKit.C_DIM, 60))
 	_live["status"] = UIKit.lbl("", 15)
 	st.add_child(_live["status"])
+	var view := CrewStatusView.new().setup(Vector2i(12, 12), 12)
+	top_row.add_child(view)
+	_live["view"] = view
 	if _tab == 0:
 		_build_personnel(w)
 	else:
@@ -347,7 +356,9 @@ func _update_live() -> void:
 	var w = _worker
 	if w == null or not _live.has("status"):
 		return
-	_live["status"].text = "%s     元気 %d / 100     配属: %s" % [w.ai.status_text(), int(w.energy), GameData.FIELD_NAMES[w.dept]]
+	_live["status"].text = "%s     配属: %s" % [w.ai.status_text(), GameData.FIELD_NAMES[w.dept]]
+	if _live.has("view"):
+		_live["view"].update_from(w)
 	for job in GameData.job_list():
 		if job != GameData.Job.REST and _live.has("eff_%d" % job):
 			_live["eff_%d" % job].text = "%s ×%.2f" % [GameData.JOB_NAMES[job], w.skill_mult(job)]

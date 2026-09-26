@@ -338,7 +338,7 @@ func _test_bedroom_move() -> void:
 	Engine.time_scale = 8.0
 	var w = W[1]
 	w.priorities[GameData.Job.REST] = 5
-	w.energy = 10.0
+	w.stamina = 10.0
 	w.ai.on_priority_changed()
 	var t: float = await _until(func(): return w.sleeping, 60.0)
 	check(t >= 0.0 and w.bed_index == 0 and absf(w.position.x - float(GameData.BED_X[0])) < 8.0, "疲れた仲間が、上の階の寝室で眠る（%.0f秒）" % t)
@@ -384,17 +384,17 @@ func _test_engine_fallback() -> void:
 # ---------------------------------------------------------------- 部屋の効果（医務室・食堂）
 func _rest_gain(w) -> float:
 	w.ai.state = CharacterAI.State.REST
-	w.energy = 10.0
+	w.stamina = 10.0
 	w._process(1.0)
-	return w.energy - 10.0
+	return w.stamina - 10.0
 
 
 func _drain(w) -> float:
 	w.ai.state = CharacterAI.State.IDLE
 	w.ai.timer = 100.0
-	w.energy = 80.0
+	w.stamina = 80.0
 	w._process(1.0)
-	return 80.0 - w.energy
+	return 80.0 - w.stamina
 
 
 func _test_effects() -> void:
@@ -431,9 +431,9 @@ func _test_effects() -> void:
 ## 動いている間（待機ではない状態）の、1秒あたりの元気の減り。
 func _drain_working(w) -> float:
 	w.ai.state = CharacterAI.State.COMBAT               # 敵がいないので探し直し（SEARCH）になる。待機ではないので、動いている間の減り方
-	w.energy = 80.0
+	w.stamina = 80.0
 	w._process(1.0)
-	return 80.0 - w.energy
+	return 80.0 - w.stamina
 
 
 # ---------------------------------------------------------------- 画面
@@ -630,7 +630,7 @@ func _soak(title: String, minutes: float, gap_min: float, gap_max: float, stress
 	print("   ワークベンチ %s・ベッド %d・加工 %d 回・回収 %d 個・狩猟 %d・建設 %d・空腹 %s・車体 %.0f・仲間の元気 %s" % [
 			("%.0f秒" % wb_at) if wb_at >= 0.0 else "なし", main.base.facility_count("bed"), main.processor.total_done, main.total_gathered,
 			main.total_hunted, main.total_built, "あり" if main.hungry else "なし", main.base.parts[GameData.Part.HULL],
-			str(W.map(func(w): return int(w.energy)))])
+			str(W.map(func(w): return int(w.stamina)))])
 	check(not main.game_over, "ゲームオーバーにならない")
 	check(done >= (20 if stress else 5), "部屋の変更が何度も行われた（%d回）" % done)
 	if not stress:

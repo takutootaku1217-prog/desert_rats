@@ -3,7 +3,7 @@ extends RefCounted
 ## 遺跡の探索（調査隊の派遣）。データは data/expeditions.gd。Main が毎フレーム tick() を呼ぶ。
 ##  状態: idle（何もない）→ offered（遺跡を見つけた。時間限定）→ running（調査隊が探索中）→ done（結果を表示）→ idle
 ##  調査隊のあいだ、仲間は拠点にいない（Worker.away）。人手が減るぶん、拠点の作業が回りにくくなる。
-##  結果（戦利品・設計図・仲間の元気）は帰還時に反映する。設計図は game.blueprints（部署Lvによる解放の枠組みで使う）。
+##  結果（戦利品・設計図・仲間のスタミナ）は帰還時に反映する。設計図は game.blueprints（部署Lvによる解放の枠組みで使う）。
 
 var game
 var state := "idle"
@@ -16,7 +16,7 @@ var steps: Array = []            # 関門の種類の並び
 var step_i := 0
 var step_left := 0.0
 var step_time := 1.0
-var energy := {}                 # Worker -> 遠征中の元気
+var energy := {}                 # Worker -> 遠征中のスタミナ（以前の「元気」）
 var loot := {}                   # Item -> 個数（倉庫に持ち帰れた分）
 var lost := {}                   # Item -> 個数（積載量がいっぱいで持ち帰れなかった分）
 var blueprint := ""              # 見つけた設計図のid
@@ -77,6 +77,8 @@ func block_reason(members: Array, appr: String, bring_kit: bool) -> String:
 	for w in members:
 		if w.away:
 			return "%s はすでに出かけている" % w.char_name
+		if w.down:
+			return "%s は倒れている（戦闘不能）" % w.char_name
 	if game.storage.count_of(GameData.Item.FOOD) < members.size() * ExpeditionDB.FOOD_PER_MEMBER:
 		return "持たせる食料が足りない（%d個必要）" % (members.size() * ExpeditionDB.FOOD_PER_MEMBER)
 	if bring_kit and game.storage.count_of(GameData.Item.REPAIR_KIT) < 1:
@@ -118,7 +120,7 @@ func start(members: Array, appr: String, bring_kit: bool) -> bool:
 	step_left = step_time
 	energy.clear()
 	for w in party:
-		energy[w] = w.energy
+		energy[w] = w.stamina
 		w.depart()
 	state = "running"
 	stats["trips"] += 1
@@ -175,9 +177,9 @@ func _resolve_step() -> void:
 		else:
 			for w in party:
 				energy[w] = maxf(0.0, energy[w] - float(def["penalty"]))
-			_add_log("%s: %s（全員の元気 -%d）" % [def["name"], def["ng"], int(def["penalty"])])
+			_add_log("%s: %s（全員のスタミナ -%d）" % [def["name"], def["ng"], int(def["penalty"])])
 	step_i += 1
-	# 誰かの元気が尽きたら撤退
+	# 誰かのスタミナが尽きたら撤退
 	var min_e := 999.0
 	for w in party:
 		min_e = minf(min_e, energy[w])

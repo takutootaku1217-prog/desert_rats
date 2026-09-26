@@ -7,7 +7,7 @@ extends RefCounted
 ##   実力 = メンバーの平均 × (1 + PARTY_BONUS × (人数 - 1))   … 人数が多いほど強いが、増やすほど得とは限らない
 ##   成功率 = clamp(BASE_CHANCE + CHANCE_SLOPE × 実力 ÷ 難しさ + 進め方の補正, MIN_CHANCE, MAX_CHANCE)
 ##   難しさ = 遺跡の difficulty × (1 + STEP_GROWTH × 何番目の関門か)
-## 失敗すると全員の元気が減る（0になったら力尽きて撤退）。修理資材を持たせると、最初の失敗の被害を防げる。
+## 失敗すると全員のスタミナが減る（0になったら力尽きて撤退）。修理資材を持たせると、最初の失敗の被害を防げる。
 
 const MAX_PARTY := 3
 const BASE_CHANCE := 0.15
@@ -20,7 +20,7 @@ const FOOD_PER_MEMBER := 1                # 派遣するとき、1人ごとに�
 const COMPLETE_RATIO := 0.6               # 成功がこの割合以上なら「踏破」（おまけの戦利品と設計図のチャンス）
 const RETURN_SECONDS := 6.0               # 結果を画面に出しておく時間（戻ってから）
 
-## 関門の種類。field = 使う分野、penalty = 失敗したときに全員が失う元気
+## 関門の種類。field = 使う分野、penalty = 失敗したときに全員が失うスタミナ
 const STEPS := {
 	"explore": {"name": "探索", "field": GameData.Field.GATHERER, "penalty": 8.0, "loot": 2,
 		"ok": "使えそうな物を見つけた", "ng": "めぼしい物は見つからなかった"},

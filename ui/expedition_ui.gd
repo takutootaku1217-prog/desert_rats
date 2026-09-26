@@ -99,11 +99,11 @@ func _process(delta: float) -> void:
 			_rebuild()
 
 
-## 遠征に出られる仲間（すでに出かけている仲間は除く）
+## 遠征に出られる仲間（すでに出かけている仲間・倒れている仲間は除く）
 func _available() -> Array:
 	var l: Array = []
 	for w in game.workers:
-		if not w.away:
+		if not w.away and not w.down:
 			l.append(w)
 	return l
 

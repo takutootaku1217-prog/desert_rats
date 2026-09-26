@@ -150,6 +150,15 @@ func claim_bed(w) -> int:
 	return -1
 
 
+## 空いているベッドがあるか（取り置きはしない。休憩に入れるかの判断用）
+func has_free_bed() -> bool:
+	var slots: Array = built.get("bed", [])
+	for i in beds.size():
+		if i in slots and (beds[i] == null or not is_instance_valid(beds[i])):
+			return true
+	return false
+
+
 func release_bed(w) -> void:
 	for i in beds.size():
 		if beds[i] == w:

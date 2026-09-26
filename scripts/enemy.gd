@@ -19,7 +19,7 @@ var _flash := 0.0
 var _t := 0.0
 
 const HIT_REACH := 80.0      # 攻撃が仲間に届く距離
-const HIT_TIRE := 2.5        # 攻撃1回で仲間が失う元気
+const HIT_TIRE := 2.5        # 攻撃1回で仲間が失うスタミナ
 
 
 func _init() -> void:
@@ -80,17 +80,20 @@ func _process(delta: float) -> void:
 	queue_redraw()
 
 
-## 近くにいる仲間を1人、疲れさせる。
+## 近くにいる仲間を1人、疲れさせ、ケガをさせる（倒れている仲間は狙わない）。HP の失い方は CrewStatusDB。
 func _hit_nearby_worker() -> void:
 	var best = null
 	var best_d := HIT_REACH * body_scale
 	for w in game.workers:
+		if w.down:
+			continue
 		var d: float = w.position.distance_to(position)
 		if d < best_d:
 			best_d = d
 			best = w
 	if best != null:
-		best.energy = maxf(0.0, best.energy - HIT_TIRE)
+		best.stamina = maxf(0.0, best.stamina - HIT_TIRE)
+		CrewStatus.damage(best, CrewStatusDB.RAID_HIT_HP * body_scale, CrewStatusDB.RAID_HIT_STRESS)
 
 
 func _draw() -> void:

@@ -79,6 +79,10 @@ func _begin_timed(id: String) -> void:
 	_log(d["start_text"])
 	if d["kind"] == "attack":
 		entry["spawned"] = _spawn_enemies(d)
+		if game != null:
+			for w in game.workers:                             # 襲撃が始まると、全員が緊張する（ストレス。精神状態に影響）
+				if not w.away:
+					w.stress += CrewStatusDB.RAID_START_STRESS
 
 
 func _end(a: Dictionary, reason: String) -> void:

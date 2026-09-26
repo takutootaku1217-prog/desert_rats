@@ -1,13 +1,13 @@
 class_name WorkPriorityUI
 extends CanvasLayer
-## 画面上部に並ぶ、仲間ごとの「状態＋元気＋作業優先度」パネル。
+## 画面上部に並ぶ、仲間ごとの「状態＋ステータス（HP・スタミナ・満腹度・疲労度・精神状態）＋作業優先度」パネル。
 ## ボタンは大きめ（タップ想定）。操作はすべて Worker.set_priority() を呼ぶだけなので、
 ## 将来スマホ用UIに差し替えてもゲームロジックには影響しない。
 
 signal worker_selected(worker)
 
 var workers: Array = []
-var _cards := {}   # Worker -> {status, stars, energy, style}
+var _cards := {}   # Worker -> {status, stars, view（CrewStatusView）, style}
 
 const C_BG := Color("1b1e24")
 const C_EDGE := Color("636b7a")
@@ -56,21 +56,9 @@ func _make_card(w) -> Control:
 	status.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	status.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	head.add_child(status)
-	# 元気ゲージ
-	var erow := HBoxContainer.new()
-	v.add_child(erow)
-	var el := GameData.make_label("元気", 13, Color("cfe6ff"))
-	el.custom_minimum_size = Vector2(48, 0)
-	erow.add_child(el)
-	var bar := ProgressBar.new()
-	bar.min_value = 0
-	bar.max_value = 100
-	bar.show_percentage = false
-	bar.custom_minimum_size = Vector2(200, 10)
-	bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	bar.add_theme_stylebox_override("background", _box(Color("0d0f12"), Color("3a3f4a"), 2))
-	bar.add_theme_stylebox_override("fill", _box(Color("7be07b"), Color("7be07b"), 0))
-	erow.add_child(bar)
+	# ステータス: HP・スタミナ・満腹度・疲労度の「アイコン自体がゲージ」と、精神状態の顔（ui/crew_status_view.gd。値は Worker から読むだけ）
+	var view := CrewStatusView.new().setup(Vector2i(8, 8), 11)
+	v.add_child(view)
 	# 仕事の優先度（6つあるので2列に並べる）
 	var stars := {}
 	var grid := GridContainer.new()
@@ -92,7 +80,7 @@ func _make_card(w) -> Control:
 		row.add_child(star)
 		row.add_child(_make_button("＋", func(): _change(w, job, 1)))
 		stars[job] = star
-	_cards[w] = {"status": status, "stars": stars, "energy": bar, "style": sb}
+	_cards[w] = {"status": status, "stars": stars, "view": view, "style": sb}
 	return panel
 
 
@@ -124,10 +112,7 @@ func _process(_delta: float) -> void:
 	for w in _cards:
 		var c: Dictionary = _cards[w]
 		c["status"].text = w.ai.status_text()
-		var e: float = w.energy
-		c["energy"].value = e
-		var fill: StyleBoxFlat = c["energy"].get_theme_stylebox("fill")
-		fill.bg_color = Color("7be07b") if e > 50.0 else (Color("f0c040") if e > 25.0 else Color("e0533d"))
+		c["view"].update_from(w)
 		for job in GameData.job_list():
 			var n: int = w.priorities.get(job, 0)
 			c["stars"][job].text = "★%d" % n if n > 0 else "─"

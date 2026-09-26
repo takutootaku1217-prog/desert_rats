@@ -25,7 +25,15 @@ var speed := 120.0
 var target := Vector2.ZERO
 var slot_offset := Vector2.ZERO   # 作業場所で重ならないようにするずらし
 var selected := false
-var energy := 100.0               # 元気（休憩で回復する）
+# ---- ステータス（設定は data/crew_status.gd、計算は scripts/crew_status.gd。ここは仲間ごとのデータ。表示は読むだけ）----
+var hp := CrewStatusDB.START_HP                 # HP（0で戦闘不能）
+var stamina := CrewStatusDB.START_STAMINA       # スタミナ（以前の「元気」。休憩で回復する）
+var hunger := CrewStatusDB.START_HUNGER         # 満腹度（100 = 満腹）
+var fatigue := CrewStatusDB.START_FATIGUE       # 疲労度（高いほど悪い）
+var stress := 0.0                               # 危険な出来事の一時的なストレス（時間で消える）
+var calm := 0.0                                 # 落ち着いていた時間（精神状態「好調」の条件）
+var mental: int = CrewStatusDB.Mental.NORMAL    # 精神状態（疲労度などから計算される。CrewStatus.mental_of）
+var down := false                               # 戦闘不能（HP 0）。倒れている
 var floor_i := 1                  # 今いる階（0=地面 1=下の階 2=上の階）
 var facing := 1.0
 var ai: CharacterAI
@@ -80,8 +88,8 @@ func set_priority(job: int, value: int) -> void:
 	ai.on_priority_changed()   # 優先度が変わったら仕事を選び直す
 
 
-## 調査隊として出発する。仕事を中断して、持っていた物・予約を元に戻し、拠点から姿を消す。
-func depart() -> void:
+## 仕事を中断する（調査隊として出発するとき・倒れたとき）。運んでいた材料や持っていた物は倉庫へ戻し、予約を解放する。
+func stop_work() -> void:
 	var a := ai
 	match a.state:
 		CharacterAI.State.HAUL_MOVE:              # 加工設備へ運んでいる材料は倉庫へ戻す
@@ -108,6 +116,12 @@ func depart() -> void:
 		carry_n = 1
 		carry_bonus = {}
 	a._release_task()
+
+
+## 調査隊として出発する。仕事を中断して、持っていた物・予約を元に戻し、拠点から姿を消す。
+func depart() -> void:
+	var a := ai
+	stop_work()
 	a._set_state(CharacterAI.State.IDLE)
 	a.timer = 9999.0
 	away = true
@@ -116,12 +130,12 @@ func depart() -> void:
 	position = Vector2(-2000.0, GameData.LO_Y)     # 敵の攻撃やクリックの対象にならない場所
 
 
-## 調査隊から戻る。斜路の下に現れ、元気を引き継ぐ。
+## 調査隊から戻る。斜路の下に現れ、スタミナを引き継ぐ。
 func arrive(new_energy: float) -> void:
 	away = false
 	visible = true
 	set_process(true)
-	energy = new_energy
+	stamina = new_energy
 	floor_i = 0
 	position = GameData.RAMP_FOOT + Vector2(randf_range(-30.0, 30.0), 0.0)
 	target = position
@@ -148,15 +162,13 @@ func skill_mult(job: int) -> float:
 
 
 ## 分野ごとの作業の速さ（加工ではレシピの分野を使う。調理なら料理人のランク）。
-## 空腹のときは遅くなる。
+## ステータス（スタミナ・満腹度・疲労度・HP・精神状態）が悪いと遅くなる（CrewStatus.work_mult）。
 func field_mult(f: int) -> float:
 	var r: int = ranks.get(f, 0)
 	var s: int = best_rank()
 	var m := 0.75 + 0.1 * r + 0.02 * s + 0.02 * (level - 1)
 	m *= 1.0 + 0.05 * (GameData.field_level(game.workers, f) - 1)
-	if game.hungry:
-		m *= GameData.HUNGRY_MULT
-	return m * game.director.work_mult()      # 襲撃で防備を固めているあいだは作業が遅くなる
+	return m * game.director.work_mult() * CrewStatus.work_mult(self)      # 襲撃で防備を固めているあいだは作業が遅くなる。ステータスが悪いときも
 
 
 ## 個体ランク = その個体が持つ分野ランクの最高値（別の能力値ではない）。
@@ -192,14 +204,9 @@ func rank_text(field: int) -> String:
 	return GameData.RANKS[ranks.get(field, 0)]
 
 
-## 疲れると動きが遅くなる。
+## ステータスが悪いと移動が遅くなる（スタミナ・満腹度・疲労度・HP のうち、いちばん悪いもの。CrewStatus.move_mult）。
 func current_speed() -> float:
-	var sp := speed
-	if game != null and game.hungry:
-		sp *= GameData.HUNGRY_MULT          # 空腹だと移動も遅い
-	if energy >= 25.0:
-		return sp
-	return sp * (0.5 + 0.5 * energy / 25.0)
+	return speed * CrewStatus.move_mult(self)
 
 
 ## target へ向かって1歩進む。到着したら true。
@@ -254,21 +261,12 @@ func _process(delta: float) -> void:
 	sleeping = false
 	pose = ""
 	ai.tick(delta)
-	# 元気の増減
-	if sleeping:
-		# 車体が傷んでいると（居住区が傷んで）よく休めない
-		var rec := 9.0 if game.base.condition(GameData.Part.HULL) >= GameData.PART_BAD else 4.5
-		rec *= 1.0 + game.room_effect("rest_rate")           # 医務室（部屋の変更。data/rooms.gd）で回復が早くなる
-		energy = minf(100.0, energy + rec * delta)
-	elif ai.state == CharacterAI.State.IDLE:
-		energy = maxf(0.0, energy - 0.25 * game.director.energy_mult() * (1.0 - game.room_effect("drain_cut")) * delta)
-	else:
-		energy = maxf(0.0, energy - 0.7 * game.director.energy_mult() * (1.0 - game.room_effect("drain_cut")) * delta)   # 酷暑などで疲れやすくなる。食堂で減る
+	CrewStatus.tick(self, delta)                  # スタミナ・満腹度・疲労度・HP・精神状態の増減（scripts/crew_status.gd）
 	queue_redraw()
 
 
 func _frame() -> int:
-	if sleeping:
+	if sleeping or down:                     # 眠っている・倒れている（戦闘不能）
 		return F_SLEEP
 	if _climb_dest != null and _climb_kind == "ladder":
 		return F_CLIMB0 + (int(_t * 8.0) % 2)
@@ -317,3 +315,33 @@ func _draw() -> void:
 	else:
 		GameData.draw_text(self, snap + Vector2(0, top - 4), ai.status_text(), 12, Color("fde68a"), 150.0)
 	GameData.draw_text(self, snap + Vector2(0, 22), char_name, 12, Color.WHITE, 90.0)
+	# 頭上の警告: 危険なステータスのうち、いちばん危険なものを1つだけ（CrewStatus.warning）。眠っている間は出さない
+	if not sleeping:
+		var warn := CrewStatus.warning(self)
+		if not warn.is_empty():
+			_draw_warning(snap + Vector2(0, top - 28.0), warn)
+
+
+## 頭上の警告の吹き出し。at = 吹き出しの下端の中心。中にそのステータスのアイコン（警告色）。危険（strong）なら点滅する。
+## 絵は assets/ui のアイコンと同じもの（表示の大きさは基準の大きさ×UNIT_PX）。見た目は差し替えられる。
+func _draw_warning(at: Vector2, warn: Dictionary) -> void:
+	var strong: bool = warn["strong"]
+	var col: Color = CrewStatusDB.COLOR_DANGER if strong else CrewStatusDB.COLOR_WARN
+	var a := 1.0
+	if strong:
+		a = 0.55 + 0.45 * (0.5 + 0.5 * sin(_t * 8.0))
+	var icon := ArtSpec.px_size(Vector2i(8, 8))
+	var pad := 4.0
+	var box := Rect2(at + Vector2(-icon.x / 2.0 - pad, -icon.y - pad * 2.0), icon + Vector2(pad * 2.0, pad * 2.0))
+	draw_rect(box, Color(0.08, 0.09, 0.11, 0.9 * a))
+	draw_rect(box, Color(col.r, col.g, col.b, a), false, 2.0)
+	var mid := box.position.x + box.size.x / 2.0
+	draw_colored_polygon(PackedVector2Array([Vector2(mid - 5.0, box.end.y), Vector2(mid + 5.0, box.end.y), Vector2(mid, box.end.y + 7.0)]), Color(col.r, col.g, col.b, a))
+	var r := Rect2(box.position + Vector2(pad, pad), icon)
+	var stat := String(warn["stat"])
+	if stat == "mental":
+		draw_texture_rect(GameData.tex("res://assets/ui/mental_limit.png"), r, false, Color(col.r, col.g, col.b, a))
+	else:
+		var file := String(CrewStatusDB.ICON_FILES[stat])
+		draw_texture_rect(GameData.tex("res://assets/ui/%s_mask.png" % file), r, false, Color(col.r, col.g, col.b, a))   # 中身を警告色で塗る
+		draw_texture_rect(GameData.tex("res://assets/ui/%s.png" % file), r, false, Color(1, 1, 1, a))
