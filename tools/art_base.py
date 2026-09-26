@@ -435,15 +435,17 @@ def slot_crop_rect(slot):
     return (s["x0"], s["top"] - 2, s["x1"] + 1, s["feet"])     # (left, top, right, bottom)
 
 
-def room_overlays():
+def room_overlays(furnish=False):
     """入れ替えできる全ての（区画, 部屋の種類）について、その区画に重ねる絵を作る。
-    その部屋だけを置いた車体を描いて、区画の範囲を切り出す（隔壁やハシゴの一部も含むので、そのまま重ねられる）。"""
+    その部屋だけを置いた車体を描いて、区画の範囲を切り出す（隔壁やハシゴの一部も含むので、そのまま重ねられる）。
+    furnish=False（ゲームで使う版）は、建設で増える家具（ワークベンチ・ベッド）を描かない（hull.png と同じ扱い）。
+    furnish=True は、旧版の重ね絵（家具つき）と同じ絵になる。"""
     out = []
     for slot in SLOT_ORDER:
         for rtype, floors_ok in ROOM_FLOORS.items():
             if slot[0] not in floors_ok:
                 continue
-            hull = build_hull({slot: rtype})
+            hull = build_hull({slot: rtype}, furnish=furnish)
             l, t, r, b = slot_crop_rect(slot)
             crop = Px(r - l, b - t)
             crop.im.paste(hull.im.crop((l, t, r, b)), (0, 0))

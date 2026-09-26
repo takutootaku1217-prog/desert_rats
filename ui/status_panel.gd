@@ -13,7 +13,7 @@ var _bars := {}        # key -> ProgressBar
 var _nums := {}        # key -> Label
 
 const W := 272.0
-const GAUGE_Y := 404.0      # アイコンゲージの枠の位置（右のボタン「建設 (B)」の下）
+const GAUGE_Y := 440.0      # アイコンゲージの枠の位置（右のボタン「建設 (B)」「部屋の変更 (R)」の下）
 
 
 func _ready() -> void:

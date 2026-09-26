@@ -1,6 +1,7 @@
 class_name BuildUI
 extends CanvasLayer
 ## 建設・製作の画面（Bキーまたは右の「建設 (B)」ボタン）。検証用の簡単な画面。見た目は後で大きく変える前提。
+## 建設 = 部屋の中に設備を足す（ワークベンチは加工室、ベッドは寝室の中）。車体の区画そのものを変える「部屋の変更」は別の画面（ui/base_ui.gd。Rキー）。
 ##  左: 建設（拠点に設備を建てる）。材料の在庫・必要設備・状態を見て、［建設を依頼する］。あとは仲間が材料を運んで作る。
 ##  右: 製作（仲間が自動で作る物）。手作業（加工設備）でできる物と、設備が必要な物（設備ができるまで「まだ作れない」）。
 ## 表の中身は data/facilities.gd（設備）と GameData.RECIPES（製作物。"station" が必要設備）。行は最初に一度だけ作り、
@@ -52,6 +53,9 @@ func _ready() -> void:
 	var title := UIKit.lbl("建設・製作", 22, UIKit.C_ACCENT)
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top.add_child(title)
+	top.add_child(UIKit.button("部屋の変更へ (R)", func():
+		close()
+		game.room_ui.open()))                      # 車体の区画そのものを変える画面（ui/base_ui.gd）。建設は「部屋の中に設備を足す」
 	top.add_child(UIKit.button("閉じる (B / Esc)", close))
 	root.add_child(UIKit.lbl("何を作るかを決めると、仲間が材料を運んで作ります。材料が足りないうちは、集まるまで取っておきます。", 13, UIKit.C_DIM))
 	var cols := HBoxContainer.new()
@@ -77,6 +81,7 @@ func toggle() -> void:
 
 
 func open() -> void:
+	game.close_other_panels(self)
 	_overlay.visible = true
 	_refresh()
 

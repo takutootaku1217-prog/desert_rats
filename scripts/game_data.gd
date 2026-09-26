@@ -272,6 +272,8 @@ const RAMP_TOP := Vector2(904, 484)
 const RAMP_FOOT := Vector2(992, 548)
 const GROUND_Y_MIN := 556.0
 const GROUND_Y_MAX := 700.0
+## 以下は、部屋の初期配置（data/rooms.gd の DEFAULT_LAYOUT）での位置。実際の位置は部屋の変更で動くので、
+## ゲームは Rooms の位置（processor_pos / storage_pos / engine_pos / floor_pos）を使う。ここは基準の値と、最初の仲間の位置にだけ使う。
 const MACHINE_X := 340.0                    # 加工設備（上の階）
 const STORAGE_X := 640.0                    # 倉庫（下の階）
 const BED_X := [540.0, 600.0, 660.0]        # ベッド（上の階）

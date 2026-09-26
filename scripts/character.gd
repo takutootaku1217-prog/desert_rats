@@ -259,11 +259,12 @@ func _process(delta: float) -> void:
 	if sleeping:
 		# 車体が傷んでいると（居住区が傷んで）よく休めない
 		var rec := 9.0 if game.base.condition(GameData.Part.HULL) >= GameData.PART_BAD else 4.5
+		rec *= 1.0 + game.room_effect("rest_rate")           # 医務室（部屋の変更。data/rooms.gd）で回復が早くなる
 		energy = minf(100.0, energy + rec * delta)
 	elif ai.state == CharacterAI.State.IDLE:
-		energy = maxf(0.0, energy - 0.25 * game.director.energy_mult() * delta)
+		energy = maxf(0.0, energy - 0.25 * game.director.energy_mult() * (1.0 - game.room_effect("drain_cut")) * delta)
 	else:
-		energy = maxf(0.0, energy - 0.7 * game.director.energy_mult() * delta)   # 酷暑などで疲れやすくなる
+		energy = maxf(0.0, energy - 0.7 * game.director.energy_mult() * (1.0 - game.room_effect("drain_cut")) * delta)   # 酷暑などで疲れやすくなる。食堂で減る
 	queue_redraw()
 
 

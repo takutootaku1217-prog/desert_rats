@@ -162,12 +162,13 @@ func access_point() -> Vector2:
 
 
 func _draw() -> void:
+	# 倉庫の中心（初期配置では x = GameData.STORAGE_X）からの相対で並べる。部屋の変更で倉庫が別の区画へ移っても、その中に描かれる
 	# 素材: 棚の上（棚板の上面 = 足元から56px上）。少し小さめに7種並べる
 	for i in GameData.RAW_ITEMS.size():
-		_slot(GameData.RAW_ITEMS[i], RAW_X0 + i * RAW_DX - position.x, -56.0, 36.0)
+		_slot(GameData.RAW_ITEMS[i], RAW_X0 - GameData.STORAGE_X + i * RAW_DX, -56.0, 36.0)
 	# 加工品: 床の上
 	for i in GameData.PRODUCT_ITEMS.size():
-		_slot(GameData.PRODUCT_ITEMS[i], PROD_X0 + i * PROD_DX - position.x, 0.0, 44.0)
+		_slot(GameData.PRODUCT_ITEMS[i], PROD_X0 - GameData.STORAGE_X + i * PROD_DX, 0.0, 44.0)
 
 
 func _slot(item: int, cx: float, base_y: float, sz: float) -> void:

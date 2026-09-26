@@ -7,6 +7,13 @@ extends RefCounted
 ## 仕組み: 車体の絵 hull.png は初期配置の部屋が焼き込まれている。入れ替え可能な4つの区画には、
 ## 部屋の種類ごとの重ね絵を上から描いて見た目を変える。加工設備・倉庫・ベッドの位置も区画から決まる。
 ## コックピット（上階・右）と搬入口（下階・右）は入れ替えできない（斜路・動線の要のため）。
+##
+## 建設（data/facilities.gd。ワークベンチ・ベッド）との役割分担:
+##   部屋の変更 = 車体の区画そのものを、どの部屋にするか（この表。画面は ui/base_ui.gd の「部屋の変更 (R)」）
+##   建設       = 部屋の中に設備を足す（FacilityDB。"room" が、どの部屋の中に置くか）。部屋を移すと、中の設備も一緒に動く。
+## 現行ゲームの機能を持つ部屋（加工室・寝室・倉庫・機関室）は unique（拠点に1つ）。別の区画に建てると移設になり、
+## 加工設備・倉庫・ベッド・ワークベンチも新しい区画へ移る（MobileBase.apply_layout / facility_spots）。
+## 部屋の変更は、その場で倉庫の材料を使って行う（仲間の作業は要らない。建設のような取り置きもしない）。
 
 const PX := GameData.PX
 const STYLE := "desert"        # 見た目の系統。将来サイバーパンクなどを足すときはここを切り替える
@@ -29,38 +36,41 @@ const FIXED := [
 ]
 
 ## 部屋の種類。
-##  floors: 置ける階（u=上 l=下）  cost: 建てる費用  min_base_level: 必要な拠点レベル
-##  unique: 拠点に1つだけ（別の区画に建てると、元の区画は空き部屋になる＝移設）
-##  required: 最低1つは必要（最後の1つは壊せない）
-##  effects: [{kind, value}]  kind は host_processor / host_storage / beds / rest_rate / drain_cut / train_xp
+##  floors: 置ける階（u=上 l=下）  cost: 建てる費用（現行の GameData.Item だけ。倉庫の枠に収まる量）  min_base_level: 必要な拠点レベル
+##  unique: 拠点に1つだけ（別の区画に建てると、元の区画は空き部屋になる＝移設。中の設備も一緒に移る）
+##  required: 最低1つは必要（最後の1つは壊せない）。加工室・寝室・倉庫は、なくなるとゲームが回らないので必須。
+##    機関室は必須にしない（区画を空けるため）。ないときは、燃料を搬入口で補給する（MobileBase.engine_point）。
+##  effects: [{kind, value}]  kind は host_processor / host_storage / rest_rate / drain_cut / train_xp
+##    rest_rate（休憩の回復）と drain_cut（元気の消耗）は Worker が読む（Main.room_effect）。train_xp は訓練の仕組みがまだないので未使用。
+## 費用は、旧版の素材を今の素材に置き換えたもの（金属→鉄、板材→木材、布→皮、骨の加工品→骨）を、今の素材の集まりやすさに合わせて調整した。
 const TYPES := {
 	"workshop": {"name": "加工室", "floors": "ul", "unique": true, "required": true, "min_base_level": 1,
-		"cost": {GameData.Item.METAL: 3, GameData.Item.PLANK: 2},
-		"desc": "加工設備が置かれる。素材を加工品にする。",
+		"cost": {GameData.Item.WOOD: 3, GameData.Item.IRON: 2},
+		"desc": "加工設備とワークベンチを置く部屋。移すと中の物も一緒に動く。",
 		"effects": [{"kind": "host_processor", "value": 1}]},
-	"bedroom": {"name": "寝室", "floors": "ul", "unique": false, "required": true, "min_base_level": 1,
-		"cost": {GameData.Item.FABRIC: 3, GameData.Item.PLANK: 2},
-		"desc": "ベッドが3つ。増やすと同時に休める人数が増える。",
-		"effects": [{"kind": "beds", "value": 3}]},
+	"bedroom": {"name": "寝室", "floors": "ul", "unique": true, "required": true, "min_base_level": 1,
+		"cost": {GameData.Item.HIDE: 3, GameData.Item.WOOD: 2},
+		"desc": "ベッドを置く部屋（ベッドは 建設 (B) で最大3つ）。移すとベッドも一緒に動く。",
+		"effects": []},
 	"storage": {"name": "倉庫", "floors": "l", "unique": true, "required": true, "min_base_level": 1,
-		"cost": {GameData.Item.PLANK: 4, GameData.Item.METAL: 1},
-		"desc": "素材と加工品の棚。",
+		"cost": {GameData.Item.WOOD: 4, GameData.Item.STONE: 3},
+		"desc": "素材棚と加工品置き場。移すと中の物も一緒に動く。",
 		"effects": [{"kind": "host_storage", "value": 1}]},
-	"engine": {"name": "機関室", "floors": "l", "unique": false, "required": false, "min_base_level": 1,
-		"cost": {GameData.Item.METAL: 4, GameData.Item.BONE_PROD: 1},
-		"desc": "ボイラーと歯車。今は飾り（将来は動力・進行速度に関わる）。",
+	"engine": {"name": "機関室", "floors": "l", "unique": true, "required": false, "min_base_level": 1,
+		"cost": {GameData.Item.IRON: 2, GameData.Item.STONE: 2},
+		"desc": "ボイラーと炉。燃料はここで補給する（ないときは搬入口で補給）。",
 		"effects": []},
 	"infirmary": {"name": "医務室", "floors": "ul", "unique": false, "required": false, "min_base_level": 1,
-		"cost": {GameData.Item.FABRIC: 3, GameData.Item.BONE_PROD: 2},
+		"cost": {GameData.Item.HIDE: 3, GameData.Item.BONE: 2},
 		"desc": "休憩中の元気の回復が早くなる（1室ごとに +25%）。",
 		"effects": [{"kind": "rest_rate", "value": 0.25}]},
 	"mess": {"name": "食堂", "floors": "ul", "unique": false, "required": false, "min_base_level": 1,
-		"cost": {GameData.Item.FOOD: 3, GameData.Item.PLANK: 2},
-		"desc": "仲間の元気が減りにくくなる（1室ごとに -12%）。",
+		"cost": {GameData.Item.FOOD: 3, GameData.Item.WOOD: 2},
+		"desc": "仲間の元気が減りにくくなる（1室ごとに -12%。合計で最大 -50%）。",
 		"effects": [{"kind": "drain_cut", "value": 0.12}]},
 	"training": {"name": "訓練室", "floors": "ul", "unique": false, "required": false, "min_base_level": 2,
-		"cost": {GameData.Item.METAL: 2, GameData.Item.BONE_PROD: 3},
-		"desc": "「訓練」で得られる経験値が増える（1室ごとに +50%）。",
+		"cost": {GameData.Item.IRON: 2, GameData.Item.BONE: 3},
+		"desc": "「訓練」で得られる経験値が増える（1室ごとに +50%）。訓練の仕組みと拠点レベルは、まだない。",
 		"effects": [{"kind": "train_xp", "value": 0.5}]},
 	"empty": {"name": "空き部屋", "floors": "ul", "unique": false, "required": false, "min_base_level": 1,
 		"cost": {},
@@ -71,10 +81,6 @@ const TYPES := {
 const TYPE_ORDER := ["workshop", "bedroom", "storage", "engine", "infirmary", "mess", "training", "empty"]
 
 const CAP_DRAIN_CUT := 0.5            # 食堂で元気の消耗を減らせる上限
-
-## 医務部の解放（Unlocks の bed_cap）で増えるベッドは、hull.png に描かれた寝室とは別に、
-## 操縦室の床に簡易の敷物として置く。
-const EXTRA_BED_POINTS := [Vector2(808.0, 354.0), Vector2(852.0, 354.0)]
 
 
 # ------------------------------------------------------------------
@@ -90,6 +96,14 @@ static func count(layout: Dictionary, rtype: String) -> int:
 		if layout.get(s, "") == rtype:
 			n += 1
 	return n
+
+
+## その種類の部屋がある区画（unique な部屋は1つだけ。複数あれば区画の順で最初。なければ ""）。
+static func slot_of(layout: Dictionary, rtype: String) -> String:
+	for s in SLOT_ORDER:
+		if layout.get(s, "") == rtype:
+			return s
+	return ""
 
 
 static func can_place(rtype: String, slot: String) -> bool:
@@ -197,9 +211,16 @@ static func storage_pos(slot: String) -> Vector2:
 	return Vector2(GameData.HULL_POS.x + float(SLOTS[slot]["x0"] + 34) * PX, slot_feet_y(slot))
 
 
-## 寝室のベッドの位置（3つ。区画の左から 9・24・39 ドット）
-static func bed_points_of(slot: String) -> Array:
-	var l: Array = []
-	for i in 3:
-		l.append(Vector2(GameData.HULL_POS.x + float(SLOTS[slot]["x0"] + 9 + 15 * i) * PX, slot_feet_y(slot)))
-	return l
+## 機関室の燃料の投入口（炉の口。区画の左から36ドット）
+static func engine_pos(slot: String) -> Vector2:
+	return Vector2(GameData.HULL_POS.x + float(SLOTS[slot]["x0"] + 36) * PX, slot_feet_y(slot))
+
+
+## 機関室がないときの燃料の投入口（下の階の搬入口の中。搬入口は入れ替えできない固定の部屋）
+static func fallback_fuel_pos() -> Vector2:
+	return Vector2(GameData.HULL_POS.x + 165.0 * PX, GameData.LO_Y)
+
+
+## 区画の中の、足元の位置。dx = 区画の左端からのドット数（設備の中心。data/facilities.gd の "dx"）。
+static func floor_pos(slot: String, dx: float) -> Vector2:
+	return Vector2(GameData.HULL_POS.x + (float(SLOTS[slot]["x0"]) + dx) * PX, slot_feet_y(slot))

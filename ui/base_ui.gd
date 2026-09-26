@@ -1,8 +1,10 @@
 class_name BaseUI
 extends CanvasLayer
-## 拠点画面。Bキーまたは右上のボタンで開閉する。
-## 左: 拠点レベル・収容人数・部屋の効果と、区画（部屋の場所）の一覧。右: 選んだ区画に建てられる部屋の一覧。
-## 部屋は「建てる」で入れ替わる（費用は加工品）。加工設備・倉庫・ベッドの位置も部屋に合わせて移る。
+## 部屋の変更の画面。Rキーか、右の「部屋の変更 (R)」ボタン（建設・製作の画面からも開ける）。Bキーは建設・製作の画面に譲った。
+## 車体そのものの区画（上階・左右／下階・左右）を、どの部屋にするかを決める（空き → 建てる → 別の部屋へ建て替える）。
+## 設備（ワークベンチ・ベッド）を部屋の中に足す「建設」（ui/build_ui.gd）とは別。見た目は検証用で、後で変える前提。
+## 左: 車体の断面図（区画を押して選ぶ。変更はすぐ絵に出る）と、部屋の効果・区画の一覧。右: 選んだ区画に建てられる部屋の一覧。
+## 部屋は「建てる」で入れ替わる（材料は倉庫から）。加工設備・倉庫・ワークベンチ・ベッドの位置も部屋に合わせて移る。
 
 var game
 var _slot := "u1"              # 選択中の区画
@@ -11,21 +13,22 @@ var _left: VBoxContainer
 var _right: VBoxContainer
 var _timer := 0.0
 
-const C_TEXT := Color("ffe9b0")
-const C_DIM := Color("9aa3b2")
-const C_ACCENT := Color("f2c14e")
+const C_TEXT := UIKit.C_TEXT
+const C_DIM := UIKit.C_DIM
+const C_ACCENT := UIKit.C_ACCENT
 const C_OK := Color("86efac")
 const C_BAD := Color("f87171")
+const HULL_SCALE := 2                 # 断面図の拡大（ドット1つを何pxで描くか）
 
 
 func _ready() -> void:
-	layer = 22
+	layer = 24
 	var btn_layer := CanvasLayer.new()
 	btn_layer.layer = 12
 	add_child(btn_layer)
-	var btn := GameData.make_button("拠点 (B)", toggle)
-	btn.position = Vector2(1000, 210)
-	btn.custom_minimum_size = Vector2(272, 34)
+	var btn := UIKit.button("部屋の変更 (R)", toggle)
+	btn.position = Vector2(1000, 398)
+	btn.custom_minimum_size = Vector2(272, 32)
 	btn_layer.add_child(btn)
 	_overlay = Control.new()
 	_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -39,25 +42,29 @@ func _ready() -> void:
 			close())
 	_overlay.add_child(dim)
 	var panel := PanelContainer.new()
-	panel.add_theme_stylebox_override("panel", GameData.panel_box(Color("1b1e24", 0.98), Color("636b7a"), 4, 12))
-	panel.position = Vector2(80, 24)
-	panel.custom_minimum_size = Vector2(1120, 672)
+	panel.add_theme_stylebox_override("panel", UIKit.box(Color("1b1e24", 0.98), Color("636b7a"), 4, 12))
+	panel.position = Vector2(60, 18)
+	panel.custom_minimum_size = Vector2(1160, 672)
 	_overlay.add_child(panel)
 	var root := VBoxContainer.new()
 	root.add_theme_constant_override("separation", 6)
 	panel.add_child(root)
 	var top := HBoxContainer.new()
+	top.add_theme_constant_override("separation", 8)
 	root.add_child(top)
-	var title := GameData.make_label("拠点（部屋を建て替える）", 22, C_ACCENT)
+	var title := UIKit.lbl("部屋の変更（車体の区画を、どの部屋にするか）", 22, C_ACCENT)
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top.add_child(title)
-	top.add_child(GameData.make_button("閉じる (B / Esc)", close))
+	top.add_child(UIKit.button("建設・製作へ (B)", func():
+		close()
+		game.build_ui.open()))
+	top.add_child(UIKit.button("閉じる (R / Esc)", close))
 	var cols := HBoxContainer.new()
 	cols.add_theme_constant_override("separation", 16)
 	cols.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	root.add_child(cols)
 	_left = VBoxContainer.new()
-	_left.custom_minimum_size = Vector2(340, 0)
+	_left.custom_minimum_size = Vector2(380, 0)
 	_left.add_theme_constant_override("separation", 6)
 	cols.add_child(_left)
 	var scroll := ScrollContainer.new()
@@ -75,18 +82,32 @@ func toggle() -> void:
 	if _overlay.visible:
 		close()
 	else:
-		game.close_other_panels(self)
-		_overlay.visible = true
-		_rebuild()
+		open()
+
+
+func open() -> void:
+	game.close_other_panels(self)
+	_overlay.visible = true
+	_rebuild()
 
 
 func close() -> void:
 	_overlay.visible = false
 
 
+func is_open() -> bool:
+	return _overlay.visible
+
+
+## 画面で選んでいる区画を変える（画面の操作と同じ。確認用にも使う）
+func select_slot(s: String) -> void:
+	_slot = s
+	_rebuild()
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
-		if event.keycode == KEY_B:
+		if event.keycode == KEY_R:
 			toggle()
 		elif event.keycode == KEY_ESCAPE and _overlay.visible:
 			close()
@@ -101,16 +122,11 @@ func _process(delta: float) -> void:
 
 
 func _clear(node: Node) -> void:
-	for c in node.get_children():
-		node.remove_child(c)
-		c.queue_free()
+	UIKit.clear(node)
 
 
 func _lbl(text: String, size: int = 15, color: Color = C_TEXT, minw: float = 0.0) -> Label:
-	var l := GameData.make_label(text, size, color)
-	if minw > 0.0:
-		l.custom_minimum_size = Vector2(minw, 0)
-	return l
+	return UIKit.lbl(text, size, color, minw)
 
 
 ## 幅に収まるよう折り返す説明文（長い文が画面の外へ広がらないように）
@@ -123,8 +139,7 @@ func _note(text: String, size: int = 12, color: Color = C_DIM, minw: float = 320
 
 
 func _select_slot(s: String) -> void:
-	_slot = s
-	_rebuild()
+	select_slot(s)
 
 
 func _rebuild() -> void:
@@ -136,27 +151,69 @@ func _rebuild() -> void:
 
 func _rebuild_left() -> void:
 	_clear(_left)
-	var lv: int = game.base_level()
-	var nxt: int = game.base_level_next_points()
-	_left.add_child(_lbl("拠点レベル Lv%d" % lv, 22, C_ACCENT))
-	var prog := "MAX" if nxt < 0 else "部署の育ち %d / %d 点（次のLvまで）" % [game.base_level_points(), nxt]
-	_left.add_child(_note(prog, 13))
-	_left.add_child(_lbl("収容人数 %d / %d匹" % [game.workers.size(), game.max_crew()], 15))
-	var beds: int = game.base.bed_capacity()
-	_left.add_child(_lbl("ベッド %d（寝室 %d室）" % [beds, Rooms.count(game.room_layout, "bedroom")], 15))
+	_left.add_child(_lbl("── 車体（区画を押して選ぶ） ──", 14, C_DIM))
+	_left.add_child(_hull_view())
 	var fx := _fx_text()
 	_left.add_child(_note(fx if fx != "" else "部屋の効果: なし", 13))
-	var sp := Control.new()
-	sp.custom_minimum_size = Vector2(0, 8)
-	_left.add_child(sp)
-	_left.add_child(_lbl("── 区画（押して選ぶ） ──", 14, C_DIM))
+	_left.add_child(_lbl("── 区画の一覧 ──", 14, C_DIM))
 	_left.add_child(_lbl("上の階", 13, C_DIM))
 	_left.add_child(_slot_row(["u1", "u2"], Rooms.FIXED[0]["name"]))
 	_left.add_child(_lbl("下の階", 13, C_DIM))
 	_left.add_child(_slot_row(["l1", "l2"], Rooms.FIXED[1]["name"]))
-	_left.add_child(_note("操縦室・搬入口は入れ替えできません。"))
-	_left.add_child(_note("加工室と倉庫は1つだけ。別の区画に建てると移設になり、元の区画は空き部屋になります。"))
-	_left.add_child(_note("寝室・加工室・倉庫は、最後の1つを壊せません。"))
+	_left.add_child(_note("操縦室・搬入口は入れ替えできません。加工室・寝室・倉庫・機関室は拠点に1つだけ。"
+			+ "別の区画に建てると移設になり、中の設備も一緒に動きます（元の区画は空き部屋）。"))
+	_left.add_child(_note("加工室・寝室・倉庫は、なくせません。機関室は壊せます（燃料は搬入口で補給）。"))
+	_left.add_child(_note("ワークベンチ・ベッドは、この画面ではなく「建設・製作 (B)」で部屋の中に建てます。"))
+
+
+## 車体の断面図（車体の絵に、区画ごとの部屋の絵を重ねたもの。ゲーム画面と同じ絵）。区画の上を押すと、その区画を選ぶ。
+## 選んでいる区画は枠で囲む。部屋を建てると、次の更新でここの絵も変わる。
+func _hull_view() -> Control:
+	var hull := GameData.tex("res://assets/base/hull.png")
+	var sc := float(HULL_SCALE)
+	var view := Control.new()
+	view.custom_minimum_size = Vector2(hull.get_size()) * sc
+	view.clip_contents = true
+	view.add_child(_tex_rect(hull, Vector2.ZERO, Vector2(hull.get_size()) * sc))
+	for s in Rooms.SLOT_ORDER:
+		var rt: String = game.room_layout.get(s, "empty")
+		var r: Rect2 = Rooms.overlay_rect(s)
+		var pos: Vector2 = (r.position - GameData.HULL_POS) / float(Rooms.PX) * sc
+		var size: Vector2 = r.size / float(Rooms.PX) * sc
+		view.add_child(_tex_rect(GameData.tex(Rooms.overlay_path(s, rt)), pos, size))
+		var b := Button.new()                                       # 区画の上の透明なボタン（枠は選択中だけ）
+		b.position = pos
+		b.size = size
+		b.focus_mode = Control.FOCUS_NONE
+		b.tooltip_text = "%s: %s" % [Rooms.SLOTS[s]["name"], Rooms.TYPES[rt]["name"]]
+		var clear := StyleBoxEmpty.new()
+		b.add_theme_stylebox_override("normal", clear)
+		b.add_theme_stylebox_override("pressed", clear)
+		b.add_theme_stylebox_override("disabled", clear)
+		var hover := UIKit.box(Color(1, 1, 1, 0.10), Color(1, 1, 1, 0.5), 2, 0)
+		b.add_theme_stylebox_override("hover", hover)
+		b.pressed.connect(func(): _select_slot(s))
+		view.add_child(b)
+		if s == _slot:
+			var frame := Panel.new()
+			frame.position = pos
+			frame.size = size
+			frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			frame.add_theme_stylebox_override("panel", UIKit.box(Color(0, 0, 0, 0), C_ACCENT, 3, 0))
+			view.add_child(frame)
+	return view
+
+
+func _tex_rect(tex: Texture2D, pos: Vector2, size: Vector2) -> TextureRect:
+	var t := TextureRect.new()
+	t.texture = tex
+	t.position = pos
+	t.size = size
+	t.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	t.stretch_mode = TextureRect.STRETCH_SCALE
+	t.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	t.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return t
 
 
 func _fx_text() -> String:
@@ -178,13 +235,12 @@ func _slot_row(slots: Array, fixed_name: String) -> Control:
 	row.add_theme_constant_override("separation", 6)
 	for s in slots:
 		var rt: String = game.room_layout.get(s, "empty")
-		var b := GameData.make_button("%s\n%s" % [Rooms.SLOTS[s]["name"], Rooms.TYPES[rt]["name"]], func(): _select_slot(s), 13)
-		b.custom_minimum_size = Vector2(102, 54)
-		if s == _slot:
-			b.add_theme_stylebox_override("normal", GameData.panel_box(Color("4b5262"), C_ACCENT, 3))
+		var b := UIKit.button("%s\n%s" % [Rooms.SLOTS[s]["name"], Rooms.TYPES[rt]["name"]], func(): _select_slot(s))
+		b.custom_minimum_size = Vector2(112, 54)
+		UIKit.style(b, s == _slot)
 		row.add_child(b)
-	var fb := GameData.make_button("\n%s\n(固定)" % fixed_name, func(): pass, 12)
-	fb.custom_minimum_size = Vector2(102, 54)
+	var fb := UIKit.button("\n%s\n(固定)" % fixed_name, func(): pass)
+	fb.custom_minimum_size = Vector2(112, 54)
 	fb.disabled = true
 	row.add_child(fb)
 	return row
@@ -193,10 +249,26 @@ func _slot_row(slots: Array, fixed_name: String) -> Control:
 func _rebuild_right() -> void:
 	_clear(_right)
 	var cur: String = game.room_layout.get(_slot, "empty")
-	_right.add_child(_lbl("%s の部屋を建て替える（今: %s）" % [Rooms.SLOTS[_slot]["name"], Rooms.TYPES[cur]["name"]], 17, C_ACCENT))
+	_right.add_child(_lbl("%s の部屋を変える（今: %s）" % [Rooms.SLOTS[_slot]["name"], Rooms.TYPES[cur]["name"]], 17, C_ACCENT))
+	var inside := _inside_text(cur)
+	if inside != "":
+		_right.add_child(_note(inside, 13, C_DIM, 560.0))
 	for t in Rooms.TYPE_ORDER:
 		if Rooms.can_place(t, _slot):
 			_right.add_child(_type_row(t, cur))
+
+
+## いまの部屋の中にある物（建設した設備。部屋を移すと一緒に動く）
+func _inside_text(rtype: String) -> String:
+	var parts: Array = []
+	if rtype == "workshop":
+		parts.append("加工設備")
+	if rtype == "storage":
+		parts.append("倉庫の棚")
+	for id in FacilityDB.ids():
+		if FacilityDB.room_of(id) == rtype and game.base.facility_count(id) > 0:
+			parts.append("%s×%d" % [FacilityDB.name_of(id), game.base.facility_count(id)])
+	return "この部屋にある物: " + "、".join(PackedStringArray(parts)) if not parts.is_empty() else ""
 
 
 func _type_row(t: String, cur: String) -> Control:
@@ -204,7 +276,7 @@ func _type_row(t: String, cur: String) -> Control:
 	var is_cur := t == cur
 	var panel := PanelContainer.new()
 	panel.add_theme_stylebox_override("panel",
-			GameData.panel_box(Color("23262d"), C_ACCENT if is_cur else Color("3a3f4a"), 3 if is_cur else 2, 8))
+			UIKit.box(Color("23262d"), C_ACCENT if is_cur else Color("3a3f4a"), 3 if is_cur else 2, 8))
 	var h := HBoxContainer.new()
 	h.add_theme_constant_override("separation", 12)
 	panel.add_child(h)
@@ -231,9 +303,12 @@ func _type_row(t: String, cur: String) -> Control:
 		v.add_child(_lbl(why, 13, C_BAD))
 	# 建てるボタン
 	var reloc: bool = Rooms.is_relocation(game.room_layout, _slot, t)
-	var label := "現在の部屋" if is_cur else ("移設する" if reloc else "建てる")
-	var b := GameData.make_button(label, func(): game.build_room(_slot, t), 15)
-	b.custom_minimum_size = Vector2(110, 40)
+	var label := "現在の部屋" if is_cur else ("壊して空ける" if t == "empty" else ("移設する" if reloc else "建てる"))
+	var b := UIKit.button(label, func():
+		game.build_room(_slot, t)
+		_rebuild())
+	b.alignment = HORIZONTAL_ALIGNMENT_CENTER
+	b.custom_minimum_size = Vector2(120, 40)
 	b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	b.disabled = is_cur or not game.can_build_room(_slot, t)
 	h.add_child(b)

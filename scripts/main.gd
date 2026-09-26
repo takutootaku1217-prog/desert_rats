@@ -24,6 +24,11 @@ var event_hud: EventHUD
 var expedition: Expedition        # 遺跡の探索（調査隊）。scripts/expedition.gd
 var expedition_ui: ExpeditionUI
 var build_ui: BuildUI             # 建設の画面（Bキー）。ui/build_ui.gd
+var room_ui: BaseUI               # 部屋の変更の画面（Rキー・右の「部屋の変更」ボタン）。ui/base_ui.gd
+
+# ---- 部屋（車体の区画。data/rooms.gd） ----
+var room_layout: Dictionary = Rooms.default_layout()   # 区画 -> 部屋の種類。初期配置は、これまでのゲームと同じ
+var total_rooms_built := 0                              # 部屋を建てた・移した・空けた回数（確認用）
 
 # ---- プレイヤーの方針（運営の方針画面で変更する） ----
 var recipe_priority := GameData.DEFAULT_RECIPE_PRIORITY.duplicate()   # レシピid -> ★0〜5
@@ -155,6 +160,9 @@ func _ready() -> void:
 	build_ui = BuildUI.new()
 	build_ui.game = self
 	add_child(build_ui)
+	room_ui = BaseUI.new()
+	room_ui.game = self
+	add_child(room_ui)
 
 
 func _process(delta: float) -> void:
@@ -403,6 +411,8 @@ func facility_unlocked(id: String) -> bool:
 ## 建設の依頼を出せない理由（出せるなら ""）
 func build_blocked_reason(id: String) -> String:
 	var d: Dictionary = FacilityDB.def(id)
+	if base.room_slot(d["room"]) == "":
+		return "%sが必要" % Rooms.TYPES[d["room"]]["name"]              # 設備は部屋の中に建てる（data/facilities.gd の "room"）
 	if not facility_unlocked(id):
 		return "%sが必要" % FacilityDB.name_of(d["requires"])
 	if base.facility_count(id) >= int(d["max"]):
@@ -508,6 +518,70 @@ func _builds_need_iron() -> bool:
 	for id in build_queue:
 		need += int(FacilityDB.def(id)["cost"].get(GameData.Item.IRON, 0))
 	return need > storage.count_of(GameData.Item.IRON) + processor.pending_of(GameData.Item.IRON)
+
+
+# ---------------------------------------------------------------- 部屋の変更（車体の区画。data/rooms.gd）
+## 部屋の変更 = 車体の区画そのものを、どの部屋にするか（空き → 建てる → 別の部屋へ建て替える）。
+## 建設（設備を部屋の中に足す）とは別のシステム。仲間の作業は要らず、プレイヤーが決めた瞬間に、倉庫の材料を使って建て替わる。
+## 加工室・倉庫は移すと加工設備・倉庫が新しい区画へ移り、寝室は移すとベッドも一緒に動く。
+## 拠点レベルは未実装（範囲外）なので、部屋の解放条件の判定には常に Lv1 を渡す（Lv2 が要る訓練室は建てられない）。
+func base_level() -> int:
+	return 1
+
+
+## 部屋の効果の合計（休憩の回復・元気の消耗など。Worker が読む）。元気の消耗を減らす食堂は、上限まで。
+func room_effect(kind: String) -> float:
+	var v := Rooms.total(room_layout, kind)
+	return minf(v, Rooms.CAP_DRAIN_CUT) if kind == "drain_cut" else v
+
+
+## 区画 slot に部屋 rtype を建てられない理由（材料の不足は含めない）。建てられるなら ""。
+func room_block_reason(slot: String, rtype: String) -> String:
+	return Rooms.block_reason(room_layout, slot, rtype, base_level())
+
+
+func can_build_room(slot: String, rtype: String) -> bool:
+	return room_block_reason(slot, rtype) == "" and storage.has_set(Rooms.TYPES[rtype]["cost"])
+
+
+## 区画 slot を rtype にする（空き部屋にして壊す・建てる・建て替える・移設する）。材料は倉庫から使う。できたら true。
+func build_room(slot: String, rtype: String) -> bool:
+	if not can_build_room(slot, rtype):
+		return false
+	var cost: Dictionary = Rooms.TYPES[rtype]["cost"]
+	if not storage.take_set(cost):
+		return false
+	var before: String = room_layout.get(slot, "empty")
+	var moved_from := ""
+	if Rooms.is_relocation(room_layout, slot, rtype):
+		moved_from = Rooms.slot_of(room_layout, rtype)
+	var bed_slot_before: String = base.room_slot("bedroom")
+	room_layout = Rooms.with_room(room_layout, slot, rtype)
+	var now := Time.get_ticks_msec()
+	base.room_built_at[slot] = now
+	if moved_from != "":
+		base.room_built_at[moved_from] = now
+	base.apply_layout()                                    # 加工設備・倉庫を、新しい部屋の位置へ
+	if base.room_slot("bedroom") != bed_slot_before:
+		for w in workers:
+			w.ai.on_bedroom_moved()                        # 眠っていた仲間は、新しいベッドへ歩き直す
+	total_rooms_built += 1
+	var slot_name: String = Rooms.SLOTS[slot]["name"]
+	var rname: String = Rooms.TYPES[rtype]["name"]
+	if rtype == "empty":
+		director.note("%sの%sを壊して空き部屋にした" % [slot_name, Rooms.TYPES[before]["name"]])
+	elif moved_from != "":
+		director.note("%sを%sへ移した" % [rname, slot_name])
+	else:
+		director.note("%sに%sができた" % [slot_name, rname])
+	return true
+
+
+## 別の画面を開くとき、ほかの管理画面を閉じる（重ならないように）。keep はいま開く画面。
+func close_other_panels(keep) -> void:
+	for p in [build_ui, room_ui, policy, detail, expedition_ui]:
+		if p != null and p != keep and p.has_method("close"):
+			p.close()
 
 
 ## 倉庫に入りきらず捨てたとき（記録には、他の出来事を押し出さないよう、60秒に1回だけ出す）

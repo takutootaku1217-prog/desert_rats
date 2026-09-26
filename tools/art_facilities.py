@@ -65,12 +65,18 @@ def hull():
     return art_base.build_hull(furnish=False)
 
 
+def room_images():
+    """部屋の変更（data/rooms.gd）で区画に重ねる絵。hull.png と同じく、ワークベンチ・ベッドは描かない（建設で増える）。
+    絵の中身は、部屋の重ね絵を作る art_base.room_overlays() のまま（家具を描かない指定だけ）。"""
+    return [(f"base/rooms/{art_base.STYLE}", f"room_{slot}_{rtype}.png", px) for slot, rtype, px in art_base.room_overlays(furnish=False)]
+
+
 def all_images():
     """(フォルダ, ファイル名, 絵) の一覧"""
     l = [("base", "hull.png", hull()), ("base", "workbench.png", workbench_sheet())]
     for i in range(3):
         l.append(("base", f"bed_{i}.png", bed(i)))
-    return l
+    return l + room_images()
 
 
 def write_all(root=ROOT):

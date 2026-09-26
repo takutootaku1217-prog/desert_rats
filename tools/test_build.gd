@@ -100,8 +100,9 @@ func _test_tables() -> void:
 	var quota := CargoDB.default_quota()
 	for id in FacilityDB.ids():
 		var d: Dictionary = FacilityDB.def(id)
-		check(d.has_all(["name", "desc", "cost", "time", "field", "max", "requires", "station", "spots", "sprite", "frame", "stride"]),
+		check(d.has_all(["name", "desc", "cost", "time", "field", "max", "requires", "station", "room", "dx", "sprite", "frame", "stride"]),
 				"%s: 必要な項目がそろっている" % id)
+		check(Rooms.TYPES.has(d["room"]), "%s: 置く部屋（%s）が部屋の表にある" % [id, d["room"]])
 		check(String(d["requires"]) == "" or FacilityDB.has(d["requires"]), "%s: 必要設備が表にある" % id)
 		var hops := 0
 		var cur: String = id
@@ -109,7 +110,7 @@ func _test_tables() -> void:
 			cur = FacilityDB.def(cur)["requires"]
 			hops += 1
 		check(cur == "", "%s: 必要設備の連鎖が手作業に届く" % id)
-		check(d["spots"].size() >= int(d["max"]), "%s: 置き場所が最大数ぶんある" % id)
+		check(d["dx"].size() >= int(d["max"]), "%s: 置き場所が最大数ぶんある" % id)
 		var cost_ok := true
 		for it in d["cost"]:
 			if CargoDB.bay_of(it) < 0 or int(d["cost"][it]) > int(quota.get(it, 0)):
@@ -221,7 +222,7 @@ func _test_flow() -> void:
 	check(st.count_of(GameData.Item.WOOD) == 0 and st.count_of(GameData.Item.IRON) == 0, "材料（%s）が使われた" % FacilityDB.cost_text("workbench"))
 	check(main.build_queue.is_empty() and main.processor.pending_build("workbench") == 0, "依頼は残っていない")
 	check(main.director.log.size() > log_before and String(main.director.log[-1]["text"]).contains("ワークベンチ"), "記録に「ワークベンチができた」が出る")
-	check(main.base.facility_point("workbench") == FacilityDB.spots_of("workbench")[0], "ワークベンチで作業する場所が決まる")
+	check(main.base.facility_point("workbench") == main.base.facility_spots("workbench")[0], "ワークベンチで作業する場所が決まる")
 	# ベッド: ワークベンチで作る。作業する仲間は、ワークベンチの場所へ行く
 	await process_frame
 	check(main.build_blocked_reason("bed") == "", "ワークベンチができたので、ベッドを依頼できる")
@@ -231,7 +232,7 @@ func _test_flow() -> void:
 	var cond2 := func() -> bool:
 		if main.processor.is_active_at("workbench") and main.processor.current.get("build", "") == "bed":
 			near["n"] += 1
-			if absf(w0.position.x - FacilityDB.spots_of("workbench")[0].x) > 60.0:
+			if absf(w0.position.x - main.base.facility_spots("workbench")[0].x) > 60.0:
 				near["far"] += 1
 		return main.base.facility_count("bed") >= 1
 	var t2: float = await _until(cond2, 120.0)
@@ -245,7 +246,7 @@ func _test_flow() -> void:
 	w1.ai.on_priority_changed()
 	var t3: float = await _until(func(): return w1.sleeping, 60.0)
 	check(t3 >= 0.0 and w1.bed_index == 0, "疲れた仲間が、できたベッドで眠る（%.0f秒）" % t3)
-	check(absf(w1.position.x - GameData.BED_X[0]) < 8.0, "眠る場所はベッドの位置")
+	check(absf(w1.position.x - main.base.bed_point(0).x) < 8.0, "眠る場所はベッドの位置")
 	# ワークベンチが必要な製作物（修理部品 = 鉄＋木材）を、仲間がワークベンチで作る
 	w1.priorities[GameData.Job.REST] = 0
 	w1.ai.on_priority_changed()
@@ -257,7 +258,7 @@ func _test_flow() -> void:
 	var cond3 := func() -> bool:
 		if main.processor.is_active_at("workbench") and main.processor.current.get("id", "") == "repair_iron":
 			at_bench["n"] += 1
-			if absf(w0.position.x - FacilityDB.spots_of("workbench")[0].x) > 60.0:
+			if absf(w0.position.x - main.base.facility_spots("workbench")[0].x) > 60.0:
 				at_bench["far"] += 1
 		return st.count_of(GameData.Item.REPAIR_KIT) >= kits_before + 2
 	var t4: float = await _until(cond3, 120.0)
@@ -303,7 +304,7 @@ func _test_unlock() -> void:
 	check(main.choose_recipe().is_empty(), "ワークベンチの前: 修理部品（鉄＋木材）は作れない")
 	main.base.add_facility("workbench")
 	check(main.choose_recipe().get("id", "") == "repair_iron", "ワークベンチの後: 修理部品（鉄＋木材）が作れる")
-	check(main.choose_recipe().get("station", "") == "workbench" and main.processor.station_point(main.choose_recipe()) == FacilityDB.spots_of("workbench")[0],
+	check(main.choose_recipe().get("station", "") == "workbench" and main.processor.station_point(main.choose_recipe()) == main.base.facility_spots("workbench")[0],
 			"作る場所はワークベンチ")
 	main.recipe_priority["repair_iron"] = 0
 	main.recipe_priority["tool_pick"] = 5

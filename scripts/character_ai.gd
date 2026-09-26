@@ -607,6 +607,12 @@ func _release_task() -> void:
 		game.processor.worker = null
 
 
+## 寝室が別の区画へ移ったとき（部屋の変更）。眠っていた仲間は、新しいベッドの位置へ歩き直す。
+func on_bedroom_moved() -> void:
+	if state == State.REST:
+		_set_state(State.REST_MOVE)
+
+
 ## プレイヤーが優先度を変えたとき、荷物を持っていなければ即座に選び直す。
 func on_priority_changed() -> void:
 	if ch.carrying >= 0:

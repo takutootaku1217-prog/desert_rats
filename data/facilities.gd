@@ -31,7 +31,8 @@ const GATHER_BOOST := 3.0
 ##  - cost: 材料 {Item: 個数}（倉庫から取り出す）。積載の枠（data/cargo.gd）より多くしないこと（集められなくなる）
 ##  - time: 組み立てにかかる基準の秒数（作業者の腕で変わる）  / field: その作業の分野
 ##  - max: 建てられる数  / requires: 必要設備（"" = 手作業）  / station: その設備で製作できるか
-##  - spots: 置き場所（足元のワールド座標。max 個ぶん）。仲間はそこへ行って作る
+##  - room / dx: どの部屋（data/rooms.gd の種類）の中に置くか / 置き場所（max 個ぶん）の、部屋の左端からのドット数（設備の中心）。
+##    設備は部屋の中に建つ。部屋を別の区画へ移すと、設備も一緒に動く（実際の位置は MobileBase.facility_spots）。仲間はそこへ行って作る
 ##  - sprite / frame / stride: 絵（見た目は差し替えやすいようにここに集める）。sprite の %d は置き場所の番号。
 ##    frame = 1コマの大きさ（ドット）、stride = コマの間隔（横に並べた絵のとき。1枚絵は 0）
 const FACILITIES := {
@@ -39,15 +40,14 @@ const FACILITIES := {
 		"name": "ワークベンチ", "desc": "手作業では作れない道具・設備をつくる作業台",
 		"cost": {GameData.Item.WOOD: 3, GameData.Item.IRON: 1}, "time": 6.0, "field": GameData.Field.DEV,
 		"max": 1, "requires": "", "station": true,
-		"spots": [Vector2(244.0, GameData.UP_Y)],
+		"room": "workshop", "dx": [9.0],
 		"sprite": "res://assets/base/workbench.png", "frame": Vector2i(16, 9), "stride": 18,
 	},
 	"bed": {
 		"name": "ベッド", "desc": "仲間が休める。多いほど同時に休める人数が増える",
 		"cost": {GameData.Item.HIDE: 2, GameData.Item.BONE: 1}, "time": 4.0, "field": GameData.Field.DEV,
 		"max": 3, "requires": "workbench", "station": false,
-		"spots": [Vector2(GameData.BED_X[0], GameData.UP_Y), Vector2(GameData.BED_X[1], GameData.UP_Y),
-				Vector2(GameData.BED_X[2], GameData.UP_Y)],
+		"room": "bedroom", "dx": [9.0, 24.0, 39.0],
 		"sprite": "res://assets/base/bed_%d.png", "frame": Vector2i(14, 9), "stride": 0,
 	},
 }
@@ -73,8 +73,17 @@ static func max_of(id: String) -> int:
 	return int(FACILITIES[id]["max"])
 
 
-static func spots_of(id: String) -> Array:
-	return FACILITIES[id]["spots"]
+## その設備の置き場所（足元のワールド座標）を、部屋が slot にあるときの位置で返す。
+static func spots_in(id: String, slot: String) -> Array:
+	var l: Array = []
+	for dx in FACILITIES[id]["dx"]:
+		l.append(Rooms.floor_pos(slot, float(dx)))
+	return l
+
+
+## その設備を置く部屋の種類
+static func room_of(id: String) -> String:
+	return FACILITIES[id]["room"]
 
 
 static func sprite_path(id: String, slot: int) -> String:

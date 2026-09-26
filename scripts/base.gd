@@ -4,6 +4,8 @@ extends Node2D
 ## 拠点自体は画面内に留まり、背景と資源が流れることで「進んでいる」ように見せる。
 ##
 ## 階: 上の階(加工室・寝室・操縦室) / 下の階(機関室・倉庫・搬入口)。ハシゴでつながる。
+## 部屋の配置（4つの区画に何の部屋があるか）は Main.room_layout（data/rooms.gd）。部屋を変えると apply_layout で
+## 加工設備・倉庫の位置が移り、設備（ワークベンチ・ベッド）の置き場所も facility_spots で新しい区画に追従する。
 
 var game
 var storage: BaseStorage
@@ -11,6 +13,7 @@ var processor: BaseProcessor
 var beds: Array = [null, null, null]     # ベッドを使っている Worker（建てていない区画は使えない。built["bed"]）
 var built := {}                          # 建てた設備 {id: 建てた区画の番号の配列}（data/facilities.gd。建設は Main.finish_build）
 var built_at := {}                       # "id:区画" -> 完成した時刻（ミリ秒。完成の演出用）
+var room_built_at := {}                  # 区画 -> 部屋ができた時刻（ミリ秒。完成の演出用）
 var max_hp := 100.0
 var hp := 100.0                          # 戦闘用（現段階では未使用）
 var hit_timer := 0.0
@@ -37,14 +40,35 @@ func _init() -> void:
 
 func _ready() -> void:
 	storage = BaseStorage.new()
-	storage.position = Vector2(GameData.STORAGE_X, GameData.LO_Y)
 	add_child(storage)
 	processor = BaseProcessor.new()
-	processor.position = Vector2(GameData.MACHINE_X, GameData.UP_Y)
 	add_child(processor)
+	apply_layout()
+
+
+# ---- 部屋（区画。data/rooms.gd） ----
+## 部屋の配置に合わせて、加工設備と倉庫を、それぞれの部屋の位置へ置く（部屋を建てた・移したときに呼ぶ）。
+## 仲間の行き先は毎フレーム位置から決めているので、途中でも新しい場所へ向かい直す。
+func apply_layout() -> void:
+	var lay: Dictionary = game.room_layout
+	var ws := Rooms.slot_of(lay, "workshop")
+	processor.position = Rooms.processor_pos(ws) if ws != "" else Vector2(GameData.MACHINE_X, GameData.UP_Y)
+	var ss := Rooms.slot_of(lay, "storage")
+	storage.position = Rooms.storage_pos(ss) if ss != "" else Vector2(GameData.STORAGE_X, GameData.LO_Y)
+
+
+## 部屋の種類の区画（なければ ""）
+func room_slot(rtype: String) -> String:
+	return Rooms.slot_of(game.room_layout, rtype)
 
 
 # ---- 設備（建設。data/facilities.gd） ----
+## 設備 id の置き場所（足元のワールド座標）。その設備を置く部屋がいまある区画の位置（部屋がなければ空）。
+func facility_spots(id: String) -> Array:
+	var slot := room_slot(FacilityDB.room_of(id))
+	return FacilityDB.spots_in(id, slot) if slot != "" else []
+
+
 ## 設備 id が拠点にあるか。"" は手作業（加工設備）＝いつでもある。
 func has_facility(id: String) -> bool:
 	return id == "" or not built.get(id, []).is_empty()
@@ -78,9 +102,10 @@ func grant_all() -> void:
 
 ## 設備で作業する場所（足元）。建てていなければ加工設備の位置。
 func facility_point(id: String) -> Vector2:
-	if built.get(id, []).is_empty():
+	var spots: Array = facility_spots(id)
+	if built.get(id, []).is_empty() or spots.is_empty():
 		return processor.global_position
-	return FacilityDB.spots_of(id)[built[id][0]]
+	return spots[built[id][0]]
 
 
 # ---- ベッド ----
@@ -100,7 +125,8 @@ func release_bed(w) -> void:
 
 
 func bed_point(i: int) -> Vector2:
-	return Vector2(GameData.BED_X[i], GameData.UP_Y)
+	var spots: Array = facility_spots("bed")
+	return spots[i] if i >= 0 and i < spots.size() else processor.global_position
 
 
 func bed_index_of(w) -> int:
@@ -108,8 +134,10 @@ func bed_index_of(w) -> int:
 
 
 # ---- 燃料 ----
+## 燃料を入れる場所。機関室があればその炉の口、なければ搬入口（機関室は必須ではないため）。
 func engine_point() -> Vector2:
-	return Vector2(GameData.ENGINE_X, GameData.LO_Y)
+	var s := room_slot("engine")
+	return Rooms.engine_pos(s) if s != "" else Rooms.fallback_fuel_pos()
 
 
 ## 燃料を補給したほうがよいか（1個分入る空きがある）。
@@ -173,7 +201,7 @@ func part_point(part: int) -> Vector2:
 		GameData.Part.DRIVE:
 			return Vector2(300.0, GameData.LO_Y)       # 機関室の奥（車軸と機関）
 		GameData.Part.MACHINE:
-			return Vector2(GameData.MACHINE_X + 60.0, GameData.UP_Y)
+			return processor.position + Vector2(60.0, 0.0)
 	return Vector2(760.0, GameData.LO_Y)               # 車体（搬入口まわりの壁）
 
 
@@ -232,6 +260,20 @@ func _process(delta: float) -> void:
 	queue_redraw()
 
 
+## 4つの区画の部屋の絵を、車体（初期配置の部屋が焼き込まれた hull.png）の上に重ねて描く。
+## 部屋を変えるとここが変わる（重ね絵は assets/base/rooms/<系統>/。初期配置と同じ部屋でも同じ絵を重ねるので継ぎ目は出ない）。
+func _draw_rooms(off: Vector2) -> void:
+	var now := Time.get_ticks_msec()
+	for slot in Rooms.SLOT_ORDER:
+		var rtype: String = game.room_layout.get(slot, "empty")
+		var rect: Rect2 = Rooms.overlay_rect(slot)
+		draw_texture_rect(GameData.tex(Rooms.overlay_path(slot, rtype)), Rect2(rect.position + off, rect.size), false)
+		var age := float(now - int(room_built_at.get(slot, -99999))) / 1000.0
+		if age < 1.6:                                                    # 部屋ができた合図
+			GameData.draw_text(self, rect.position + off + Vector2(rect.size.x / 2.0, 76.0 - age * 14.0), "%sができた!" % Rooms.TYPES[rtype]["name"],
+					16, Color("fde68a"), 160.0)
+
+
 ## 建てた設備（ワークベンチ・ベッド）を車体の上に重ねて描く。まだ建てていない置き場所は、
 ## 建てられるなら薄く（建てる予定なら少し濃く点滅）、必要設備がなければ何も描かない。作業中のワークベンチは槌を振る。
 func _draw_facilities(off: Vector2) -> void:
@@ -242,8 +284,9 @@ func _draw_facilities(off: Vector2) -> void:
 		var pend: int = game.build_pending(id)
 		var fs: Vector2i = d["frame"]
 		var size := Vector2(fs) * GameData.PX
-		for i in FacilityDB.spots_of(id).size():
-			var spot: Vector2 = FacilityDB.spots_of(id)[i]
+		var spots: Array = facility_spots(id)                            # 設備を置く部屋がある区画の位置（部屋を移すと追従する）
+		for i in spots.size():
+			var spot: Vector2 = spots[i]
 			var tex := GameData.tex(FacilityDB.sprite_path(id, i))
 			var rect := Rect2(spot + off - Vector2(size.x / 2.0, size.y), size)
 			var frame := 0
@@ -274,18 +317,20 @@ func _draw() -> void:
 				Rect2(f * 30, 0, 28, 28))
 	var hull := GameData.tex("res://assets/base/hull.png")
 	draw_texture_rect(hull, Rect2(GameData.HULL_POS + shake + Vector2(0, bob), Vector2(hull.get_size()) * GameData.PX), false)
+	_draw_rooms(shake + Vector2(0, bob))
 	# 斜路
 	var ramp := GameData.tex("res://assets/base/ramp.png")
 	draw_texture_rect(ramp, Rect2(Vector2(900, 482) + Vector2(0, bob), Vector2(ramp.get_size()) * GameData.PX), false)
 	_draw_facilities(shake + Vector2(0, bob))
-	# 機関室の燃料計
-	var gx := GameData.ENGINE_X - 44.0
+	# 燃料計（燃料を入れる場所の上。機関室があればその炉、なければ搬入口）
+	var ex := engine_point().x
+	var gx := ex - 44.0
 	var gy := 392.0
 	var r := fuel / GameData.FUEL_CAP
 	var fc := Color("7be07b") if r > 0.5 else (Color("f0c040") if r > 0.2 else Color("e0533d"))
 	draw_rect(Rect2(gx, gy, 88, 12), Color(0.08, 0.07, 0.06, 0.95))
 	draw_rect(Rect2(gx + 4, gy + 4, 80.0 * r, 4), fc)
-	GameData.draw_text(self, Vector2(GameData.ENGINE_X, gy - 4), "燃料" if has_fuel() else "燃料切れ", 12,
+	GameData.draw_text(self, Vector2(ex, gy - 4), "燃料" if has_fuel() else "燃料切れ", 12,
 			Color("fde68a") if has_fuel() else Color("ff8a70"), 90.0)
 	# 煙・砂ぼこり（ドットの格子に合わせた四角）
 	for pf in _puffs:
