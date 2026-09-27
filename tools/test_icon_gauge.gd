@@ -263,7 +263,7 @@ func _test_status_panel() -> void:
 	sp._process(0.0)
 	var w: IconGauge = sp._weight
 	check(w != null and w.text == "0" and w.ratio == 0.0, "空のとき、重りは空で数字は 0")
-	check(not sp.get("_cargo") and not sp._bars.has("weight"), "横長ゲージや「積載 x/y」の文字表示は使わない")
+	check(sp.get("_cargo") == null and not ("_bars" in sp), "横長ゲージや「積載 x/y」の文字表示は使わない")
 	st.add_item(GameData.Item.WOOD, 8)
 	st.add_item(GameData.Item.FOOD, 10)
 	st.add_item(GameData.Item.STONE, 6)
@@ -282,9 +282,11 @@ func _test_status_panel() -> void:
 	check(w.ratio == 1.0 and w.filled_count() == w.fill_dots().size(), "満載: 重りが全部埋まる")
 	_clear()
 	sp._process(0.0)
-	# 位置: 右のボタン列（建設 (B) まで）の下、ほかのUIに重ならない
-	var panel: PanelContainer = w.get_parent().get_parent()
-	check(panel.position.y >= 394.0 and panel.position.x == 1000.0, "アイコンゲージの枠は、右のボタンの下（%s）" % str(panel.position))
+	# 位置: 右上の拠点の状態の中（ほかのゲージと並ぶ）。右のボタン列には重ならない
+	var wr: Rect2 = w.get_global_rect()
+	check(wr.position.x >= 1000.0 and wr.end.y < 200.0, "積載重量のアイコンは、右上の状態の中の、ほかのゲージと並ぶ位置にある（%s）" % str(wr))
+	for k in ["hull", "drive", "machine", "fuel", "weight"]:
+		check(sp._gauges.has(k) and sp._gauges[k] is IconGauge, "アイコンゲージ（%s）がある" % k)
 	await process_frame
 
 

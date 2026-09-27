@@ -14,6 +14,19 @@ const GAUGE_STAGES_LOAD := [
 ]
 
 
+## 拠点の耐久（盾）・燃料（ジェリカン）のアイコンゲージの色の表。個体のHP（ハート）と同じ向き（少ないほど危険）。
+## 赤 = 「不調」の線（GameData.PART_BAD。これ以下で設備の効果が半分になる）まで、黄 = 半分まで、緑 = それ以上。
+const GAUGE_STAGES_BASE := [
+	[GameData.PART_BAD / 100.0, Color("e0533d")], [0.5, Color("f0c040")], [1.01, Color("7be07b")],
+]
+## 危険域: この割合より少ないと、そのアイコンだけが赤く点滅する（個体のHPの危険域と同じ考え方）
+const GAUGE_BLINK_BELOW := 0.15
+
+## アイコンゲージの数字の表示（プレイヤー設定。true = アイコンの中に数字、false = アイコンだけ）。仲間・拠点・積載のすべてのアイコンゲージに共通。
+## OFF にしても、アイコンだけで状態が分かること。設定の画面ができたら、ここへつなぐ。
+static var show_icon_numbers := true
+
+
 static func box(bg: Color, edge: Color, border: int = 2, margin: int = 6) -> StyleBoxFlat:
 	var sb := StyleBoxFlat.new()
 	sb.bg_color = bg

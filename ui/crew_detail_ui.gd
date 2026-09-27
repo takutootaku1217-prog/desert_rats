@@ -226,7 +226,7 @@ func _build_detail() -> void:
 	st.add_child(UIKit.lbl("状態", 14, UIKit.C_DIM, 60))
 	_live["status"] = UIKit.lbl("", 15)
 	st.add_child(_live["status"])
-	var view := CrewStatusView.new().setup(Vector2i(12, 12), 12)
+	var view := CrewStatusView.new().setup(Vector2i(16, 16), 13, true)
 	top_row.add_child(view)
 	_live["view"] = view
 	if _tab == 0:

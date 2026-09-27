@@ -342,7 +342,7 @@ func _test_swap(factor: int, groups: Array, label: String) -> void:
 	check(true, "差し替えた絵で、内装・外装・部屋の変更・建設の画面を動かした（描画 %d 回。エラーなし）" % int(draws["n"]))
 	# アイコンゲージ: 画面上の大きさは同じで、充填は細かくなる
 	var g: IconGauge = main.status._weight
-	check(g.display_size == Vector2(64, 64) and is_equal_approx(g.pixel * float(g._icon_size.x), 64.0), "積載ゲージの画面上の大きさは 64x64 のまま（絵のドットは %d 個。1ドット %.1fpx）" % [g.fill_dots().size(), g.pixel])
+	check(g.display_size == Vector2(48, 48) and is_equal_approx(g.pixel * float(g._icon_size.x), 48.0), "積載ゲージの画面上の大きさは 48x48 のまま（絵のドットは %d 個。1ドット %.1fpx）" % [g.fill_dots().size(), g.pixel])
 	var total := g.fill_dots().size()
 	g.set_value(0.5, 1.0, "")
 	check(absf(float(g.filled_count()) / float(total) - 0.5) < 0.02, "充填は、絵のドットの面積が基準なので、細かい絵でも 50%% は半分（%d/%d）" % [g.filled_count(), total])

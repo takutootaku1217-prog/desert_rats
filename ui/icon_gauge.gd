@@ -191,6 +191,6 @@ func _draw() -> void:
 	draw_texture_rect(_interior, Rect2(Vector2.ZERO, sz), false, Color(1, 1, 1, a))
 	draw_texture_rect(_frame, Rect2(Vector2.ZERO, sz), false)
 	if text != "":
-		var fs := maxi(9, int(display_size.x * 0.22))                  # 数字の大きさは、画面上の表示の大きさに合わせる（絵のドット数に依存しない。64px なら 14）
+		var fs := maxi(10, int(display_size.x * 0.24))                 # 数字の大きさは、画面上の表示の大きさに合わせる（絵のドット数に依存しない。48px なら 11・64px なら 15）
 		var c := _text_center * pixel
 		GameData.draw_text(self, Vector2(c.x, c.y + float(fs) * 0.36), text, fs, Color.WHITE, sz.x, HORIZONTAL_ALIGNMENT_CENTER)

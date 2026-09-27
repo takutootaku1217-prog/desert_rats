@@ -58,13 +58,13 @@ func _initialize() -> void:
 	heads.resize(heads.get_width() * 2, heads.get_height() * 2, Image.INTERPOLATE_NEAREST)
 	heads.save_png("%s/s_heads.png" % dir)
 	# 数字を消した表示（アイコンだけで状態が分かるか）
-	CrewStatusView.show_numbers = false
+	UIKit.show_icon_numbers = false
 	await _frames(6)
 	var img2 := root.get_texture().get_image()
 	var cards2 := img2.get_region(Rect2i(0, 0, 1000, 230))
 	cards2.resize(cards2.get_width() * 2, cards2.get_height() * 2, Image.INTERPOLATE_NEAREST)
 	cards2.save_png("%s/s_cards_nonum.png" % dir)
-	CrewStatusView.show_numbers = true
+	UIKit.show_icon_numbers = true
 	# 仲間の管理画面
 	main.detail.toggle()
 	main.detail._select(W[1])

@@ -2,47 +2,39 @@ class_name CrewStatusView
 extends HBoxContainer
 ## 仲間1人のステータス表示: HP・スタミナ・満腹度・疲労度の「アイコン自体がゲージ」（ui/icon_gauge.gd）＋ 精神状態の顔。
 ## 表示だけを担当し、Worker のデータを読むだけ（update_from に渡す）。ゲームの処理は変えない。
-## 上部の仲間カード（小さいアイコン）と、仲間の管理画面（大きいアイコン）で同じ部品を使い回す。アイコンの大きさは size_units（ユニット）。
+## 上部の仲間カード（48px）と、仲間の管理画面（64px）で同じ部品を使い回す。アイコンの大きさは size_units（ユニット）。
 ##  - 絵は assets/ui/<名前>.png（枠）と <名前>_mask.png（充填範囲）。tools/art_ui.py が作る。差し替えるだけで形を変えられる。
 ##  - 色・点滅の基準・精神状態の色は data/crew_status.gd（CrewStatusDB）。危険域（値が悪い側の線を越えた）では、そのアイコンだけが赤く点滅する。
 ##  - 疲労度は「余力（100 − 疲労度）」で表す: 疲れるほどアイコンの中身が減る（ほかのステータスと同じ向き）。数字も余力。
-##  - 数字はアイコンの下に出す。数値の表示ON/OFF は show_numbers（プレイヤー設定。OFF でもアイコンだけで状態が分かる）。
-
-## 数値の表示（true = アイコン＋数字、false = アイコンのみ）。設定画面ができたら、そこへつなぐ
-static var show_numbers := true
+##  - 数字はアイコンの中に出す（拠点の耐久・燃料・積載重量と同じルール）。数字のON/OFFは UIKit.show_icon_numbers（OFF でもアイコンだけで状態が分かる）。
 
 var _gauges := {}                     # ステータス名 -> IconGauge
-var _labels := {}                     # ステータス名 -> 数字のラベル
 var _face: TextureRect
 var _face_label: Label
 var _faces: Array = []                # 精神状態ごとの顔の絵
-var _icon_px := 32.0
+var _icon_px := 48.0
 var _t := 0.0
 var _limit := false                   # 精神状態が限界（顔が点滅する）
+var _show_name := false
 
 
 func _init() -> void:
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 
 
-## 部品を作る。size_units = アイコン1つの基準の大きさ（ユニット。1ユニット = UNIT_PX）。font_size = 数字・名前の文字の大きさ。
-func setup(size_units: Vector2i = Vector2i(8, 8), font_size: int = 12) -> CrewStatusView:
+## 部品を作る。size_units = アイコン1つの基準の大きさ（ユニット。1ユニット = UNIT_PX）。font_size = 精神状態の名前の文字の大きさ。
+## show_mental_name = 精神状態の名前を顔の下に出すか（カードでは顔の色と形だけ。管理画面では名前も）。
+func setup(size_units: Vector2i = Vector2i(12, 12), font_size: int = 12, show_mental_name := false) -> CrewStatusView:
 	add_theme_constant_override("separation", 6)
 	_icon_px = ArtSpec.px_size(size_units).x
+	_show_name = show_mental_name
 	for stat in CrewStatusDB.STATS:
-		var col := VBoxContainer.new()
-		col.add_theme_constant_override("separation", 0)
-		add_child(col)
 		var g := IconGauge.new().setup(String(CrewStatusDB.ICON_FILES[stat]), size_units)
 		g.color_stages = CrewStatusDB.GAUGE_STAGES[stat]
 		g.dark_empty = true                                           # 減った部分は、いまの色の暗い色（どれだけ減ったかが見える）
-		col.add_child(g)
-		var l := UIKit.lbl("", font_size, UIKit.C_TEXT, _icon_px)
-		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		col.add_child(l)
+		add_child(g)
 		_gauges[stat] = g
-		_labels[stat] = l
-	# 精神状態: 顔のアイコン（色で状態が分かる）＋ 名前
+	# 精神状態: 顔のアイコン（色で状態が分かる）
 	for f in CrewStatusDB.MENTAL_ICON_FILES:
 		_faces.append(GameData.tex("res://assets/ui/%s.png" % f))
 	var fcol := VBoxContainer.new()
@@ -57,6 +49,7 @@ func setup(size_units: Vector2i = Vector2i(8, 8), font_size: int = 12) -> CrewSt
 	fcol.add_child(_face)
 	_face_label = UIKit.lbl("", font_size, UIKit.C_TEXT, _icon_px)
 	_face_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_face_label.visible = show_mental_name
 	fcol.add_child(_face_label)
 	return self
 
@@ -66,17 +59,14 @@ func update_from(w) -> void:
 	for stat in CrewStatusDB.STATS:
 		var v: float = CrewStatus.gauge_value(w, stat)
 		var g: IconGauge = _gauges[stat]
-		g.set_value(v, CrewStatusDB.max_of(stat))
+		g.set_value(v, CrewStatusDB.max_of(stat), str(int(round(v))) if UIKit.show_icon_numbers else "")
 		g.set_blink(CrewStatus.is_blinking(w, stat))
 		g.tooltip_text = tooltip_of(w, stat)
-		var l: Label = _labels[stat]
-		l.visible = show_numbers
-		l.text = str(int(round(v)))
 	var m: int = w.mental
 	_face.texture = _faces[m]
 	_face.modulate = CrewStatusDB.MENTAL_COLORS[m]
 	_face.tooltip_text = "精神状態: %s" % CrewStatusDB.MENTAL_NAMES[m]
-	_face_label.visible = show_numbers
+	_face_label.visible = _show_name and UIKit.show_icon_numbers
 	_face_label.text = CrewStatusDB.MENTAL_NAMES[m]
 	_limit = m == CrewStatusDB.Mental.LIMIT
 	set_process(_limit)
@@ -108,5 +98,5 @@ func face() -> TextureRect:
 	return _face
 
 
-func number_label(stat: String) -> Label:
-	return _labels[stat]
+func face_label() -> Label:
+	return _face_label

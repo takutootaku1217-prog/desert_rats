@@ -297,7 +297,7 @@ func _run() -> void:
 			"積載重量のアイコンゲージに重量が出る（数字は絵の内側）: " + main.status._weight.text)
 	st.add_item(GameData.Item.WOOD, 99)
 	main.status._process(0.0)
-	check(main.status._stock.text.contains("木%s満" % 8), "枠がいっぱいの素材に「満」が付く: " + main.status._stock.text.replace("\n", " / "))
+	check(main.status.stock_summary().contains("木材 8満"), "枠がいっぱいの素材に「満」が付く: " + main.status.stock_summary())
 	st.queue_redraw()
 	await process_frame
 

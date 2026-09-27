@@ -18,7 +18,7 @@ enum State {
 	REST_MOVE, REST,
 	REFUEL_TAKE, REFUEL_MOVE, REFUEL,
 	HUNT_MOVE, HUNT_ATTACK,
-	EAT_TAKE, EAT, DOWN,
+	EAT_TAKE, EAT, DOWN, REST_HERE,
 }
 
 const STATE_TEXT := {
@@ -48,6 +48,7 @@ const STATE_TEXT := {
 	State.EAT_TAKE: "食料を取りに行く",
 	State.EAT: "食事中",
 	State.DOWN: "倒れている",
+	State.REST_HERE: "その場で休憩",
 }
 
 var ch      # Worker
@@ -317,6 +318,16 @@ func tick(delta: float) -> void:
 				ch.carrying = -1
 				_set_state(State.SEARCH)
 
+		# ---- ベッドが使えないときの簡易休憩（その場で休む。回復は遅い）----
+		State.REST_HERE:
+			ch.resting = true
+			if ch.priorities.get(GameData.Job.REST, 0) > 0 and game.base.has_free_bed() and _try_start(GameData.Job.REST):
+				current_job = GameData.Job.REST                     # ベッドが空いたら、ベッドで休む
+				return
+			if CrewStatus.rest_done(ch) or (CrewStatus.needs_to_eat_now(ch) and _wants_to_eat()):
+				_release_task()
+				_set_state(State.SEARCH)
+
 		# ---- 戦闘不能（HP 0）。倒れて動けない。HP が戻ると起き上がる ----
 		State.DOWN:
 			if not ch.down:
@@ -492,15 +503,24 @@ func _try_life_need() -> bool:
 		if need == "eat":
 			if _try_start_eat():
 				return true
-		elif _can_start_rest() and _try_start(GameData.Job.REST):
-			current_job = GameData.Job.REST
+		elif _can_start_rest():
+			if game.base.has_free_bed() and _try_start(GameData.Job.REST):
+				current_job = GameData.Job.REST                     # ベッドで休む
+			else:
+				_start_rest_here()                                  # ベッドが使えないときは、その場で簡易休憩
 			return true
 	return false
 
 
-## 休憩を始められるか（休憩の優先度が0でなく、休むべき状態で、空いているベッドがある）
+## 休憩を始められるか（休憩の優先度が0でなく、休むべき状態）。ベッドがなくても、その場で簡易休憩できる
 func _can_start_rest() -> bool:
-	return ch.priorities.get(GameData.Job.REST, 0) > 0 and CrewStatus.can_rest(ch) and game.base.has_free_bed()
+	return ch.priorities.get(GameData.Job.REST, 0) > 0 and CrewStatus.can_rest(ch)
+
+
+## その場で簡易休憩を始める（ベッドが使えないとき。回復はベッドより遅い: CrewStatusDB.REST_IN_PLACE_RATE）
+func _start_rest_here() -> void:
+	current_job = GameData.Job.REST
+	_set_state(State.REST_HERE)
 
 
 ## HP が 0 になった（戦闘不能）。仕事を中断して（荷物は倉庫へ戻し、予約は解放して）、その場に倒れる。
@@ -530,7 +550,7 @@ func _release_eat_claim() -> void:
 		game.food_claims = maxi(0, game.food_claims - 1)
 
 
-## 加工などの途中でも、先に済ませるべき生活の必要があるか（とても空腹で食べられる食料がある／休みが危険なほど必要でベッドが使える）
+## 加工などの途中でも、先に済ませるべき生活の必要があるか（とても空腹で食べられる食料がある／休みが危険なほど必要）
 func _urgent_life_need() -> bool:
 	if CrewStatus.needs_to_eat_now(ch) and _wants_to_eat():
 		return true

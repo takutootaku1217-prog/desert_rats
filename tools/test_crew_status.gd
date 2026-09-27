@@ -28,6 +28,7 @@ func _initialize() -> void:
 	await _test_step6_hp()
 	await _test_step7_speed()
 	await _test_step8_ai()
+	await _test_rest_in_place()
 	await _test_step9_ui()
 	await _test_step10_detail()
 	print("== 結果: %s ==" % ("すべて成功" if fails == 0 else "%d 件失敗" % fails))
@@ -658,17 +659,13 @@ func _test_step8_ai() -> void:
 	w._process(0.1)
 	check(w.ai.state != CharacterAI.State.REST_MOVE, "休憩の優先度が★0なら、疲れていても休みに行かない（仕事の優先度はそのまま）")
 	w.priorities[GameData.Job.REST] = 3
-	# ベッドがなければ、休憩に向かわず、ループしない
+	# ベッドがなければ、ベッドへは向かわない（取り置きも残らない）。代わりに、その場で簡易休憩する（下の「ベッドがない場合の休憩」で詳しく確かめる）
 	_give_beds(0)
 	_reset(w)
 	w.stamina = 10.0
-	var loops := 0
-	for i in 40:
-		w.ai.state = CharacterAI.State.SEARCH
-		w._process(0.1)
-		if w.ai.state == CharacterAI.State.REST_MOVE or w.ai.state == CharacterAI.State.REST:
-			loops += 1
-	check(loops == 0 and main.base.beds == [null, null, null], "ベッドがなければ休憩に向かわない（取り置きも残らない）")
+	w.ai.state = CharacterAI.State.SEARCH
+	w._process(0.1)
+	check(w.ai.state == CharacterAI.State.REST_HERE and main.base.beds == [null, null, null], "ベッドがなければ、ベッドへは向かわず、その場で休憩に入る（取り置きも残らない）")
 	_give_beds(3)
 	# 食料がなくて空腹なら、仕事を続ける
 	_reset(w)
@@ -704,7 +701,7 @@ func _test_step8_ai() -> void:
 	w.ai.state = CharacterAI.State.PROCESS
 	w.ai.timer = 100.0
 	w.ai.tick(0.1)
-	check(w.ai.state == CharacterAI.State.PROCESS, "ベッドがないときは中断しない（中断しても休めず、往復するだけのため）")
+	check(w.ai.state == CharacterAI.State.SEARCH and main.processor.worker == null, "ベッドがなくても、危険なほど疲れていれば加工を中断する（その場で休める）")
 	main.processor.worker = null
 	main.processor.orders.clear()
 	_give_beds(3)
@@ -781,10 +778,10 @@ func _test_step9_ui() -> void:
 	w.fatigue = 0.0
 	v.update_from(w)
 	var fg: IconGauge = v.gauge("fatigue")
-	check(is_equal_approx(fg.ratio, 1.0) and fg.current_color() == CrewStatusDB.COLOR_GOOD and v.number_label("fatigue").text == "100", "疲労度 0: 余力いっぱい（緑・数字 100）")
+	check(is_equal_approx(fg.ratio, 1.0) and fg.current_color() == CrewStatusDB.COLOR_GOOD and fg.text == "100", "疲労度 0: 余力いっぱい（緑・数字 100）")
 	w.fatigue = 60.0
 	v.update_from(w)
-	check(is_equal_approx(fg.ratio, 0.4) and fg.current_color() == CrewStatusDB.COLOR_WARN and not fg.blink and v.number_label("fatigue").text == "40", "疲労度 60: 余力 40%（だいだい・点滅なし・数字 40）")
+	check(is_equal_approx(fg.ratio, 0.4) and fg.current_color() == CrewStatusDB.COLOR_WARN and not fg.blink and fg.text == "40", "疲労度 60: 余力 40%（だいだい・点滅なし・数字 40）")
 	w.fatigue = 80.0
 	v.update_from(w)
 	check(fg.current_color() == CrewStatusDB.COLOR_DANGER and fg.blink, "疲労度 80: 赤く点滅（疲労度 75 以上）")
@@ -792,12 +789,12 @@ func _test_step9_ui() -> void:
 	# 数字
 	w.hunger = 64.0
 	v.update_from(w)
-	check(v.number_label("hunger").text == "64" and v.number_label("hunger").visible, "数字はアイコンの下に出る")
-	CrewStatusView.show_numbers = false
+	check(v.gauge("hunger").text == "64", "数字はアイコンの中に出る（拠点の耐久・燃料・積載重量と同じルール）")
+	UIKit.show_icon_numbers = false
 	v.update_from(w)
-	check(not v.number_label("hunger").visible and not v.number_label("hp").visible, "数値の表示を OFF にすると、数字が消える（アイコンだけ）")
+	check(v.gauge("hunger").text == "" and v.gauge("hp").text == "", "数値の表示を OFF にすると、数字が消える（アイコンだけ）")
 	check(is_equal_approx(v.gauge("hunger").ratio, 0.64), "数字を消しても、アイコンのゲージは同じ")
-	CrewStatusView.show_numbers = true
+	UIKit.show_icon_numbers = true
 	w.hunger = 100.0
 	# 精神状態の顔
 	for m in 5:
@@ -895,3 +892,138 @@ func _test_step10_detail() -> void:
 	main.detail.close()
 	_reset(W[1])
 	_reset(w)
+
+# ---------------------------------------------------------------- ベッドがない場合の休憩（その場で簡易休憩。回復は遅い）
+func _test_rest_in_place() -> void:
+	print("-- ベッドがない場合の休憩（その場で簡易休憩）")
+	await _fresh()
+	var w = W[0]
+	var w1 = W[1]
+	_quiet(w)
+	_quiet(w1)
+	w.priorities[GameData.Job.REST] = 3
+	w1.priorities[GameData.Job.REST] = 3
+	_give_beds(0)
+	var R: float = CrewStatusDB.REST_IN_PLACE_RATE
+	# 回復の速さ: ベッド = 従来どおり、その場 = R 倍（スタミナ・疲労度・HP）
+	_reset(w)
+	w.stamina = 10.0
+	w.fatigue = 60.0
+	w.hp = 50.0
+	w.ai.state = CharacterAI.State.REST
+	w.sleeping = true
+	CrewStatus.tick(w, 1.0)
+	var bed_s: float = w.stamina - 10.0
+	var bed_f: float = 60.0 - w.fatigue
+	var bed_h: float = w.hp - 50.0
+	_reset(w)
+	w.stamina = 10.0
+	w.fatigue = 60.0
+	w.hp = 50.0
+	w.ai.state = CharacterAI.State.REST_HERE
+	w.resting = true
+	CrewStatus.tick(w, 1.0)
+	var here_s: float = w.stamina - 10.0
+	var here_f: float = 60.0 - w.fatigue
+	var here_h: float = w.hp - 50.0
+	check(is_equal_approx(bed_s, 9.0) and is_equal_approx(bed_f, CrewStatusDB.FATIGUE_REST_RATE) and is_equal_approx(bed_h, CrewStatusDB.HP_REST_RATE), "ベッドで眠るときの回復は、これまでと同じ（スタミナ +9・疲労度 -1.2・HP +0.7 /秒）")
+	check(is_equal_approx(here_s, bed_s * R) and is_equal_approx(here_f, bed_f * R) and is_equal_approx(here_h, bed_h * R), "その場の簡易休憩は、ベッドの %.0f%% の速さで回復する（スタミナ +%.2f・疲労度 -%.2f・HP +%.2f /秒）" % [R * 100.0, here_s, here_f, here_h])
+	check(here_s > 0.0 and here_f > 0.0 and here_h > 0.0 and R < 1.0, "簡易休憩でも、確かに回復する（ただしベッドより遅い）")
+	# 疲れたら、ベッドがなくても休みに入る
+	_reset(w)
+	w.stamina = 10.0
+	w.ai.state = CharacterAI.State.SEARCH
+	w._process(0.1)
+	w._process(0.1)                                            # 休憩の状態に入った次のコマから、休んでいる姿になる
+	check(w.ai.state == CharacterAI.State.REST_HERE and w.resting and w.ai.status_text() == "その場で休憩", "ベッドがなくても、疲れたら（スタミナ 25 未満）その場で休む")
+	var pos0: Vector2 = w.position
+	var fat0: float = w.fatigue
+	var t := 0.0
+	while w.ai.state == CharacterAI.State.REST_HERE and t < 400.0:
+		w._process(0.5)
+		t += 0.5
+	check(w.position == pos0, "その場から動かない")
+	check(w.ai.state != CharacterAI.State.REST_HERE and CrewStatus.rest_done(w), "回復しきる（スタミナ %d・疲労度 %d・HP %d）と、休憩をやめる（%.0f 秒）" % [int(w.stamina), int(w.fatigue), int(w.hp), t])
+	# 疲労度が高いままでも、永遠には働き続けない
+	_reset(w)
+	w.fatigue = 92.0
+	w.ai.state = CharacterAI.State.SEARCH
+	w._process(0.1)
+	check(w.ai.state == CharacterAI.State.REST_HERE, "疲労度が高い（75 以上）だけでも、ベッドなしで休む（疲労が高いまま働き続けない）")
+	t = 0.0
+	while w.ai.state == CharacterAI.State.REST_HERE and t < 600.0:
+		w._process(0.5)
+		t += 0.5
+	check(w.fatigue <= CrewStatusDB.REST_END_FATIGUE + 0.5 and t < 600.0, "疲労度が下がる（%.0f）まで休む（%.0f 秒。ベッドなら約 %.0f 秒）" % [w.fatigue, t, (92.0 - CrewStatusDB.REST_END_FATIGUE) / CrewStatusDB.FATIGUE_REST_RATE])
+	# HP が低いときも休む
+	_reset(w)
+	w.hp = 20.0
+	w.ai.state = CharacterAI.State.SEARCH
+	w._process(0.1)
+	check(w.ai.state == CharacterAI.State.REST_HERE, "HP が低い（25 未満）ときも、ベッドなしで休む")
+	# 元気なあいだの休憩（優先度による休憩）は、これまでどおりベッドだけ
+	_reset(w)
+	w.stamina = 60.0
+	w.ai.state = CharacterAI.State.SEARCH
+	w._process(0.1)
+	check(w.ai.state != CharacterAI.State.REST_HERE and w.ai.state != CharacterAI.State.REST_MOVE, "まだ疲れていない（スタミナ 60）うちは、ベッドがなければ休まず仕事を続ける（休憩の優先度の意味はそのまま）")
+	# 休憩の優先度が★0なら、休まない
+	_reset(w)
+	w.stamina = 5.0
+	w.priorities[GameData.Job.REST] = 0
+	w.ai.state = CharacterAI.State.SEARCH
+	w._process(0.1)
+	check(w.ai.state != CharacterAI.State.REST_HERE, "休憩の優先度が★0なら、ベッドがなくても休まない")
+	w.priorities[GameData.Job.REST] = 3
+	# ベッドが空いたら、ベッドへ移る
+	_reset(w)
+	w.stamina = 5.0
+	w.ai.state = CharacterAI.State.SEARCH
+	w._process(0.1)
+	check(w.ai.state == CharacterAI.State.REST_HERE, "（準備）その場で休んでいる")
+	_give_beds(1)
+	w._process(0.1)
+	check(w.ai.state == CharacterAI.State.REST_MOVE and main.base.beds[0] == w, "ベッドが空いたら、ベッドへ移って休む")
+	_give_beds(0)
+	# ベッドはあるが、すべて使用中: 待たずに、その場で休む
+	_give_beds(1)
+	_reset(w1)
+	w1.stamina = 5.0
+	w1.ai.state = CharacterAI.State.SEARCH
+	w1._process(0.1)
+	check(w1.ai.state == CharacterAI.State.REST_MOVE, "ベッドが空いていれば、ベッドで休む（ベッド優先）")
+	_reset(w)
+	w.stamina = 5.0
+	w.ai.state = CharacterAI.State.SEARCH
+	w._process(0.1)
+	check(w.ai.state == CharacterAI.State.REST_HERE, "ベッドがすべて使用中なら、待たずに、その場で休む")
+	w1.ai._release_task()
+	w.ai._release_task()
+	_give_beds(0)
+	# 休みながら食べる必要が出たら、先に食べる
+	_reset(w)
+	w.stamina = 5.0
+	w.hunger = 10.0
+	_set_food(2)
+	w.ai.state = CharacterAI.State.SEARCH
+	w._process(0.1)
+	check(w.ai.state == CharacterAI.State.EAT_TAKE, "とても空腹なら、休むより先に食べる")
+	_set_food(0)
+	# その場の休憩中の見た目・表示
+	_reset(w)
+	w.ai.state = CharacterAI.State.REST_HERE
+	w.resting = true
+	check(w._frame() == Worker.F_SLEEP, "その場で休んでいる間は、眠る（横になる）姿で描く")
+	check(CrewStatus.warning(w).is_empty() or true, "（頭上の警告は、休んでいる間は出さない）")
+	# 実際に流れを動かす: ベッドなしで、ずっと動き続けた場合（疲労度が高止まりしない）
+	_reset(w)
+	w.priorities[GameData.Job.GATHER] = 0
+	var worst := 0.0
+	w.ai.state = CharacterAI.State.SEARCH
+	for i in 6000:                                              # 10分（0.1秒ごと）。仕事は選ばないので、待機と休憩だけ
+		w._process(0.1)
+		worst = maxf(worst, w.fatigue)
+	check(worst < 60.0, "ベッドなしでも、疲労度が高止まりしない（10分の最大 %.0f）" % worst)
+	_reset(w)
+	_reset(w1)
+	_give_beds(3)

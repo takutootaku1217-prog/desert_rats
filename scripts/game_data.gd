@@ -416,3 +416,17 @@ static func draw_creature(canvas: CanvasItem, species: String, frame: int, feet:
 static func draw_item(canvas: CanvasItem, item: int, pos: Vector2, s: float = 1.0) -> void:
 	var size := ArtSpec.px_size(ArtSpec.ITEM) * s
 	canvas.draw_texture_rect(item_tex(item), Rect2(pos - size / 2.0, size), false)
+
+
+## アイテムのアイコンを「ゲージ」として描く（アイコンそのものが進み具合を表す）。下から ratio（0〜1）の分だけ明るく、残りは暗い。
+## 画面上の大きさは、基準の大きさ（ArtSpec.ITEM）× s。絵の細かさに依存しない。加工の進みなどに使う。
+static func draw_item_fill(canvas: CanvasItem, item: int, pos: Vector2, s: float, ratio: float, tint: Color = Color.WHITE) -> void:
+	var size := ArtSpec.px_size(ArtSpec.ITEM) * s
+	var tx := item_tex(item)
+	var rect := Rect2(pos - size / 2.0, size)
+	canvas.draw_texture_rect(tx, rect, false, Color(0.2, 0.2, 0.26, 0.9))
+	var r := clampf(ratio, 0.0, 1.0)
+	if r > 0.0:
+		var h := size.y * r
+		var src_h := float(tx.get_height()) * r
+		canvas.draw_texture_rect_region(tx, Rect2(rect.position.x, rect.end.y - h, size.x, h), Rect2(0.0, float(tx.get_height()) - src_h, float(tx.get_width()), src_h), tint)

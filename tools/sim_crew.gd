@@ -81,7 +81,7 @@ func _run() -> void:
 				hungry_t += dt
 			for w in main.workers:
 				var st: int = w.ai.state
-				if st == CharacterAI.State.REST or st == CharacterAI.State.REST_MOVE:
+				if st == CharacterAI.State.REST or st == CharacterAI.State.REST_MOVE or st == CharacterAI.State.REST_HERE:
 					rest_t += dt
 				elif st != CharacterAI.State.IDLE and st != CharacterAI.State.SEARCH:
 					work_t += dt

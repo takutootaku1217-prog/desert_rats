@@ -57,7 +57,7 @@ func _make_card(w) -> Control:
 	status.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	head.add_child(status)
 	# ステータス: HP・スタミナ・満腹度・疲労度の「アイコン自体がゲージ」と、精神状態の顔（ui/crew_status_view.gd。値は Worker から読むだけ）
-	var view := CrewStatusView.new().setup(Vector2i(8, 8), 11)
+	var view := CrewStatusView.new().setup(Vector2i(12, 12), 12)
 	v.add_child(view)
 	# 仕事の優先度（6つあるので2列に並べる）
 	var stars := {}

@@ -126,6 +126,10 @@ const REST_STRESS_URGENT := 60.0           # ストレスがこれ以上: 休憩
 const REST_JOB_STAMINA_BELOW := 70.0       # 以前の REST_START_BELOW
 const REST_JOB_FATIGUE_ABOVE := 50.0
 const REST_JOB_HP_BELOW := 50.0
+## ベッドが使えない（建てていない・すべて使用中）とき、本当に休みが必要な状態（上の「急ぎ」の線）なら、その場で簡易休憩する。
+## 回復は、ベッドで眠るときの何割か（スタミナ・疲労度・HP すべてに掛かる。ベッドで眠るときの数字は変えていない）。
+## 休憩の優先度が★0の仲間は、これも休まない。ベッドが空いたら、そちらへ移る。
+const REST_IN_PLACE_RATE := 0.33
 ## 休憩をやめてよい状態（スタミナが戻っても、疲労度・HPが高ければ、しばらく休み続ける）
 const REST_END_STAMINA := 98.0             # 以前の REST_UNTIL
 const REST_END_FATIGUE := 20.0

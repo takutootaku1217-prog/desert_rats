@@ -77,9 +77,10 @@ BONE = hexc("ece3cf")       # 骨（充填しない部分）
 BONE_SH = hexc("b8ad94")
 
 
-def silhouette_icon(sil, rim, extra=None):
+def silhouette_icon(sil, rim, extra=None, carve=False):
     """シルエット sil（不透明 = 体）から (frame, mask) を作る。内側 = 体のうち、上下左右がすべて体のドット（充填範囲）。
-    枠 = 体の縁（rim）＋ その外側の輪郭。extra は枠の上に足す絵（骨など。充填範囲の外に置く）。"""
+    枠 = 体の縁（rim）＋ その外側の輪郭。extra は枠の上に足す絵（骨など。充填範囲の外に置く）。
+    carve=True なら、extra が体の内側に重なる所は、充填範囲から外して、枠の絵として描く（盾の中の目印など）。"""
     interior = Px(SIZE, SIZE)
     for y in range(SIZE):
         for x in range(SIZE):
@@ -87,6 +88,11 @@ def silhouette_icon(sil, rim, extra=None):
                 continue
             if all(sil.get(x + dx, y + dy)[3] > 0 for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))):
                 interior.set(x, y, (255, 255, 255, 255))
+    if carve and extra is not None:
+        for y in range(SIZE):
+            for x in range(SIZE):
+                if extra.get(x, y)[3] > 0:
+                    interior.set(x, y, CLEAR)
     ring = Px(SIZE, SIZE)
     for y in range(SIZE):
         for x in range(SIZE):
@@ -160,6 +166,58 @@ def fatigue_shapes():
     return silhouette_icon(s, STATUS_RIM["fatigue"], z)
 
 
+# ---------------------------------------------------------------- 拠点の耐久（盾）と燃料（ジェリカン）。個体のHP（ハート）と同じ「アイコン自体がゲージ」の作り
+SHIELD_RIM = hexc("aab4c4")
+FUEL_RIM = hexc("d9793a")
+MARK = hexc("eef1f6")           # 盾の中の目印（部位を見分ける。充填しない）
+CAP = hexc("6b7482")
+
+
+def _shield_body():
+    s = Px(SIZE, SIZE)
+    s.poly([(1, 1), (14, 1), (14, 8), (10, 13), (5, 13), (1, 8)], SHIELD_RIM)
+    s.poly([(5, 13), (10, 13), (8, 15), (7, 15)], SHIELD_RIM)
+    return s
+
+
+def _mark(rows):
+    """5x3 の目印。rows = 3つの文字列（# = 点）。盾の上寄りの中央（x 5〜9・y 2〜4）に置く。"""
+    m = Px(SIZE, SIZE)
+    for j, row in enumerate(rows):
+        for i, ch in enumerate(row):
+            if ch == "#":
+                m.set(5 + i, 2 + j, MARK)
+    return m
+
+
+def shield_hull_shapes():
+    """拠点の耐久: 車体（外板の目印）。"""
+    return silhouette_icon(_shield_body(), SHIELD_RIM, _mark(["#####", "#...#", "#####"]), carve=True)
+
+
+def shield_drive_shapes():
+    """拠点の耐久: 走行装置（車輪の目印）。"""
+    return silhouette_icon(_shield_body(), SHIELD_RIM, _mark([".###.", "##.##", ".###."]), carve=True)
+
+
+def shield_machine_shapes():
+    """拠点の耐久: 加工設備（歯車の目印）。"""
+    return silhouette_icon(_shield_body(), SHIELD_RIM, _mark(["#.#.#", ".###.", "#.#.#"]), carve=True)
+
+
+def fuel_shapes():
+    """燃料: ジェリカン。缶の中身だけが充填範囲。注ぎ口と取っ手は枠の側に描く。"""
+    s = Px(SIZE, SIZE)
+    s.poly([(2, 5), (11, 5), (14, 7), (14, 14), (2, 14)], FUEL_RIM)
+    extra = Px(SIZE, SIZE)
+    extra.rect(3, 2, 3, 3, CAP)           # 注ぎ口
+    extra.rect(4, 1, 1, 1, CAP)
+    extra.hline(8, 2, 5, CAP)             # 取っ手
+    extra.vline(8, 3, 2, CAP)
+    extra.vline(12, 3, 2, CAP)
+    return silhouette_icon(s, FUEL_RIM, extra)
+
+
 # ---------------------------------------------------------------- 精神状態の顔（5段階。色は色分け用に、白っぽく描いて画面側で染める）
 FACE = hexc("f4f4f4")
 FACE_SH = hexc("c9c9c9")
@@ -192,7 +250,8 @@ def face(kind):
     return p.outline(OUT)
 
 
-ICONS = {"weight": weight_shapes, "hp": hp_shapes, "stamina": stamina_shapes, "hunger": hunger_shapes, "fatigue": fatigue_shapes}
+ICONS = {"weight": weight_shapes, "hp": hp_shapes, "stamina": stamina_shapes, "hunger": hunger_shapes, "fatigue": fatigue_shapes,
+         "shield_hull": shield_hull_shapes, "shield_drive": shield_drive_shapes, "shield_machine": shield_machine_shapes, "fuel": fuel_shapes}
 FACES = ["good", "normal", "anxious", "bad", "limit"]
 
 def all_images():

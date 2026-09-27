@@ -5,6 +5,8 @@ extends SceneTree
 ## シナリオ（省略すると normal）: stop（90秒で拠点を止める）／ fast（速度200）／ slow（速度10）／ rawfull（素材棚が満杯から始める）／
 ##   prodfull（加工品置き場が満杯から始める）／ priostress（仲間の優先度と加工の方針を数秒ごとに乱数で変える）
 ## 確認する流れ: 拠点が移動 → 資源が発生 → 仲間が発見 → 回収 → 運搬 → 素材棚に収納 → 加工設備へ送られる → 加工される → 加工品置き場に収納。
+##   続けて、生活と維持（休憩・食事・燃料補給・修理・最後まで移動が続く）も確かめる（「基本ループ（生活と維持）」の行）。
+##   食事は、最初の食事が約19分後なので、25分以上の回で確かめる（それより短い回では参考）。
 ## 監視する異常: 同じ状態で動かない・発見と取り消しの繰り返し・運んでいる物が消える・予約したまま動かない・
 ##   加工が始まらない/終わらない/取り出されない・倉庫の個数がおかしい・元気が0のまま。
 
@@ -18,9 +20,11 @@ const LIMITS := {
 	CharacterAI.State.REFUEL_MOVE: 40.0, CharacterAI.State.REFUEL: 6.0, CharacterAI.State.HUNT_MOVE: 60.0,
 	CharacterAI.State.HUNT_ATTACK: 60.0, CharacterAI.State.COMBAT_MOVE: 60.0, CharacterAI.State.COMBAT: 120.0,
 	CharacterAI.State.IDLE: 3.0, CharacterAI.State.SEARCH: 3.0,
+	CharacterAI.State.REST_HERE: 300.0, CharacterAI.State.EAT_TAKE: 40.0, CharacterAI.State.EAT: 5.0, CharacterAI.State.DOWN: 150.0,
 }
 ## 荷物を持っている状態から手ぶらになってよい、直前の状態（それ以外で消えたら「荷物が消えた」）
-const CARRY_END_OK := [CharacterAI.State.STORE, CharacterAI.State.HAUL_MOVE, CharacterAI.State.REFUEL, CharacterAI.State.REPAIR]
+## （食事 EAT は、持っていた食料を食べて消費するので、手ぶらになってよい）
+const CARRY_END_OK := [CharacterAI.State.STORE, CharacterAI.State.HAUL_MOVE, CharacterAI.State.REFUEL, CharacterAI.State.REPAIR, CharacterAI.State.EAT]
 
 var fails := 0
 var all_ok := true
@@ -88,6 +92,7 @@ func _one(n: int, minutes: float, scale: float, seed_base: int, events_on: bool,
 	var prog_last := -1.0                # 加工の進みが最後に変わった時の値・種類・時刻
 	var prog_id := ""
 	var prog_changed_at := d.elapsed
+	var dist_mid := -1.0                 # 走行距離（試験時間の半分の時点。最後まで移動が続いたかを見る）
 
 	var mark := func(key: String) -> void:
 		if not ms.has(key):
@@ -147,6 +152,8 @@ func _one(n: int, minutes: float, scale: float, seed_base: int, events_on: bool,
 				mark.call("B3 ベッド3つ完成")
 			if lasting.call("buildq", not main.build_queue.is_empty(), 240.0):
 				note.call("buildq", "建設の依頼が 4 分以上、待ったまま（材料が集まらない？）")
+		if dist_mid < 0.0 and t >= minutes * 30.0:
+			dist_mid = d.distance
 		if scenario == "stop" and t >= 90.0:
 			main.target_speed = 0.0                  # 最初の90秒は普通に走り、そのあと拠点を止める（止まっても加工・運搬が回るか）
 		if scenario == "priostress" and t >= next_stress:
@@ -180,6 +187,10 @@ func _one(n: int, minutes: float, scale: float, seed_base: int, events_on: bool,
 			mark.call("7 加工設備へ送られる")
 		if P.total_done > 0:
 			mark.call("8 加工される")
+		if main.base.total_refuel > 0:
+			mark.call("L3 燃料補給")
+		if main.base.total_repair > 0:
+			mark.call("L4 修理")
 
 		# ---- 仲間ごと ----
 		for w in W:
@@ -192,6 +203,10 @@ func _one(n: int, minutes: float, scale: float, seed_base: int, events_on: bool,
 				since[w] = t
 			if s == CharacterAI.State.NOTICE:
 				mark.call("3 資源を発見")
+			if s in [CharacterAI.State.REST_MOVE, CharacterAI.State.REST, CharacterAI.State.REST_HERE]:
+				mark.call("L1 休憩")
+			if s == CharacterAI.State.EAT:
+				mark.call("L2 食事")
 			if s == CharacterAI.State.GATHER and w.carrying >= 0:
 				mark.call("4 資源を回収")
 			if s == CharacterAI.State.MOVE_TO_STORAGE and w.carrying >= 0:
@@ -306,11 +321,11 @@ func _one(n: int, minutes: float, scale: float, seed_base: int, events_on: bool,
 	paused = false
 	# ---- 画面の数字と実際の個数が合っているか ----
 	main.status._process(0.0)
-	var text: String = main.status._stock.text + "\n" + main.status._weight.tooltip_text     # 素材棚・加工品置き場の内訳は、重りのアイコンのツールチップ
+	var text: String = main.status.stock_summary() + "\n" + main.status._weight.tooltip_text     # 倉庫の中身はアイコン＋個数（その文字にしたもの）。素材棚・加工品置き場の内訳は、重りのアイコンのツールチップ
 	var rx := RegEx.new()
-	var labels := [["食料", GameData.Item.FOOD], ["燃料", GameData.Item.FUEL], ["修理資材", GameData.Item.REPAIR_KIT], ["肉", GameData.Item.MEAT],
-			["皮", GameData.Item.HIDE], ["骨", GameData.Item.BONE], ["脂", GameData.Item.FAT], ["木", GameData.Item.WOOD], ["石", GameData.Item.STONE],
-			["鉱", GameData.Item.IRON_ORE], ["鉄", GameData.Item.IRON]]
+	var labels := [["食料", GameData.Item.FOOD], ["燃料", GameData.Item.FUEL], ["修理資材", GameData.Item.REPAIR_KIT], ["生肉", GameData.Item.MEAT],
+			["皮", GameData.Item.HIDE], ["骨", GameData.Item.BONE], ["脂肪", GameData.Item.FAT], ["木材", GameData.Item.WOOD], ["石", GameData.Item.STONE],
+			["鉄鉱石", GameData.Item.IRON_ORE], ["鉄", GameData.Item.IRON]]
 	var ui_ok := true
 	for lb in labels:
 		rx.compile(str(lb[0]) + " ?(\\d+)")
@@ -340,6 +355,27 @@ func _one(n: int, minutes: float, scale: float, seed_base: int, events_on: bool,
 	var over: bool = main.game_over
 	print("--- 第%d回（出来事 %s・シナリオ %s）ゲーム内 %.0f 分 走行 %.1f km%s ---" % [n, "あり" if events_on else "なし", scenario, d.elapsed / 60.0,
 			d.distance / 2500.0, "  ★ゲームオーバー" if over else ""])
+	# ---- 基本ループ（生活と維持）: 休憩・食事・燃料補給・修理・最後まで移動が続く ----
+	var life := ""
+	var sec: float = minutes * 60.0
+	for k in ["L1 休憩", "L2 食事", "L3 燃料補給", "L4 修理"]:
+		if ms.has(k):
+			life += "%s %.0f秒 / " % [k.substr(3), ms[k]]
+		else:
+			life += "%s なし / " % k.substr(3)
+	var keeps_moving: bool = scenario == "stop" or main.game_over or dist_mid < 0.0 or d.distance > dist_mid + 100.0
+	life += "最後まで移動が続く %s" % ("はい" if keeps_moving else "いいえ")
+	var eat_due: float = (CrewStatusDB.MAX_HUNGER - CrewStatusDB.EAT_BELOW) / CrewStatusDB.HUNGER_DECAY_PER_MIN * 60.0 + 300.0     # 最初の食事が起きるはずの時刻（余裕つき）
+	if not ms.has("L1 休憩") and sec >= 360.0:
+		errors.append("休憩が一度も起きなかった（疲れた仲間が休めない？）")
+	if not ms.has("L2 食事") and sec >= eat_due and not main.game_over:
+		errors.append("食事が一度も起きなかった（%d 秒たっても。満腹度が下がっても食べない？）" % int(sec))
+	if not ms.has("L3 燃料補給") and sec >= 480.0 and scenario != "stop" and scenario != "slow":
+		errors.append("燃料補給が一度も起きなかった（拠点の維持が回っていない？）")
+	if not keeps_moving:
+		errors.append("拠点の移動が、途中から止まったまま")
+	if not ms.has("L2 食事") and sec < eat_due:
+		notes.append("食事の確認は、最初の食事（約%d秒後）より短い回なので、参考（この回では起きていない）" % int(eat_due - 300.0))
 	var names := ["1 拠点が移動", "2 資源が発生", "3 資源を発見", "4 資源を回収", "5 拠点へ運ぶ", "6 素材棚に収納", "7 加工設備へ送られる", "8 加工される", "9 加工品置き場に収納"]
 	var line := ""
 	for k in names:
@@ -349,6 +385,7 @@ func _one(n: int, minutes: float, scale: float, seed_base: int, events_on: bool,
 			line += "%s ★未達 / " % k
 			all_ok = false
 	print("  流れ: " + line.trim_suffix(" / "))
+	print("  基本ループ（生活と維持）: " + life)
 	if scenario == "build":
 		var bl := ""
 		for k in ["B1 ワークベンチ完成", "B2 最初のベッド完成", "B3 ベッド3つ完成"]:

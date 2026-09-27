@@ -49,7 +49,8 @@ var away := false                 # 調査隊として拠点を離れている�
 var moving := false
 var pose := ""                # "pick" / "work" / ""
 var attacking := false        # 戦闘用（work と同じ見た目）
-var sleeping := false
+var sleeping := false          # ベッドで眠っている
+var resting := false           # ベッドがなく、その場で簡易休憩している（回復は遅い）
 var bed_index := -1
 
 var _climb_dest = null        # 階をまたぐ移動の途中（Vector2）
@@ -259,6 +260,7 @@ func _process(delta: float) -> void:
 	moving = false
 	attacking = false
 	sleeping = false
+	resting = false
 	pose = ""
 	ai.tick(delta)
 	CrewStatus.tick(self, delta)                  # スタミナ・満腹度・疲労度・HP・精神状態の増減（scripts/crew_status.gd）
@@ -266,7 +268,7 @@ func _process(delta: float) -> void:
 
 
 func _frame() -> int:
-	if sleeping or down:                     # 眠っている・倒れている（戦闘不能）
+	if sleeping or resting or down:          # 眠っている・その場で休んでいる・倒れている（戦闘不能）
 		return F_SLEEP
 	if _climb_dest != null and _climb_kind == "ladder":
 		return F_CLIMB0 + (int(_t * 8.0) % 2)
@@ -315,8 +317,8 @@ func _draw() -> void:
 	else:
 		GameData.draw_text(self, snap + Vector2(0, top - 4), ai.status_text(), 12, Color("fde68a"), 150.0)
 	GameData.draw_text(self, snap + Vector2(0, 22), char_name, 12, Color.WHITE, 90.0)
-	# 頭上の警告: 危険なステータスのうち、いちばん危険なものを1つだけ（CrewStatus.warning）。眠っている間は出さない
-	if not sleeping:
+	# 頭上の警告: 危険なステータスのうち、いちばん危険なものを1つだけ（CrewStatus.warning）。休んでいる間は出さない
+	if not sleeping and not resting:
 		var warn := CrewStatus.warning(self)
 		if not warn.is_empty():
 			_draw_warning(snap + Vector2(0, top - 28.0), warn)
