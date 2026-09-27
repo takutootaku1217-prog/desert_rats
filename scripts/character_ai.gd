@@ -9,6 +9,7 @@ extends RefCounted
 ##   加工: MOVE_TO_MACHINE -> PROCESS -> MOVE_TO_STORAGE -> STORE
 ##   修理: REPAIR_TAKE(修理資材) -> REPAIR_MOVE -> REPAIR
 ##   食事: EAT_TAKE(倉庫の食料) -> EAT（満腹度が下がったとき、仕事より先に。scripts/crew_status.gd・data/crew_status.gd）
+##   運搬の依頼（プレイヤーが頼んだ 倉庫 ⇄ 作業場）: XFER_TAKE(元の置き場) -> XFER_MOVE(行き先)。運搬の仕事（HAUL）の一部。同時に1人だけ（Main.transfer_worker）
 ## 新しい仕事は _try_start() に分岐を足し、状態を増やすだけで拡張できる。
 
 enum State {
@@ -18,7 +19,7 @@ enum State {
 	REST_MOVE, REST,
 	REFUEL_TAKE, REFUEL_MOVE, REFUEL,
 	HUNT_MOVE, HUNT_ATTACK,
-	EAT_TAKE, EAT, DOWN, REST_HERE,
+	EAT_TAKE, EAT, DOWN, REST_HERE, XFER_TAKE, XFER_MOVE,
 }
 
 const STATE_TEXT := {
@@ -49,6 +50,8 @@ const STATE_TEXT := {
 	State.EAT: "食事中",
 	State.DOWN: "倒れている",
 	State.REST_HERE: "その場で休憩",
+	State.XFER_TAKE: "素材を取りに行く（運搬の依頼）",
+	State.XFER_MOVE: "素材を運ぶ（運搬の依頼）",
 }
 
 var ch      # Worker
@@ -71,6 +74,8 @@ const REPAIR_TIME := 1.2
 const REFUEL_TIME := 0.6
 ## 休憩の基準は data/crew_status.gd（CrewStatusDB）にまとめてある（スタミナ・疲労度・HP）
 var eat_wait := 0.0      # 食料が取れなかったあと、食べに行き直すまでの待ち（食事のループにならないように）
+var xfer_item := -1      # 運搬の依頼で運んでいるアイテムと向き（Main.request_transfer）
+var xfer_dir := ""
 var _eat_claimed := false   # 食料の在庫を1つ取り置いている（食べに向かっている間）
 var current_job := -1
 
@@ -318,6 +323,28 @@ func tick(delta: float) -> void:
 				ch.carrying = -1
 				_set_state(State.SEARCH)
 
+		# ---- 運搬の依頼（倉庫 ⇄ 作業場）----
+		State.XFER_TAKE:
+			ch.target = _xfer_point(true) + ch.slot_offset
+			if ch.move_to_target(delta):
+				var got: int = game.begin_transfer_trip(xfer_item, xfer_dir)
+				if got > 0:
+					ch.carrying = xfer_item
+					ch.carry_n = got
+					ch.carry_bonus = {}
+					_set_state(State.XFER_MOVE)
+				else:
+					_release_task()                                    # 元にもう材料がなかった
+					_set_state(State.SEARCH)
+		State.XFER_MOVE:
+			ch.target = _xfer_point(false) + ch.slot_offset
+			if ch.move_to_target(delta):
+				game.finish_transfer_trip(xfer_item, xfer_dir, ch.carry_n)
+				ch.carrying = -1
+				ch.carry_n = 1
+				_release_task()
+				_set_state(State.SEARCH)
+
 		# ---- ベッドが使えないときの簡易休憩（その場で休む。回復は遅い）----
 		State.REST_HERE:
 			ch.resting = true
@@ -523,6 +550,14 @@ func _start_rest_here() -> void:
 	_set_state(State.REST_HERE)
 
 
+## 運搬の依頼の、元の置き場（from_source = true）／行き先（false）の位置。倉庫 → 作業場（to_workshop）または 作業場 → 倉庫（to_storage）
+func _xfer_point(from_source: bool) -> Vector2:
+	var to_workshop: bool = xfer_dir == "to_workshop"
+	if to_workshop == from_source:
+		return game.storage.access_point()
+	return game.processor.access_point()
+
+
 ## HP が 0 になった（戦闘不能）。仕事を中断して（荷物は倉庫へ戻し、予約は解放して）、その場に倒れる。
 func on_down() -> void:
 	ch.stop_work()
@@ -630,7 +665,15 @@ func _try_start(job: int) -> bool:
 					game.base.refuel_reserved = true
 					_set_state(State.REFUEL_TAKE)
 					return true
-			# 2) 加工の方針に従って、材料一式を加工設備へ
+			# 2) プレイヤーが頼んだ運搬（倉庫 ⇄ 作業場）。同時に CraftDB.TRANSFER_WORKERS 人だけ引き受ける（ほかの仲間は、これまでの仕事を続ける）
+			var xf: Dictionary = game.next_transfer()
+			if not xf.is_empty() and (game.transfer_worker == null or game.transfer_worker == ch):
+				xfer_item = int(xf["item"])
+				xfer_dir = String(xf["dir"])
+				game.transfer_worker = ch
+				_set_state(State.XFER_TAKE)
+				return true
+			# 3) 加工の方針に従って、材料一式を加工設備へ
 			var p: BaseProcessor = game.processor
 			if p.free_slots() <= 0:
 				return false
@@ -705,6 +748,8 @@ func _release_task() -> void:
 	game.base.release_bed(ch)
 	ch.bed_index = -1
 	_release_eat_claim()
+	if game.transfer_worker == ch:
+		game.transfer_worker = null                                     # 運搬の依頼の取り置き（同時に1人だけ）を返す
 	if state == State.HAUL_TAKE and not haul_recipe.is_empty():
 		game.processor.cancel_reservation(haul_recipe)
 		haul_recipe = {}

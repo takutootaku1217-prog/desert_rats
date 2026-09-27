@@ -25,6 +25,8 @@ var expedition: Expedition        # 遺跡の探索（調査隊）。scripts/exp
 var expedition_ui: ExpeditionUI
 var build_ui: BuildUI             # 建設の画面（Bキー）。ui/build_ui.gd
 var room_ui: BaseUI               # 部屋の変更の画面（Rキー・右の「部屋の変更」ボタン）。ui/base_ui.gd
+var inventory_ui: InventoryUI     # インベントリの画面（Tabキー・右の「インベントリ」ボタン）。ui/inventory_ui.gd
+var craft_ui: CraftUI             # 制作の画面（Fキー・右の「制作」ボタン）。ui/craft_ui.gd
 var base_view: BaseView           # 拠点の見え方（外装 ⇄ 内装）。scripts/base_view.gd
 var view_switch: ViewSwitchUI     # 外装・内装の切り替えボタン（Oキー・Iキー）。ui/view_switch.gd
 
@@ -165,6 +167,12 @@ func _ready() -> void:
 	room_ui = BaseUI.new()
 	room_ui.game = self
 	add_child(room_ui)
+	inventory_ui = InventoryUI.new()
+	inventory_ui.game = self
+	add_child(inventory_ui)
+	craft_ui = CraftUI.new()
+	craft_ui.game = self
+	add_child(craft_ui)
 	base_view = BaseView.new()                     # 外装 ⇄ 内装（仲間ができたあとに作る。仲間の見え方も決めるため）
 	base_view.game = self
 	add_child(base_view)
@@ -202,6 +210,10 @@ func _process(delta: float) -> void:
 		_tool_clock = 0.0
 		manage_tools()
 	_update_hungry_flag()
+	_feed_clock += delta                       # 手動の制作を、作業場の材料から加工設備の注文にする
+	if _feed_clock >= CraftDB.FEED_SECONDS:
+		_feed_clock = 0.0
+		_feed_crafts()
 	# 地面の資源と生物は、進んだ距離に応じて現れる（天候で出にくくなる）
 	_spawn_dist -= dist * director.spawn_mult()
 	if _spawn_dist <= 0.0:
@@ -244,6 +256,163 @@ func gather_weight(item: int) -> float:
 func hunt_allowed(species: String) -> bool:
 	return hunt_policy.get(species, false)
 
+
+# ---------------------------------------------------------------- 作業場と倉庫の運搬・手動の制作（アイテム・インベントリ・制作システム）
+## 作業場 = 加工室（加工設備＋ワークベンチ）の材料置き場（BaseProcessor.stock）。倉庫とは別の置き場で、運ぶまで材料は移らない
+## （倉庫に100個あっても、作業場から使えるのは、作業場にある分だけ）。
+## 運搬の依頼（transfer_queue）: プレイヤーが決めた量を、仲間（運搬の仕事。同時に CraftDB.TRANSFER_WORKERS 人）が、倉庫 ⇄ 作業場で運ぶ。
+## 手動の制作（craft_queue）: 作業場の材料を使って、加工設備の注文にする（材料が作業場にあるときだけ頼める）。
+## 自動の加工（choose_recipe → 運搬 → 注文）は、これまでのまま（作業場の材料は使わない）。
+var transfer_queue: Array = []    # 運搬の依頼 [{item, n, dir}]。dir = "to_workshop"（倉庫→作業場）／"to_storage"（作業場→倉庫）
+var transfer_worker = null        # いま運搬の依頼を引き受けている仲間
+var craft_queue: Array = []       # 手動の制作の待ち [{id, n}]（n = 作る回数）
+var total_transferred := 0        # 運んだ個数（確認用）
+var total_crafted_by_hand := 0    # 手動の制作で作った回数（確認用）
+var _feed_clock := 0.0
+
+
+## 作業場にある材料の数（注文になっていない分）
+func workshop_count(item: int) -> int:
+	return processor.stock.count(item)
+
+
+## 手動の制作の待ちが使う予定の材料の数
+func workshop_reserved(item: int) -> int:
+	var n := 0
+	for e in craft_queue:
+		var r: Dictionary = GameData.recipe_by_id(e["id"])
+		n += int(r.get("in", {}).get(item, 0)) * int(e["n"])
+	return n
+
+
+## 制作に使える作業場の材料（制作の待ちが使う予定の分と、倉庫へ戻す依頼の分を除く）
+func workshop_available(item: int) -> int:
+	return maxi(0, workshop_count(item) - workshop_reserved(item) - _queued_transfer(item, "to_storage"))
+
+
+func _queued_transfer(item: int, dir: String) -> int:
+	var n := 0
+	for t in transfer_queue:
+		if t["item"] == item and t["dir"] == dir:
+			n += int(t["n"])
+	return n
+
+
+func _find_transfer(item: int, dir: String) -> Dictionary:
+	for t in transfer_queue:
+		if t["item"] == item and t["dir"] == dir:
+			return t
+	return {}
+
+
+## 運搬を頼む。頼めた個数を返す（0 = 頼めない）。to_workshop は倉庫にある分まで、to_storage は作業場にある分・倉庫の空きまで。
+func request_transfer(item: int, n: int, dir: String) -> int:
+	if n <= 0 or not (item in ItemDB.ORDER):
+		return 0
+	var can := 0
+	if dir == "to_workshop":
+		can = storage.count_of(item) - _queued_transfer(item, "to_workshop")
+	elif dir == "to_storage":
+		can = mini(workshop_available(item), storage.free_for(item) - _queued_transfer(item, "to_storage"))
+	else:
+		return 0
+	var give := mini(n, can)
+	if give <= 0:
+		return 0
+	var t := _find_transfer(item, dir)
+	if t.is_empty():
+		transfer_queue.append({"item": item, "n": give, "dir": dir})
+	else:
+		t["n"] += give
+	return give
+
+
+## 待っている運搬の依頼を取り消す（すでに運んでいる分は、そのまま届く）
+func cancel_transfers() -> void:
+	transfer_queue.clear()
+
+
+## 次に運ぶ依頼（元にもう材料がない依頼は、ここで消す）。なければ空
+func next_transfer() -> Dictionary:
+	for t in transfer_queue.duplicate():
+		var src: int = storage.count_of(t["item"]) if t["dir"] == "to_workshop" else processor.stock.count(t["item"])
+		if src <= 0:
+			transfer_queue.erase(t)
+			continue
+		return t
+	return {}
+
+
+## 運搬の1回分を始める（仲間が元の置き場に着いたとき）。依頼を減らし、元から取り出して、運ぶ個数を返す（0 なら何もなかった）。
+func begin_transfer_trip(item: int, dir: String) -> int:
+	var t := _find_transfer(item, dir)
+	if t.is_empty():
+		return 0
+	var src_inv: Inventory = storage.inventory if dir == "to_workshop" else processor.stock
+	var got := src_inv.take_n(item, mini(int(t["n"]), CraftDB.TRANSFER_TRIP))
+	t["n"] -= got
+	if got == 0 or int(t["n"]) <= 0:
+		transfer_queue.erase(t)
+	return got
+
+
+## 運搬の1回分が届いた（仲間が行き先に着いたとき）
+func finish_transfer_trip(item: int, dir: String, n: int) -> void:
+	if dir == "to_workshop":
+		processor.stock.add(item, n, Inventory.SOURCE_TRANSFER)
+	else:
+		var stored := storage.add_item(item, n, Inventory.SOURCE_TRANSFER)
+		if stored < n:
+			processor.stock.add(item, n - stored, Inventory.SOURCE_TRANSFER)      # 倉庫に入りきらない分は、作業場に残す（捨てない）
+	total_transferred += n
+
+
+## 手動の制作を頼む（作る回数）。頼めた回数を返す（作業場の材料・置き場の空きの範囲まで。必要設備がなければ 0）。
+func request_craft(id: String, n: int) -> int:
+	var e := CraftDB.entry_of(id)
+	if e.is_empty() or e["kind"] != "recipe" or n <= 0:
+		return 0
+	var ev: Dictionary = CraftDB.evaluate(e, self, 1)
+	if ev["state"] == "locked":
+		return 0
+	var give := mini(n, int(ev["max_qty"]))
+	if give <= 0:
+		return 0
+	for q in craft_queue:
+		if q["id"] == id:
+			q["n"] += give
+			return give
+	craft_queue.append({"id": id, "n": give})
+	return give
+
+
+## 待ちの制作を1つ取り消す（材料は作業場に残る）
+func cancel_craft(index: int) -> void:
+	if index >= 0 and index < craft_queue.size():
+		craft_queue.remove_at(index)
+
+
+## 手動の制作を、作業場の材料で加工設備の注文にする（材料がそろっていて、注文の空きがあるとき）
+func _feed_crafts() -> void:
+	while not craft_queue.is_empty() and processor.free_slots() > 0:
+		var started := false
+		for q in craft_queue:
+			var r: Dictionary = GameData.recipe_by_id(q["id"])
+			if r.is_empty():
+				craft_queue.erase(q)
+				started = true
+				break
+			if not has_facility(GameData.recipe_station(r)) or not processor.stock.has_set(r["in"]):
+				continue
+			processor.stock.take_set(r["in"])
+			processor.receive_manual(r.duplicate())
+			q["n"] -= 1
+			if int(q["n"]) <= 0:
+				craft_queue.erase(q)
+			started = true
+			break
+		if not started:
+			break
 
 # ---------------------------------------------------------------- 積載量（data/cargo.gd）
 ## いま倉庫へ向かっている物の数（回収に向かっている・運んでいる）。空き枠から引いて、入りきらない無駄足を防ぐ。
@@ -584,7 +753,7 @@ func build_room(slot: String, rtype: String) -> bool:
 
 ## 別の画面を開くとき、ほかの管理画面を閉じる（重ならないように）。keep はいま開く画面。
 func close_other_panels(keep) -> void:
-	for p in [build_ui, room_ui, policy, detail, expedition_ui]:
+	for p in [build_ui, room_ui, policy, detail, expedition_ui, inventory_ui, craft_ui]:
 		if p != null and p != keep and p.has_method("close"):
 			p.close()
 

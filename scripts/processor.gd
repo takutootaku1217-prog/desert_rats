@@ -14,7 +14,10 @@ const HOPPER := Vector2(-32.0, -96.0)      # 投入口（左上のじょうご�
 const VENT := Vector2(20.0, -92.0)         # 煙突の先（湯気）
 const CHUTE := Vector2(46.0, -14.0)        # 出口（完成品が出てくる所）
 const TRAY_X := 70.0                       # 出力トレイの左端
-const GAUGE_POS := Vector2(90.0, -68.0)    # 「作っている物」のアイコン（進み具合）の中心
+const GAUGE_POS := Vector2(90.0, -72.0)    # 「作っている物」のアイコン（進み具合）の中心
+const STOCK_POS := Vector2(76.0, -36.0)    # 作業場の材料（手で運ばれた材料）のアイコンを並べる先頭の中心
+const STOCK_DX := 28.0
+const STOCK_SLOTS := 3                     # 並べる種類の数（それ以上は「＋n」）
 const DROP_SECONDS := 0.4                  # 材料が投入口へ落ちるアニメの長さ
 const POP_SECONDS := 0.35                  # 完成品がトレイに弾んで現れる長さ
 
@@ -28,6 +31,9 @@ var total_done := 0          # 加工した回数（確認用）
 var waiting_fuel := false    # 燃料がなくて炉のレシピが止まっている
 var _last_work_ms := -10000
 var _last_station := ""      # いま（直前に）作業していた設備（"" = 加工設備。レシピの "station"）
+## 作業場の材料置き場（加工室＝加工設備＋ワークベンチ）。倉庫とは別の置き場で、仲間が運ぶまで材料は移らない（Main.request_transfer）。
+## 手動の制作（制作画面。Main.request_craft）は、ここの材料だけを使う。自動の加工（choose_recipe → 運搬 → orders）は、これを使わない（これまでのまま）。
+var stock := Inventory.new()
 var _steam: FxSprite         # 煙突の湯気（加工中だけ出る。効果の素材）
 var _drops: Array = []       # 投入口へ落ちている材料 [{item, t0（ms）}]（見た目だけ）
 var _out_times: Array = []   # output と同じ並び。その完成品が出てきた時刻（ms。弾んで現れる動き用。見た目だけ）
@@ -75,6 +81,17 @@ func _drop_reservation(recipe: Dictionary) -> void:
 
 func receive(recipe: Dictionary) -> void:
 	_drop_reservation(recipe)
+	_accept(recipe)
+
+
+## 手動の制作の注文（作業場の材料は、呼ぶ側が stock から取り出してある）。加工の仕組みは、自動の注文と同じ。
+func receive_manual(recipe: Dictionary) -> void:
+	recipe["manual"] = true
+	_accept(recipe)
+
+
+## 注文を積む（材料は届いている）
+func _accept(recipe: Dictionary) -> void:
 	orders.append(recipe)
 	# 材料が入った見た目（投入口へ落ちる／設備の場所で砂ぼこり）
 	if recipe.get("station", "") == "":
@@ -82,6 +99,18 @@ func receive(recipe: Dictionary) -> void:
 		FxSprite.spawn(self, "proc_drop", HOPPER + Vector2(0.0, 8.0))
 	else:
 		FxSprite.spawn(self, "proc_drop", to_local(station_point(recipe)))
+
+
+## 注文（加工待ち・加工中）に割り当て済みの材料の合計 {Item: 個数}（作業場の見せ方用。stock は、まだ注文になっていない材料）
+func committed_inputs() -> Dictionary:
+	var d := {}
+	var all: Array = orders.duplicate()
+	if not current.is_empty():
+		all.append(current)
+	for r in all:
+		for it in r["in"]:
+			d[it] = int(d.get(it, 0)) + int(r["in"][it])
+	return d
 
 
 ## これから出来上がる予定の数（作りすぎないための計算に使う）
@@ -163,6 +192,8 @@ func work(delta: float, speed_of: Callable) -> void:
 			else:
 				FxSprite.spawn(self, "proc_done", to_local(station_point(done)) + Vector2(0.0, -30.0))
 		total_done += 1
+		if done.get("manual", false):
+			b.game.total_crafted_by_hand += 1
 		current = {}
 		progress = 0.0
 
@@ -282,6 +313,33 @@ func _draw() -> void:
 		else:
 			lift = -2.0 * sin(float(now) / 260.0 + float(i))
 		GameData.draw_item(self, output[i], Vector2(TRAY_X + i * 26.0, -14.0 + lift), scale)
+	_draw_stock()
+
+
+## 作業場の材料（手で運ばれて stock に入っている材料）を、出口のそばに、アイテムのアイコンと個数で見せる（見るだけ。倉庫とは別の置き場）。
+## 数字はアイコンの右下の中。数字の表示は UIKit.show_icon_numbers に従う。
+func _draw_stock() -> void:
+	var shown := 0
+	var extra := 0
+	var isz := ArtSpec.px_size(ArtSpec.ITEM) * 0.5
+	for it in ItemDB.all():
+		var n: int = stock.count(it)
+		if n <= 0:
+			continue
+		if shown >= STOCK_SLOTS:
+			extra += 1
+			continue
+		var at := STOCK_POS + Vector2(STOCK_DX * float(shown), 0.0)
+		GameData.draw_item(self, it, at, 0.5)
+		if UIKit.show_icon_numbers:
+			var txt := str(n)
+			var f := GameData.font()
+			var p := at + Vector2(-isz.x / 2.0, isz.y / 2.0)
+			draw_string_outline(f, p, txt, HORIZONTAL_ALIGNMENT_RIGHT, isz.x + 2.0, 11, 4, Color(0.1, 0.06, 0.04, 0.9))
+			draw_string(f, p, txt, HORIZONTAL_ALIGNMENT_RIGHT, isz.x + 2.0, 11, Color("fff7dc"))
+		shown += 1
+	if extra > 0 and UIKit.show_icon_numbers:
+		GameData.draw_text(self, STOCK_POS + Vector2(STOCK_DX * float(STOCK_SLOTS) - 4.0, 6.0), "＋%d" % extra, 12, Color("fde68a"), 30.0, HORIZONTAL_ALIGNMENT_LEFT)
 
 
 ## 「作っている物」のアイコンの下地（仮。将来、画像の枠に差し替えられる）。edge = 枠の色

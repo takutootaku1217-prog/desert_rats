@@ -14,6 +14,7 @@ const SOURCE_PROCESSING := "processing"
 const SOURCE_HUNT := "hunt"                   # 生物を倒して解体
 const SOURCE_CAPTURE := "capture"             # 将来: 捕獲した生物から
 const SOURCE_PURCHASE := "purchase"           # 将来: 購入（今はテスト用のみ）
+const SOURCE_TRANSFER := "transfer"           # 倉庫 ⇄ 作業場の運搬（アイテム・インベントリ・制作。増えたのではなく、置き場が変わっただけ）
 
 var counts := {}
 
@@ -30,6 +31,15 @@ func take(item: int) -> bool:
 	counts[item] -= 1
 	changed.emit()
 	return true
+
+
+## item を n 個まで取り出す。取り出せた個数を返す（足りなければ、あるだけ）
+func take_n(item: int, n: int) -> int:
+	var got := mini(maxi(0, n), counts.get(item, 0))
+	if got > 0:
+		counts[item] -= got
+		changed.emit()
+	return got
 
 
 func count(item: int) -> int:

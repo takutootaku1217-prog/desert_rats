@@ -250,6 +250,42 @@ def face(kind):
     return p.outline(OUT)
 
 
+# ---------------------------------------------------------------- 制作画面の印（足りている ✓・足りない ×・解放待ちの鍵）。文字ではなく、絵で「作れる／作れない」を見せる
+MARK_OK = hexc("8be58b")
+MARK_NG = hexc("f0705a")
+MARK_LOCK = hexc("c9ccd6")
+MARK_LOCK_DARK = hexc("8a90a0")
+
+
+def mark_ok():
+    p = Px(SIZE, SIZE)
+    for dx in (0, 1):
+        p.line(2, 8 + dx, 6, 12 + dx, MARK_OK)
+        p.line(6, 12 + dx, 13, 3 + dx, MARK_OK)
+    return p.outline(OUT)
+
+
+def mark_ng():
+    p = Px(SIZE, SIZE)
+    for dx in (0, 1):
+        p.line(3 + dx, 3, 12 + dx, 12, MARK_NG)
+        p.line(12 + dx, 3, 3 + dx, 12, MARK_NG)
+    return p.outline(OUT)
+
+
+def mark_lock():
+    p = Px(SIZE, SIZE)
+    p.rect(4, 7, 8, 7, MARK_LOCK)                       # 錠の体
+    p.rect(4, 12, 8, 2, MARK_LOCK_DARK)
+    p.rect(7, 9, 2, 3, hexc("3b4050"))                  # 鍵穴
+    p.rect(5, 2, 2, 5, MARK_LOCK)                       # つる
+    p.rect(9, 2, 2, 5, MARK_LOCK)
+    p.rect(5, 2, 6, 2, MARK_LOCK)
+    return p.outline(OUT)
+
+
+MARKS = {"mark_ok": mark_ok, "mark_ng": mark_ng, "mark_lock": mark_lock}
+
 ICONS = {"weight": weight_shapes, "hp": hp_shapes, "stamina": stamina_shapes, "hunger": hunger_shapes, "fatigue": fatigue_shapes,
          "shield_hull": shield_hull_shapes, "shield_drive": shield_drive_shapes, "shield_machine": shield_machine_shapes, "fuel": fuel_shapes}
 FACES = ["good", "normal", "anxious", "bad", "limit"]
@@ -263,6 +299,8 @@ def all_images():
         l.append(("ui", f"{name}_mask.png", mask))
     for k in FACES:
         l.append(("ui", f"mental_{k}.png", face(k)))
+    for name, fn in MARKS.items():
+        l.append(("ui", f"{name}.png", fn()))
     return l
 
 

@@ -3,7 +3,8 @@ extends SceneTree
 ##   Godot --headless --path . -s res://tools/test_loop.gd -- <ゲーム内の分> <回数> <倍速> <乱数の種> <出来事 0/1> [シナリオ]
 ## 例: -- 10 2 12 500 0   … 出来事なしで10分を2回（基本ループだけを見る）／ -- 15 3 12 700 1 … 出来事あり
 ## シナリオ（省略すると normal）: stop（90秒で拠点を止める）／ fast（速度200）／ slow（速度10）／ rawfull（素材棚が満杯から始める）／
-##   prodfull（加工品置き場が満杯から始める）／ priostress（仲間の優先度と加工の方針を数秒ごとに乱数で変える）
+##   prodfull（加工品置き場が満杯から始める）／ priostress（仲間の優先度と加工の方針を数秒ごとに乱数で変える）／
+##   manual（プレイヤーが手で、運搬の依頼（倉庫 ⇄ 作業場）と手動の制作を、20秒ごとに乱数で頼み続ける。自動の加工と一緒に回っても詰まらないか）
 ## 確認する流れ: 拠点が移動 → 資源が発生 → 仲間が発見 → 回収 → 運搬 → 素材棚に収納 → 加工設備へ送られる → 加工される → 加工品置き場に収納。
 ##   続けて、生活と維持（休憩・食事・燃料補給・修理・最後まで移動が続く）も確かめる（「基本ループ（生活と維持）」の行）。
 ##   食事は、最初の食事が約19分後なので、25分以上の回で確かめる（それより短い回では参考）。
@@ -21,10 +22,11 @@ const LIMITS := {
 	CharacterAI.State.HUNT_ATTACK: 60.0, CharacterAI.State.COMBAT_MOVE: 60.0, CharacterAI.State.COMBAT: 120.0,
 	CharacterAI.State.IDLE: 3.0, CharacterAI.State.SEARCH: 3.0,
 	CharacterAI.State.REST_HERE: 300.0, CharacterAI.State.EAT_TAKE: 40.0, CharacterAI.State.EAT: 5.0, CharacterAI.State.DOWN: 150.0,
+	CharacterAI.State.XFER_TAKE: 40.0, CharacterAI.State.XFER_MOVE: 40.0,
 }
 ## 荷物を持っている状態から手ぶらになってよい、直前の状態（それ以外で消えたら「荷物が消えた」）
 ## （食事 EAT は、持っていた食料を食べて消費するので、手ぶらになってよい）
-const CARRY_END_OK := [CharacterAI.State.STORE, CharacterAI.State.HAUL_MOVE, CharacterAI.State.REFUEL, CharacterAI.State.REPAIR, CharacterAI.State.EAT]
+const CARRY_END_OK := [CharacterAI.State.STORE, CharacterAI.State.HAUL_MOVE, CharacterAI.State.REFUEL, CharacterAI.State.REPAIR, CharacterAI.State.EAT, CharacterAI.State.XFER_MOVE]
 
 var fails := 0
 var all_ok := true
@@ -66,6 +68,7 @@ func _one(n: int, minutes: float, scale: float, seed_base: int, events_on: bool,
 			for it in GameData.PRODUCT_ITEMS:
 				st.inventory.counts[it] = st.quota_of(it)
 	var next_stress := 5.0
+	var next_manual := 20.0
 	var W: Array = main.workers
 	var P: BaseProcessor = main.processor
 	var ms := {}                         # 確認する流れ -> 初めて起きた時刻
@@ -92,6 +95,7 @@ func _one(n: int, minutes: float, scale: float, seed_base: int, events_on: bool,
 	var prog_last := -1.0                # 加工の進みが最後に変わった時の値・種類・時刻
 	var prog_id := ""
 	var prog_changed_at := d.elapsed
+	var manual_reqs := 0                 # シナリオ manual: 手で頼んだ回数
 	var dist_mid := -1.0                 # 走行距離（試験時間の半分の時点。最後まで移動が続いたかを見る）
 
 	var mark := func(key: String) -> void:
@@ -156,6 +160,20 @@ func _one(n: int, minutes: float, scale: float, seed_base: int, events_on: bool,
 			dist_mid = d.distance
 		if scenario == "stop" and t >= 90.0:
 			main.target_speed = 0.0                  # 最初の90秒は普通に走り、そのあと拠点を止める（止まっても加工・運搬が回るか）
+		if scenario == "manual" and t >= next_manual:
+			# プレイヤーが手で頼み続ける（運搬の依頼・戻す依頼・手動の制作）。自動の加工と一緒に回っても、詰まらず、物が消えないか
+			next_manual = t + 20.0
+			var mit: int = GameData.RAW_ITEMS[randi() % GameData.RAW_ITEMS.size()]
+			main.request_transfer(mit, 3 + randi() % 7, "to_workshop")
+			if randi() % 2 == 0:
+				var back: int = ItemDB.all()[randi() % ItemDB.all().size()]
+				main.request_transfer(back, 1 + randi() % 5, "to_storage")
+			var rec: Dictionary = GameData.RECIPES[randi() % GameData.RECIPES.size()]
+			main.request_craft(rec["id"], 1 + randi() % 3)
+			manual_reqs += 1
+			for it2 in ItemDB.all():
+				if main.processor.stock.count(it2) < 0:
+					err.call("stock_neg_%d" % it2, "作業場の材料がマイナス（%s）" % GameData.ITEM_NAMES[it2])
 		if scenario == "priostress" and t >= next_stress:
 			# 優先度と方針を乱数で変え続ける（途中で仕事を切り替えても、予約や荷物が取り残されないか）
 			next_stress = t + 4.0
@@ -415,6 +433,11 @@ func _one(n: int, minutes: float, scale: float, seed_base: int, events_on: bool,
 		share += "%s[%s] " % [w.char_name, "・".join(PackedStringArray(parts))]
 	print("  仲間の時間の使い方: " + share)
 	print("  空腹 %d秒 ／ 加工の注文が待たされた最長 %d秒 ／ 加工品が取り出されなかった最長 %d秒" % [int(hungry_t), int(max_wait["orders"]), int(max_wait["output"])])
+	if scenario == "manual":
+		print("  手で頼んだ %d 回 ／ 運んだ %d 個 ／ 手動で作った %d 回 ／ 運搬の依頼の残り %d ／ 制作の待ちの残り %d ／ 作業場の材料 %d 個" % [manual_reqs, main.total_transferred,
+				main.total_crafted_by_hand, main.transfer_queue.size(), main.craft_queue.size(), main.processor.stock.counts.values().reduce(func(a, b): return a + b, 0)])
+		if main.total_transferred == 0 and minutes >= 5.0:
+			errors.append("手で頼んだ運搬が、一度も届かなかった（運搬が動かない？）")
 	if lost_claim > 0:
 		notes.append("資源が、向かっている仲間がいるまま消えた回数: %d" % lost_claim)
 	for e in errors:
