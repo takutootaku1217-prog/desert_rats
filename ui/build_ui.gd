@@ -9,7 +9,7 @@ extends CanvasLayer
 
 var game
 var _overlay: Control
-var _fac_rows := {}          # 設備 id -> {state, costs {Item: Label}, req, build, cancel}
+var _fac_rows := {}          # 設備 id -> {state, mark, costs {Item: Label}, cost_marks, req, req_mark, phase, bar, build, cancel}
 var _station_heads := {}     # 必要設備 id（"" = 手作業）-> 見出しの Label
 var _recipe_rows: Array = [] # {recipe, name, stars}
 var _t := 0.0
@@ -17,6 +17,23 @@ var _t := 0.0
 const C_OK := Color("7be07b")
 const C_SHORT := Color("ffc266")
 const C_BAD := Color("ff8a70")
+
+
+## 建設カードで使う代表アイコン。設備の専用絵は拠点内に描かれるため、ここでは
+## 「何をする設備か」を既存のアイテム絵で示す（新しい仮素材は増やさない）。
+func _facility_item(id: String) -> int:
+	return GameData.Item.HAMMER if id == "workbench" else GameData.Item.HIDE
+
+
+func _set_mark(mark: TextureRect, state: String) -> void:
+	var kind: String = String(ItemWidgets.STATE_MARKS.get(state, "ng"))
+	mark.texture = GameData.tex("res://assets/ui/mark_%s.png" % kind)
+	mark.tooltip_text = ItemWidgets.state_text(state)
+
+
+func _progress_style(bar: ProgressBar, color: Color) -> void:
+	bar.add_theme_stylebox_override("background", UIKit.box(Color("15181d"), Color("3a3f4a"), 1, 2))
+	bar.add_theme_stylebox_override("fill", UIKit.box(color.darkened(0.45), color, 1, 2))
 
 
 func _ready() -> void:
@@ -115,28 +132,57 @@ func _build_left(col: VBoxContainer) -> void:
 		var card := PanelContainer.new()
 		card.add_theme_stylebox_override("panel", UIKit.box(Color("23272f"), Color("4b5262"), 2, 8))
 		col.add_child(card)
+		var body := HBoxContainer.new()
+		body.add_theme_constant_override("separation", 8)
+		card.add_child(body)
+		var preview := ItemWidgets.icon_frame(_facility_item(id), 48.0)
+		preview.tooltip_text = "%sを建設" % d["name"]
+		body.add_child(preview)
 		var v := VBoxContainer.new()
+		v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		v.add_theme_constant_override("separation", 3)
-		card.add_child(v)
+		body.add_child(v)
 		var head := HBoxContainer.new()
 		v.add_child(head)
 		var name_l := UIKit.lbl(d["name"], 17, UIKit.C_TEXT)
 		name_l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		head.add_child(name_l)
 		var state := UIKit.lbl("", 14, UIKit.C_DIM)
+		var state_mark := ItemWidgets.mark("ng", 16.0)
+		head.add_child(state_mark)
 		head.add_child(state)
 		v.add_child(UIKit.lbl(d["desc"], 12, UIKit.C_DIM))
 		var cost_row := HBoxContainer.new()
-		cost_row.add_theme_constant_override("separation", 12)
+		cost_row.add_theme_constant_override("separation", 6)
 		v.add_child(cost_row)
-		cost_row.add_child(UIKit.lbl("材料", 13, UIKit.C_DIM))
 		var costs := {}
+		var cost_marks := {}
 		for it in d["cost"]:
+			var cost := HBoxContainer.new()
+			cost.add_theme_constant_override("separation", 2)
+			cost.add_child(ItemWidgets.icon(it, 24.0))
 			var l := UIKit.lbl("", 14)
-			cost_row.add_child(l)
+			cost.add_child(l)
+			var mark := ItemWidgets.mark("ng", 14.0)
+			cost.add_child(mark)
+			cost_row.add_child(cost)
 			costs[it] = l
+			cost_marks[it] = mark
+		var req_row := HBoxContainer.new()
+		req_row.add_theme_constant_override("separation", 4)
+		var req_mark := ItemWidgets.mark("ok", 14.0)
+		req_row.add_child(req_mark)
 		var req := UIKit.lbl("", 13, UIKit.C_DIM)
-		v.add_child(req)
+		req_row.add_child(req)
+		v.add_child(req_row)
+		var phase := UIKit.lbl("", 12, UIKit.C_DIM)
+		v.add_child(phase)
+		var bar := ProgressBar.new()
+		bar.show_percentage = false
+		bar.custom_minimum_size = Vector2(0, 10)
+		bar.max_value = 100.0
+		_progress_style(bar, Color("f2c14e"))
+		v.add_child(bar)
 		var btns := HBoxContainer.new()
 		btns.add_theme_constant_override("separation", 8)
 		v.add_child(btns)
@@ -152,7 +198,8 @@ func _build_left(col: VBoxContainer) -> void:
 		b_cancel.alignment = HORIZONTAL_ALIGNMENT_CENTER
 		b_cancel.custom_minimum_size = Vector2(130, 28)
 		btns.add_child(b_cancel)
-		_fac_rows[id] = {"state": state, "costs": costs, "req": req, "build": b_build, "cancel": b_cancel}
+		_fac_rows[id] = {"state": state, "mark": state_mark, "costs": costs, "cost_marks": cost_marks,
+			"req": req, "req_mark": req_mark, "phase": phase, "bar": bar, "build": b_build, "cancel": b_cancel}
 
 
 # ---------------------------------------------------------------- 右: 製作
@@ -199,29 +246,62 @@ func _refresh() -> void:
 		var reason: String = game.build_blocked_reason(id)
 		var state := "未建設 %d/%d" % [built, mx]
 		var scol: Color = UIKit.C_TEXT
+		var state_key := "ok"
+		var phase := "材料を集めて、仲間に建設を依頼できます"
+		var progress := 0.0
+		var material_ratio := 1.0
+		for it in d["cost"]:
+			var need_ratio: float = float(st.count_of(it)) / float(maxi(1, int(d["cost"][it])))
+			material_ratio = minf(material_ratio, clampf(need_ratio, 0.0, 1.0))
 		if built >= mx:
 			state = "完成 %d/%d" % [built, mx]
 			scol = C_OK
+			state_key = "done"
+			phase = "完成。ここで作れる物が増えています"
+			progress = 100.0
 		elif not game.facility_unlocked(id):
 			state = "まだ建てられない"
 			scol = UIKit.C_DIM
+			state_key = "locked"
+			phase = "必要な設備を先に完成させてください"
 		elif working > 0:
 			state = "運搬・組み立て中 %d/%d" % [built, mx]
 			scol = Color("fde68a")
+			state_key = "queued"
+			phase = "仲間が組み立て中"
+			var current: Dictionary = game.processor.current
+			if current.get("build", "") == id:
+				progress = clampf(game.processor.progress / float(maxf(0.01, current["time"])), 0.0, 1.0) * 100.0
+			else:
+				progress = 65.0
 		elif queued > 0:
 			state = "材料集め中 %d/%d" % [built, mx]
 			scol = Color("fde68a")
+			state_key = "queued"
+			phase = "材料を取り置きし、仲間が運ぶのを待っています"
+			progress = material_ratio * 55.0
+		else:
+			state_key = "ok" if material_ratio >= 1.0 else "short"
+			phase = "材料はそろっています。建設を依頼できます" if material_ratio >= 1.0 else "材料不足。必要な素材は色と × 印で確認できます"
 		row["state"].text = state
 		row["state"].add_theme_color_override("font_color", scol)
+		_set_mark(row["mark"], state_key)
+		row["phase"].text = phase
+		row["phase"].add_theme_color_override("font_color", scol if state_key != "short" else C_SHORT)
+		row["bar"].value = progress
+		_progress_style(row["bar"], scol)
 		for it in row["costs"]:
 			var need: int = int(d["cost"][it])
 			var have: int = st.count_of(it)
 			var l: Label = row["costs"][it]
 			l.text = "%s %d/%d%s" % [GameData.ITEM_NAMES[it], have, need, "（枠不足）" if st.quota_of(it) < need else ""]
-			l.add_theme_color_override("font_color", UIKit.C_DIM if (built >= mx or not game.facility_unlocked(id)) else \
-					(C_BAD if st.quota_of(it) < need else (C_OK if have >= need else C_SHORT)))    # 完成済み・まだ建てられない設備の材料は薄く
+			var cost_state := "locked" if (built >= mx or not game.facility_unlocked(id)) else ("blocked" if st.quota_of(it) < need else ("ok" if have >= need else "short"))
+			l.add_theme_color_override("font_color", UIKit.C_DIM if cost_state == "locked" else \
+					(C_BAD if cost_state == "blocked" else (C_OK if cost_state == "ok" else C_SHORT)))
+			_set_mark(row["cost_marks"][it], cost_state)
 		var rq: String = d["requires"]
 		row["req"].text = "必要設備: %s" % ("なし（手作業でできる）" if rq == "" else "%s（%s）" % [FacilityDB.name_of(rq), "ある" if game.has_facility(rq) else "まだない"])
+		_set_mark(row["req_mark"], "ok" if (rq == "" or game.has_facility(rq)) else "locked")
 		var b: Button = row["build"]
 		b.disabled = reason != ""
 		b.text = "建設を依頼する（仲間が材料を運んで作る）" if reason == "" else reason
