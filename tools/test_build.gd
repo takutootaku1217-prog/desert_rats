@@ -155,7 +155,7 @@ func _test_initial_state() -> void:
 	check(not main.has_facility("workbench"), "ワークベンチはまだない")
 	check(main.base.facility_count("bed") == 0, "ベッドは1つもない")
 	check(main.base.claim_bed(W[0]) == -1, "ベッドがないので、割り当てられない")
-	W[0].stamina = 10.0
+	W[0].fatigue = 80.0
 	W[0].priorities[GameData.Job.REST] = 5
 	check(not W[0].ai._try_start(GameData.Job.REST), "休憩の仕事は、ベッドがなければ始められない（詰まらず次へ進む）")
 	# 材料がすべてあっても、必要設備の要る物は作らない
@@ -242,7 +242,7 @@ func _test_flow() -> void:
 	# ベッドができたら、疲れた仲間が休める
 	var w1 = W[1]
 	w1.priorities[GameData.Job.REST] = 5
-	w1.stamina = 10.0
+	w1.fatigue = 80.0
 	w1.ai.on_priority_changed()
 	var t3: float = await _until(func(): return w1.sleeping, 60.0)
 	check(t3 >= 0.0 and w1.bed_index == 0, "疲れた仲間が、できたベッドで眠る（%.0f秒）" % t3)
@@ -425,8 +425,7 @@ func _test_full_run() -> void:
 		await _fresh(false, true)                         # 初期の蓄え・仲間・優先度・方針・速度は、ふつうのゲームのまま
 		Engine.time_scale = 12.0
 		var done := {}                                    # 設備 -> 完成した時刻の一覧
-		var min_energy := 100.0
-		var energy0_sec := 0.0
+		var max_fatigue := 0.0
 		var t0: float = main.director.elapsed
 		var last: float = t0
 		main.request_build("workbench")                   # 熱心なプレイヤー: すぐ依頼し、ベッドも建てられるようになったら依頼する
@@ -439,18 +438,16 @@ func _test_full_run() -> void:
 					done[id] = done.get(id, []) + [now - t0]
 				if main.build_blocked_reason(id) == "":
 					main.request_build(id)
-			var lo := 100.0
+			var hi := 0.0
 			for w in W:
-				lo = minf(lo, w.stamina)
-			min_energy = minf(min_energy, lo)
-			if lo <= 0.0:
-				energy0_sec += now - last
+				hi = maxf(hi, w.fatigue)
+			max_fatigue = maxf(max_fatigue, hi)
 			last = now
 		Engine.time_scale = 1.0
 		var wb: Array = done.get("workbench", [])
 		var bd: Array = done.get("bed", [])
-		print("   [回%d] ワークベンチ %s ／ ベッド %s ／ 元気の最低 %.0f（0だった時間 %.0f秒）／ 空腹はゲーム内 %s ／ 車体 %.0f" % [
-				n + 1, _times(wb), _times(bd), min_energy, energy0_sec, "あり" if main.hungry else "なし", main.base.parts[GameData.Part.HULL]])
+		print("   [回%d] ワークベンチ %s ／ ベッド %s ／ 疲労度の最大 %.0f ／ 空腹はゲーム内 %s ／ 車体 %.0f" % [
+				n + 1, _times(wb), _times(bd), max_fatigue, "あり" if main.hungry else "なし", main.base.parts[GameData.Part.HULL]])
 		check(not main.game_over, "[回%d] ゲームオーバーにならない" % (n + 1))
 		# 運（木が来るか・獲物が獲れるか）で遅れる回があるので、1回ごとではなく「3回のうち2回以上」で確かめる
 		if wb.size() == 1 and wb[0] < 4.0 * 60.0 and bd.size() >= 1 and bd[0] < 5.0 * 60.0:

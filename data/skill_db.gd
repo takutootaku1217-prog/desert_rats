@@ -6,7 +6,6 @@ extends RefCounted
 ##   yield_up  : 回収した資源が +1 個増える確率 +value
 ##   atk / def : 戦闘時の攻撃力 / 防御力 +value
 ##   all_eff   : 全分野の作業効率 +value（汎用）
-##   stamina   : 元気の消耗 -value
 ## "home" はそのスキルが関連する分野（個体の得意分野に近いスキルが出やすくなる。-1 = 汎用）。
 ## "weight" は出やすさ。
 
@@ -31,15 +30,9 @@ const SKILLS := {
 		"home": GameData.Field.COMBAT, "weight": 2.0},
 	"preserve": {"name": "保存食", "kind": "field_eff", "key": GameData.Field.COOK, "value": 0.15,
 		"home": GameData.Field.COOK, "weight": 3.0},
-	"nutrition": {"name": "栄養管理", "kind": "stamina", "value": 0.12,
-		"home": GameData.Field.COOK, "weight": 3.0},
 	"first_aid": {"name": "応急処置", "kind": "field_eff", "key": GameData.Field.MEDIC, "value": 0.15,
 		"home": GameData.Field.MEDIC, "weight": 3.0},
-	"health_guide": {"name": "保健指導", "kind": "stamina", "value": 0.10,
-		"home": GameData.Field.MEDIC, "weight": 2.0},
 	"all_rounder": {"name": "万能型", "kind": "all_eff", "value": 0.06,
-		"home": -1, "weight": 1.5},
-	"hard_worker": {"name": "働き者", "kind": "stamina", "value": 0.08,
 		"home": -1, "weight": 1.5},
 }
 
@@ -81,8 +74,6 @@ static func describe(id: String) -> String:
 			return "戦闘の防御力 +%d%%" % pct
 		"all_eff":
 			return "全分野の作業効率 +%d%%" % pct
-		"stamina":
-			return "元気の消耗 -%d%%" % pct
 	return ""
 
 

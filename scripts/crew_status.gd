@@ -1,13 +1,12 @@
 class_name CrewStatus
 extends RefCounted
-## 仲間1人のステータスの計算（HP・スタミナ・満腹度・疲労度・精神状態）。データは Worker が持ち、ここは計算だけ。UI は読むだけ。
+## 仲間1人のステータスの計算（HP・満腹度・疲労度・精神状態）。データは Worker が持ち、ここは計算だけ。UI は読むだけ。
 ## 流れ: Worker（データ）→ ここ（増減・疲労度・精神状態の計算）→ 自動行動AI（scripts/character_ai.gd が「休む・食べる」を選ぶ）→ UI（ui/）。
 ## 数値・基準は、すべて data/crew_status.gd（CrewStatusDB）。ここに数字を直接書かない。
-## Worker._process が、毎フレーム tick(w, delta) を呼ぶ（調査隊に出ている間は呼ばれない＝ステータスは止まる）。
+## Worker._process が、毎フレーム tick(w, delta) を呼ぶ。
 
 
 static func tick(w, delta: float) -> void:
-	_tick_stamina(w, delta)
 	_tick_hunger(w, delta)
 	_tick_fatigue(w, delta)
 	_tick_hp(w, delta)
@@ -21,41 +20,6 @@ static func rest_factor(w) -> float:
 	if w.resting:
 		return CrewStatusDB.REST_IN_PLACE_RATE
 	return 0.0
-
-
-# ------------------------------------------------------------------
-# スタミナ。屋外で移動中は減り、停止中または移動拠点内では自動回復する。
-# 回復した量に比例して本人の満腹度を使う（ARK風）。
-# ------------------------------------------------------------------
-static func _tick_stamina(w, delta: float) -> void:
-	var g = w.game
-	var rf := 1.0 if w.down else rest_factor(w)
-	var recovery := 0.0
-	if rf > 0.0:                                                # 眠っている・その場で休んでいる・倒れている間は速く回復する
-		# 車体が傷んでいると（居住区が傷んで）よく休めない
-		recovery = CrewStatusDB.STAMINA_REST_RATE if g.base.condition(GameData.Part.HULL) >= GameData.PART_BAD else CrewStatusDB.STAMINA_REST_RATE_HULL_BAD
-		recovery *= (1.0 + g.room_effect("rest_rate")) * rf      # 医務室（部屋の変更。data/rooms.gd）で回復が早くなる
-	elif not w.moving or g.base.is_inside(w.position):
-		recovery = CrewStatusDB.STAMINA_AUTO_RECOVERY_RATE
-	if recovery > 0.0:
-		_recover_stamina_with_hunger(w, recovery * delta)
-	else:
-		# 酷暑などで疲れやすくなる。食堂で減る
-		w.stamina = maxf(0.0, w.stamina - CrewStatusDB.STAMINA_DRAIN_ACTIVE * g.director.energy_mult() * (1.0 - g.room_effect("drain_cut")) * delta)
-
-
-## 実際に回復したスタミナ量だけ、一定割合で本人の満腹度を消費する。
-## 満腹度が足りなければ、回復量も残っている満腹度のぶんまでに制限する。
-static func _recover_stamina_with_hunger(w, requested: float) -> void:
-	var cost: float = CrewStatusDB.HUNGER_PER_STAMINA_RECOVERED
-	var missing: float = CrewStatusDB.MAX_STAMINA - float(w.stamina)
-	var recovered: float = minf(requested, missing)
-	if cost > 0.0:
-		recovered = minf(recovered, w.hunger / cost)
-	if recovered <= 0.0:
-		return
-	w.stamina += recovered
-	w.hunger = maxf(0.0, w.hunger - recovered * cost)
 
 
 # ------------------------------------------------------------------
@@ -85,7 +49,7 @@ static func needs_to_eat_now(w) -> bool:
 
 # ------------------------------------------------------------------
 # 疲労度（高いほど悪い）。仕事や移動を続けると溜まり、眠ると下がる。待機中は変わらない。
-# スタミナ・満腹度・HP が低い状態で動き続けると、溜まりが速くなる（3つのうち、いちばん大きい倍率だけ）。
+# 満腹度・HP が低い状態で動き続けると、溜まりが速くなる（2つのうち、大きい倍率だけ）。
 # ------------------------------------------------------------------
 static func _tick_fatigue(w, delta: float) -> void:
 	var g = w.game
@@ -94,8 +58,7 @@ static func _tick_fatigue(w, delta: float) -> void:
 	elif rest_factor(w) > 0.0:
 		w.fatigue = maxf(0.0, w.fatigue - CrewStatusDB.FATIGUE_REST_RATE * (1.0 + g.room_effect("rest_rate")) * rest_factor(w) * delta)
 	elif w.ai.state != CharacterAI.State.IDLE:
-		var m := maxf(_low_mult(CrewStatusDB.FATIGUE_MULT_STAMINA, w.stamina),
-				maxf(_low_mult(CrewStatusDB.FATIGUE_MULT_HUNGER, w.hunger), _low_mult(CrewStatusDB.FATIGUE_MULT_HP, w.hp)))
+		var m := maxf(_low_mult(CrewStatusDB.FATIGUE_MULT_HUNGER, w.hunger), _low_mult(CrewStatusDB.FATIGUE_MULT_HP, w.hp))
 		w.fatigue = minf(CrewStatusDB.MAX_FATIGUE, w.fatigue + CrewStatusDB.FATIGUE_GAIN_ACTIVE * m * g.director.energy_mult() * delta)
 
 
@@ -212,7 +175,7 @@ static func move_mult(w) -> float:
 
 # ------------------------------------------------------------------
 # 自動行動（STEP 8）。仕事の優先度（★0〜5）はそのまま。ここは「仕事より先に休む・食べる」の判断材料。
-# 順番: HPがとても低い → 休む／満腹度がとても低い → 食べる／疲労度がとても高い → 休む／スタミナがとても低い → 休む／
+# 順番: HPがとても低い → 休む／満腹度がとても低い → 食べる／疲労度がとても高い → 休む／
 #        精神状態が限界 → 休む／満腹度が低い → 食べる。そのあと、いつもの仕事。
 # ------------------------------------------------------------------
 ## いま必要な生活行動を、急ぎの順に並べる（"rest" / "eat"）。実際に行けるか（ベッド・食料・休憩の優先度）は AI が見る。
@@ -224,8 +187,6 @@ static func life_needs(w) -> Array:
 		l.append("eat")
 	if w.fatigue >= CrewStatusDB.REST_FATIGUE_URGENT:
 		l.append("rest")
-	if w.stamina < CrewStatusDB.REST_STAMINA_URGENT:
-		l.append("rest")
 	if w.mental == CrewStatusDB.Mental.LIMIT:
 		l.append("rest")
 	if w.hunger < CrewStatusDB.EAT_BELOW:
@@ -233,19 +194,19 @@ static func life_needs(w) -> Array:
 	return l
 
 
-## 休憩に入ってよい状態か（スタミナが減った・疲労度が高い・HPが減っている）。眠っても良くならない状態では入らない（休憩のループ防止）
+## 休憩に入ってよい状態か（疲労度が高い・HPが減っている）。眠っても良くならない状態では入らない（休憩のループ防止）
 static func can_rest(w) -> bool:
-	return w.stamina < CrewStatusDB.REST_JOB_STAMINA_BELOW or w.fatigue > CrewStatusDB.REST_JOB_FATIGUE_ABOVE or w.hp < CrewStatusDB.REST_JOB_HP_BELOW
+	return w.fatigue > CrewStatusDB.REST_JOB_FATIGUE_ABOVE or w.hp < CrewStatusDB.REST_JOB_HP_BELOW
 
 
-## 休憩をやめてよいか。スタミナが戻っても、疲労度・HPが回復するまでは休み続ける
+## 休憩をやめてよいか。
 static func rest_done(w) -> bool:
-	return w.stamina >= CrewStatusDB.REST_END_STAMINA and w.fatigue <= CrewStatusDB.REST_END_FATIGUE and w.hp >= CrewStatusDB.REST_END_HP
+	return w.fatigue <= CrewStatusDB.REST_END_FATIGUE and w.hp >= CrewStatusDB.REST_END_HP
 
 
 ## 危険なほど休みが必要か（加工などの途中でも、基本的に仕事を続けない）
 static func rest_critical(w) -> bool:
-	return w.hp < CrewStatusDB.REST_HP_CRITICAL or w.fatigue >= CrewStatusDB.REST_FATIGUE_CRITICAL or w.stamina < CrewStatusDB.REST_STAMINA_CRITICAL
+	return w.hp < CrewStatusDB.REST_HP_CRITICAL or w.fatigue >= CrewStatusDB.REST_FATIGUE_CRITICAL
 
 # ------------------------------------------------------------------
 # 表示のための読み取り（ui/ は、Worker のデータを、ここを通して読むだけ。値は書き換えない）

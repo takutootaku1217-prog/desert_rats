@@ -1,8 +1,8 @@
 extends SceneTree
-## 仲間のステータス（HP・スタミナ・満腹度・疲労度・精神状態）を入れる前後で、放置プレイのテンポが変わっていないかを比べる測定。実行:
+## 仲間のステータス（HP・満腹度・疲労度・精神状態）を、放置プレイで測る。実行:
 ##   Godot --headless --path . -s res://tools/sim_crew.gd -- <分> <回数> <倍速> <出来事0/1> [設備が最初からある 0/1] [建設を自動で依頼 0/1]
 ## 例: 15 3 12 0 0 1  （出来事なし・設備なしで始めて、建てられるようになった設備をすぐ依頼する熱心なプレイヤー。15分×3回・12倍速）
-## 出力: 回ごとの 回収・加工・狩猟・食事・仲間の状態の時間の割合・スタミナ／満腹度／疲労度の様子。新旧のどちらのコードでも動く
+## 出力: 回ごとの 回収・加工・狩猟・食事・仲間の状態の時間の割合・満腹度／疲労度の様子。
 ## （新しい項目は、なければ出さない）。
 
 var main
@@ -50,8 +50,6 @@ func _run() -> void:
 		var rest_t := 0.0
 		var work_t := 0.0
 		var hungry_t := 0.0
-		var stamina_sum := 0.0
-		var stamina_min := 100.0
 		var samples := 0
 		var last: float = t0
 		var fat_sum := 0.0
@@ -85,8 +83,6 @@ func _run() -> void:
 					rest_t += dt
 				elif st != CharacterAI.State.IDLE and st != CharacterAI.State.SEARCH:
 					work_t += dt
-				stamina_sum += w.stamina
-				stamina_min = minf(stamina_min, w.stamina)
 				var f = w.get("fatigue")
 				if f != null:
 					fat_sum += f
@@ -112,12 +108,12 @@ func _run() -> void:
 		var res := {
 			"gathered": main.total_gathered, "done": main.processor.total_done, "hunted": main.total_hunted, "eaten": main.total_eaten,
 			"built": main.total_built, "hungry_s": hungry_t, "rest_pct": 100.0 * rest_t / (3.0 * minutes * 60.0),
-			"work_pct": 100.0 * work_t / (3.0 * minutes * 60.0), "stamina_avg": stamina_sum / float(maxi(1, samples)), "stamina_min": stamina_min,
+			"work_pct": 100.0 * work_t / (3.0 * minutes * 60.0),
 			"food": main.storage.count_of(GameData.Item.FOOD), "hull": main.base.parts[GameData.Part.HULL],
 		}
-		var line := "[回%d] 回収 %d ・加工 %d ・狩猟 %d ・食事 %d ・建設 %d ・ワークベンチ %s ・空腹の時間 %ds ・休憩 %.0f%% ・作業 %.0f%% ・スタミナ 平均 %.0f 最低 %.0f ・食料 %d ・車体 %.0f%s" % [
+		var line := "[回%d] 回収 %d ・加工 %d ・狩猟 %d ・食事 %d ・建設 %d ・ワークベンチ %s ・空腹の時間 %ds ・休憩 %.0f%% ・作業 %.0f%% ・食料 %d ・車体 %.0f%s" % [
 				n + 1, res["gathered"], res["done"], res["hunted"], res["eaten"], res["built"], ("%.0f秒" % wb_at) if wb_at >= 0.0 else "なし",
-				int(res["hungry_s"]), res["rest_pct"], res["work_pct"], res["stamina_avg"], res["stamina_min"], res["food"], res["hull"],
+				int(res["hungry_s"]), res["rest_pct"], res["work_pct"], res["food"], res["hull"],
 				"  ゲームオーバー" if main.game_over else ""]
 		if samples > 0 and fat_sum > 0.0:
 			line += " ・疲労度 平均 %.0f 最大 %.0f ・満腹度 平均 %.0f 最低 %.0f" % [fat_sum / float(samples), fat_max, hun_sum / float(samples), hun_min]
@@ -131,6 +127,6 @@ func _run() -> void:
 		for k in res:
 			sums[k] = float(sums.get(k, 0.0)) + float(res[k])
 	var out := "平均:"
-	for k in ["gathered", "done", "hunted", "eaten", "built", "hungry_s", "rest_pct", "work_pct", "stamina_avg"]:
+	for k in ["gathered", "done", "hunted", "eaten", "built", "hungry_s", "rest_pct", "work_pct"]:
 		out += " %s=%.1f" % [k, float(sums[k]) / float(runs)]
 	print(out)

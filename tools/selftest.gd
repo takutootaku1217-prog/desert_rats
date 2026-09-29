@@ -176,8 +176,6 @@ func _run() -> void:
 	check(is_equal_approx(s.skill_mult(GameData.Job.PROCESS), _worker_base(s, GameData.Job.PROCESS) * 1.06), "万能型: 全分野 +6%")
 	s.skills = ["scavenger"]
 	check(is_equal_approx(s.yield_chance(), 0.15), "拾い上手: 追加資源の確率 15%")
-	s.skills = ["nutrition", "hard_worker"]
-	check(is_equal_approx(s.stamina_mult(), 1.0 - 0.12 - 0.08), "栄養管理+働き者: 元気の消耗が減る")
 	s.skills = ["spoils", "survivor"]
 	check(is_equal_approx(s.atk_mult(), 1.15) and is_equal_approx(s.def_bonus(), 0.15), "戦闘スキル: 攻撃 +15% / 防御 +15%")
 	# 相乗効果
@@ -310,7 +308,7 @@ func _run() -> void:
 	check(main.build_room("u1", "bedroom"), "空き部屋に寝室を建てられる")
 	check(main.base.room_bed_count() == 6 and main.base.bed_capacity() >= 6, "寝室が2つでベッド6つ")
 	# 食堂（寝室が2つあるので1つは建て替えできる）
-	check(main.build_room("u1", "mess") and is_equal_approx(main.room_effect("drain_cut"), 0.12), "食堂で元気の消耗 -12%")
+	check(main.build_room("u1", "mess") and Rooms.TYPES["mess"]["effects"].is_empty(), "食堂は生活ステータスへの効果なし（調整中）")
 	# 訓練室（効果の確認。建てる条件は上で確認済み）
 	main.room_layout = Rooms.with_room(main.room_layout, "u1", "training")
 	main._apply_layout()

@@ -70,9 +70,9 @@ def weight_shapes():
     return frame, interior
 
 
-# ---------------------------------------------------------------- 仲間のステータス（HP・スタミナ・満腹度・疲労度）のアイコン
+# ---------------------------------------------------------------- 仲間のステータス（HP・満腹度・疲労度）のアイコン
 # どれも「シルエット」から作る: 内側（縁を1ドット除いた所）が充填範囲、縁と外側の輪郭が枠。形は仮（差し替えできる）。
-STATUS_RIM = {"hp": hexc("d8848c"), "stamina": hexc("e8d27a"), "hunger": hexc("d9a066"), "fatigue": hexc("a9b7d0")}
+STATUS_RIM = {"hp": hexc("d8848c"), "hunger": hexc("d9a066"), "fatigue": hexc("a9b7d0")}
 BONE = hexc("ece3cf")       # 骨（充填しない部分）
 BONE_SH = hexc("b8ad94")
 
@@ -127,13 +127,6 @@ def hp_shapes():
     s.ellipse(10.4, 5.4, 3.7, 3.5, RIM)
     s.poly([(1, 6), (14, 6), (8, 14), (7, 14)], RIM)
     return silhouette_icon(s, STATUS_RIM["hp"])
-
-
-def stamina_shapes():
-    """スタミナ: 稲妻（ずんぐりした形。細いと充填範囲が取れない）。"""
-    s = Px(SIZE, SIZE)
-    s.poly([(11, 0), (1, 9), (6, 9), (4, 15), (14, 6), (9, 6), (13, 0)], RIM)
-    return silhouette_icon(s, STATUS_RIM["stamina"])
 
 
 def hunger_shapes():
@@ -286,7 +279,7 @@ def mark_lock():
 
 MARKS = {"mark_ok": mark_ok, "mark_ng": mark_ng, "mark_lock": mark_lock}
 
-ICONS = {"weight": weight_shapes, "hp": hp_shapes, "stamina": stamina_shapes, "hunger": hunger_shapes, "fatigue": fatigue_shapes,
+ICONS = {"weight": weight_shapes, "hp": hp_shapes, "hunger": hunger_shapes, "fatigue": fatigue_shapes,
          "shield_hull": shield_hull_shapes, "shield_drive": shield_drive_shapes, "shield_machine": shield_machine_shapes, "fuel": fuel_shapes}
 FACES = ["good", "normal", "anxious", "bad", "limit"]
 

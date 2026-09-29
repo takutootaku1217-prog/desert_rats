@@ -695,10 +695,9 @@ func base_level() -> int:
 	return 1
 
 
-## 部屋の効果の合計（休憩の回復・元気の消耗など。Worker が読む）。元気の消耗を減らす食堂は、上限まで。
+## 部屋の効果の合計（休憩の回復など。Worker が読む）。
 func room_effect(kind: String) -> float:
-	var v := Rooms.total(room_layout, kind)
-	return minf(v, Rooms.CAP_DRAIN_CUT) if kind == "drain_cut" else v
+	return Rooms.total(room_layout, kind)
 
 
 ## 区画 slot に部屋 rtype を建てられない理由（材料の不足は含めない）。建てられるなら ""。

@@ -77,7 +77,7 @@ func _initialize() -> void:
 	await create_timer(0.4).timeout
 	_shot("b7_bed_built")
 	for w in main.workers:
-		w.stamina = 12.0
+		w.fatigue = 80.0
 		w.ai.on_priority_changed()
 	ok = await _wait(func(): return main.workers.any(func(w): return w.sleeping), 40.0)
 	print("someone sleeping: ", ok)

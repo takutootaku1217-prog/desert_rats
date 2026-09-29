@@ -54,8 +54,8 @@ const ANCHORS := {
 ##  unique: 拠点に1つだけ（別の区画に建てると、元の区画は空き部屋になる＝移設。中の設備も一緒に移る）
 ##  required: 最低1つは必要（最後の1つは壊せない）。加工室・寝室・倉庫は、なくなるとゲームが回らないので必須。
 ##    機関室は必須にしない（区画を空けるため）。ないときは、燃料を搬入口で補給する（MobileBase.engine_point）。
-##  effects: [{kind, value}]  kind は host_processor / host_storage / rest_rate / drain_cut / train_xp
-##    rest_rate（休憩の回復）と drain_cut（スタミナの消耗）は Worker が読む（Main.room_effect）。train_xp は訓練の仕組みがまだないので未使用。
+##  effects: [{kind, value}]  kind は host_processor / host_storage / rest_rate / train_xp
+##    rest_rate（HP・疲労度の休憩回復）は Worker が読む。train_xp は訓練の仕組みがまだないので未使用。
 ## 費用は、旧版の素材を今の素材に置き換えたもの（金属→鉄、板材→木材、布→皮、骨の加工品→骨）を、今の素材の集まりやすさに合わせて調整した。
 const TYPES := {
 	"workshop": {"name": "加工室", "floors": "ul", "unique": true, "required": true, "min_base_level": 1,
@@ -76,12 +76,12 @@ const TYPES := {
 		"effects": []},
 	"infirmary": {"name": "医務室", "floors": "ul", "unique": false, "required": false, "min_base_level": 1,
 		"cost": {GameData.Item.HIDE: 3, GameData.Item.BONE: 2},
-		"desc": "休憩中のスタミナの回復が早くなる（1室ごとに +25%）。",
+		"desc": "休憩中のHP回復と疲労回復が早くなる（1室ごとに +25%）。",
 		"effects": [{"kind": "rest_rate", "value": 0.25}]},
 	"mess": {"name": "食堂", "floors": "ul", "unique": false, "required": false, "min_base_level": 1,
 		"cost": {GameData.Item.FOOD: 3, GameData.Item.WOOD: 2},
-		"desc": "仲間のスタミナが減りにくくなる（1室ごとに -12%。合計で最大 -50%）。",
-		"effects": [{"kind": "drain_cut", "value": 0.12}]},
+		"desc": "仲間が食事をする部屋。部屋の効果は調整中。",
+		"effects": []},
 	"training": {"name": "訓練室", "floors": "ul", "unique": false, "required": false, "min_base_level": 2,
 		"cost": {GameData.Item.IRON: 2, GameData.Item.BONE: 3},
 		"desc": "「訓練」で得られる経験値が増える（1室ごとに +50%）。訓練の仕組みと拠点レベルは、まだない。",
@@ -93,9 +93,6 @@ const TYPES := {
 }
 ## 一覧に並べる順番
 const TYPE_ORDER := ["workshop", "bedroom", "storage", "engine", "infirmary", "mess", "training", "empty"]
-
-const CAP_DRAIN_CUT := 0.5            # 食堂でスタミナの消耗を減らせる上限
-
 
 # ------------------------------------------------------------------
 # 配置の検査・更新（layout = {区画: 種類} を受け取って新しい layout を返すだけ。状態は持たない）

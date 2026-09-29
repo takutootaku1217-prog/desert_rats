@@ -2,7 +2,7 @@ class_name Enemy
 extends Node2D
 ## 砂漠の敵（サソリ系）。右から現れ、拠点の前まで来て車体を攻撃する（襲撃の出来事。scripts/director.gd）。
 ## 種類は EventDB.ENEMIES（体力・被害・速さ・大きさ・色・戦利品）。戦闘担当の仲間が倒す。
-## 車体の被害は「防備を固める」で減る。近くで戦っている仲間は疲れる。
+## 車体の被害は「防備を固める」で減る。近くで戦っている仲間はケガをする。
 
 var game
 var kind := "scorpion"
@@ -19,7 +19,6 @@ var _flash := 0.0
 var _t := 0.0
 
 const HIT_REACH := 80.0      # 攻撃が仲間に届く距離
-const HIT_TIRE := 2.5        # 攻撃1回で仲間が失うスタミナ
 
 
 func _init() -> void:
@@ -80,7 +79,7 @@ func _process(delta: float) -> void:
 	queue_redraw()
 
 
-## 近くにいる仲間を1人、疲れさせ、ケガをさせる（倒れている仲間は狙わない）。HP の失い方は CrewStatusDB。
+## 近くにいる仲間を1人、ケガさせる（倒れている仲間は狙わない）。HP の失い方は CrewStatusDB。
 func _hit_nearby_worker() -> void:
 	var best = null
 	var best_d := HIT_REACH * body_scale
@@ -92,7 +91,6 @@ func _hit_nearby_worker() -> void:
 			best_d = d
 			best = w
 	if best != null:
-		best.stamina = maxf(0.0, best.stamina - HIT_TIRE)
 		CrewStatus.damage(best, CrewStatusDB.RAID_HIT_HP * body_scale, CrewStatusDB.RAID_HIT_STRESS)
 
 

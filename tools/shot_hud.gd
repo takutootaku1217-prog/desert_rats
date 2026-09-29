@@ -48,7 +48,7 @@ func _initialize() -> void:
 	W[1].position = Vector2(700.0, GameData.deck_y(1))
 	W[1].ai.state = CharacterAI.State.REST_HERE
 	W[1].resting = true
-	W[1].stamina = 8.0
+	W[1].fatigue = 82.0
 	W[2].position = Vector2(140.0, GameData.deck_y(1))
 	for w in W:
 		w.queue_redraw()

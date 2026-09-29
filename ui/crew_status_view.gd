@@ -1,6 +1,6 @@
 class_name CrewStatusView
 extends HBoxContainer
-## 仲間1人のステータス表示: HP・スタミナ・満腹度・疲労度の「アイコン自体がゲージ」（ui/icon_gauge.gd）＋ 精神状態の顔。
+## 仲間1人のステータス表示: HP・満腹度・疲労度の「アイコン自体がゲージ」（ui/icon_gauge.gd）＋ 精神状態の顔。
 ## 表示だけを担当し、Worker のデータを読むだけ（update_from に渡す）。ゲームの処理は変えない。
 ## 上部の仲間カード（48px）と、仲間の管理画面（64px）で同じ部品を使い回す。アイコンの大きさは size_units（ユニット）。
 ##  - 絵は assets/ui/<名前>.png（枠）と <名前>_mask.png（充填範囲）。tools/art_ui.py が作る。差し替えるだけで形を変えられる。

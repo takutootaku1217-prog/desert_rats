@@ -1,6 +1,6 @@
 class_name WorkPriorityUI
 extends CanvasLayer
-## 画面上部に並ぶ、仲間ごとの「状態＋ステータス（HP・スタミナ・満腹度・疲労度・精神状態）＋作業優先度」パネル。
+## 画面上部に並ぶ、仲間ごとの「状態＋ステータス（HP・満腹度・疲労度・精神状態）＋作業優先度」パネル。
 ## ボタンは大きめ（タップ想定）。操作はすべて Worker.set_priority() を呼ぶだけなので、
 ## 将来スマホ用UIに差し替えてもゲームロジックには影響しない。
 
@@ -56,7 +56,7 @@ func _make_card(w) -> Control:
 	status.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	status.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	head.add_child(status)
-	# ステータス: HP・スタミナ・満腹度・疲労度の「アイコン自体がゲージ」と、精神状態の顔（ui/crew_status_view.gd。値は Worker から読むだけ）
+	# ステータス: HP・満腹度・疲労度の「アイコン自体がゲージ」と、精神状態の顔（ui/crew_status_view.gd。値は Worker から読むだけ）
 	var view := CrewStatusView.new().setup(Vector2i(12, 12), 12)
 	v.add_child(view)
 	# 仕事の優先度（6つあるので2列に並べる）

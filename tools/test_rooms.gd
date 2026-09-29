@@ -171,7 +171,7 @@ func _test_default_positions() -> void:
 	var bs: Array = main.base.facility_spots("bed")
 	check(bs.size() == 3 and bs[0] == Vector2(GameData.BED_X[0], GameData.UP_Y) and bs[1] == Vector2(GameData.BED_X[1], GameData.UP_Y)
 			and bs[2] == Vector2(GameData.BED_X[2], GameData.UP_Y), "ベッドの置き場所（3つ）は、これまでと同じ")
-	check(main.room_effect("rest_rate") == 0.0 and main.room_effect("drain_cut") == 0.0, "初期配置では、部屋の効果はない（これまでと同じ）")
+	check(main.room_effect("rest_rate") == 0.0, "初期配置では、休憩を強める部屋の効果はない")
 	check(main.base.facility_count("workbench") == 0 and main.base.facility_count("bed") == 0, "設備は建てるまでない（建設は、これまでどおり）")
 
 
@@ -229,8 +229,8 @@ func _test_build_flow() -> void:
 	# 建て替え
 	_give("mess")
 	check(main.build_room("l1", "mess"), "医務室を食堂に建て替える")
-	check(main.room_layout["l1"] == "mess" and main.room_effect("rest_rate") == 0.0 and is_equal_approx(main.room_effect("drain_cut"), 0.12),
-			"食堂に変わり、効果も入れ替わる（元気の消耗 -12%）")
+	check(main.room_layout["l1"] == "mess" and main.room_effect("rest_rate") == 0.0,
+			"食堂に変わると、医務室の休憩効果はなくなる")
 	check(not main.build_room("l1", "mess"), "同じ部屋への建て替えはできない")
 	check(not main.build_room("u1", "storage"), "置けない階には建てられない")
 	_give("training")
@@ -338,7 +338,7 @@ func _test_bedroom_move() -> void:
 	Engine.time_scale = 8.0
 	var w = W[1]
 	w.priorities[GameData.Job.REST] = 5
-	w.stamina = 10.0
+	w.fatigue = 80.0
 	w.ai.on_priority_changed()
 	var t: float = await _until(func(): return w.sleeping, 60.0)
 	check(t >= 0.0 and w.bed_index == 0 and absf(w.position.x - float(GameData.BED_X[0])) < 8.0, "疲れた仲間が、上の階の寝室で眠る（%.0f秒）" % t)
@@ -384,21 +384,13 @@ func _test_engine_fallback() -> void:
 # ---------------------------------------------------------------- 部屋の効果（医務室・食堂）
 func _rest_gain(w) -> float:
 	w.ai.state = CharacterAI.State.REST
-	w.stamina = 10.0
+	w.fatigue = 60.0
 	w._process(1.0)
-	return w.stamina - 10.0
-
-
-func _drain(w) -> float:
-	w.ai.state = CharacterAI.State.IDLE
-	w.ai.timer = 100.0
-	w.stamina = 80.0
-	w._process(1.0)
-	return 80.0 - w.stamina
+	return 60.0 - w.fatigue
 
 
 func _test_effects() -> void:
-	print("-- 部屋の効果（休憩の回復・元気の消耗）")
+	print("-- 部屋の効果（HP・疲労度の休憩回復）")
 	await _fresh(true)
 	for x in W:
 		x.set_process(false)
@@ -406,8 +398,7 @@ func _test_effects() -> void:
 			x.priorities[j] = 0
 	var w = W[0]
 	var base_rest := _rest_gain(w)
-	var base_drain := _drain(w)
-	check(base_rest > 8.0 and base_drain > 0.0, "基準: 眠ると +%.2f/秒・待機で -%.2f/秒" % [base_rest, base_drain])
+	check(is_equal_approx(base_rest, CrewStatusDB.FATIGUE_REST_RATE), "基準: 眠ると疲労度が %.2f/秒下がる" % base_rest)
 	_give("infirmary")
 	check(main.build_room("l1", "infirmary"), "医務室を建てる")
 	var r2 := _rest_gain(w)
@@ -415,25 +406,7 @@ func _test_effects() -> void:
 	_give("mess")
 	check(main.build_room("l1", "mess"), "食堂に建て替える")
 	check(is_equal_approx(_rest_gain(w) / base_rest, 1.0), "食堂に替えると、医務室の効果はなくなる")
-	var d2 := _drain(w)
-	check(is_equal_approx(d2 / base_drain, 0.88), "食堂で、元気の消耗が 12%% 減る（%.3f → %.3f）" % [base_drain, d2])
-	# 動いている間の消耗も同じ割合で減る
-	var moving_mess := _drain_working(w)
-	main.room_layout["l1"] = "empty"                     # 食堂を外して（配置だけを書き換えて）基準を測る
-	var moving_base := _drain_working(w)
-	main.room_layout["l1"] = "mess"
-	check(moving_base > 0.0 and is_equal_approx(moving_mess / moving_base, 0.88), "作業中の元気の消耗も 12%% 減る（%.3f → %.3f）" % [moving_base, moving_mess])
-	# 食堂を重ねても、上限（50%）を超えない
-	main.room_layout = {"u1": "mess", "u2": "mess", "l1": "mess", "l2": "mess"}
-	check(main.room_effect("drain_cut") <= Rooms.CAP_DRAIN_CUT, "食堂を重ねても、元気の消耗を減らす効果には上限がある")
-
-
-## 動いている間（待機ではない状態）の、1秒あたりの元気の減り。
-func _drain_working(w) -> float:
-	w.ai.state = CharacterAI.State.COMBAT               # 敵がいないので探し直し（SEARCH）になる。待機ではないので、動いている間の減り方
-	w.stamina = 80.0
-	w._process(1.0)
-	return 80.0 - w.stamina
+	check(Rooms.TYPES["mess"]["effects"].is_empty(), "食堂にはスタミナ関連の効果が残っていない")
 
 
 # ---------------------------------------------------------------- 画面
@@ -627,10 +600,10 @@ func _soak(title: String, minutes: float, gap_min: float, gap_max: float, stress
 	for k in kinds:
 		made += " %s×%d" % [k, kinds[k]]
 	print("   部屋の変更を試した %d 回・実際に変わった %d 回:%s" % [ops, done, made])
-	print("   ワークベンチ %s・ベッド %d・加工 %d 回・回収 %d 個・狩猟 %d・建設 %d・空腹 %s・車体 %.0f・仲間の元気 %s" % [
+	print("   ワークベンチ %s・ベッド %d・加工 %d 回・回収 %d 個・狩猟 %d・建設 %d・空腹 %s・車体 %.0f・仲間の疲労度 %s" % [
 			("%.0f秒" % wb_at) if wb_at >= 0.0 else "なし", main.base.facility_count("bed"), main.processor.total_done, main.total_gathered,
 			main.total_hunted, main.total_built, "あり" if main.hungry else "なし", main.base.parts[GameData.Part.HULL],
-			str(W.map(func(w): return int(w.stamina)))])
+			str(W.map(func(w): return int(w.fatigue)))])
 	check(not main.game_over, "ゲームオーバーにならない")
 	check(done >= (20 if stress else 5), "部屋の変更が何度も行われた（%d回）" % done)
 	if not stress:

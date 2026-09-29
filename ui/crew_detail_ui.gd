@@ -210,7 +210,7 @@ func _build_detail() -> void:
 	var w = _worker
 	if w == null:
 		return
-	# 上の段: 左に「名前・プロフィール」と「状態」、右に5つのステータス（HP・スタミナ・満腹度・疲労度・精神状態）。カードと同じ部品で、少し大きく出す
+	# 上の段: 左に「名前・プロフィール」と「状態」、右にHP・満腹度・疲労度・精神状態。カードと同じ部品で、少し大きく出す
 	var top_row := HBoxContainer.new()
 	top_row.add_theme_constant_override("separation", 10)
 	_body.add_child(top_row)
