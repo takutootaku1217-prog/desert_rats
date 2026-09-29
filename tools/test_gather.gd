@@ -35,8 +35,6 @@ func _reset() -> void:
 	main.director.forecast.clear()
 	main.scroll_speed = 0.0                    # 世界を止めて、採取ポイントの「選び方」だけを確かめる（追いつけるかは専用の診断で）
 	for w in main.workers:
-		if w.away:
-			w.arrive(100.0)
 		w.ai._release_task()
 		w.carrying = -1
 		w.carry_n = 1
@@ -372,15 +370,14 @@ func _run() -> void:
 	check(ai1.state == CharacterAI.State.SEARCH and tr3.claimed_by == null, "何も掘っていない戦闘担当は、すぐ採取をやめて迎撃へ向かえる")
 	W[2].priorities[GameData.Job.COMBAT] = 0
 	main.director.active.clear()
-	# 遠征に出るとき、袋の中身は倉庫へ戻る
+	# 作業を中断するとき、袋の中身は倉庫へ戻る
 	_reset()
 	W[1].carrying = GameData.Item.WOOD
 	W[1].carry_n = 3
 	W[1].carry_bonus = {GameData.Item.BONE: 1}
 	W[1].ai.state = CharacterAI.State.MOVE_TO_STORAGE
-	W[1].depart()
-	check(st.count_of(GameData.Item.WOOD) == 3 and st.count_of(GameData.Item.BONE) == 1 and W[1].carry_n == 1, "遠征に出る仲間の袋（複数個・副産物）は、倉庫へ戻る")
-	W[1].arrive(80.0)
+	W[1].stop_work()
+	check(st.count_of(GameData.Item.WOOD) == 3 and st.count_of(GameData.Item.BONE) == 1 and W[1].carry_n == 1, "作業を中断した仲間の袋（複数個・副産物）は、倉庫へ戻る")
 	# 積載量: 袋を運んでいる分も空き枠に数える
 	_reset()
 	st.add_item(GameData.Item.WOOD, st.quota_of(GameData.Item.WOOD) - 3)

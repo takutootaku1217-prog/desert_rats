@@ -1,7 +1,7 @@
 extends SceneTree
 ## 積載量（倉庫の容量）の自己診断。実行:
 ##   Godot --headless --path . -s res://tools/test_cargo.gd
-## 表・枠・あふれ・割り当ての変更・回収と狩猟の判断・加工の判断・遠征の持ち帰り・画面・長時間の安定を確かめる。
+## 表・枠・あふれ・割り当ての変更・回収と狩猟の判断・加工の判断・画面・長時間の安定を確かめる。
 
 var fails := 0
 var main
@@ -35,8 +35,6 @@ func _reset() -> void:
 	main.director.forecast.clear()
 	main.scroll_speed = 0.0                    # 世界を止めて、回収の「選び方」だけを確かめる（追いつけるかは test_gather.gd で）
 	for w in main.workers:
-		if w.away:
-			w.arrive(100.0)
 		w.ai._release_task()
 		w.carrying = -1
 		w.ai._set_state(CharacterAI.State.SEARCH)
@@ -253,30 +251,6 @@ func _run() -> void:
 	check(st.take_set(fw["in"]) and st.count_of(GameData.Item.WOOD) == st.quota_of(GameData.Item.WOOD) - 1, "材料の取り出し（運搬）は、いっぱいでも普通にできる")
 	st.add_item(GameData.Item.WOOD, 1)
 	check(st.count_of(GameData.Item.WOOD) == st.quota_of(GameData.Item.WOOD), "取り出して空いた枠は、また使える")
-
-	print("== 遠征の持ち帰り ==")
-	_reset()
-	st.add_item(GameData.Item.FOOD, 6)
-	st.add_item(GameData.Item.IRON, st.quota_of(GameData.Item.IRON))
-	var ex: Expedition = main.expedition
-	ex.state = "idle"
-	ex.offer("ruins_large")
-	ex.loot.clear()
-	ex.loot[GameData.Item.IRON] = 5
-	ex.loot[GameData.Item.FUEL] = 3
-	ex.party = [W[0]]
-	W[0].depart()
-	ex.energy = {W[0]: 50.0}
-	ex.steps = ["explore"]
-	ex.ok_count = 1
-	ex.retreated = true                 # 踏破のおまけ（追加の戦利品）を出さず、持ち帰りだけを確かめる
-	ex._finish()
-	check(st.count_of(GameData.Item.IRON) == st.quota_of(GameData.Item.IRON) and ex.lost.get(GameData.Item.IRON, 0) == 5,
-			"戦利品が枠に入りきらないときは持ち帰れない（鉄%d個を諦めた）" % ex.lost.get(GameData.Item.IRON, 0))
-	check(ex.loot.get(GameData.Item.FUEL, 0) == 3 and st.count_of(GameData.Item.FUEL) == 3, "入る分（燃料3）は持ち帰れる")
-	check(ex.summary().contains("持ち帰れず"), "結果の文に、持ち帰れなかった分が出る: " + ex.summary())
-	ex.state = "idle"
-	W[0].arrive(80.0) if W[0].away else null
 
 	print("== 画面 ==")
 	_reset()

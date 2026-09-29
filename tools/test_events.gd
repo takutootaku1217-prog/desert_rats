@@ -90,9 +90,12 @@ func _run() -> void:
 	check(is_equal_approx(d.energy_mult(), 1.7) and is_equal_approx(d.wear_mult(M), 1.8), "酷暑・走り続ける: 疲れ×1.7・加工設備の傷み×1.8")
 	var e0: float = w.stamina
 	w.stamina = 100.0
-	w.ai.state = CharacterAI.State.SEARCH
+	w.position = Vector2(1100.0, 560.0)
+	w.target = Vector2(1200.0, 560.0)
+	w.ai.state = CharacterAI.State.IDLE
+	w.ai.timer = 100.0
 	w._process(1.0)
-	check(w.stamina < 100.0 - 0.7 * 1.5, "酷暑では仲間が実際に疲れやすくなる (%.2f)" % (100.0 - w.stamina))
+	check(w.stamina < 100.0 - 0.7 * 1.5, "酷暑では屋外を移動中の仲間が実際に疲れやすくなる (%.2f)" % (100.0 - w.stamina))
 	# 寒波: 暖房の燃料
 	d.active.clear()
 	d.trigger("coldsnap", false)

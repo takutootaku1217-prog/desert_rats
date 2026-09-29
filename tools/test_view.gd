@@ -244,17 +244,6 @@ func _test_switch() -> void:
 		if not w.visible:
 			same = false
 	check(same and main.processor.visible and main.storage.visible and main.base.modulate.a == 1.0, "内装へ戻すと、全員と加工設備・倉庫がまた見える")
-	# 調査隊に出ている間は、どちらでも見えない。戻ると、外にいるので外装でも見える
-	main.base_view.set_mode(BaseView.Mode.EXTERIOR, true)
-	W[1].depart()
-	await process_frame
-	check(not W[1].visible, "調査隊に出ている仲間は、外装でも見えない")
-	W[1].arrive(100.0)
-	await process_frame
-	check(W[1].visible, "戻った仲間（斜路の下に現れる）は、外装でも見える")
-	main.base_view.set_mode(BaseView.Mode.INTERIOR, true)
-
-
 # ---------------------------------------------------------------- 外装・内装が同じ拠点データを読んでいる
 func _test_same_data() -> void:
 	print("-- 外装と内装は同じ拠点データ（部屋の変更・設備の建設が外装にも反映される）")
@@ -359,7 +348,7 @@ func _test_ui() -> void:
 	var b_int: Button = _find_button(vs, "内装 (I)")
 	check(b_ext != null and b_int != null, "[外装 (O)] [内装 (I)] のボタンがある")
 	var overlap := false
-	for t in ["仲間の管理 (C)", "運営の方針 (P)", "遠征 (X)", "建設 (B)", "部屋の変更 (R)"]:
+	for t in ["仲間の管理 (C)", "運営の方針 (P)", "建設 (B)", "部屋の変更 (R)"]:
 		var o: Button = _find_button(main, t)
 		if o == null:
 			overlap = true
@@ -410,11 +399,11 @@ func _test_ui() -> void:
 	main.room_ui._unhandled_input(_key(KEY_R))
 	var keys := {}
 	var dup := false
-	for k in [KEY_B, KEY_R, KEY_P, KEY_X, KEY_C, KEY_O, KEY_I]:
+	for k in [KEY_B, KEY_R, KEY_P, KEY_C, KEY_O, KEY_I]:
 		if keys.has(k):
 			dup = true
 		keys[k] = true
-	check(not dup, "O・I は、ほかの操作のキー（B・R・P・X・C）と重ならない")
+	check(not dup, "O・I は、ほかの操作のキー（B・R・P・C）と重ならない")
 	# 外装のまま、ほかの画面が開ける
 	main.base_view.set_mode(BaseView.Mode.EXTERIOR, true)
 	main.build_ui.open()
@@ -510,12 +499,12 @@ func _test_soak() -> void:
 		for i in W.size():
 			var w = W[i]
 			var d: float = w.position.distance_to(prev_pos[i])
-			if not w.away and d > 90.0:
+			if d > 90.0:
 				jump += 1
-			max_step = maxf(max_step, d) if not w.away else max_step
+			max_step = maxf(max_step, d)
 			prev_pos[i] = w.position
 			var inside: bool = main.base.is_inside(w.position)
-			var should_show: bool = (not w.away) and (main.base_view._shown == BaseView.Mode.INTERIOR or not inside)
+			var should_show: bool = main.base_view._shown == BaseView.Mode.INTERIOR or not inside
 			if w.visible != should_show:
 				vis_bad += 1
 		var lay: Dictionary = main.room_layout

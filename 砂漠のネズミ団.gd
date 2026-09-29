@@ -21,8 +21,6 @@ var policy: PolicyUI
 var status: StatusPanel
 var director: Director            # 旅の出来事（天候・トラブル・好機）。scripts/director.gd
 var event_hud: EventHUD
-var expedition: Expedition        # 遺跡の探索（調査隊）。scripts/expedition.gd
-var expedition_ui: ExpeditionUI
 var build_ui: BuildUI             # 建設の画面（Bキー）。ui/build_ui.gd
 var room_ui: BaseUI               # 部屋の変更の画面（Rキー・右の「部屋の変更」ボタン）。ui/base_ui.gd
 var inventory_ui: InventoryUI     # インベントリの画面（Tabキー・右の「インベントリ」ボタン）。ui/inventory_ui.gd
@@ -90,8 +88,6 @@ func _ready() -> void:
 	randomize()
 	director = Director.new()       # 出来事（base や仲間より先に作る。倍率を読まれるため）
 	director.setup(self)
-	expedition = Expedition.new()
-	expedition.setup(self)
 	var bg := WorldScroll.new()
 	bg.game = self
 	add_child(bg)
@@ -158,9 +154,6 @@ func _ready() -> void:
 	event_hud = EventHUD.new()
 	event_hud.game = self
 	add_child(event_hud)
-	expedition_ui = ExpeditionUI.new()
-	expedition_ui.game = self
-	add_child(expedition_ui)
 	build_ui = BuildUI.new()
 	build_ui.game = self
 	add_child(build_ui)
@@ -204,7 +197,6 @@ func _process(delta: float) -> void:
 	base.burn(dist)
 	base.wear_by(delta, dist)
 	director.tick(delta, dist)                 # 出来事の進行（予報・発生・終了）
-	expedition.tick(delta)                     # 調査隊の進行（遺跡の探索）
 	_tool_clock += delta                       # 倉庫の道具を、仲間に持たせ直す（採取の道具）
 	if _tool_clock >= GatherDB.TOOL_CHECK_SECONDS:
 		_tool_clock = 0.0
@@ -237,7 +229,7 @@ func food_for_eating() -> int:
 func _update_hungry_flag() -> void:
 	hungry = false
 	for w in workers:
-		if not w.away and CrewStatus.wants_to_eat(w):
+		if CrewStatus.wants_to_eat(w):
 			hungry = true
 			break
 
@@ -446,9 +438,9 @@ func _tool_score(w, slot: String, tool_item: int) -> float:
 	return GatherDB.tool_score(slot, tool_item, w.ranks.get(GameData.Field.GATHERER, 0), w.field_mult(GameData.Field.GATHERER))
 
 
-## 道具を使う仲間か（回収の優先度が0でなく、遠征に出ていない）
+## 道具を使う仲間か（回収の優先度が0でない）
 func _uses_tools(w) -> bool:
-	return not w.away and w.priorities.get(GameData.Job.GATHER, 0) > 0
+	return w.priorities.get(GameData.Job.GATHER, 0) > 0
 
 
 ## 枠 slot の道具の割り当てを考える。使える道具 = 倉庫の予備 ＋ 道具を使う仲間がいま持っている物 ＋ extra（作る予定の物など）。
@@ -753,7 +745,7 @@ func build_room(slot: String, rtype: String) -> bool:
 
 ## 別の画面を開くとき、ほかの管理画面を閉じる（重ならないように）。keep はいま開く画面。
 func close_other_panels(keep) -> void:
-	for p in [build_ui, room_ui, policy, detail, expedition_ui, inventory_ui, craft_ui]:
+	for p in [build_ui, room_ui, policy, detail, inventory_ui, craft_ui]:
 		if p != null and p != keep and p.has_method("close"):
 			p.close()
 

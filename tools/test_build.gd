@@ -350,14 +350,14 @@ func _test_interrupt() -> void:
 	w0.ai._set_state(CharacterAI.State.SEARCH)
 	var t2: float = await _until(func(): return w0.ai.state == CharacterAI.State.HAUL_MOVE, 40.0)
 	check(t2 >= 0.0 and st.count_of(GameData.Item.WOOD) == 0, "もう一度、材料を持って向かう")
-	w0.depart()                                            # 調査隊に出る
-	check(main.build_queue == ["workbench"], "材料を運んでいる途中で調査隊に出ても、依頼は待ちに戻る")
+	w0.stop_work()                                         # 作業を中断する
+	check(main.build_queue == ["workbench"], "材料を運んでいる途中で作業を中断しても、依頼は待ちに戻る")
 	check(st.count_of(GameData.Item.WOOD) == _need("workbench", GameData.Item.WOOD)
 			and st.count_of(GameData.Item.IRON) == _need("workbench", GameData.Item.IRON), "運んでいた材料は倉庫に戻る")
 	check(main.processor.incoming.is_empty() and main.processor.pending_build("workbench") == 0, "運搬中の予約も消える")
-	w0.arrive(100.0)
+	w0.ai._set_state(CharacterAI.State.SEARCH)
 	var t3: float = await _until(func(): return main.has_facility("workbench"), 120.0)
-	check(t3 >= 0.0, "戻ったあと、建設が最後まで進む（%.0f秒）" % t3)
+	check(t3 >= 0.0, "中断したあと、建設が最後まで進む（%.0f秒）" % t3)
 	Engine.time_scale = 1.0
 
 

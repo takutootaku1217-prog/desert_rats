@@ -43,7 +43,6 @@ var gender := 0                   # GameData.GENDER_NAMES の番号
 var ranks := {}                   # Field -> 0..7（0=E, 7=SSS）
 var skills: Array = []
 var dept := -1                    # 配属している部署（GameData.Field）
-var away := false                 # 調査隊として拠点を離れている（scripts/expedition.gd）
 
 # 毎フレーム ai が設定する描画用の状態
 var moving := false
@@ -117,31 +116,6 @@ func stop_work() -> void:
 		carry_n = 1
 		carry_bonus = {}
 	a._release_task()
-
-
-## 調査隊として出発する。仕事を中断して、持っていた物・予約を元に戻し、拠点から姿を消す。
-func depart() -> void:
-	var a := ai
-	stop_work()
-	a._set_state(CharacterAI.State.IDLE)
-	a.timer = 9999.0
-	away = true
-	visible = false
-	set_process(false)
-	position = Vector2(-2000.0, GameData.LO_Y)     # 敵の攻撃やクリックの対象にならない場所
-
-
-## 調査隊から戻る。斜路の下に現れ、スタミナを引き継ぐ。
-func arrive(new_energy: float) -> void:
-	away = false
-	visible = true
-	set_process(true)
-	stamina = new_energy
-	floor_i = 0
-	position = GameData.RAMP_FOOT + Vector2(randf_range(-30.0, 30.0), 0.0)
-	target = position
-	ai.timer = 0.0
-	ai._set_state(CharacterAI.State.SEARCH)
 
 
 ## 採取ポイント kind に使う道具（-1 = 素手）。道具は枠（採掘・伐採）ごとに1つ。

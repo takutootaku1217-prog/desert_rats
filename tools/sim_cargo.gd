@@ -42,7 +42,7 @@ func _one(n: int, limited: bool, minutes: float, scale: float) -> void:
 		if not main.base.has_fuel():
 			nofuel_t += dt
 		for w in main.workers:
-			if not w.away and w.ai.state == CharacterAI.State.IDLE:
+			if w.ai.state == CharacterAI.State.IDLE:
 				idle_t += dt
 	Engine.time_scale = 1.0
 	var over: bool = main.game_over

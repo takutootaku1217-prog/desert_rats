@@ -238,7 +238,7 @@ func _test_transfer() -> void:
 	# 最後まで運ぶ（合計 8）
 	var done := _run_until(carrier, func(): return P.stock.count(GameData.Item.WOOD) == 8 and main.transfer_queue.is_empty() and carrier.ai.state != CharacterAI.State.XFER_MOVE, 200.0)
 	check(done and st.count_of(GameData.Item.WOOD) == 12 and main.total_transferred == 8, "全部で 8 個が作業場へ移った（倉庫 12・作業場 8・運んだ数 %d）" % main.total_transferred)
-	# 途中で仲間が離れても、物は消えない
+	# 途中で作業を中断しても、物は消えない
 	main.request_transfer(GameData.Item.STONE, 5, "to_workshop")
 	carrier.ai.state = CharacterAI.State.SEARCH
 	carrier.priorities[GameData.Job.HAUL] = 3
@@ -246,9 +246,8 @@ func _test_transfer() -> void:
 	check(carrier.ai.state == CharacterAI.State.XFER_TAKE, "（準備）石を運びに行く")
 	check(_run_until(carrier, func(): return carrier.ai.state == CharacterAI.State.XFER_MOVE, 40.0), "（準備）石を持った")
 	var stone_total: int = st.count_of(GameData.Item.STONE) + carrier.carry_n + P.stock.count(GameData.Item.STONE)
-	carrier.depart()
-	check(st.count_of(GameData.Item.STONE) + P.stock.count(GameData.Item.STONE) == stone_total and main.transfer_worker == null, "運搬の途中で遠征に出ても、持っていた物は倉庫に戻る（消えない）。引き受けも返す")
-	carrier.arrive(80.0)
+	carrier.stop_work()
+	check(st.count_of(GameData.Item.STONE) + P.stock.count(GameData.Item.STONE) == stone_total and main.transfer_worker == null, "運搬の途中で作業を中断しても、持っていた物は倉庫に戻る（消えない）。引き受けも返す")
 	carrier.set_process(false)
 	main.cancel_transfers()
 	# 戻す（作業場 → 倉庫）

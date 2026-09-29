@@ -9,7 +9,6 @@ signal item_added(item: int, amount: int, source: String)
 
 const SOURCE_ENVIRONMENT := "environment"
 const SOURCE_ENEMY_DROP := "enemy_drop"       # 将来: 敵ドロップ
-const SOURCE_EXPEDITION := "expedition"       # 将来: 探索隊の持ち帰り
 const SOURCE_PROCESSING := "processing"
 const SOURCE_HUNT := "hunt"                   # 生物を倒して解体
 const SOURCE_CAPTURE := "capture"             # 将来: 捕獲した生物から

@@ -94,5 +94,5 @@ func _update() -> void:
 	base.modulate.a = _alpha
 	for w in game.workers:
 		var inside: bool = base.is_inside(w.position)
-		w.visible = not w.away and (_shown == Mode.INTERIOR or not inside)        # 調査隊に出ている間は、どちらでも見えない
+		w.visible = _shown == Mode.INTERIOR or not inside
 		w.modulate.a = _alpha if inside else 1.0

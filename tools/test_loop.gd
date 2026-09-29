@@ -178,9 +178,8 @@ func _one(n: int, minutes: float, scale: float, seed_base: int, events_on: bool,
 			# 優先度と方針を乱数で変え続ける（途中で仕事を切り替えても、予約や荷物が取り残されないか）
 			next_stress = t + 4.0
 			var sw = W[randi() % W.size()]
-			if not sw.away:
-				var jobs: Array = GameData.job_list()
-				sw.set_priority(jobs[randi() % jobs.size()], randi() % (GameData.MAX_PRIORITY + 1))
+			var jobs: Array = GameData.job_list()
+			sw.set_priority(jobs[randi() % jobs.size()], randi() % (GameData.MAX_PRIORITY + 1))
 			if randi() % 2 == 0:
 				var rid: String = GameData.RECIPES[randi() % GameData.RECIPES.size()]["id"]
 				main.recipe_priority[rid] = randi() % (GameData.MAX_PRIORITY + 1)
@@ -199,7 +198,7 @@ func _one(n: int, minutes: float, scale: float, seed_base: int, events_on: bool,
 				r.tree_exiting.connect(func():
 					# 仲間が向かっている最中に消えた（画面の外へ流れた・別の理由）
 					for w2 in W:
-						if is_instance_valid(w2) and w2.ai.res == rr and not w2.away and w2.ai.state != CharacterAI.State.SEARCH:
+						if is_instance_valid(w2) and w2.ai.res == rr and w2.ai.state != CharacterAI.State.SEARCH:
 							lost_claim += 1)
 		if not P.orders.is_empty() or not P.current.is_empty():
 			mark.call("7 加工設備へ送られる")
@@ -212,9 +211,6 @@ func _one(n: int, minutes: float, scale: float, seed_base: int, events_on: bool,
 
 		# ---- 仲間ごと ----
 		for w in W:
-			if w.away:
-				prev_carry[w] = -1
-				continue
 			var s: int = w.ai.state
 			if last_state.get(w, -1) != s:
 				last_state[w] = s
@@ -280,8 +276,6 @@ func _one(n: int, minutes: float, scale: float, seed_base: int, events_on: bool,
 		var repairers := {}
 		var resting := {}
 		for w in W:
-			if w.away:
-				continue
 			var s2: int = w.ai.state
 			if s2 in [CharacterAI.State.HAUL_TAKE, CharacterAI.State.HAUL_MOVE]:
 				haulers += 1

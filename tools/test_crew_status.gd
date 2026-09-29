@@ -78,45 +78,53 @@ func _test_step1_data() -> void:
 	check(not ("energy" in w0), "旧名の「元気」（energy）はもう使わない（スタミナ stamina に置き換えた）")
 
 
-# ---------------------------------------------------------------- STEP 2: 元気 → スタミナ（動きは同じ）
-func _stamina_delta(w, state: int, start: float, dt := 1.0) -> float:
-	w.ai.state = state
-	w.ai.timer = 100.0
-	w.sleeping = false
+# ---------------------------------------------------------------- STEP 2: スタミナの消耗・自動回復
+func _stamina_tick(w, start: float, hunger: float, moving: bool, pos: Vector2, sleeping := false) -> Array:
 	w.stamina = start
-	w._process(dt)
-	return w.stamina - start
+	w.hunger = hunger
+	w.moving = moving
+	w.position = pos
+	w.sleeping = sleeping
+	w.resting = false
+	w.down = false
+	CrewStatus._tick_stamina(w, 1.0)
+	return [w.stamina - start, hunger - w.hunger]
 
 
 func _test_step2_stamina() -> void:
-	print("-- STEP 2: 元気 → スタミナ（増減の数字は以前と同じ）")
+	print("-- STEP 2: スタミナ（停止中・拠点内で自動回復し、回復量に応じて満腹度を使う）")
 	var w = W[0]
 	_quiet(w)
 	main.director.enabled = false
-	# 以前の数字: 眠る +9.0/秒（車体が傷んでいると +4.5）・待機 -0.25/秒・動いている間 -0.7/秒
-	var rest := _stamina_delta(w, CharacterAI.State.REST, 10.0)
-	check(is_equal_approx(rest, 9.0), "眠ると +9.0/秒（以前と同じ。実測 %.3f）" % rest)
-	var idle := _stamina_delta(w, CharacterAI.State.IDLE, 80.0)
-	check(is_equal_approx(idle, -0.25), "待機中は -0.25/秒（以前と同じ。実測 %.3f）" % idle)
-	var work := _stamina_delta(w, CharacterAI.State.COMBAT, 80.0)
-	check(is_equal_approx(work, -0.7), "動いている間は -0.7/秒（以前と同じ。実測 %.3f）" % work)
+	var outside := Vector2(1100.0, 560.0)
+	var inside := Vector2(700.0, GameData.LO_Y)
+	var stopped := _stamina_tick(w, 80.0, 100.0, false, outside)
+	check(is_equal_approx(stopped[0], CrewStatusDB.STAMINA_AUTO_RECOVERY_RATE), "屋外でも止まっていれば、スタミナが最大値の3%%/秒回復する（実測 %.3f）" % stopped[0])
+	check(is_equal_approx(stopped[1], stopped[0] * CrewStatusDB.HUNGER_PER_STAMINA_RECOVERED), "回復したスタミナ量の10%%を、本人の満腹度から使う（実測 %.3f）" % stopped[1])
+	var inside_move := _stamina_tick(w, 80.0, 100.0, true, inside)
+	check(is_equal_approx(inside_move[0], CrewStatusDB.STAMINA_AUTO_RECOVERY_RATE), "移動中でも、移動拠点の中なら自動回復する（実測 %.3f）" % inside_move[0])
+	var outside_move := _stamina_tick(w, 80.0, 100.0, true, outside)
+	check(is_equal_approx(outside_move[0], -CrewStatusDB.STAMINA_DRAIN_ACTIVE) and is_zero_approx(outside_move[1]), "屋外で移動中だけスタミナが減り、回復用の満腹度は使わない（実測 %.3f）" % outside_move[0])
+	var no_food := _stamina_tick(w, 50.0, 0.0, false, outside)
+	check(is_zero_approx(no_food[0]), "満腹度が0ならスタミナは自動回復しない")
+	var limited := _stamina_tick(w, 50.0, 0.1, false, outside)
+	check(is_equal_approx(limited[0], 1.0) and is_zero_approx(w.hunger), "満腹度が少しだけなら、その量で払える分だけ回復する")
+	var full := _stamina_tick(w, 100.0, 50.0, false, outside)
+	check(is_zero_approx(full[0]) and is_zero_approx(full[1]), "スタミナが満タンなら満腹度を使わない")
+	var rest := _stamina_tick(w, 10.0, 100.0, false, inside, true)
+	check(is_equal_approx(rest[0], 9.0) and is_equal_approx(rest[1], 0.9), "眠ると +9.0/秒回復し、回復量に応じて満腹度を使う")
 	# 車体が傷んでいると、休憩の回復は半分
 	var hull_prev: float = main.base.parts[GameData.Part.HULL]
 	main.base.parts[GameData.Part.HULL] = GameData.PART_BAD - 1.0
-	var rest_bad := _stamina_delta(w, CharacterAI.State.REST, 10.0)
-	check(is_equal_approx(rest_bad, 4.5), "車体が傷んでいると、眠っても +4.5/秒（以前と同じ。実測 %.3f）" % rest_bad)
+	var rest_bad := _stamina_tick(w, 10.0, 100.0, false, inside, true)
+	check(is_equal_approx(rest_bad[0], 4.5), "車体が傷んでいると、眠っても +4.5/秒（実測 %.3f）" % rest_bad[0])
 	main.base.parts[GameData.Part.HULL] = hull_prev
-	# 上限・下限
-	check(is_equal_approx(_stamina_delta(w, CharacterAI.State.REST, 98.0), 2.0), "スタミナは 100 を超えない")
-	w.ai.state = CharacterAI.State.COMBAT
-	w.stamina = 0.3
-	w._process(1.0)
-	check(is_equal_approx(w.stamina, 0.0), "スタミナは 0 を下回らない")
+	check(is_equal_approx(_stamina_tick(w, 98.0, 100.0, false, inside, true)[0], 2.0), "スタミナは 100 を超えない")
 	# 酷暑・部屋の効果は、これまでどおり掛かる
 	main.director.trigger("heatwave", false)
 	main.director.set_stance("heatwave", "run")
-	var heat_work := _stamina_delta(w, CharacterAI.State.COMBAT, 80.0)
-	check(is_equal_approx(heat_work, -0.7 * 1.7), "酷暑（走り続ける）では、動いている間の疲れが 1.7 倍（%.3f/秒）" % heat_work)
+	var heat_work := _stamina_tick(w, 80.0, 100.0, true, outside)
+	check(is_equal_approx(heat_work[0], -0.7 * 1.7), "酷暑（走り続ける）では、屋外移動中の疲れが 1.7 倍（%.3f/秒）" % heat_work[0])
 	main.director.active.clear()
 	# 休憩の判断（AI）は、設定の基準を読んでいる
 	check(CrewStatusDB.REST_STAMINA_URGENT == 25.0 and CrewStatusDB.REST_JOB_STAMINA_BELOW == 70.0 and CrewStatusDB.REST_END_STAMINA == 98.0,
@@ -245,14 +253,13 @@ func _test_step3_hunger() -> void:
 	check(w.ai.state == CharacterAI.State.SEARCH and main.processor.worker == null, "加工の途中でも、とても空腹なら中断して食事を優先する")
 	main.processor.orders.clear()
 	w.hunger = 100.0
-	# 遠征に出るとき、取り置きが残らない
+	# 作業を中断するとき、取り置きが残らない
 	w.hunger = 20.0
 	_set_food(2)
 	w.ai.state = CharacterAI.State.SEARCH
 	w._process(0.1)
-	w.depart()
-	check(main.food_claims == 0, "遠征に出ても、食料の取り置きは残らない")
-	w.arrive(80.0)
+	w.stop_work()
+	check(main.food_claims == 0, "作業を中断しても、食料の取り置きは残らない")
 	w.set_process(false)
 	w.hunger = 100.0
 	# 旧方式の倍率は掛からない
@@ -346,7 +353,7 @@ func _test_step4_fatigue() -> void:
 	w.priorities[GameData.Job.GATHER] = 0
 	for i in 100:
 		w._process(0.1)
-	check(w.fatigue >= 0.0 and w.stamina < 100.0, "（通し）動かしても値は範囲内（疲労度 %.1f・スタミナ %.1f）" % [w.fatigue, w.stamina])
+	check(w.fatigue >= 0.0 and w.stamina >= 0.0 and w.stamina <= 100.0, "（通し）動かしても値は範囲内（疲労度 %.1f・スタミナ %.1f）" % [w.fatigue, w.stamina])
 
 
 # ---------------------------------------------------------------- STEP 5: 精神状態
@@ -459,10 +466,6 @@ func _test_step6_hp() -> void:
 	w.set_priority(GameData.Job.GATHER, 4)
 	check(w.ai.state == CharacterAI.State.DOWN, "倒れている間は、優先度を変えても動かない")
 	w.set_priority(GameData.Job.GATHER, 0)
-	# 遠征には出せない
-	main.expedition.state = "offered"
-	check(main.expedition.block_reason([w], "standard", false) != "", "倒れている仲間は遠征に出せない")
-	main.expedition.state = "idle"
 	# 敵の攻撃
 	_reset(w)
 	_reset(w1)

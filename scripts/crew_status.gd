@@ -24,21 +24,38 @@ static func rest_factor(w) -> float:
 
 
 # ------------------------------------------------------------------
-# スタミナ（以前の「元気」）。増減の数字は以前と同じ（酷暑などの疲れやすさ・食堂・医務室の効果もそのまま）。
+# スタミナ。屋外で移動中は減り、停止中または移動拠点内では自動回復する。
+# 回復した量に比例して本人の満腹度を使う（ARK風）。
 # ------------------------------------------------------------------
 static func _tick_stamina(w, delta: float) -> void:
 	var g = w.game
 	var rf := 1.0 if w.down else rest_factor(w)
-	if rf > 0.0:                                                # 眠っている・その場で休んでいる・倒れている間は回復する
+	var recovery := 0.0
+	if rf > 0.0:                                                # 眠っている・その場で休んでいる・倒れている間は速く回復する
 		# 車体が傷んでいると（居住区が傷んで）よく休めない
-		var rec := CrewStatusDB.STAMINA_REST_RATE if g.base.condition(GameData.Part.HULL) >= GameData.PART_BAD else CrewStatusDB.STAMINA_REST_RATE_HULL_BAD
-		rec *= 1.0 + g.room_effect("rest_rate")                 # 医務室（部屋の変更。data/rooms.gd）で回復が早くなる
-		w.stamina = minf(CrewStatusDB.MAX_STAMINA, w.stamina + rec * rf * delta)
-	elif w.ai.state == CharacterAI.State.IDLE:
-		w.stamina = maxf(0.0, w.stamina - CrewStatusDB.STAMINA_DRAIN_IDLE * g.director.energy_mult() * (1.0 - g.room_effect("drain_cut")) * delta)
+		recovery = CrewStatusDB.STAMINA_REST_RATE if g.base.condition(GameData.Part.HULL) >= GameData.PART_BAD else CrewStatusDB.STAMINA_REST_RATE_HULL_BAD
+		recovery *= (1.0 + g.room_effect("rest_rate")) * rf      # 医務室（部屋の変更。data/rooms.gd）で回復が早くなる
+	elif not w.moving or g.base.is_inside(w.position):
+		recovery = CrewStatusDB.STAMINA_AUTO_RECOVERY_RATE
+	if recovery > 0.0:
+		_recover_stamina_with_hunger(w, recovery * delta)
 	else:
 		# 酷暑などで疲れやすくなる。食堂で減る
 		w.stamina = maxf(0.0, w.stamina - CrewStatusDB.STAMINA_DRAIN_ACTIVE * g.director.energy_mult() * (1.0 - g.room_effect("drain_cut")) * delta)
+
+
+## 実際に回復したスタミナ量だけ、一定割合で本人の満腹度を消費する。
+## 満腹度が足りなければ、回復量も残っている満腹度のぶんまでに制限する。
+static func _recover_stamina_with_hunger(w, requested: float) -> void:
+	var cost: float = CrewStatusDB.HUNGER_PER_STAMINA_RECOVERED
+	var missing: float = CrewStatusDB.MAX_STAMINA - float(w.stamina)
+	var recovered: float = minf(requested, missing)
+	if cost > 0.0:
+		recovered = minf(recovered, w.hunger / cost)
+	if recovered <= 0.0:
+		return
+	w.stamina += recovered
+	w.hunger = maxf(0.0, w.hunger - recovered * cost)
 
 
 # ------------------------------------------------------------------
@@ -104,9 +121,9 @@ static func _tick_hp(w, delta: float) -> void:
 
 
 ## ダメージを受ける（敵の攻撃・狩りの事故・出来事）。stress_gain はそのときのストレス。HP が 0 になったら戦闘不能。
-## 調査隊に出ている間・すでに倒れているときは受けない。
+## すでに倒れているときは受けない。
 static func damage(w, amount: float, stress_gain := 0.0) -> void:
-	if w.away or w.down:
+	if w.down:
 		return
 	w.hp = maxf(0.0, w.hp - amount)
 	w.stress += stress_gain
