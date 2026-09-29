@@ -30,6 +30,15 @@ var craft_ui: CraftUI             # 制作の画面（Fキー・右の「制作�
 var base_view: BaseView           # 拠点の見え方（外装 ⇄ 内装）。scripts/base_view.gd
 var view_switch: ViewSwitchUI     # 外装・内装の切り替えボタン（Oキー・Iキー）。ui/view_switch.gd
 
+# ---- カメラ追従（個体管理タブとカメラ追従_仕様書のうち、カメラ追従の最小構成。2026-09-30） ----
+# Camera2D は世界（背景・拠点・仲間・資源。CanvasLayer の外）だけを動かす。HUD は CanvasLayer なので触れない。
+var camera: Camera2D
+var follow_target = null          # 追従中の Worker（null なら追従なし）。main._select で設定される
+var _follow_label: Label          # 「追従中」「追従できません」の小さな表示（右上の状態の下）
+const FOLLOW_DEADZONE_HALF := 150.0   # 画面中央からこの範囲内に対象がいれば、カメラは動かさない（常に対象を追わない＝滑らかさ優先）
+const FOLLOW_SMOOTH_SPEED := 6.0      # Camera2D の内蔵スムージングの速さ
+const FOLLOW_SCREEN_CENTER_X := 640.0 # 1280x720 の画面中央x（カメラなしのときと同じ見え方の基準）
+
 # ---- 部屋（車体の区画。data/rooms.gd） ----
 var room_layout: Dictionary = Rooms.default_layout()   # 区画 -> 部屋の種類。初期配置は、これまでのゲームと同じ
 var total_rooms_built := 0                              # 部屋を建てた・移した・空けた回数（確認用）
@@ -96,6 +105,15 @@ func _ready() -> void:
 	bg.game = self
 	add_child(bg)
 
+	# カメラ（世界側だけを動かす。position=0 なら、これまでと画素まで同じ見え方）
+	camera = Camera2D.new()
+	camera.anchor_mode = Camera2D.ANCHOR_MODE_FIXED_TOP_LEFT   # position を「画面左上に来る世界座標」にする（中央基準だとカメラなしの見え方とズレる）
+	camera.position_smoothing_enabled = true                   # 内蔵のスムージングで、滑らかに追う・滑らかに戻る
+	camera.position_smoothing_speed = FOLLOW_SMOOTH_SPEED
+	camera.zoom = Vector2.ONE                                  # 拡大縮小はしない（ドット絵がぼやけるのを避ける）
+	add_child(camera)
+	camera.make_current()
+
 	base = MobileBase.new()
 	base.game = self
 	add_child(base)
@@ -150,6 +168,12 @@ func _ready() -> void:
 	policy = PolicyUI.new()
 	policy.game = self
 	add_child(policy)
+	var follow_layer := CanvasLayer.new()      # 追従の状態表示（右上の状態パネルの左）。HUD なのでカメラの影響を受けない
+	follow_layer.layer = 10
+	add_child(follow_layer)
+	_follow_label = GameData.make_label("", 14, Color("ffe9b0"))
+	_follow_label.position = Vector2(10, 196)
+	follow_layer.add_child(_follow_label)
 	_select(workers[0])
 	# 出来事の見た目と画面（左下）
 	var fx := WeatherFX.new()
@@ -226,6 +250,7 @@ func _process(delta: float) -> void:
 	if _creature_dist <= 0.0:
 		_spawn_creature()
 		_creature_dist = randf_range(GameData.CREATURE_DIST_MIN, GameData.CREATURE_DIST_MAX)
+	_update_camera(delta)
 
 
 ## 食べに行ける食料の数（倉庫の在庫から、食べに向かっている仲間の分を引く）
@@ -942,14 +967,16 @@ func _select(w) -> void:
 	ui.set_selected(w)
 	if detail != null:
 		detail.show_worker(w)
+	follow_target = w                          # 既存の選択方法（クリック・上部カード）が、そのままカメラ追従の切り替えにもなる
 
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		var best = null
 		var best_d := 34.0
+		var click_world := get_global_mouse_position()    # カメラが動いても正しい世界座標になる（event.position は画面座標のまま）
 		for w in workers:
-			var d: float = w.position.distance_to(event.position)
+			var d: float = w.position.distance_to(click_world)
 			if d < best_d:
 				best_d = d
 				best = w
@@ -960,3 +987,24 @@ func _unhandled_input(event: InputEvent) -> void:
 			target_speed = minf(target_speed + 10.0, 200.0)
 		elif event.keycode == KEY_DOWN:
 			target_speed = maxf(target_speed - 10.0, 0.0)
+		elif event.keycode == KEY_ESCAPE:
+			follow_target = null                # 追従の解除（選んだ仲間・優先度パネルの表示はそのまま。カメラだけ戻る）
+
+
+## カメラ追従の更新（世界側だけを動かす。仲間の位置・AI・仕事には一切触れない）。
+## 対象が居ない・遠征中・拠点の中で見えない（外装表示）ときは、無効な位置へ飛ばず、その場で止めて表示だけ変える。
+func _update_camera(_delta: float) -> void:
+	var target = follow_target
+	var followable: bool = target != null and is_instance_valid(target) and not target.away and target.visible
+	if followable:
+		# 対象が画面中央付近（デッドゾーン）にいる間はカメラを動かさない。外れたら、必要な分だけ追いつく（常に中央固定にはしない）
+		var lo: float = target.position.x - (FOLLOW_SCREEN_CENTER_X + FOLLOW_DEADZONE_HALF)
+		var hi: float = target.position.x - (FOLLOW_SCREEN_CENTER_X - FOLLOW_DEADZONE_HALF)
+		camera.position.x = clampf(camera.position.x, lo, hi)
+		_follow_label.text = "◎ %s を追従中（Escキーで解除）" % target.char_name
+	else:
+		camera.position.x = 0.0                 # 通常の、拠点を見渡す構図に戻る
+		if target == null:
+			_follow_label.text = ""
+		else:
+			_follow_label.text = "△ %s を追従できません（%s）" % [target.char_name, "遠征中" if target.away else "拠点の中（外装表示）"]
