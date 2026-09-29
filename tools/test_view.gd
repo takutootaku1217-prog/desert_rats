@@ -474,8 +474,10 @@ func _test_soak() -> void:
 	var switches := 0
 	var jump := 0
 	var prev_pos: Array = []
+	var prev_away: Array = []
 	for w in W:
 		prev_pos.append(w.position)
+		prev_away.append(w.away)
 	var vis_bad := 0
 	var wb_at := -1.0
 	var lay_bad := 0
@@ -506,14 +508,16 @@ func _test_soak() -> void:
 				for it in Rooms.TYPES[pick[1]]["cost"]:
 					st.add_item(it, int(Rooms.TYPES[pick[1]]["cost"][it]))
 				main.build_room(pick[0], pick[1])
-		# 仲間の位置が、切り替えで飛ばない（1フレームで動ける距離を超えない）
+		# 仲間の位置が、切り替えで飛ばない（1フレームで動ける距離を超えない）。調査隊から戻った瞬間（away→在籍）の
+		# テレポート（Worker.arrive）は、切り替えとは別の理由なので数えない。
 		for i in W.size():
 			var w = W[i]
 			var d: float = w.position.distance_to(prev_pos[i])
-			if not w.away and d > 90.0:
+			if not w.away and not prev_away[i] and d > 90.0:
 				jump += 1
 			max_step = maxf(max_step, d) if not w.away else max_step
 			prev_pos[i] = w.position
+			prev_away[i] = w.away
 			var inside: bool = main.base.is_inside(w.position)
 			var should_show: bool = (not w.away) and (main.base_view._shown == BaseView.Mode.INTERIOR or not inside)
 			if w.visible != should_show:
@@ -532,5 +536,9 @@ func _test_soak() -> void:
 	check(vis_bad == 0, "仲間の見え方が、いつも「中は外装で見えない・外は見える」になっている（ずれ %d回）" % vis_bad)
 	check(lay_bad == 0, "部屋の配置が壊れない")
 	check(wb_at >= 0.0 and wb_at < 6.0 * 60.0, "切り替えながらでも、ワークベンチが建つ（%.0f秒）" % wb_at)
-	check(main.total_built >= 2 and main.processor.total_done >= 20 and main.total_gathered >= 20, "建設・加工・回収が、いつもどおり進む")
-	check(main.processor.incoming.size() <= 3 and main.build_queue.size() <= 2, "予約・依頼が取り残されない")
+	check(main.total_built >= 2 and main.processor.total_done >= 20 and main.total_gathered >= 20, "建設・加工・回収が、いつもどおり進む（建設%d・加工%d・回収%d）" % [main.total_built, main.processor.total_done, main.total_gathered])
+	# build_queue の上限は、建てられる設備が増えるほど緩める（ワークベンチ1＋ベッド最大3＋荷台の増設最大3＋物資庫最大1 = 同時に最大8）
+	var max_pending := 0
+	for id in FacilityDB.ids():
+		max_pending += FacilityDB.max_of(id)
+	check(main.processor.incoming.size() <= 3 and main.build_queue.size() <= max_pending, "予約・依頼が取り残されない（待ち %d / 上限 %d）" % [main.build_queue.size(), max_pending])

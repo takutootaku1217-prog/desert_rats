@@ -65,6 +65,22 @@ CRATE = hexc("8b5a32"); CRATE_L = hexc("c99a5c"); CRATE_D = hexc("5a3a1e")
 SACK = hexc("cbb27a"); SACK_D = hexc("a4894f")
 
 
+def supply_cache():
+    """物資庫（幅8・高さ10。修理資材でつくる棚。data/facilities.gd の supply_cache。仲間のスタミナの消耗を減らす）。
+    加工室が狭い（ワークベンチ・加工機と場所を分け合う）ため、幅を詰めた仮のドット絵。修理資材の小箱・瓶を並べただけ。"""
+    p = Px(8, 10)
+    p.vline(0, 1, 9, WOOD_D); p.vline(7, 1, 9, WOOD_D)       # 支柱
+    p.hline(0, 1, 8, WOOD_L)                                  # 上端
+    p.hline(0, 5, 8, WOOD); p.hline(0, 5, 8, WOOD_L)          # 中段の棚板
+    p.hline(0, 9, 8, C["steel_d"])                            # 床
+    # 上段: 修理資材の小箱
+    p.rect(1, 2, 5, 2, C["rust_l"]); p.hline(1, 2, 5, C["copper"])
+    # 下段: 瓶・工具
+    p.rect(1, 6, 2, 3, hexc("cbb27a")); p.set(1, 6, hexc("efe7d2"))
+    p.rect(4, 6, 3, 2, C["steel_m"]); p.hline(4, 6, 3, C["steel_l"])
+    return p
+
+
 def cargo_rack(i):
     """荷台の増設（幅12・高さ9。倉庫の重量制の積載量を増やす設備。data/cargo.gd の capacity_bonus）。
     i = 0..2 で積んである木箱・袋の並びが変わる（置き場所ごとに見た目を変えるだけ。仮の絵）。"""
@@ -102,6 +118,7 @@ def all_images():
         l.append(("base", f"bed_{i}.png", bed(i)))
     for i in range(3):
         l.append(("base", f"cargo_rack_{i}.png", cargo_rack(i)))
+    l.append(("base", "supply_cache.png", supply_cache()))
     return l + room_images()
 
 

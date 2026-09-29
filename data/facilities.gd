@@ -38,6 +38,8 @@ const GATHER_BOOST := 3.0
 ##    横に並べた絵のとき。1枚絵は 0）、frames = コマ数。絵の細かさ（1ユニットのドット数）は、絵の幅から自動で決まる（data/art_spec.gd）
 ##  - capacity_bonus: 完成すると BaseStorage.capacity_bonus に足す量（積載できる最大の重さが増える。data/cargo.gd）。
 ##    書いていない設備は 0（積載量には関係ない）。Main.finish_build がここを読んで足す。
+##  - effects: [{kind, value}]（仲間の休憩・消耗に効く。data/rooms.gd の部屋の効果と同じ形・同じ kind（rest_rate / drain_cut）で、
+##    Main.room_effect が部屋の分とまとめて合計する。CrewStatus は room_effect を呼ぶだけなので変更不要。書いていない設備は []。
 const FACILITIES := {
 	"workbench": {
 		"name": "ワークベンチ", "desc": "手作業では作れない道具・設備をつくる作業台",
@@ -45,6 +47,7 @@ const FACILITIES := {
 		"max": 1, "requires": "", "station": true,
 		"room": "workshop", "dx": [9.0],
 		"sprite": "res://assets/base/workbench.png", "frame": Vector2i(16, 9), "stride": 18, "frames": 3,
+		"effects": [],
 	},
 	"bed": {
 		"name": "ベッド", "desc": "仲間が休める。多いほど同時に休める人数が増える",
@@ -52,6 +55,7 @@ const FACILITIES := {
 		"max": 3, "requires": "workbench", "station": false,
 		"room": "bedroom", "dx": [9.0, 24.0, 39.0],
 		"sprite": "res://assets/base/bed_%d.png", "frame": Vector2i(14, 9), "stride": 0, "frames": 1,
+		"effects": [],
 	},
 	"cargo_rack": {
 		"name": "荷台の増設", "desc": "倉庫の脇に荷台を組む。拠点全体の積載できる重さが増える（1つ+60）",
@@ -59,7 +63,15 @@ const FACILITIES := {
 		"max": 3, "requires": "workbench", "station": false,
 		"room": "storage", "dx": [38.0, 47.0, 56.0],
 		"sprite": "res://assets/base/cargo_rack_%d.png", "frame": Vector2i(12, 9), "stride": 0, "frames": 1,
-		"capacity_bonus": 60,
+		"capacity_bonus": 60, "effects": [],
+	},
+	"supply_cache": {
+		"name": "物資庫", "desc": "修理資材を使い、消耗品の蓄えを整える棚。仲間のスタミナが減りにくくなる（-8%）",
+		"cost": {GameData.Item.REPAIR_KIT: 3, GameData.Item.WOOD: 2}, "time": 5.0, "field": GameData.Field.DEV,
+		"max": 1, "requires": "workbench", "station": false,
+		"room": "workshop", "dx": [51.0],
+		"sprite": "res://assets/base/supply_cache.png", "frame": Vector2i(8, 10), "stride": 0, "frames": 1,
+		"effects": [{"kind": "drain_cut", "value": 0.08}],
 	},
 }
 

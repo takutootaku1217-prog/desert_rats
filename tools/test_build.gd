@@ -89,6 +89,7 @@ func _run() -> void:
 	await _test_reserve()
 	await _test_unlock()
 	await _test_beds()
+	await _test_effects()
 	await _test_interrupt()
 	await _test_ui()
 	await _test_full_run()
@@ -99,7 +100,7 @@ func _test_tables() -> void:
 	print("-- 設備の表の整合")
 	for id in FacilityDB.ids():
 		var d: Dictionary = FacilityDB.def(id)
-		check(d.has_all(["name", "desc", "cost", "time", "field", "max", "requires", "station", "room", "dx", "sprite", "frame", "stride"]),
+		check(d.has_all(["name", "desc", "cost", "time", "field", "max", "requires", "station", "room", "dx", "sprite", "frame", "stride", "effects"]),
 				"%s: 必要な項目がそろっている" % id)
 		check(Rooms.TYPES.has(d["room"]), "%s: 置く部屋（%s）が部屋の表にある" % [id, d["room"]])
 		check(String(d["requires"]) == "" or FacilityDB.has(d["requires"]), "%s: 必要設備が表にある" % id)
@@ -330,6 +331,34 @@ func _test_beds() -> void:
 	check(main.base.claim_bed(W[0]) == 0 and main.base.claim_bed(W[1]) == -1, "ベッド1つなら、2人目は休めない")
 	main.base.release_bed(W[0])
 	check(main.base.claim_bed(W[1]) == 0, "空いたベッドを次の仲間が使う")
+
+
+# ---------------------------------------------------------------- 加工品を使う設備と、その効果（物資庫）
+func _test_effects() -> void:
+	print("-- 加工品（修理資材）を使う設備と、設置後の効果（物資庫）")
+	await _fresh(false)
+	_only_hauler()
+	Engine.time_scale = 8.0
+	main.base.add_facility("workbench")
+	check(is_equal_approx(main.room_effect("drain_cut"), 0.0), "建てる前は、スタミナの消耗を減らす効果はない")
+	_give_cost("supply_cache")
+	check(main.request_build("supply_cache"), "物資庫を依頼する（材料 %s がある）" % FacilityDB.cost_text("supply_cache"))
+	var r: Dictionary = main.choose_recipe()
+	check(r.get("build", "") == "supply_cache" and r["station"] == "workbench", "材料（修理資材・木材）がそろうと、建設のレシピが選ばれる（作業はワークベンチ）")
+	var t: float = await _until(func(): return main.has_facility("supply_cache"), 120.0)
+	check(t >= 0.0, "物資庫が完成する（%.0f秒）" % t)
+	check(st.count_of(GameData.Item.REPAIR_KIT) == 0 and st.count_of(GameData.Item.WOOD) == 0, "材料（%s）が一度だけ消費される" % FacilityDB.cost_text("supply_cache"))
+	check(is_equal_approx(main.room_effect("drain_cut"), 0.08), "設置後、スタミナの消耗を減らす効果（-8%）が実際に反映される（CrewStatus が room_effect を読む）")
+	# 部屋の効果（食堂）と足し合わされる（食堂は data/rooms.gd。既存の部屋の変更のまま）
+	var slot := ""
+	for s in Rooms.SLOT_ORDER:
+		if not Rooms.TYPES[main.room_layout[s]]["required"]:
+			slot = s
+			break
+	st.add_item(GameData.Item.FOOD, Rooms.TYPES["mess"]["cost"][GameData.Item.FOOD])
+	st.add_item(GameData.Item.WOOD, Rooms.TYPES["mess"]["cost"][GameData.Item.WOOD])
+	check(slot != "" and main.build_room(slot, "mess"), "食堂も建てられる（部屋の変更。既存の仕組み）")
+	check(is_equal_approx(main.room_effect("drain_cut"), 0.08 + 0.12), "部屋（食堂）と設備（物資庫）の効果は足し合わされる（%.2f）" % main.room_effect("drain_cut"))
 
 
 # ---------------------------------------------------------------- 途中でやめたときの依頼の戻り

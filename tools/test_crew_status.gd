@@ -45,6 +45,8 @@ func _fresh(all_facilities := true) -> void:
 	root.add_child(main)
 	await process_frame
 	await process_frame
+	if all_facilities:
+		main.base.built.erase("supply_cache")     # 消耗を減らす効果（data/facilities.gd）を含まない基準で、ステータスの数値を確かめる
 	main.director.enabled = false
 	main.target_speed = 0.0
 	W = main.workers

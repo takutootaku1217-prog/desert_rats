@@ -706,10 +706,24 @@ func base_level() -> int:
 	return 1
 
 
-## 部屋の効果の合計（休憩の回復・元気の消耗など。Worker が読む）。元気の消耗を減らす食堂は、上限まで。
+## 部屋と設備の効果の合計（休憩の回復・元気の消耗など。Worker（CrewStatus）が読む）。設備の効果は data/facilities.gd の
+## "effects"（部屋の効果と同じ kind・形。例: 物資庫の drain_cut）。元気の消耗を減らす分は、部屋＋設備の合計に上限をかける。
 func room_effect(kind: String) -> float:
-	var v := Rooms.total(room_layout, kind)
+	var v := Rooms.total(room_layout, kind) + facility_effect(kind)
 	return minf(v, Rooms.CAP_DRAIN_CUT) if kind == "drain_cut" else v
+
+
+## 建てた設備の効果の合計（同じ設備を複数建てていれば、建てた数ぶん重なる。data/facilities.gd の "effects"）。
+func facility_effect(kind: String) -> float:
+	var sum := 0.0
+	for id in FacilityDB.ids():
+		var n := base.facility_count(id)
+		if n <= 0:
+			continue
+		for e in FacilityDB.def(id).get("effects", []):
+			if e["kind"] == kind:
+				sum += float(e["value"]) * n
+	return sum
 
 
 ## 区画 slot に部屋 rtype を建てられない理由（材料の不足は含めない）。建てられるなら ""。

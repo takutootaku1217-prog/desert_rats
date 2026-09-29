@@ -207,6 +207,7 @@ func _test_rules() -> void:
 func _test_build_flow() -> void:
 	print("-- 空き → 部屋を建てる → 別の部屋へ建て替え（材料の消費）")
 	await _fresh(true)
+	main.base.built.erase("supply_cache")     # 部屋の効果だけを見るため、設備側の効果（物資庫。data/facilities.gd）は外す
 	var lay0: Dictionary = main.room_layout.duplicate()
 	check(not main.can_build_room("l1", "infirmary"), "材料がなければ建てられない")
 	check(not main.build_room("l1", "infirmary") and main.room_layout == lay0 and main.total_rooms_built == 0, "失敗しても、配置も記録も変わらない")
@@ -400,6 +401,7 @@ func _drain(w) -> float:
 func _test_effects() -> void:
 	print("-- 部屋の効果（休憩の回復・元気の消耗）")
 	await _fresh(true)
+	main.base.built.erase("supply_cache")     # 部屋の効果だけを見るため、設備側の効果（物資庫。data/facilities.gd）は外す
 	for x in W:
 		x.set_process(false)
 		for j in GameData.job_list():
