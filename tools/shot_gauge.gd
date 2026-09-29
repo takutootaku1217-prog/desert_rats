@@ -21,10 +21,12 @@ func _initialize() -> void:
 	var levels := [0.0, 0.15, 0.30, 0.50, 0.65, 0.80, 0.95, 1.0]
 	var crops: Array = []
 	for lv in levels:
-		# 素材棚・加工品置き場の両方が、その割合になるように置く（枠の割合）
+		# 素材棚・加工品置き場のどちらの素材にも均等に振り分けて、拠点全体の重さがその割合になるように置く（重量制）
 		st.inventory.counts.clear()
-		for it in st.quota:
-			st.inventory.counts[it] = int(round(float(st.quota_of(it)) * lv))
+		var items: Array = GameData.RAW_ITEMS + GameData.PRODUCT_ITEMS
+		var target: float = float(st.max_weight()) * lv / float(items.size())
+		for it in items:
+			st.inventory.counts[it] = roundi(target / float(CargoDB.size_of(it)))
 		for k in 4:
 			await process_frame
 		var img := root.get_texture().get_image()

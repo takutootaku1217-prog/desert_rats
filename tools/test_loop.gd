@@ -328,12 +328,8 @@ func _one(n: int, minutes: float, scale: float, seed_base: int, events_on: bool,
 		for it in GameData.Item.values():
 			if st.count_of(it) < 0:
 				err.call("neg_%d" % it, "倉庫の個数がマイナス（%s）" % GameData.ITEM_NAMES.get(it, "?"))
-		for bay in [CargoDB.Bay.RAW, CargoDB.Bay.PRODUCT]:
-			if st.used_in(bay) > st.capacity_of(bay):
-				err.call("cap_%d" % bay, "%s が積載量を超えている（%d/%d）" % [CargoDB.BAY_NAMES[bay], st.used_in(bay), st.capacity_of(bay)])
-		for it in st.quota:
-			if st.count_of(it) > st.quota_of(it):
-				err.call("quota_%d" % it, "%s の個数（%d）が枠（%d）を超えている" % [GameData.ITEM_NAMES[it], st.count_of(it), st.quota_of(it)])
+		if st.current_weight() > st.max_weight():
+			err.call("cap", "積載重量が上限を超えている（%d/%d）" % [st.current_weight(), st.max_weight()])
 
 	Engine.time_scale = 1.0
 	paused = false
@@ -356,16 +352,16 @@ func _one(n: int, minutes: float, scale: float, seed_base: int, events_on: bool,
 	if wg.text != str(st.current_weight()) or absf(wg.ratio - st.weight_ratio()) > 0.001:
 		ui_ok = false
 		errors.append("積載重量のアイコン（数字 %s・充填 %.2f）が、実際の積載重量（%d・%.2f）と違う" % [wg.text, wg.ratio, st.current_weight(), st.weight_ratio()])
-	rx.compile("素材棚 (\\d+) / (\\d+)")
+	rx.compile("素材棚 (\\d+)")
 	var m2 := rx.search(text)
-	if m2 == null or int(m2.get_string(1)) != st.used_in(CargoDB.Bay.RAW) or int(m2.get_string(2)) != st.capacity_of(CargoDB.Bay.RAW):
+	if m2 == null or int(m2.get_string(1)) != st.used_in(CargoDB.Bay.RAW):
 		ui_ok = false
-		errors.append("右上の素材棚の表示が、実際の積載量と違う")
-	rx.compile("加工品置き場 (\\d+) / (\\d+)")
+		errors.append("右上の素材棚の表示が、実際の重さと違う")
+	rx.compile("加工品置き場 (\\d+)")
 	var m3 := rx.search(text)
-	if m3 == null or int(m3.get_string(1)) != st.used_in(CargoDB.Bay.PRODUCT) or int(m3.get_string(2)) != st.capacity_of(CargoDB.Bay.PRODUCT):
+	if m3 == null or int(m3.get_string(1)) != st.used_in(CargoDB.Bay.PRODUCT):
 		ui_ok = false
-		errors.append("右上の加工品置き場の表示が、実際の積載量と違う")
+		errors.append("右上の加工品置き場の表示が、実際の重さと違う")
 	if ui_ok:
 		notes.append("右上の表示（素材・加工品の個数、素材棚・加工品置き場の積載量）は、実際の倉庫と一致している")
 

@@ -188,10 +188,10 @@ func _test_craftdb() -> void:
 	var bed := CraftDB.entry_of("build:bed")
 	ev = CraftDB.evaluate(bed, main, 1)
 	check(ev["state"] == "locked" and ev["reason"].contains("ワークベンチ"), "ベッドは、ワークベンチが必要（解放待ち）")
-	# 置き場がいっぱい
+	# 置き場がいっぱい（拠点全体の積載量を使い切ったことにする。重量制なので枠ではなく capacity_bonus で作る）
 	main.storage.inventory.counts[GameData.Item.HAMMER] = 0
-	main.storage.quota[GameData.Item.FOOD] = 3
 	main.storage.inventory.counts[GameData.Item.FOOD] = 3
+	main.storage.capacity_bonus = -100000
 	main.processor.stock.add(GameData.Item.MEAT, 2)
 	ev = CraftDB.evaluate(CraftDB.entry_of("cook"), main, 1)
 	check(ev["state"] == "blocked" and ev["reason"] == "置き場がいっぱい" and ev["max_qty"] == 0, "作った物の置き場（倉庫の枠）がいっぱいなら「置き場がいっぱい」（捨てないため、作れない）")
@@ -203,7 +203,7 @@ func _test_transfer() -> void:
 	await _fresh(true)
 	var st: BaseStorage = main.storage
 	var P: BaseProcessor = main.processor
-	st.quota[GameData.Item.WOOD] = 40                             # 倉庫へ戻す試験のため、枠を広げる
+	st.capacity_bonus = 1000                                       # 倉庫へ戻す試験のため、積載量を広げる（枠ではなく重さで管理するため）
 	_set_storage({GameData.Item.WOOD: 20, GameData.Item.STONE: 5})
 	check(main.workshop_count(GameData.Item.WOOD) == 0 and P.stock.count(GameData.Item.WOOD) == 0, "作業場の材料置き場は、最初は空（倉庫とは別の置き場）")
 	check(main.request_craft("tool_hammer", 1) == 0 and main.craft_queue.is_empty(), "倉庫に材料が100個あっても、作業場に無ければ、手動の制作は頼めない")
@@ -289,7 +289,7 @@ func _test_craft() -> void:
 	check(finished and main.total_crafted_by_hand == 3, "仲間が加工して、完成品が倉庫に入る（簡易ハンマー +3。手動で作った回数 %d）" % main.total_crafted_by_hand)
 	check(P.stock.count(GameData.Item.STONE) == 0 and P.stock.count(GameData.Item.WOOD) == 0, "材料は使い切った（作業場の材料も、注文も、残らない）")
 	# 数量（1・5・全部）
-	st.quota[GameData.Item.FOOD] = 50
+	st.capacity_bonus = 1000                                       # 積載量を十分広げておく（材料の数だけで最大回数が決まるように）
 	P.stock.add(GameData.Item.MEAT, 7)
 	var ev: Dictionary = CraftDB.evaluate(CraftDB.entry_of("cook"), main, 1)
 	check(ev["max_qty"] == 7, "「全部」= 材料の範囲の最大回数（生肉 7 個 → 7 回）")
@@ -367,7 +367,7 @@ func _test_ui() -> void:
 	check(others_ok and not b_inv.get_global_rect().intersects(b_craft.get_global_rect()), "新しいボタンは、ほかのボタンに重ならない（建設・部屋の変更・仲間の管理は残っている）")
 	# ---- インベントリ
 	_set_storage({GameData.Item.WOOD: 20, GameData.Item.STONE: 18, GameData.Item.MEAT: 8, GameData.Item.IRON: 1})
-	main.storage.quota[GameData.Item.WOOD] = 40
+	main.storage.capacity_bonus = 1000                             # 積載量を十分広げておく（枠ではなく重さで管理するため）
 	inv._unhandled_input(_key(KEY_TAB))
 	await process_frame
 	check(inv.is_open(), "Tab キーでインベントリが開く")

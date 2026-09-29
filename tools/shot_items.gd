@@ -26,7 +26,7 @@ func _initialize() -> void:
 	for it in [[GameData.Item.MEAT, 8], [GameData.Item.HIDE, 15], [GameData.Item.BONE, 7], [GameData.Item.FAT, 4], [GameData.Item.WOOD, 20], [GameData.Item.STONE, 18],
 			[GameData.Item.IRON_ORE, 12], [GameData.Item.IRON, 1], [GameData.Item.REPAIR_KIT, 2], [GameData.Item.FOOD, 8], [GameData.Item.FUEL, 2], [GameData.Item.HAMMER, 1], [GameData.Item.AXE, 1]]:
 		st.inventory.counts[it[0]] = it[1]
-	st.quota[GameData.Item.WOOD] = 40
+	st.capacity_bonus = 1000                                       # 積載量を十分広げておく（枠ではなく重さで管理するため）
 	await _frames(6)
 	root.get_texture().get_image().save_png("%s/i0_main.png" % dir)
 	# インベントリ（倉庫）: 木材を選んで分割

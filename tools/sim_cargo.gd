@@ -52,8 +52,8 @@ func _one(n: int, limited: bool, minutes: float, scale: float) -> void:
 	for it in GameData.RAW_ITEMS + GameData.PRODUCT_ITEMS:
 		parts.append("%s%d" % [GameData.ITEM_NAMES[it], st.count_of(it)])
 	print("  倉庫: %s" % " ".join(PackedStringArray(parts)))
-	print("  素材棚 %d/%d  加工品 %d/%d  捨てた %d個" % [st.used_in(CargoDB.Bay.RAW), st.capacity_of(CargoDB.Bay.RAW),
-			st.used_in(CargoDB.Bay.PRODUCT), st.capacity_of(CargoDB.Bay.PRODUCT), main.total_wasted])
+	print("  重さ %d/%d（素材棚%d・加工品%d）  捨てた %d個" % [st.current_weight(), st.max_weight(),
+			st.used_in(CargoDB.Bay.RAW), st.used_in(CargoDB.Bay.PRODUCT), main.total_wasted])
 	var w_parts: Array = []
 	for it in st.wasted:
 		w_parts.append("%s%d" % [GameData.ITEM_NAMES[it], st.wasted[it]])

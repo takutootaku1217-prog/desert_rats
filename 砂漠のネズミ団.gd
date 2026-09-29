@@ -630,6 +630,9 @@ func finish_build(id: String) -> void:
 	if base.add_facility(id) < 0:
 		return
 	total_built += 1
+	var bonus := int(FacilityDB.def(id).get("capacity_bonus", 0))
+	if bonus > 0:
+		storage.capacity_bonus += bonus                    # 荷台の増設など。積載できる最大の重さが増える（data/cargo.gd）
 	director.note("%sができた" % FacilityDB.name_of(id))
 
 

@@ -37,11 +37,11 @@ func _initialize() -> void:
 	main.policy._page = 1
 	main.policy._rebuild()
 	await _shot(dir, "c2_cargo_page", 0.8)
-	# 木材の枠を減らして、肉に回す
-	st.set_quota(GameData.Item.WOOD, 8)
-	st.set_quota(GameData.Item.MEAT, 16)
+	# さらに積んで、積載率が上がった（重量制）見た目を確認
+	st.add_item(GameData.Item.MEAT, 10)
+	st.add_item(GameData.Item.STONE, 10)
 	main.policy._rebuild()
-	await _shot(dir, "c3_cargo_page_changed", 0.6)
+	await _shot(dir, "c3_cargo_page_fuller", 0.6)
 	main.policy._page = 0
 	main.policy._rebuild()
 	await _shot(dir, "c4_policy_page", 0.6)

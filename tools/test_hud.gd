@@ -163,10 +163,9 @@ func _test_stock() -> void:
 		all_ok = all_ok and g.shown_count(it) == st.count_of(it)
 	check(all_ok, "これまで文字で出ていた11種すべてが、アイコンで出ている（情報は減らしていない）")
 	check(g.summary().contains("食料 5") and g.summary().contains("木材 3"), "（診断用の文字）%s" % g.summary())
-	for it in st.quota:
-		st.inventory.counts[it] = st.quota_of(it)
+	st.add_item(GameData.Item.FOOD, st.free_for(GameData.Item.FOOD))     # 拠点全体の重さをちょうど使い切る（枠ではなく重さで管理するため）
 	sp._process(0.0)
-	check(g.summary().contains("満") and g._cells[0]["full"], "枠がいっぱいの素材は「満」になる（枠の赤とともに表示）")
+	check(g.summary().contains("満") and g._cells[0]["full"], "積載量がいっぱいの素材は「満」になる（赤枠とともに表示）")
 	st.inventory.counts.clear()
 	main.hungry = true
 	sp._process(0.0)

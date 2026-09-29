@@ -65,27 +65,26 @@ func _test_weight_api() -> void:
 	var st: BaseStorage = main.storage
 	_clear()
 	check(st.current_weight() == 0 and st.weight_ratio() == 0.0, "空なら重量0・積載率0")
-	var cap := 0
-	for bay in CargoDB.BAY_NAMES:
-		cap += CargoDB.CAPACITY[bay]
-	check(st.max_weight() == cap, "最大積載重量は、区画ごとの積載量の合計（%d）" % cap)
+	var cap := CargoDB.CAPACITY
+	check(st.max_weight() == cap, "最大積載重量は、拠点全体の基本の積載量（%d。重量制）" % cap)
 	st.add_item(GameData.Item.WOOD, 6)
 	st.add_item(GameData.Item.FOOD, 4)
-	check(st.current_weight() == st.used_in(CargoDB.Bay.RAW) + st.used_in(CargoDB.Bay.PRODUCT) and st.current_weight() == 10,
-			"重量は、素材棚と加工品置き場の合計（used_in の合計）")
-	check(absf(st.weight_ratio() - 10.0 / float(cap)) < 0.0001, "積載率 = 重量 ÷ 最大重量")
+	var expect := 6 * CargoDB.size_of(GameData.Item.WOOD) + 4 * CargoDB.size_of(GameData.Item.FOOD)
+	check(st.current_weight() == st.used_in(CargoDB.Bay.RAW) + st.used_in(CargoDB.Bay.PRODUCT) and st.current_weight() == expect,
+			"重量は、素材ごとの重さ（CargoDB.SIZES）× 個数の合計（%d）" % expect)
+	check(absf(st.weight_ratio() - float(expect) / float(cap)) < 0.0001, "積載率 = 重量 ÷ 最大重量")
 	st.add_item(GameData.Item.HAMMER, 3)
-	check(st.current_weight() == 10, "道具は倉庫の積載量の対象外なので、重量に入らない（従来どおり）")
-	st.capacity_bonus[CargoDB.Bay.RAW] = 12
-	check(st.max_weight() == cap + 12 and st.weight_ratio() < 10.0 / float(cap), "拠点の強化で積載量が増えると、最大重量が増え、積載率が下がる")
-	st.capacity_bonus.clear()
-	for it in st.quota:
-		st.inventory.counts[it] = st.quota_of(it)
-	check(st.current_weight() == st.max_weight() and st.weight_ratio() == 1.0, "すべての枠が埋まると積載率は1（満載）")
+	check(st.current_weight() == expect, "道具は倉庫の積載量の対象外なので、重量に入らない（従来どおり）")
+	st.capacity_bonus = 12
+	check(st.max_weight() == cap + 12 and st.weight_ratio() < float(expect) / float(cap), "拠点の強化（荷台の増設など）で積載量が増えると、最大重量が増え、積載率が下がる")
+	st.capacity_bonus = 0
+	# 重さ1の素材（食料）で、残りの重さをちょうど埋め切れる（面積基準の充填の検証のため、満載にする）
+	st.add_item(GameData.Item.FOOD, st.free_for(GameData.Item.FOOD))
+	check(st.current_weight() == st.max_weight() and st.weight_ratio() == 1.0, "残りの重さをちょうど埋めると積載率は1（満載）")
 	_clear()
-	# 既存の積載管理は変わっていない（枠がいっぱいなら入りきらない分は捨てる）
-	st.add_item(GameData.Item.WOOD, 99)
-	check(st.count_of(GameData.Item.WOOD) == st.quota_of(GameData.Item.WOOD), "積載管理（枠を超えると捨てる）は従来どおり")
+	# 既存の積載管理は変わっていない（いっぱいなら入りきらない分は捨てる）
+	var got := st.add_item(GameData.Item.WOOD, 99)
+	check(got < 99 and st.current_weight() <= st.max_weight() and st.is_full(GameData.Item.WOOD), "積載管理（いっぱいなら入りきらない分を捨てる）は従来どおり")
 	_clear()
 
 
@@ -268,7 +267,7 @@ func _test_status_panel() -> void:
 	st.add_item(GameData.Item.FOOD, 10)
 	st.add_item(GameData.Item.STONE, 6)
 	sp._process(0.0)
-	check(w.text == str(st.current_weight()) and w.text == "24", "数字は実際の積載重量（%s）" % w.text)
+	check(w.text == str(st.current_weight()), "数字は実際の積載重量（%s）" % w.text)
 	check(absf(w.ratio - st.weight_ratio()) < 0.0001, "充填率は実際の積載率（%.2f）" % w.ratio)
 	check(w.tooltip_text.contains("素材棚") and w.tooltip_text.contains("加工品置き場") and w.tooltip_text.contains("%d / %d" % [st.current_weight(), st.max_weight()]),
 			"マウスを載せると、区画ごとの内訳が出る")
@@ -276,8 +275,7 @@ func _test_status_panel() -> void:
 	sp._process(0.0)
 	check(w.tooltip_text.contains("捨てた 3"), "捨てた数もツールチップに出る（画面から消えない）")
 	main.total_wasted = 0
-	for it in st.quota:
-		st.inventory.counts[it] = st.quota_of(it)
+	st.add_item(GameData.Item.FOOD, st.free_for(GameData.Item.FOOD))     # 拠点全体の重さをちょうど使い切る（枠ではなく重さで管理するため）
 	sp._process(0.0)
 	check(w.ratio == 1.0 and w.filled_count() == w.fill_dots().size(), "満載: 重りが全部埋まる")
 	_clear()

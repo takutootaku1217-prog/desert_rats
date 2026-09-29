@@ -2,33 +2,38 @@ class_name CargoDB
 extends RefCounted
 ## 積載量（倉庫の容量）の表（プロトタイプの仮の数値）。数値の調整はここだけでよい。
 ##
-## 考え方:
-##  - 倉庫は2つの区画（素材棚・加工品置き場）に分かれ、区画ごとに「積載量」がある。
-##    区画を分けるのは、素材で棚が埋まって食料・燃料の置き場がなくなる（詰み）のを防ぐため。
-##  - プレイヤーは積載量を、素材ごとの「枠（いくつまで置くか）」に割り当てる（運営の方針 → 積載の割り当て）。
-##    枠の合計は積載量まで。ある素材を増やしたければ、別の素材の枠を減らす。
-##  - 枠がいっぱいの素材は、回収・狩猟・加工の対象から外れる（無駄足を防ぐ）。
+## 考え方（2026-09-30 に、ARK風の「重量制」へ作り替えた。ユーザーの指示）:
+##  - 素材ごとに「重さ」（SIZES）がある。倉庫は、素材ごとの個数上限ではなく、
+##    拠点全体の「いまの重さ合計 / 最大の重さ」という**1本の積載量**で管理する。
+##  - 重い素材（石・鉄鉱石など）を積みすぎると、ほかの物（食料・燃料など）が入らなくなる。
+##    以前あった「素材棚・加工品置き場」を分けた個別の上限や、素材ごとに枠を割り当てる画面（運営の方針の
+##    旧「積載の割り当て」ページ）は廃止した。Bay（RAW/PRODUCT）は、いまは表示のグループ分け（倉庫の棚と床の
+##    どちらに描くか・ツールチップの内訳）だけに使う。積載の上限には関係ない。
+##  - 置き場がいっぱい（残りの重さが足りない）素材は、回収・狩猟・加工の対象から外れる（無駄足を防ぐ）。
 ##    それでも入りきらない分（同時に運んでいた物・遠征の戦利品など）は捨てる。
-##  - 最初の割り当ては、放置でも回るように決めてある（枠の合計 = 積載量）。
-## 将来: 拠点の強化や部屋で積載量を増やす（BaseStorage.capacity_bonus）。SIZES で重い物ほど場所を取るようにする。
+##  - 道具（GameData.TOOL_ITEMS）は、これまでどおり積載量の対象外（重さを持たない）。
+## 将来: 拠点の強化・設備（荷台の増設。data/facilities.gd）で最大の重さを増やす（BaseStorage.capacity_bonus）。
 
 enum Bay { RAW, PRODUCT }
 
 const BAY_NAMES := {Bay.RAW: "素材棚", Bay.PRODUCT: "加工品置き場"}
-const CAPACITY := {Bay.RAW: 60, Bay.PRODUCT: 48}                  # 区画ごとの積載量
 
-## 最初の割り当て（個数）。素材棚の合計 60、加工品置き場の合計 48。
-const DEFAULT_QUOTA := {
-	GameData.Item.MEAT: 10, GameData.Item.HIDE: 6, GameData.Item.BONE: 6, GameData.Item.FAT: 8,
-	GameData.Item.WOOD: 14, GameData.Item.STONE: 8, GameData.Item.IRON_ORE: 8,
-	GameData.Item.FOOD: 18, GameData.Item.FUEL: 12, GameData.Item.REPAIR_KIT: 10, GameData.Item.IRON: 8,
+## 拠点全体の最大の重さ（プレイヤーの強化なしの基本値）。**仮の値**:
+## 旧「素材棚60・加工品置き場48（枠の個数の合計）」を、下の SIZES の重さで数え直した合計（約362）に近い、切りのよい数。
+const CAPACITY := 360
+
+## 素材1個あたりの重さ（プロトタイプの仮の数値）。ユーザー提示の例（食料0.5・皮/骨/脂肪0.5・生肉1・木材2・石3・
+## 鉄鉱石4・鉄3・燃料2・修理資材2）を、整数のまま扱うため**2倍**にした（食料=1 を基準の重さとする）。
+## 書いていない物は 1（旧来の「全部1」の名残。今は主要な素材はすべてここに書いてある）。
+const SIZES := {
+	GameData.Item.FOOD: 1, GameData.Item.HIDE: 1, GameData.Item.BONE: 1, GameData.Item.FAT: 1,
+	GameData.Item.MEAT: 2,
+	GameData.Item.WOOD: 4, GameData.Item.FUEL: 4, GameData.Item.REPAIR_KIT: 4,
+	GameData.Item.STONE: 6, GameData.Item.IRON: 6,
+	GameData.Item.IRON_ORE: 8,
 }
 
-## 1個あたりの大きさ（枠の合計の計算に使う）。書いていない物は 1。
-const SIZES := {}
-
-const QUOTA_STEP := 2                    # 画面の＋／－で増減する量
-const WARN_RATIO := 0.8                  # 枠のこの割合を超えたら、表示を警告色にする
+const WARN_RATIO := 0.8                  # 積載率がこの割合を超えたら、表示を警告色にする
 const MIN_DROP_FIT := 0.5                # 獲物の素材のうち、これ以上の割合が入らないなら狩り・運搬をしない
 
 
@@ -36,7 +41,7 @@ static func items_of(bay: int) -> Array:
 	return GameData.RAW_ITEMS if bay == Bay.RAW else GameData.PRODUCT_ITEMS
 
 
-## 素材・加工品の区画。倉庫に置かない物（獲物など）は -1。
+## 素材・加工品のどちらのグループか（表示だけに使う。積載の上限には関係ない）。倉庫に置かない物（獲物など）は -1。
 static func bay_of(item: int) -> int:
 	if item in GameData.RAW_ITEMS:
 		return Bay.RAW
@@ -47,7 +52,3 @@ static func bay_of(item: int) -> int:
 
 static func size_of(item: int) -> int:
 	return int(SIZES.get(item, 1))
-
-
-static func default_quota() -> Dictionary:
-	return DEFAULT_QUOTA.duplicate()

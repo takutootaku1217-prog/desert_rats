@@ -109,16 +109,16 @@ func _png_size(path: String) -> Vector2i:
 # ---------------------------------------------------------------- 表の整合
 func _test_tables() -> void:
 	print("-- 部屋の表の整合")
-	var quota := CargoDB.default_quota()
 	var valid_items: Array = GameData.Item.values()
 	for t in Rooms.TYPES:
 		var d: Dictionary = Rooms.TYPES[t]
 		check(d.has_all(["name", "floors", "unique", "required", "min_base_level", "cost", "desc", "effects"]), "%s: 必要な項目がそろっている" % t)
 		var ok := true
 		for it in d["cost"]:
-			if not (it in valid_items) or CargoDB.bay_of(it) < 0 or int(d["cost"][it]) > int(quota.get(it, 0)):
-				ok = false            # 旧素材（今の GameData.Item にない）・倉庫に置けない物・初期の枠より多い量は不可
-		check(ok, "%s: 費用は今の素材で、倉庫に置ける物・初期の枠に収まる量" % t)
+			# 旧素材（今の GameData.Item にない）・倉庫に置けない物・拠点の基本の積載量（重さ）より重い量は不可
+			if not (it in valid_items) or CargoDB.bay_of(it) < 0 or int(d["cost"][it]) * CargoDB.size_of(it) > CargoDB.CAPACITY:
+				ok = false
+		check(ok, "%s: 費用は今の素材で、倉庫に置ける物・基本の積載量に収まる重さ" % t)
 	var order: Array = Rooms.TYPE_ORDER.duplicate()
 	var keys: Array = Rooms.TYPES.keys()
 	order.sort()
@@ -641,4 +641,8 @@ func _soak(title: String, minutes: float, gap_min: float, gap_max: float, stress
 	check(bad_worker == 0, "仲間の位置が壊れない（%d回）" % bad_worker)
 	check(sleepers_in_air == 0, "眠っている仲間は、いつもベッドの上にいる（ずれ %d回）" % sleepers_in_air)
 	check(main.processor.total_done >= 5 and main.total_gathered >= 5, "部屋を変え続けても、回収・運搬・加工が回り続ける")
-	check(main.processor.incoming.size() <= 3 and main.build_queue.size() <= 2, "予約・依頼が取り残されない")
+	# build_queue の上限は、建てられる設備が増えるほど緩める（ワークベンチ1＋ベッド最大3＋荷台の増設最大3 = 同時に最大7）
+	var max_pending := 0
+	for id in FacilityDB.ids():
+		max_pending += FacilityDB.max_of(id)
+	check(main.processor.incoming.size() <= 3 and main.build_queue.size() <= max_pending, "予約・依頼が取り残されない（待ち %d / 上限 %d）" % [main.build_queue.size(), max_pending])

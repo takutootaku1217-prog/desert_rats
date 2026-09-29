@@ -43,7 +43,7 @@ func update_from(st, hungry: bool) -> void:
 		for x in _rows[y].size():
 			var it: int = _rows[y][x]
 			var n: int = st.count_of(it)
-			var q: int = st.quota_of(it) if st.quota.has(it) else 0
+			var q: int = st.quota_of(it) if CargoDB.bay_of(it) >= 0 else 0
 			_cells.append({"item": it, "n": n, "quota": q, "full": st.is_full(it), "near": q > 0 and float(n) >= 0.8 * float(q),
 					"pos": Vector2(CELL.x * float(x), CELL.y * float(y))})
 	set_process(hungry)

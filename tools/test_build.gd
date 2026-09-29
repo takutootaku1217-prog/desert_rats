@@ -97,7 +97,6 @@ func _run() -> void:
 # ---------------------------------------------------------------- 表の整合
 func _test_tables() -> void:
 	print("-- 設備の表の整合")
-	var quota := CargoDB.default_quota()
 	for id in FacilityDB.ids():
 		var d: Dictionary = FacilityDB.def(id)
 		check(d.has_all(["name", "desc", "cost", "time", "field", "max", "requires", "station", "room", "dx", "sprite", "frame", "stride"]),
@@ -113,9 +112,9 @@ func _test_tables() -> void:
 		check(d["dx"].size() >= int(d["max"]), "%s: 置き場所が最大数ぶんある" % id)
 		var cost_ok := true
 		for it in d["cost"]:
-			if CargoDB.bay_of(it) < 0 or int(d["cost"][it]) > int(quota.get(it, 0)):
-				cost_ok = false                              # 倉庫の初期の枠より多い材料は、集めても貯まらない
-		check(cost_ok, "%s: 材料は倉庫に置ける物で、初期の枠に収まる" % id)
+			if CargoDB.bay_of(it) < 0 or int(d["cost"][it]) * CargoDB.size_of(it) > CargoDB.CAPACITY:
+				cost_ok = false                              # 倉庫の基本の積載量（重さ）より重い材料は、集めても貯まらない
+		check(cost_ok, "%s: 材料は倉庫に置ける物で、基本の積載量に収まる重さ" % id)
 		var sprites_ok := true
 		for i in int(d["max"]):
 			if not FileAccess.file_exists(FacilityDB.sprite_path(id, i)):

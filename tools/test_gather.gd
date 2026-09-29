@@ -50,7 +50,7 @@ func _reset() -> void:
 			c.free()
 	st.enforce = true
 	st.inventory.counts.clear()
-	st.quota = CargoDB.default_quota()
+	st.capacity_bonus = 0
 	st.wasted.clear()
 	main.total_wasted = 0
 	main.total_gathered = 0
@@ -309,8 +309,7 @@ func _run() -> void:
 	W[0].position = st.access_point() + W[0].slot_offset
 	W[0].target = W[0].position
 	var ore_n: int = W[0].carry_n
-	st.quota[GameData.Item.IRON_ORE] = 999
-	st.quota[GameData.Item.STONE] = 999
+	st.capacity_bonus += 10000                             # 積載量を十分広げておく（枠ではなく重さで管理するため）
 	ai._release_task()
 	ai._set_state(CharacterAI.State.MOVE_TO_STORAGE)
 	guard = 0

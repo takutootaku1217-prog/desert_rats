@@ -61,6 +61,29 @@ def bed(i):
     return p
 
 
+CRATE = hexc("8b5a32"); CRATE_L = hexc("c99a5c"); CRATE_D = hexc("5a3a1e")
+SACK = hexc("cbb27a"); SACK_D = hexc("a4894f")
+
+
+def cargo_rack(i):
+    """荷台の増設（幅12・高さ9。倉庫の重量制の積載量を増やす設備。data/cargo.gd の capacity_bonus）。
+    i = 0..2 で積んである木箱・袋の並びが変わる（置き場所ごとに見た目を変えるだけ。仮の絵）。"""
+    p = Px(12, 9)
+    p.hline(0, 8, 12, C["steel_d"])                        # 床板
+    if i == 0:
+        p.rect(1, 3, 5, 5, CRATE); p.hline(1, 3, 5, CRATE_L); p.hline(1, 7, 5, CRATE_D)
+        p.rect(7, 4, 4, 4, CRATE); p.hline(7, 4, 4, CRATE_L)
+    elif i == 1:
+        p.rect(2, 5, 5, 3, CRATE); p.hline(2, 5, 5, CRATE_L)
+        p.rect(3, 1, 4, 4, CRATE); p.hline(3, 1, 4, CRATE_L); p.hline(3, 4, 4, CRATE_D)
+        p.rect(8, 4, 3, 4, CRATE); p.hline(8, 4, 3, CRATE_L)
+    else:
+        p.rect(1, 4, 4, 4, CRATE); p.hline(1, 4, 4, CRATE_L)
+        p.ellipse(8, 6, 3, 2, SACK); p.hline(6, 5, 5, SACK_D)
+        p.rect(5, 2, 3, 3, CRATE); p.hline(5, 2, 3, CRATE_L)
+    return p
+
+
 def hull():
     # 屋根の上の物は焼き込まない（外装パーツ art_exterior.py が、外装でも内装の断面図の上でも同じ絵を重ねる）
     return art_base.build_hull(furnish=False, roof=False)
@@ -77,6 +100,8 @@ def all_images():
     l = [("base", "hull.png", hull()), ("base", "workbench.png", workbench_sheet())]
     for i in range(3):
         l.append(("base", f"bed_{i}.png", bed(i)))
+    for i in range(3):
+        l.append(("base", f"cargo_rack_{i}.png", cargo_rack(i)))
     return l + room_images()
 
 

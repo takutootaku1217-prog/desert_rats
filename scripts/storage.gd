@@ -7,9 +7,8 @@ signal overflowed(item: int, amount: int)   # 置き場がなくて捨てた（�
 
 var inventory := Inventory.new()
 var total_butchered := 0       # 解体した数（確認用）
-# ---- 積載量（data/cargo.gd）。素材ごとの「枠」を決め、いっぱいなら回収・狩猟・加工をしない ----
-var quota := CargoDB.default_quota()   # Item -> 置ける個数（プレイヤーが割り当てを変える）
-var capacity_bonus := {}               # Bay -> 増えた積載量（将来: 拠点の強化・部屋）
+# ---- 積載量（data/cargo.gd。重量制）。拠点全体の「いまの重さ / 最大の重さ」がいっぱいなら回収・狩猟・加工をしない ----
+var capacity_bonus := 0                # 増えた最大の重さ（設備「荷台の増設」・将来の拠点強化）
 var enforce := true                    # false なら制限なし（自己診断ツール用）
 var wasted := {}                       # Item -> 捨てた累計
 
@@ -43,9 +42,8 @@ func butcher(species: String, source: String = Inventory.SOURCE_HUNT) -> void:
 	total_butchered += 1
 
 
-# ---------------------------------------------------------------- 積載重量（画面のアイコンゲージが読む）
-## 積載重量 = いま置いてある量の合計（素材ごとの大きさ CargoDB.SIZES で数える。今は全部1なので個数と同じ）。
-## 素材棚・加工品置き場の2区画の合計。重さの計算そのものは used_in / capacity_of のまま（UIのための窓口だけ）。
+# ---------------------------------------------------------------- 積載重量（画面のアイコンゲージが読む。積載量そのものの窓口でもある）
+## 積載重量 = いま置いてある量の合計（素材ごとの大きさ CargoDB.SIZES で数える）。素材棚・加工品置き場の2区画の合計。
 func current_weight() -> int:
 	var n := 0
 	for bay in CargoDB.BAY_NAMES:
@@ -53,12 +51,9 @@ func current_weight() -> int:
 	return n
 
 
-## 積載できる重量の合計（区画ごとの積載量の合計。拠点の強化で増えた分 capacity_bonus を含む）
+## 積載できる重量の合計（CargoDB.CAPACITY ＋ 拠点の強化で増えた分 capacity_bonus）。区画ごとの上限はない。
 func max_weight() -> int:
-	var n := 0
-	for bay in CargoDB.BAY_NAMES:
-		n += capacity_of(bay)
-	return n
+	return CargoDB.CAPACITY + capacity_bonus
 
 
 ## 積載率 0〜1（画面のアイコンゲージの充填に使う）
@@ -66,60 +61,33 @@ func weight_ratio() -> float:
 	return clampf(float(current_weight()) / float(maxi(1, max_weight())), 0.0, 1.0)
 
 
-# ---------------------------------------------------------------- 積載量
-func capacity_of(bay: int) -> int:
-	return int(CargoDB.CAPACITY[bay]) + int(capacity_bonus.get(bay, 0))
+# ---------------------------------------------------------------- 積載量（重量制。素材ごとの枠はない）
+## その素材が、いまの残りの重さであと何個置けるか。制限なしのときは十分大きな数。
+func free_for(item: int) -> int:
+	if not enforce or CargoDB.bay_of(item) < 0:
+		return 1000000
+	var size := CargoDB.size_of(item)
+	return maxi(0, floori(float(max_weight() - current_weight()) / float(size)))
 
 
-## 素材ごとの枠（個数）。制限なしのときは十分大きな数。
+## その素材を、拠点がいま最大で何個まで持てるか（いま置いてある分＋残りの重さで置ける分）。
+## 加工の作り置きの上限（Main.choose_recipe の room）など、「枠」があった頃の使い方をそのまま保つための窓口。
 func quota_of(item: int) -> int:
 	if not enforce or CargoDB.bay_of(item) < 0:
 		return 1000000
-	return int(quota.get(item, 0))
-
-
-## その素材があと何個置けるか
-func free_for(item: int) -> int:
-	return maxi(0, quota_of(item) - inventory.count(item))
+	return inventory.count(item) + free_for(item)
 
 
 func is_full(item: int) -> bool:
 	return enforce and CargoDB.bay_of(item) >= 0 and free_for(item) <= 0
 
 
-## 区画に置いてある量（大きさで数える）
+## 区画（素材棚／加工品置き場）に置いてある重さ。上限はなく、内訳の表示だけに使う。
 func used_in(bay: int) -> int:
 	var n := 0
 	for it in CargoDB.items_of(bay):
 		n += inventory.count(it) * CargoDB.size_of(it)
 	return n
-
-
-## 区画の積載量のうち、素材ごとの枠に割り当て済みの量
-func allocated_in(bay: int) -> int:
-	var n := 0
-	for it in CargoDB.items_of(bay):
-		n += int(quota.get(it, 0)) * CargoDB.size_of(it)
-	return n
-
-
-func unallocated_in(bay: int) -> int:
-	return maxi(0, capacity_of(bay) - allocated_in(bay))
-
-
-## 枠を変える。増やすときは、割り当てていない積載量の範囲まで。変えたあとの枠を返す。
-func set_quota(item: int, value: int) -> int:
-	var bay := CargoDB.bay_of(item)
-	if bay < 0:
-		return 0
-	value = maxi(0, value)
-	var cur := int(quota.get(item, 0))
-	if value > cur:
-		var size := CargoDB.size_of(item)
-		value = mini(value, cur + floori(float(unallocated_in(bay)) / float(size)))
-	quota[item] = value
-	queue_redraw()
-	return value
 
 
 ## 獲物を解体したとき、素材のうち何割が入るか（0〜1）。狩りや運搬をしてよいかの判断に使う。
@@ -175,21 +143,18 @@ func _slot(item: int, cx: float, base_y: float, sz: float) -> void:
 	var n := inventory.count(item)
 	var t := GameData.item_tex(item)
 	var size := Vector2(sz, sz)
-	var q := quota_of(item)
 	if n <= 0:
 		# 空きスロットはうっすら表示
 		draw_texture_rect(t, Rect2(Vector2(cx - sz / 2.0, base_y - sz), size), false, Color(1, 1, 1, 0.12))
-		if enforce and q <= 0:
-			GameData.draw_text(self, Vector2(cx - 4, base_y - 2), "枠0", 12, Color("ff8a70"), 30.0, HORIZONTAL_ALIGNMENT_LEFT)
 		return
 	for k in mini(n, 3):
 		draw_texture_rect(t, Rect2(Vector2(cx - sz / 2.0, base_y - sz - k * 8), size), false)
-	# 数字は、枠がいっぱいに近づくと橙、いっぱい（「満」）で赤にする
+	# 数字は、その素材がいま置けるだけ置けていれば赤「満」、拠点全体の積載率が高ければ橙（素材ごとの上限はない。重量制）
 	var col := Color("fff7c0")
 	var txt := "%d" % n
-	if enforce and n >= q:
+	if is_full(item):
 		col = Color("ff8a70")
 		txt += "満"
-	elif enforce and float(n) >= float(q) * CargoDB.WARN_RATIO:
+	elif enforce and weight_ratio() >= CargoDB.WARN_RATIO:
 		col = Color("ffc266")
 	GameData.draw_text(self, Vector2(cx - 4, base_y - 2), txt, 12, col, 30.0, HORIZONTAL_ALIGNMENT_LEFT)
