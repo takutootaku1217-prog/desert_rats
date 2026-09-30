@@ -157,11 +157,11 @@ func _rebuild() -> void:
 	right.add_child(UIKit.lbl("押すと、その生物を解体した素材が倉庫に入ります", 12, UIKit.C_DIM))
 
 
-## 上のページ切り替え（方針 / 積載の割り当て）
+## 上のページ切り替え（方針 / 積載重量）
 func _tabs() -> Control:
 	var h := HBoxContainer.new()
 	h.add_theme_constant_override("separation", 6)
-	for spec in [[0, "方針（加工・回収・狩猟）"], [1, "積載の割り当て"], [2, "採取の道具"]]:
+	for spec in [[0, "方針（加工・回収・狩猟）"], [1, "積載重量"], [2, "採取の道具"]]:
 		var p: int = spec[0]
 		var b := UIKit.button(spec[1], func():
 			_page = p
@@ -173,35 +173,49 @@ func _tabs() -> Control:
 	return h
 
 
-## 積載の割り当て: 区画ごとの積載量を、素材ごとの枠に振り分ける。枠がいっぱいの素材は回収・狩猟・加工をしない。
+## 積載重量（見るだけ。実装指示書「運営の方針→積載の割り当て」は廃止し、読み取り専用の積載重量ページへ）。
+## 個別の枠は無く、拠点全体の「現在重量 / 最大重量」だけで収納の可否が決まる。ここでは、いまの内訳を確認できる。
 func _build_cargo_page() -> void:
 	var st = game.storage
-	_body.add_child(UIKit.lbl("倉庫の積載量は限られています。素材ごとに「いくつまで置くか」（枠）を決めます。枠の合計は積載量まで。"
-			+ "\n増やしたい素材があれば、別の素材の枠を減らしてください。枠がいっぱいの素材は集めず、入りきらない分は捨てます。", 13, UIKit.C_DIM))
-	var cols := HBoxContainer.new()
-	cols.add_theme_constant_override("separation", 40)
-	_body.add_child(cols)
-	for bay in [CargoDB.Bay.RAW, CargoDB.Bay.PRODUCT]:
-		var col := VBoxContainer.new()
-		col.add_theme_constant_override("separation", 4)
-		col.custom_minimum_size = Vector2(560, 0)
-		cols.add_child(col)
-		var cap: int = st.capacity_of(bay)
-		var left: int = st.unallocated_in(bay)
-		col.add_child(UIKit.lbl("── %s（積載量 %d） ──" % [CargoDB.BAY_NAMES[bay], cap], 15, UIKit.C_ACCENT))
-		var budget := "割り当て %d / %d　" % [st.allocated_in(bay), cap]
-		budget += "あと %d 増やせる" % left if left > 0 else "余りなし（増やすなら他を減らす）"
-		col.add_child(UIKit.lbl(budget, 13, Color("cfe6ff") if left > 0 else UIKit.C_DIM))
-		for it in CargoDB.items_of(bay):
-			col.add_child(_quota_row(it))
-	var used_txt := ""
-	for bay in [CargoDB.Bay.RAW, CargoDB.Bay.PRODUCT]:
-		used_txt += "%s %d/%d　" % [CargoDB.BAY_NAMES[bay], st.used_in(bay), st.capacity_of(bay)]
-	_body.add_child(UIKit.lbl("いま置いてある量: " + used_txt + "　捨てた累計: %d 個" % game.total_wasted, 13, UIKit.C_DIM))
+	var total: int = game.total_weight()
+	var maxw: int = game.max_weight()
+	_body.add_child(UIKit.lbl("倉庫の制限は、拠点全体の「いまの重さ / 最大の重さ」の1本だけです（素材ごとの枠はありません）。"
+			+ "\n満杯（100%）になると、新しい回収・狩猟・加工・運搬を予約しなくなります。重さが空けば、また予約できます。", 13, UIKit.C_DIM))
+	var ratio := float(total) / float(maxi(1, maxw))
+	var rcol := Color("7be07b")
+	if ratio >= 1.0:
+		rcol = Color("e0533d")
+	elif ratio >= CargoDB.WARN_RATIO:
+		rcol = Color("f0c040")
+	_body.add_child(UIKit.lbl("── 現在重量 %d / %d（%d%%） ──" % [total, maxw, int(ratio * 100.0)], 17, rcol))
+	var col := VBoxContainer.new()
+	col.add_theme_constant_override("separation", 3)
+	col.custom_minimum_size = Vector2(640, 0)
+	_body.add_child(col)
+	var header := HBoxContainer.new()
+	header.add_theme_constant_override("separation", 10)
+	col.add_child(header)
+	header.add_child(UIKit.lbl("アイテム", 13, UIKit.C_DIM, 140))
+	header.add_child(UIKit.lbl("所持数", 13, UIKit.C_DIM, 90))
+	header.add_child(UIKit.lbl("1個の重さ", 13, UIKit.C_DIM, 90))
+	header.add_child(UIKit.lbl("合計の重さ", 13, UIKit.C_DIM, 90))
+	for it in ItemDB.all():
+		var n: int = st.count_of(it)
+		if n <= 0:
+			continue
+		var w := CargoDB.item_weight(it)
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 10)
+		col.add_child(row)
+		row.add_child(UIKit.lbl(GameData.ITEM_NAMES[it], 15, UIKit.C_TEXT, 140))
+		row.add_child(UIKit.lbl("%d" % n, 15, UIKit.C_TEXT, 90))
+		row.add_child(UIKit.lbl("%d" % w, 14, UIKit.C_DIM, 90))
+		row.add_child(UIKit.lbl("%d" % (w * n), 15, Color("ffd24a"), 90))
 	var tgt: Array = []
 	for it in GameData.STOCK_TARGET:
 		tgt.append("%s%d" % [GameData.ITEM_NAMES[it], GameData.STOCK_TARGET[it]])
-	_body.add_child(UIKit.lbl("加工品の「作り置きの上限」（%s）は、枠がそれより小さければ枠に合わせます。" % "・".join(PackedStringArray(tgt)), 12, UIKit.C_DIM))
+	_body.add_child(UIKit.lbl("加工品の「作り置きの上限」（%s）は、いまの目安です（重量に空きがあるうちの目安。プレイヤーが手動で作るときはこれを超えられます）。"
+			% "・".join(PackedStringArray(tgt)), 12, UIKit.C_DIM))
 
 
 ## 採取の道具: 誰に何を持たせるか・道具の性能・結果の目安。採取の結果は「採取ポイント × 道具 × 仲間の能力」で決まる（data/gathering.gd）。
@@ -307,52 +321,6 @@ func _build_tools_page() -> void:
 		b.alignment = HORIZONTAL_ALIGNMENT_CENTER
 		b.custom_minimum_size = Vector2(124, 28)
 		flow.add_child(b)
-
-
-## 素材ひとつぶんの行: 名前 [－] 枠 [＋]  置いてある量のバー
-func _quota_row(item: int) -> Control:
-	var st = game.storage
-	var h := HBoxContainer.new()
-	h.add_theme_constant_override("separation", 6)
-	h.add_child(UIKit.lbl(GameData.ITEM_NAMES[item], 15, UIKit.C_TEXT, 84))
-	var minus := UIKit.button("－", func():
-		st.set_quota(item, st.quota_of(item) - CargoDB.QUOTA_STEP)
-		_rebuild())
-	var plus := UIKit.button("＋", func():
-		st.set_quota(item, st.quota_of(item) + CargoDB.QUOTA_STEP)
-		_rebuild())
-	for b in [minus, plus]:
-		b.custom_minimum_size = Vector2(30, 26)
-		b.alignment = HORIZONTAL_ALIGNMENT_CENTER
-	h.add_child(minus)
-	var q := UIKit.lbl("枠 %d" % st.quota_of(item), 15, Color("ffd24a"), 64)
-	q.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	h.add_child(q)
-	h.add_child(plus)
-	# 置いてある量のバー（枠に対する割合。8割で橙、いっぱいで赤）
-	var n: int = st.count_of(item)
-	var quota: int = st.quota_of(item)
-	var bar := ProgressBar.new()
-	bar.max_value = float(maxi(1, quota))
-	bar.value = minf(float(n), bar.max_value)
-	bar.show_percentage = false
-	bar.custom_minimum_size = Vector2(150, 9)
-	bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	var col := Color("7be07b")
-	if n >= quota:
-		col = Color("e0533d")
-	elif float(n) >= float(quota) * CargoDB.WARN_RATIO:
-		col = Color("f0c040")
-	bar.add_theme_stylebox_override("background", UIKit.box(Color("0d0f12"), Color("0d0f12"), 0, 0))
-	bar.add_theme_stylebox_override("fill", UIKit.box(col, col, 0, 0))
-	h.add_child(bar)
-	var note := "いま %d" % n
-	if quota <= 0:
-		note += "（集めない）"
-	elif n >= quota:
-		note += "（いっぱい）"
-	h.add_child(UIKit.lbl(note, 13, UIKit.C_DIM))
-	return h
 
 
 ## ★0〜5 を －／＋ で変える部品。

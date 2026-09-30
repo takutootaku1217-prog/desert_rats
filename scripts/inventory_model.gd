@@ -2,9 +2,11 @@ class_name InventoryModel
 extends RefCounted
 ## インベントリの画面が見せる「束（ItemStack）の並び」。実際の数量（Inventory の counts）に合わせて作り、画面の操作（分割・整理）を受け持つ。
 ## 数量そのものはここでは持たない（倉庫・作業場のデータが正）。分割した束の並びは、数量が変わっても、できるだけ保つ。
-##  - sync: 実際の数量に合わせる（増えた分は先頭の束へ、減った分は後ろの束から。0 の束は消える。新しいアイテムは並び順の位置へ）。
-##  - split: 束を2つに分ける（例: 木材 ×20 → ×12 と ×8。分けた束は元の束のすぐ後ろに並ぶ）。
-##  - merge_all（整理）: 同じアイテムを1つにまとめて、並び順（ItemDB.ORDER）に整える。
+## 1スタックの最大数は ItemDB.stack_limit（通常100・道具1）。100を超える分は、新しいスタックに分かれる（実装指示書）。
+##  - sync: 実際の数量に合わせる（増えた分は、既存の未満スタックを詰めてから新しいスタックを作る。減った分は後ろの束から。
+##    0 の束は消える。新しいアイテムは並び順の位置へ）。
+##  - split: 束を2つに分ける（例: 木材 ×20 → ×12 と ×8。分けた束は元の束のすぐ後ろに並ぶ）。上限を超える束は作らない。
+##  - merge_all（整理）: 同じアイテムを、1スタックの最大数ごとに詰め直し、並び順（ItemDB.ORDER）に整える。
 
 var stacks: Array = []            # ItemStack の並び
 
@@ -18,11 +20,7 @@ func sync(counts: Dictionary) -> void:
 		var c := int(counts[it])
 		var h := int(have.get(it, 0))
 		if c > h:
-			var first := _first_stack_of(it)
-			if first == null:
-				_insert_new(ItemStack.new(it, c - h))
-			else:
-				first.n += c - h
+			_add_to_item(it, c - h)
 		elif c < h:
 			var over := h - c
 			var i := stacks.size() - 1
@@ -39,6 +37,28 @@ func sync(counts: Dictionary) -> void:
 		if s.n > 0 and int(counts.get(s.item, 0)) > 0:
 			kept.append(s)
 	stacks = kept
+
+
+## item を add 個ぶん増やす。まず1スタックの最大数（ItemDB.stack_limit）に満たない既存の束を詰め、
+## それでも余れば、最大数ごとの新しい束を追加していく（230個 → 100・100・30 のように分かれる）。
+func _add_to_item(item: int, add: int) -> void:
+	var limit := ItemDB.stack_limit(item)
+	var left := add
+	for s in stacks:
+		if left <= 0:
+			break
+		if s.item != item:
+			continue
+		var room: int = limit - int(s.n)
+		if room <= 0:
+			continue
+		var take := mini(room, left)
+		s.n += take
+		left -= take
+	while left > 0:
+		var take := mini(limit, left)
+		_insert_new(ItemStack.new(item, take))
+		left -= take
 
 
 func _first_stack_of(item: int) -> ItemStack:
@@ -66,7 +86,8 @@ func total_of(item: int) -> int:
 	return t
 
 
-## 束 index を、n個の束（新しい束。元の束の後ろに入る）と、残りの束に分ける。n は 1 以上、元の個数より小さい。分けられたら true。
+## 束 index を、n個の束（新しい束。元の束の後ろに入る）と、残りの束に分ける。n は 1 以上、元の個数より小さい。
+## 分けた2つの束は、どちらも元の束（1スタックの最大数以下）を超えないので、上限は自動的に守られる。分けられたら true。
 func split(index: int, n: int) -> bool:
 	if index < 0 or index >= stacks.size():
 		return false
@@ -78,18 +99,27 @@ func split(index: int, n: int) -> bool:
 	return true
 
 
-## 整理: 同じ（まとめてよい）束を1つにして、アイテムの並び順に整える
+## 整理: 同じ（まとめてよい）束の合計を、1スタックの最大数（ItemDB.stack_limit）ごとに詰め直し、並び順に整える。
+## 例: 木材×20 と 木材×8 が2束あっても、まとめて1つの巨大な束にはしない（230個の食料なら 100・100・30 の3束のまま）。
 func merge_all() -> void:
-	var merged: Array = []
+	var totals: Array = []            # {item, data, n}（まとめてよい組み合わせごとの合計。最初に出てきた順）
 	for s in stacks:
-		var target: ItemStack = null
-		for m in merged:
-			if m.can_stack_with(s):
-				target = m
+		var target = null
+		for t in totals:
+			if int(t["item"]) == s.item and t["data"] == s.data:
+				target = t
 				break
 		if target == null:
-			merged.append(ItemStack.new(s.item, s.n, s.data))
+			totals.append({"item": s.item, "data": s.data, "n": s.n})
 		else:
-			target.n += s.n
-	merged.sort_custom(func(a, b): return ItemDB.order_of(a.item) < ItemDB.order_of(b.item))
+			target["n"] += s.n
+	totals.sort_custom(func(a, b): return ItemDB.order_of(int(a["item"])) < ItemDB.order_of(int(b["item"])))
+	var merged: Array = []
+	for t in totals:
+		var left: int = t["n"]
+		var limit := ItemDB.stack_limit(int(t["item"]))
+		while left > 0:
+			var take := mini(limit, left)
+			merged.append(ItemStack.new(int(t["item"]), take, t["data"]))
+			left -= take
 	stacks = merged

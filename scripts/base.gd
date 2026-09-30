@@ -353,6 +353,20 @@ func _draw_facilities(off: Vector2) -> void:
 				if i - slots.size() < pend:
 					col.a = 0.32 + 0.12 * sin(now / 260.0)
 			draw_texture_rect_region(tex, rect, ArtSpec.frame_src(tex, spec, frame), col)
+	_draw_tool_rack_items(off)
+
+
+## 道具棚（tool_rack）が建っていれば、倉庫にある余りの採取道具を、棚のそばにアイコンで並べる（実装指示書8。見るだけ）。
+func _draw_tool_rack_items(off: Vector2) -> void:
+	var spares: Array = game.tool_rack_spares()
+	if spares.is_empty():
+		return
+	var spots: Array = facility_spots("tool_rack")
+	if spots.is_empty():
+		return
+	var at: Vector2 = spots[0] + off + Vector2(0.0, -ArtSpec.px_size(FacilityDB.def("tool_rack")["frame"]).y - 6.0)
+	for i in mini(spares.size(), 4):
+		GameData.draw_item(self, int(spares[i]), at + Vector2(i * 14.0 - 14.0, 0.0), 0.5)
 
 
 func _draw() -> void:

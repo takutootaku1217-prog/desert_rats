@@ -617,15 +617,14 @@ func _try_start(job: int) -> bool:
 			# 回収の方針（★）が高いほど、遠くても優先する。★0 の資源は拾わない。獲物は常に拾う。
 			var best = null
 			var best_score := 0.0
-			var inflight: Dictionary = game.gather_room()
 			for r in game.resources_root.get_children():
 				if r.claimed_by != null or r.position.x < 60.0 or r.position.x > 1250.0:
 					continue
 				var w: float = game.gather_weight(r.item)
 				if w <= 0.0:
 					continue
-				if not game.has_room_for(r, inflight):
-					continue               # 倉庫の枠がいっぱい（積載量）。拾っても置き場がない
+				if not game.has_room_for(r):
+					continue               # 拠点全体の残り重量に入らない（積載量）。拾っても置き場がない
 				if not _can_reach(r):
 					continue               # 画面の外へ流れ去る前に追いつけない（追っては取り消す往復を防ぐ）
 				if r is GatherPoint:
@@ -643,11 +642,12 @@ func _try_start(job: int) -> bool:
 					best = r
 			if best == null:
 				return false
+			if best is GatherPoint:
+				# 袋の大きさ: 拠点全体のいまの空き重量（他の人が向かっている・運んでいる分は差し引き済み）と袋の上限のうち小さいほう
+				bag_limit = clampi(int(game.available_weight_for_reservation() / maxi(1, CargoDB.item_weight(best.item))), 1, GatherDB.CARRY_MAX)
 			res = best
 			res.claimed_by = ch
 			if res is GatherPoint:
-				# 袋の大きさ: 倉庫の空き枠（ほかの人が運んでいる分を除く）と袋の上限のうち小さいほう
-				bag_limit = clampi(game.storage.free_for(res.item) - int(inflight.get(res.item, 0)), 1, GatherDB.CARRY_MAX)
 				res.reserved = bag_limit
 				gather_ev = {}
 				bag_frac = 0.0

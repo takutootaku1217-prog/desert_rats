@@ -1,7 +1,7 @@
 extends SceneTree
-## 積載量（倉庫の容量）の自己診断。実行:
+## 積載量（拠点全体の総重量）の自己診断。実行:
 ##   Godot --headless --path . -s res://tools/test_cargo.gd
-## 表・枠・あふれ・割り当ての変更・回収と狩猟の判断・加工の判断・画面・長時間の安定を確かめる。
+## 表・重量の計算・超過時の扱い（捨てない）・回収と狩猟の判断・加工の判断・画面・長時間の安定を確かめる。
 
 var fails := 0
 var main
@@ -18,7 +18,7 @@ func check(cond: bool, msg: String) -> void:
 
 func _initialize() -> void:
 	seed(20260926)
-	FacilityDB.start_all = true      # 設備は最初から全部ある状態で確かめる（設備の建設は test_build.gd）
+	FacilityDB.start_all = true      # 設備は最初から全部ある状態で確かめる（木製荷台も建っている。設備の建設は test_build.gd）
 	main = load("res://scenes/main.tscn").instantiate()
 	root.add_child(main)
 	await process_frame
@@ -28,7 +28,7 @@ func _initialize() -> void:
 	quit(1 if fails > 0 else 0)
 
 
-## 倉庫を空にして、割り当てを初期に戻す。出来事は止め、地面の資源も消す。
+## 倉庫・作業場・仲間の持ち物を空にする。出来事は止め、地面の資源も消す。
 func _reset() -> void:
 	main.director.enabled = false
 	main.director.active.clear()
@@ -37,6 +37,9 @@ func _reset() -> void:
 	for w in main.workers:
 		w.ai._release_task()
 		w.carrying = -1
+		w.carry_n = 1
+		w.carry_bonus.clear()
+		w.tools.clear()
 		w.ai._set_state(CharacterAI.State.SEARCH)
 	for root_node in [main.resources_root, main.creatures_root]:
 		for c in root_node.get_children():
@@ -44,14 +47,14 @@ func _reset() -> void:
 			c.free()
 	st.enforce = true
 	st.inventory.counts.clear()
-	st.quota = CargoDB.default_quota()
-	st.capacity_bonus.clear()
-	st.wasted.clear()
-	main.total_wasted = 0
+	main.processor.stock.counts.clear()
 	main.processor.orders.clear()
 	main.processor.incoming.clear()
 	main.processor.current = {}
 	main.processor.output.clear()
+	main.transfer_queue.clear()
+	main.transfer_worker = null
+	main.craft_queue.clear()
 
 
 func _drop_resource(item: int, x := 600.0) -> ResourceNode:
@@ -68,93 +71,135 @@ func _run() -> void:
 	var W: Array = main.workers
 	_reset()
 
-	print("== 表の整合 ==")
-	for bay in [CargoDB.Bay.RAW, CargoDB.Bay.PRODUCT]:
-		var sum := 0
-		var all_have := true
-		for it in CargoDB.items_of(bay):
-			sum += int(CargoDB.DEFAULT_QUOTA.get(it, -1)) * CargoDB.size_of(it)
-			if not CargoDB.DEFAULT_QUOTA.has(it):
-				all_have = false
-		check(all_have, "%s の全素材に初期の枠がある" % CargoDB.BAY_NAMES[bay])
-		check(sum == CargoDB.CAPACITY[bay], "%s: 枠の合計 %d = 積載量 %d" % [CargoDB.BAY_NAMES[bay], sum, CargoDB.CAPACITY[bay]])
-	check(CargoDB.bay_of(GameData.Item.CARCASS) < 0 and CargoDB.bay_of(GameData.Item.WOOD) == CargoDB.Bay.RAW
-			and CargoDB.bay_of(GameData.Item.FOOD) == CargoDB.Bay.PRODUCT, "獲物は倉庫に置かない。素材は素材棚、加工品は加工品置き場")
-	check(st.unallocated_in(CargoDB.Bay.RAW) == 0 and st.unallocated_in(CargoDB.Bay.PRODUCT) == 0, "最初は積載量をすべて割り当て済み")
+	print("== 重さの表 ==")
+	check(CargoDB.missing_weights().is_empty(), "GameData.Item のうち CARCASS 以外は、すべて重さが登録されている（登録漏れの検査）")
+	check(CargoDB.item_weight(GameData.Item.FOOD) == 1 and CargoDB.item_weight(GameData.Item.MEAT) == 1
+			and CargoDB.item_weight(GameData.Item.WOOD) == 2 and CargoDB.item_weight(GameData.Item.STONE) == 3
+			and CargoDB.item_weight(GameData.Item.IRON_ORE) == 4 and CargoDB.item_weight(GameData.Item.IRON) == 3
+			and CargoDB.item_weight(GameData.Item.FUEL) == 2 and CargoDB.item_weight(GameData.Item.REPAIR_KIT) == 2
+			and CargoDB.item_weight(GameData.Item.HAMMER) == 4 and CargoDB.item_weight(GameData.Item.AXE) == 4
+			and CargoDB.item_weight(GameData.Item.PICKAXE) == 6 and CargoDB.item_weight(GameData.Item.IRON_AXE) == 6
+			and CargoDB.item_weight(GameData.Item.ADV_PICK) == 8, "実装指示書どおりの重さの表")
+	check(CargoDB.BASE_MAX_WEIGHT == 200, "基本の最大重量は200")
 
-	print("== 容量の上限と、あふれたときの挙動 ==")
+	print("== 重量の計算 ==")
 	_reset()
-	var signals := []
-	st.overflowed.connect(func(item, n): signals.append([item, n]))
-	var wq: int = st.quota_of(GameData.Item.WOOD)
-	check(st.add_item(GameData.Item.WOOD, wq) == wq and st.count_of(GameData.Item.WOOD) == wq, "枠（%d）までは入る" % wq)
-	check(st.is_full(GameData.Item.WOOD) and st.free_for(GameData.Item.WOOD) == 0, "枠がいっぱいになる")
-	var got: int = st.add_item(GameData.Item.WOOD, 3)
-	check(got == 0 and st.count_of(GameData.Item.WOOD) == wq, "いっぱいのときは入らない（入った数 %d）" % got)
-	check(st.wasted.get(GameData.Item.WOOD, 0) == 3 and main.total_wasted == 3 and signals.size() == 1, "入りきらない分は捨てられ、数と通知が残る")
+	check(main.total_weight() == 0 and main.max_weight() == 300, "空なら 0/300（設備は最初から全部あり、木製荷台の +100 を含む）")
+	st.add_item(GameData.Item.WOOD, 10)
+	check(main.total_weight() == 20, "木材10個なら重量20")
 	_reset()
-	st.add_item(GameData.Item.STONE, st.quota_of(GameData.Item.STONE) - 1)
-	check(st.add_item(GameData.Item.STONE, 3) == 1 and main.total_wasted == 2, "あと1個の空きに3個入れると、1個入って2個捨てる")
-	# 区画が別なので、素材棚がいっぱいでも加工品は置ける（食料・燃料が置けなくなって詰まらない）
+	st.add_item(GameData.Item.STONE, 10)
+	check(main.total_weight() == 30, "石10個なら重量30")
 	_reset()
-	for it in GameData.RAW_ITEMS:
-		st.add_item(it, 99)
-	check(st.used_in(CargoDB.Bay.RAW) == CargoDB.CAPACITY[CargoDB.Bay.RAW], "素材棚を満杯にできる（%d/%d）" % [st.used_in(CargoDB.Bay.RAW), CargoDB.CAPACITY[CargoDB.Bay.RAW]])
-	check(st.add_item(GameData.Item.FOOD, 1) == 1 and st.add_item(GameData.Item.FUEL, 1) == 1, "素材棚が満杯でも、食料・燃料は置ける")
-	# 制限なしのモード（自己診断・将来の拡張用）
+	st.add_item(GameData.Item.FOOD, 100)
+	check(main.total_weight() == 100, "食料100個なら重量100")
 	_reset()
-	st.enforce = false
-	check(st.add_item(GameData.Item.WOOD, 500) == 500 and main.total_wasted == 0, "enforce=false なら制限なし")
+	st.add_item(GameData.Item.WOOD, 5)
+	st.add_item(GameData.Item.STONE, 4)
+	st.add_item(GameData.Item.FOOD, 3)
+	check(main.total_weight() == 5 * 2 + 4 * 3 + 3 * 1, "違うアイテムを混ぜても合計が正しい（木材5・石4・食料3）")
+
+	print("== 重量へ含める場所（倉庫だけでなく拠点全体） ==")
+	_reset()
+	main.processor.stock.add(GameData.Item.STONE, 6)
+	check(main.total_weight() == 18 and st.current_weight() == 0, "作業場（processor.stock）へ移した材料も、拠点全体の重量に入る（倉庫自体の重さは0のまま）")
+	_reset()
+	main.processor.orders.append({"in": {GameData.Item.IRON: 1, GameData.Item.WOOD: 1}, "out": GameData.Item.REPAIR_KIT, "n": 2})
+	check(main.total_weight() == CargoDB.item_weight(GameData.Item.IRON) + CargoDB.item_weight(GameData.Item.WOOD), "加工設備へ投入済みの材料（orders の in）も重量に入る")
+	main.processor.orders.clear()
+	_reset()
+	main.processor.output.append(GameData.Item.FUEL)
+	main.processor.output.append(GameData.Item.FUEL)
+	check(main.total_weight() == CargoDB.item_weight(GameData.Item.FUEL) * 2, "取り出し待ちの完成品（output）も重量に入る")
+	main.processor.output.clear()
+	_reset()
+	W[0].tools["mine"] = GameData.Item.PICKAXE
+	check(main.total_weight() == CargoDB.item_weight(GameData.Item.PICKAXE), "仲間が装備している道具も重量に入る")
+	W[0].tools.clear()
+	_reset()
+	W[0].ai.haul_recipe = {"in": {GameData.Item.WOOD: 3}}
+	W[0].ai._set_state(CharacterAI.State.HAUL_MOVE)
+	check(main.total_weight() == CargoDB.item_weight(GameData.Item.WOOD) * 3, "倉庫→作業場を運搬中のアイテム（HAUL_MOVE）も重量に入る")
+	W[0].ai._set_state(CharacterAI.State.SEARCH)
+	W[0].ai.haul_recipe = {}
+	_reset()
+	W[0].ai.xfer_item = GameData.Item.STONE
+	W[0].carry_n = 2
+	W[0].ai._set_state(CharacterAI.State.XFER_MOVE)
+	check(main.total_weight() == CargoDB.item_weight(GameData.Item.STONE) * 2, "運搬の依頼で運んでいるアイテム（XFER_MOVE）も重量に入る")
+	W[0].ai._set_state(CharacterAI.State.SEARCH)
+	W[0].ai.xfer_item = -1
+	W[0].carry_n = 1
+	_reset()
+	check(main.total_weight() == 0, "獲物（CARCASS）は、倉庫に入っていない間は重量に含めない（解体するまで一時データ）")
+
+	print("== 収納できるかの判定・予約（重量が同じでも二重計上しない） ==")
+	_reset()
+	st.add_item(GameData.Item.WOOD, 90)              # 重量180（最大300のうち）
+	check(main.request_transfer(GameData.Item.WOOD, 5, "to_workshop") == 5, "倉庫から作業場へ移す（運搬の依頼）")
+	check(main.total_weight() == 180, "倉庫から作業場へ移しても、拠点全体の総重量は変わらない（依頼を作っただけで、まだ運んでいない）")
+	main.cancel_transfers()
+
+	print("== 重量超過でアイテムを消さない（実装指示書 2.3） ==")
+	_reset()
 	st.enforce = true
+	var cap: int = main.max_weight()                 # 300（木製荷台込み）
+	var wood_max: int = cap / CargoDB.item_weight(GameData.Item.WOOD)   # 150
+	check(st.add_item(GameData.Item.WOOD, wood_max) == wood_max and main.total_weight() == cap, "最大重量ぴったりまでは入る")
+	check(main.remaining_weight() == 0, "残り重量が0になる")
+	var before: int = main.total_weight()
+	var got := st.add_item(GameData.Item.WOOD, 5)
+	check(got == 0, "満杯のとき、倉庫にはこれ以上そのまま入らない（入った数 %d）" % got)
+	check(main.processor.stock.count(GameData.Item.WOOD) == 5, "入らなかった5個は、捨てずに作業場（processor.stock）へ移る")
+	check(main.total_weight() == before + 10, "総重量としては消えていない（一時的に最大重量を超える。実装指示書どおり削除しない）")
+	_reset()
+	st.add_item(GameData.Item.STONE, wood_max)  # 何かのアイテムで重量を使い切る量は種類によって違うので、次は個別に検証
+	_reset()
+	# 残り重量10、木材(重さ2)を10個収納しようとした場合は5個だけ収納し、残り5個を保持する
+	st.add_item(GameData.Item.STONE, (cap - 10) / CargoDB.item_weight(GameData.Item.STONE))   # 残りをちょうど10近くに詰める
+	var rem: int = main.remaining_weight()
+	var n_try := 10
+	var expect_store: int = mini(n_try, int(rem / CargoDB.item_weight(GameData.Item.WOOD)))
+	var got2 := st.add_item(GameData.Item.WOOD, n_try)
+	check(got2 == expect_store and got2 + main.processor.stock.count(GameData.Item.WOOD) == n_try, "残り重量に一部だけ入る場合、入った個数と残った個数の合計が、元の個数と一致する（試した%d個・入った%d個・残り重量は事前に%d）" % [n_try, got2, rem])
+	_reset()
+	# 残り重量1のとき、重量2の木材は0個収納する
+	st.add_item(GameData.Item.STONE, (cap - 1) / CargoDB.item_weight(GameData.Item.STONE))
+	while main.remaining_weight() != 1:               # 石だけでは端数が合わないことがあるので、食料(重さ1)で微調整する
+		if main.remaining_weight() > 1:
+			st.add_item(GameData.Item.FOOD, 1)
+		else:
+			st.inventory.counts[GameData.Item.FOOD] = maxi(0, st.inventory.counts.get(GameData.Item.FOOD, 0) - 1)
+	check(main.remaining_weight() == 1, "（準備）残り重量をちょうど1にした")
+	check(st.add_item(GameData.Item.WOOD, 1) == 0, "残り重量1のとき、重さ2の木材は0個しか倉庫に収納しない")
 
-	print("== 割り当ての変更 ==")
-	_reset()
-	var raw := CargoDB.Bay.RAW
-	check(st.set_quota(GameData.Item.MEAT, st.quota_of(GameData.Item.MEAT) + 4) == 10, "余りがないときは、枠を増やせない")
-	st.set_quota(GameData.Item.WOOD, st.quota_of(GameData.Item.WOOD) - 4)
-	check(st.quota_of(GameData.Item.WOOD) == 10 and st.unallocated_in(raw) == 4, "木材の枠を減らすと、割り当てていない積載量が増える")
-	check(st.set_quota(GameData.Item.MEAT, 10 + 6) == 14, "余り（4）の分だけ、肉の枠を増やせる")
-	check(st.unallocated_in(raw) == 0 and st.allocated_in(raw) == CargoDB.CAPACITY[raw], "枠の合計が積載量を超えない")
-	st.set_quota(GameData.Item.MEAT, -5)
-	check(st.quota_of(GameData.Item.MEAT) == 0, "枠は0（集めない）まで減らせる")
-	# 枠を減らしても、いま置いてある分は消えない（新しく入らないだけ）
-	_reset()
-	st.add_item(GameData.Item.HIDE, 6)
-	st.set_quota(GameData.Item.HIDE, 2)
-	check(st.count_of(GameData.Item.HIDE) == 6 and st.free_for(GameData.Item.HIDE) == 0 and st.add_item(GameData.Item.HIDE, 1) == 0,
-			"枠を減らしても、置いてある分は消えず、新しくは入らない")
-	# 積載量の増加（将来の拠点強化）
-	_reset()
-	st.capacity_bonus[raw] = 10
-	check(st.capacity_of(raw) == CargoDB.CAPACITY[raw] + 10 and st.unallocated_in(raw) == 10, "積載量が増えると、割り当てられる量が増える（将来の拠点強化）")
-	check(st.set_quota(GameData.Item.STONE, st.quota_of(GameData.Item.STONE) + 10) == 18, "増えた分を枠に割り当てられる")
-
-	print("== 解体（獲物）と狩り ==")
+	print("== 解体（獲物）と狩り（重量ベースの入る割合） ==")
 	_reset()
 	check(st.drop_fit("hump") == 1.0 and main.hunt_has_room("hump"), "空いていれば、獲物の素材はすべて入る")
-	st.add_item(GameData.Item.MEAT, 10)
-	st.add_item(GameData.Item.FAT, 8)
-	# コブ獣: 肉2 脂2 皮1 骨1 → 皮と骨だけ入る（2/6）
-	check(st.drop_fit("hump") < CargoDB.MIN_DROP_FIT and not main.hunt_has_room("hump"), "素材の大半が入らない獲物は狩らない（入る割合 %.0f%%）" % (st.drop_fit("hump") * 100.0))
-	check(main.hunt_has_room("hare"), "ウサギ（肉1・皮1）は皮が入るので狩る（入る割合 %.0f%%）" % (st.drop_fit("hare") * 100.0))
+	# コブ獣: 肉2 脂2 皮1 骨1（重さ合計6）。残り重量2にすると、6のうち2しか入らない（入る割合33%）
+	st.add_item(GameData.Item.MEAT, (main.max_weight() - 2) / CargoDB.item_weight(GameData.Item.MEAT))
+	check(st.drop_fit("hump") < CargoDB.MIN_DROP_FIT and not main.hunt_has_room("hump"), "素材の重さの大半が入らない獲物は狩らない（入る割合 %.0f%%）" % (st.drop_fit("hump") * 100.0))
+	_reset()
+	st.add_item(GameData.Item.STONE, (main.max_weight() - 2) / CargoDB.item_weight(GameData.Item.STONE))
+	check(main.hunt_has_room("hare"), "ウサギ（肉1・皮1。重さ2）は、残りわずかでも入るので狩る（入る割合 %.0f%%）" % (st.drop_fit("hare") * 100.0))
+	_reset()
+	main.hunt_policy["hump"] = true
+	st.add_item(GameData.Item.MEAT, (main.max_weight() - 2) / CargoDB.item_weight(GameData.Item.MEAT))
 	var c := Creature.new()
 	c.setup(main, "hump")
 	c.position = Vector2(700, (GameData.GROUND_Y_MIN + GameData.GROUND_Y_MAX) / 2.0)
 	main.creatures_root.add_child(c)
-	main.hunt_policy["hump"] = true
-	check(not W[1].ai._try_start(GameData.Job.HUNT), "枠がいっぱいのときは、狩猟の仕事に入らない")
+	check(not W[1].ai._try_start(GameData.Job.HUNT), "重量がいっぱいのときは、狩猟の仕事に入らない")
 	st.inventory.counts[GameData.Item.MEAT] = 0
-	st.inventory.counts[GameData.Item.FAT] = 0
 	check(W[1].ai._try_start(GameData.Job.HUNT), "空きができたら、狩猟の仕事に入る")
 	W[1].ai._release_task()
 	W[1].ai._set_state(CharacterAI.State.SEARCH)
-	c.queue_free()
-	# 解体で、入る分だけ入って残りは捨てる
+	# 解体で、入る分だけ入って残りは作業場へ（捨てない）
 	_reset()
-	st.add_item(GameData.Item.MEAT, 9)
+	st.add_item(GameData.Item.MEAT, (main.max_weight() - 1) / CargoDB.item_weight(GameData.Item.MEAT))
+	var meat_before := st.count_of(GameData.Item.MEAT)
 	st.butcher("hump")
-	check(st.count_of(GameData.Item.MEAT) == 10 and st.count_of(GameData.Item.FAT) == 2 and st.count_of(GameData.Item.HIDE) == 1
-			and st.wasted.get(GameData.Item.MEAT, 0) == 1, "解体: 入る分だけ入り、あふれた肉1個は捨てる")
+	check(st.count_of(GameData.Item.MEAT) + main.processor.stock.count(GameData.Item.MEAT) == meat_before + 2, "解体: 入りきらない分は、捨てずに作業場へ（肉が%d→%d、作業場に%d）" % [meat_before, st.count_of(GameData.Item.MEAT), main.processor.stock.count(GameData.Item.MEAT)])
 
 	print("== 回収の判断（回収AIへの影響） ==")
 	_reset()
@@ -162,27 +207,29 @@ func _run() -> void:
 	check(W[0].ai._try_start(GameData.Job.GATHER) and W[0].ai.res == wood, "空きがあれば、木材を回収しに行く")
 	W[0].ai._release_task()
 	W[0].ai._set_state(CharacterAI.State.SEARCH)
-	st.add_item(GameData.Item.WOOD, st.quota_of(GameData.Item.WOOD))
-	check(not W[0].ai._try_start(GameData.Job.GATHER), "枠がいっぱいの木材は、拾いに行かない")
-	# 別の素材があれば、そちらを拾う
+	st.add_item(GameData.Item.WOOD, main.max_weight() / CargoDB.item_weight(GameData.Item.WOOD))
+	check(not W[0].ai._try_start(GameData.Job.GATHER), "重量がいっぱいのときは、拾いに行かない")
+	# 別の素材でも、重量がいっぱいなら拾わない（区画という概念が無くなったので、木材以外もいっぱいなら拾えない）
 	var stone := _drop_resource(GameData.Item.STONE, 700.0)
-	check(W[0].ai._try_start(GameData.Job.GATHER) and W[0].ai.res == stone, "木材がいっぱいでも、空きのある石は拾う")
+	check(not W[0].ai._try_start(GameData.Job.GATHER), "重量がいっぱいなら、別の素材（石）も拾いに行かない")
+	stone.queue_free()
 	W[0].ai._release_task()
 	W[0].ai._set_state(CharacterAI.State.SEARCH)
-	# 残り1個の枠に、同時に2人が向かわない（運んでいる分も数える）
+	# 残りわずかな重量に、同時に2人が向かわない（運んでいる分も数える）
 	_reset()
-	st.add_item(GameData.Item.IRON_ORE, st.quota_of(GameData.Item.IRON_ORE) - 1)
+	var iron_room := int(main.max_weight() / CargoDB.item_weight(GameData.Item.IRON_ORE)) - 1
+	st.add_item(GameData.Item.IRON_ORE, iron_room)
 	_drop_resource(GameData.Item.IRON_ORE, 600.0)
 	_drop_resource(GameData.Item.IRON_ORE, 640.0)
 	var a1: bool = W[0].ai._try_start(GameData.Job.GATHER)
 	var a2: bool = W[1].ai._try_start(GameData.Job.GATHER)
-	check(a1 and not a2, "残り1個の枠には、2人目は向かわない（1人目 %s・2人目 %s）" % [a1, a2])
+	check(a1 and not a2, "残りわずかな重量には、2人目は向かわない（1人目 %s・2人目 %s）" % [a1, a2])
 	W[0].ai._release_task()
 	W[0].ai._set_state(CharacterAI.State.SEARCH)
-	# 運んでいる最中の分も、枠を予約している
+	# 運んでいる最中の分も、重量を予約している
 	W[2].carrying = GameData.Item.IRON_ORE
 	W[2].ai._set_state(CharacterAI.State.MOVE_TO_STORAGE)
-	check(not W[0].ai._try_start(GameData.Job.GATHER), "運んでいる途中の分も、空き枠として数える")
+	check(not W[0].ai._try_start(GameData.Job.GATHER), "運んでいる途中の分も、空き重量として数える")
 	W[2].carrying = -1
 	W[2].ai._set_state(CharacterAI.State.SEARCH)
 	# 方針にない物（敵が落とした肉・皮）も拾える（以前は方針にないため拾われなかった）
@@ -200,57 +247,69 @@ func _run() -> void:
 	carcass.species = "hump"
 	carcass.position = Vector2(650, (GameData.GROUND_Y_MIN + GameData.GROUND_Y_MAX) / 2.0)
 	main.resources_root.add_child(carcass)
-	st.add_item(GameData.Item.MEAT, 10)
-	st.add_item(GameData.Item.FAT, 8)
-	check(not W[0].ai._try_start(GameData.Job.GATHER), "素材の入らない獲物は、拾わない")
-	carcass.queue_free()
+	st.add_item(GameData.Item.MEAT, (main.max_weight() - 2) / CargoDB.item_weight(GameData.Item.MEAT))
+	check(not W[0].ai._try_start(GameData.Job.GATHER), "素材の重さが大半入らない獲物は、拾わない")
 
 	print("== 運搬・加工・保管への影響 ==")
 	_reset()
-	# 作り置きの目標より大きな枠は使わない。枠が小さければ枠に合わせる
+	# 作った結果が最大重量を超えるなら作らない（実装指示書2.4）。食料は cook（生肉1→食料2）で重量が+1増える
 	st.add_item(GameData.Item.MEAT, 5)
 	main.recipe_priority = GameData.DEFAULT_RECIPE_PRIORITY.duplicate()
 	var r1: Dictionary = main.choose_recipe()
-	check(r1.get("id", "") == "cook", "材料があり枠に余裕があれば、加工を選ぶ（%s）" % r1.get("id", "なし"))
-	st.set_quota(GameData.Item.FOOD, 1)
+	check(r1.get("id", "") == "cook", "材料があり重量に余裕があれば、加工を選ぶ（%s）" % r1.get("id", "なし"))
+	# 拠点をほぼ満杯にする（残り重量をちょうど0にする。石だけでは端数が余ることがあるので、食料で微調整する）
+	st.add_item(GameData.Item.STONE, main.remaining_weight() / CargoDB.item_weight(GameData.Item.STONE))
+	if main.remaining_weight() > 0:
+		st.add_item(GameData.Item.FOOD, main.remaining_weight())
+	check(main.remaining_weight() == 0, "（準備）拠点の残り重量をちょうど0にした")
 	var r2: Dictionary = main.choose_recipe()
-	check(r2.get("id", "") != "cook", "食料の枠が小さくて2個入らないなら、調理は選ばない")
-	st.set_quota(GameData.Item.FOOD, 0)
-	st.inventory.counts[GameData.Item.FOOD] = 0
-	check(main.choose_recipe().get("id", "") != "cook", "食料の枠が0なら、調理は選ばない")
-	# 枠が作り置きの目標（食料12）より大きくても、目標で止まる（従来どおり）
+	check(r2.get("id", "") != "cook", "拠点がほぼ満杯で、作ると重量が増えるレシピ（調理）は選ばない")
+	# 作り置きの目標（食料12）に届いたら、重量に余裕があっても作らない（従来どおり）
 	_reset()
 	st.add_item(GameData.Item.MEAT, 5)
 	st.add_item(GameData.Item.FOOD, 12)
-	check(main.choose_recipe().get("id", "") != "cook", "作り置きの目標（食料12）に届いたら、枠が余っていても作らない")
-	# 加工品は素材棚の使用量に関係なく置ける（詰み防止）
+	check(main.choose_recipe().get("id", "") != "cook", "作り置きの目標（食料12）に届いたら、重量が余っていても作らない")
+	# 倉庫が満杯でも、加工品置き場（区画は無いが）に完成品はそのまま届く/作業場へ逃げる（詰み防止・実装指示書2.3）
 	_reset()
-	for it in GameData.RAW_ITEMS:
-		st.add_item(it, 99)
+	st.add_item(GameData.Item.STONE, main.max_weight() / CargoDB.item_weight(GameData.Item.STONE))
+	main.processor.output.clear()
 	main.processor.output.append(GameData.Item.FUEL)
 	W[2].carrying = main.processor.take_output()
 	W[2].ai._set_state(CharacterAI.State.STORE)
 	W[2].ai.timer = 0.0
 	W[2].ai.tick(0.1)
-	check(st.count_of(GameData.Item.FUEL) == 1 and W[2].carrying == -1, "素材棚が満杯でも、加工した燃料は倉庫に入る")
-	# 加工品置き場がいっぱいのとき、運んできた完成品は捨てる（詰まらない）
+	check((st.count_of(GameData.Item.FUEL) + main.processor.stock.count(GameData.Item.FUEL)) == 1 and W[2].carrying == -1,
+			"拠点がほぼ満杯でも、加工した燃料は消えない（倉庫か作業場のどちらかに必ず入る）")
+	# 運搬（材料を倉庫から取り出す）は、重量に影響されない
 	_reset()
-	st.add_item(GameData.Item.FUEL, 99)
-	main.total_wasted = 0
-	W[2].carrying = GameData.Item.FUEL
-	W[2].ai._set_state(CharacterAI.State.STORE)
-	W[2].ai.timer = 0.0
-	W[2].ai.tick(0.1)
-	check(W[2].carrying == -1 and st.count_of(GameData.Item.FUEL) == st.quota_of(GameData.Item.FUEL) and main.total_wasted == 1,
-			"いっぱいのときに届いた完成品は捨てられ、仲間は次の仕事へ戻る")
-	W[2].ai._set_state(CharacterAI.State.SEARCH)
-	# 運搬（材料を倉庫から取り出す）は、枠に影響されない
-	_reset()
-	st.add_item(GameData.Item.WOOD, st.quota_of(GameData.Item.WOOD))
+	st.add_item(GameData.Item.WOOD, main.max_weight() / CargoDB.item_weight(GameData.Item.WOOD))
+	var w_before := st.count_of(GameData.Item.WOOD)
 	var fw: Dictionary = GameData.recipe_by_id("firewood")
-	check(st.take_set(fw["in"]) and st.count_of(GameData.Item.WOOD) == st.quota_of(GameData.Item.WOOD) - 1, "材料の取り出し（運搬）は、いっぱいでも普通にできる")
+	check(st.take_set(fw["in"]) and st.count_of(GameData.Item.WOOD) == w_before - 1, "材料の取り出し（運搬）は、いっぱいでも普通にできる")
 	st.add_item(GameData.Item.WOOD, 1)
-	check(st.count_of(GameData.Item.WOOD) == st.quota_of(GameData.Item.WOOD), "取り出して空いた枠は、また使える")
+	check(st.count_of(GameData.Item.WOOD) == w_before, "取り出して空いた分は、また使える")
+
+	print("== 同時運搬でも最大重量の予約を超えない（reserved_weight） ==")
+	_reset()
+	var room: int = main.max_weight()
+	var wood_pt := GatherPoint.new()
+	wood_pt.setup(main, "tree")
+	wood_pt.remaining = 999
+	wood_pt.position = Vector2(600.0, (GameData.GROUND_Y_MIN + GameData.GROUND_Y_MAX) / 2.0)
+	main.resources_root.add_child(wood_pt)
+	check(W[0].ai._try_start(GameData.Job.GATHER), "1人目が採取ポイントを予約する")
+	var reserved1: int = main.reserved_weight()
+	check(reserved1 > 0, "予約した分の重さが、reserved_weight に反映される")
+	var wood_pt2 := GatherPoint.new()
+	wood_pt2.setup(main, "tree")
+	wood_pt2.remaining = 999
+	wood_pt2.position = Vector2(640.0, (GameData.GROUND_Y_MIN + GameData.GROUND_Y_MAX) / 2.0)
+	main.resources_root.add_child(wood_pt2)
+	st.add_item(GameData.Item.STONE, (room - reserved1 - 2) / CargoDB.item_weight(GameData.Item.STONE))  # 残りをぎりぎりまで詰める
+	var a3: bool = W[1].ai._try_start(GameData.Job.GATHER)
+	check(main.reserved_weight() + main.total_weight() <= main.max_weight() or not a3, "2人目の予約を足しても、最大重量の予約を超えない（超えるなら2人目は始めない）")
+	W[0].ai._release_task()
+	W[1].ai._release_task()
 
 	print("== 画面 ==")
 	_reset()
@@ -259,19 +318,13 @@ func _run() -> void:
 	for page in [0, 1]:
 		pol._page = page
 		pol._rebuild()
-	check(pol._page == 1, "運営の方針の画面に「積載の割り当て」のページが出る")
-	pol._page = 1
-	# ＋／－のボタン相当の操作
-	st.set_quota(GameData.Item.WOOD, 8)
-	pol._rebuild()
-	pol.toggle()
+	check(pol._page == 1, "運営の方針の画面に「積載重量」のページが出る（読み取り専用）")
 	pol._page = 0
 	main.status._process(0.0)
-	check(main.status._weight.text == str(st.current_weight()) and main.status._weight.tooltip_text.contains("素材棚"),
-			"積載重量のアイコンゲージに重量が出る（数字は絵の内側）: " + main.status._weight.text)
-	st.add_item(GameData.Item.WOOD, 99)
+	check(main.status._weight.text == str(main.total_weight()), "積載重量のアイコンゲージに、拠点全体の総重量が出る（数字は絵の内側）: " + main.status._weight.text)
+	st.add_item(GameData.Item.WOOD, main.max_weight())
 	main.status._process(0.0)
-	check(main.status.stock_summary().contains("木材 8満"), "枠がいっぱいの素材に「満」が付く: " + main.status.stock_summary())
+	check(absf(main.status._weight.ratio - st.weight_ratio()) < 0.0001, "積載ゲージの充填は、拠点全体の積載率と一致する")
 	st.queue_redraw()
 	await process_frame
 
@@ -283,9 +336,8 @@ func _run() -> void:
 	main.director.enabled = true
 	Engine.time_scale = 8.0
 	var t_end := Time.get_ticks_msec() + 60000
-	var over_quota := 0
-	var max_raw := 0
-	var max_prod := 0
+	var over_max := 0
+	var max_seen := 0
 	var hungry_t := 0.0
 	var last := Time.get_ticks_msec()
 	while Time.get_ticks_msec() < t_end and not main.game_over:
@@ -294,18 +346,15 @@ func _run() -> void:
 		if main.hungry:
 			hungry_t += float(now - last) / 1000.0 * 8.0
 		last = now
-		for it in st.quota:
-			if st.count_of(it) > st.quota_of(it):
-				over_quota += 1
-		max_raw = maxi(max_raw, st.used_in(raw))
-		max_prod = maxi(max_prod, st.used_in(CargoDB.Bay.PRODUCT))
+		if main.total_weight() > main.max_weight():
+			over_max += 1
+		max_seen = maxi(max_seen, main.total_weight())
 	Engine.time_scale = 1.0
 	paused = false
-	print("       走行 %.1f km・回収%d 狩猟%d 加工%d・捨てた%d・空腹 %d秒・素材棚 最大 %d/%d 加工品 最大 %d/%d" % [
-			main.director.distance / 2500.0, main.total_gathered, main.total_hunted, main.processor.total_done, main.total_wasted,
-			int(hungry_t), max_raw, st.capacity_of(raw), max_prod, st.capacity_of(CargoDB.Bay.PRODUCT)])
-	check(over_quota == 0, "どの素材も、枠を超えて置かれなかった")
-	check(max_raw <= st.capacity_of(raw) and max_prod <= st.capacity_of(CargoDB.Bay.PRODUCT), "区画の積載量を超えなかった")
-	check(main.total_gathered > 5 and main.processor.total_done > 2, "積載量があっても、回収と加工は回り続ける")
+	print("       走行 %.1f km・回収%d 狩猟%d 加工%d・空腹 %d秒・重量 最大 %d/%d" % [
+			main.director.distance / 2500.0, main.total_gathered, main.total_hunted, main.processor.total_done,
+			int(hungry_t), max_seen, main.max_weight()])
+	check(over_max == 0, "放置しているだけでは、最大重量を超えなかった（重量超過は競合・強制の場合だけ）")
+	check(main.total_gathered > 5 and main.processor.total_done > 2, "積載量（重量）があっても、回収と加工は回り続ける")
 	if main.game_over:
 		print("       （途中で車体が壊れてゲームオーバーになった。出来事を本来の頻度で起こしているため）")

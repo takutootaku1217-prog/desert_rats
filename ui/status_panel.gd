@@ -86,6 +86,18 @@ func stock_summary() -> String:
 	return _stock.summary()
 
 
+## 倉庫にある物のうち、重い順の上位 n件（積載重量のツールチップ用。実装指示書 5「重い順の上位アイテムを表示する」）
+func _top_weight_items(n: int = 4) -> Array:
+	var l: Array = []
+	for it in game.storage.inventory.counts:
+		var cnt: int = game.storage.inventory.counts[it]
+		if cnt <= 0:
+			continue
+		l.append({"item": it, "n": cnt, "w": CargoDB.weight_of(it, cnt)})
+	l.sort_custom(func(a, b): return a["w"] > b["w"])
+	return l.slice(0, n)
+
+
 func _process(_d: float) -> void:
 	if game == null or game.base == null:
 		return
@@ -114,14 +126,14 @@ func _process(_d: float) -> void:
 		_set_gauge(spec[0], cond, 100.0, str(int(cond)), "%s の耐久 %d / 100%s" % [nm, int(cond), "（不調）" if cond < GameData.PART_BAD else ""])
 	_set_gauge("fuel", b.fuel, GameData.FUEL_CAP, str(int(b.fuel / GameData.FUEL_CAP * 100.0)), "燃料 %d / %d" % [int(b.fuel), int(GameData.FUEL_CAP)])
 	# 積載重量: 重りのアイコンが下から埋まり、増えるほど色が濃くなる。数字は正確な重量（アイコンの中）。
-	# 区画ごとの内訳（素材棚・加工品置き場）と捨てた数は、アイコンにマウスを載せると出る。
+	# アイテムごとの区画は無くなったので、重い順の上位アイテムを、アイコンにマウスを載せると出す。
 	var st = game.storage
-	var tip := "積載重量 %d / %d" % [st.current_weight(), st.max_weight()]
-	for bay in CargoDB.BAY_NAMES:
-		tip += "\n　%s %d / %d" % [CargoDB.BAY_NAMES[bay], st.used_in(bay), st.capacity_of(bay)]
-	if game.total_wasted > 0:
-		tip += "\n　捨てた %d 個" % game.total_wasted
-	_set_gauge("weight", float(st.current_weight()), float(st.max_weight()), str(st.current_weight()), tip)
+	var total_w: int = game.total_weight()
+	var max_w: int = game.max_weight()
+	var tip := "積載重量 %d / %d" % [total_w, max_w]
+	for e in _top_weight_items(4):
+		tip += "\n　%s ×%d（%d）" % [GameData.ITEM_NAMES[e["item"]], e["n"], e["w"]]
+	_set_gauge("weight", float(total_w), float(max_w), str(total_w), tip)
 	# 3段目
 	_stock.update_from(st, game.hungry)
 	# 4段目

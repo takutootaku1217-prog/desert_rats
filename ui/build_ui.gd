@@ -216,10 +216,11 @@ func _refresh() -> void:
 		for it in row["costs"]:
 			var need: int = int(d["cost"][it])
 			var have: int = st.count_of(it)
+			var too_heavy: bool = CargoDB.item_weight(it) * need > st.max_weight()   # 最大重量いっぱいでも積めない量（恒常的に不可）
 			var l: Label = row["costs"][it]
-			l.text = "%s %d/%d%s" % [GameData.ITEM_NAMES[it], have, need, "（枠不足）" if st.quota_of(it) < need else ""]
+			l.text = "%s %d/%d%s" % [GameData.ITEM_NAMES[it], have, need, "（最大重量を超える）" if too_heavy else ""]
 			l.add_theme_color_override("font_color", UIKit.C_DIM if (built >= mx or not game.facility_unlocked(id)) else \
-					(C_BAD if st.quota_of(it) < need else (C_OK if have >= need else C_SHORT)))    # 完成済み・まだ建てられない設備の材料は薄く
+					(C_BAD if too_heavy else (C_OK if have >= need else C_SHORT)))    # 完成済み・まだ建てられない設備の材料は薄く
 		var rq: String = d["requires"]
 		row["req"].text = "必要設備: %s" % ("なし（手作業でできる）" if rq == "" else "%s（%s）" % [FacilityDB.name_of(rq), "ある" if game.has_facility(rq) else "まだない"])
 		var b: Button = row["build"]

@@ -36,6 +36,8 @@ const GATHER_BOOST := 3.0
 ##  - sprite / frame / stride / frames: 絵（見た目は差し替えやすいようにここに集める）。sprite の %d は置き場所の番号。
 ##    frame = 1コマの基準の大きさ（ユニット。画面上は ×ArtSpec.UNIT_PX。絵を高精細にしても変えない）、stride = コマの間隔（ユニット。
 ##    横に並べた絵のとき。1枚絵は 0）、frames = コマ数。絵の細かさ（1ユニットのドット数）は、絵の幅から自動で決まる（data/art_spec.gd）
+##  - capacity_bonus: 完成すると拠点の最大重量に足す量（data/cargo.gd。BaseStorage.max_weight が、建てた数×この値を毎回計算する。
+##    別の変数に二重保存しない）。書いていない設備は 0（積載量には関係ない）。
 const FACILITIES := {
 	"workbench": {
 		"name": "ワークベンチ", "desc": "手作業では作れない道具・設備をつくる作業台",
@@ -50,6 +52,21 @@ const FACILITIES := {
 		"max": 3, "requires": "workbench", "station": false,
 		"room": "bedroom", "dx": [9.0, 24.0, 39.0],
 		"sprite": "res://assets/base/bed_%d.png", "frame": Vector2i(14, 9), "stride": 0, "frames": 1,
+	},
+	"wood_cargo": {
+		"name": "木製荷台", "desc": "拠点の最大重量を増やす荷台。外装では車体後部に荷物が追加される",
+		"cost": {GameData.Item.WOOD: 8, GameData.Item.IRON: 2}, "time": 6.0, "field": GameData.Field.DEV,
+		"max": 1, "requires": "workbench", "station": false,
+		"room": "workshop", "dx": [50.0],
+		"sprite": "res://assets/base/wood_cargo.png", "frame": Vector2i(8, 10), "stride": 0, "frames": 1,
+		"capacity_bonus": 100,
+	},
+	"tool_rack": {
+		"name": "道具棚", "desc": "倉庫にある採取道具の余りを並べ、個体管理画面から装備・交換できるようにする",
+		"cost": {GameData.Item.WOOD: 4, GameData.Item.IRON: 1}, "time": 5.0, "field": GameData.Field.DEV,
+		"max": 1, "requires": "workbench", "station": false,
+		"room": "workshop", "dx": [58.0],
+		"sprite": "res://assets/base/tool_rack.png", "frame": Vector2i(8, 10), "stride": 0, "frames": 1,
 	},
 }
 

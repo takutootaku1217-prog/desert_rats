@@ -48,9 +48,7 @@ func _reset() -> void:
 			c.free()
 	st.enforce = true
 	st.inventory.counts.clear()
-	st.quota = CargoDB.default_quota()
-	st.wasted.clear()
-	main.total_wasted = 0
+	main.processor.stock.counts.clear()
 	main.total_gathered = 0
 	main.tool_auto = true
 	main.processor.orders.clear()
@@ -102,7 +100,7 @@ func _run() -> void:
 		if not GatherDB.SLOTS.has(d["slot"]) or not (d["item"] in GameData.GROUND_ITEMS) or d["amount"][0] > d["amount"][1]:
 			pts_ok = false
 	check(pts_ok, "採取ポイントは、木材・石・鉄鉱石のどれかを産し、道具の枠が正しい")
-	check(CargoDB.bay_of(GameData.Item.HAMMER) < 0 and st.add_item(GameData.Item.HAMMER, 5) == 5, "道具は倉庫の積載量の対象外（枠なしで置ける）")
+	check(CargoDB.item_weight(GameData.Item.HAMMER) > 0 and st.add_item(GameData.Item.HAMMER, 5) == 5, "道具も拠点の重量に数えるが、ふつうに置ける（実装指示書: 道具も重量に含める）")
 	st.inventory.counts.clear()
 
 	print("== 計算式（採取ポイント × 道具 × 仲間の能力） ==")
@@ -196,8 +194,11 @@ func _run() -> void:
 	check(W[0].ai.bag_limit == GatherDB.CARRY_MAX and rock.reserved == GatherDB.CARRY_MAX, "袋は %d 個まで（倉庫の空き枠も予約する）" % GatherDB.CARRY_MAX)
 	W[0].ai._release_task()
 	W[0].ai._set_state(CharacterAI.State.SEARCH)
-	# 空き枠が少ないと、袋も小さくなる
-	st.add_item(GameData.Item.STONE, st.quota_of(GameData.Item.STONE) - 2)
+	# 残り重量が少ないと、袋も小さくなる（石の重さ3で2個ぶん＝残り重量6にする）
+	var cap0: int = main.max_weight()
+	st.add_item(GameData.Item.STONE, (cap0 - 6) / CargoDB.item_weight(GameData.Item.STONE))
+	if main.remaining_weight() > 6:
+		st.add_item(GameData.Item.FOOD, main.remaining_weight() - 6)
 	W[0].ai._try_start(GameData.Job.GATHER)
 	check(W[0].ai.bag_limit == 2 and rock.reserved == 2, "倉庫の空き枠が2個なら、袋も2個まで")
 	W[0].ai._release_task()
@@ -307,8 +308,7 @@ func _run() -> void:
 	W[0].position = st.access_point() + W[0].slot_offset
 	W[0].target = W[0].position
 	var ore_n: int = W[0].carry_n
-	st.quota[GameData.Item.IRON_ORE] = 999
-	st.quota[GameData.Item.STONE] = 999
+	st.enforce = false   # ここでの検証は「袋の中身が丸ごと倉庫へ入るか」であって、積載量の上限の検証ではないので外す（次の _reset() で戻る）
 	ai._release_task()
 	ai._set_state(CharacterAI.State.MOVE_TO_STORAGE)
 	guard = 0
@@ -378,9 +378,12 @@ func _run() -> void:
 	W[1].ai.state = CharacterAI.State.MOVE_TO_STORAGE
 	W[1].stop_work()
 	check(st.count_of(GameData.Item.WOOD) == 3 and st.count_of(GameData.Item.BONE) == 1 and W[1].carry_n == 1, "作業を中断した仲間の袋（複数個・副産物）は、倉庫へ戻る")
-	# 積載量: 袋を運んでいる分も空き枠に数える
+	# 積載量: 袋を運んでいる分も空き重量に数える（木材3個ぶん＝重さ6を残して、ちょうど埋める）
 	_reset()
-	st.add_item(GameData.Item.WOOD, st.quota_of(GameData.Item.WOOD) - 3)
+	var need_w: int = CargoDB.weight_of(GameData.Item.WOOD, 3)
+	st.add_item(GameData.Item.STONE, (main.max_weight() - need_w) / CargoDB.item_weight(GameData.Item.STONE))
+	if main.remaining_weight() > need_w:
+		st.add_item(GameData.Item.FOOD, main.remaining_weight() - need_w)
 	W[2].carrying = GameData.Item.WOOD
 	W[2].carry_n = 3
 	W[2].ai.state = CharacterAI.State.MOVE_TO_STORAGE
@@ -536,8 +539,8 @@ func _run() -> void:
 	var tool_txt := ""
 	for w in W:
 		tool_txt += "%s[%s/%s] " % [w.char_name, GatherDB.tool_def(int(w.tools.get("mine", -1)))["name"], GatherDB.tool_def(int(w.tools.get("chop", -1)))["name"]]
-	print("       走行 %.1f km・回収%d 加工%d・捨てた%d・同時に見えた採取ポイント 最大%d・道具 %s" % [main.director.distance / 2500.0, main.total_gathered,
-			main.processor.total_done, main.total_wasted, spawned_max, tool_txt])
+	print("       走行 %.1f km・回収%d 加工%d・重量 最大%d/%d・同時に見えた採取ポイント 最大%d・道具 %s" % [main.director.distance / 2500.0, main.total_gathered,
+			main.processor.total_done, main.total_weight(), main.max_weight(), spawned_max, tool_txt])
 	check(main.total_gathered > 8, "採取ポイントから、回収が回り続ける（累計 %d 個）" % main.total_gathered)
 	check(min_count >= 0, "倉庫の個数がマイナスにならない")
 	check(stuck < 20, "予約したまま動かない採取ポイントが残らない（ずれ %d 回）" % stuck)

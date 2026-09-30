@@ -2,9 +2,10 @@ class_name StockGrid
 extends Control
 ## 倉庫の中身を、アイテムのアイコンと個数で並べる表示（文字の一覧の代わり）。個数はアイコンの右下の内側。
 ## アイコンは assets/resources のアイテムの絵（差し替えられる素材）。倉庫のデータは読むだけ。
-##  - 枠がいっぱい（満）: 個数が赤く、アイコンに赤い枠。8割を超えたら個数が橙。
+## アイテムごとの枠は無く、拠点全体の積載率（重量）だけで判断する（重量制。data/cargo.gd）:
+##  - 拠点が満杯（積載率100%）: 個数が赤い（新しい収納の予約が止まる）。75%を超えたら個数が橙。
 ##  - 空腹の仲間がいるとき: 食料のアイコンが赤く点滅する。
-##  - マウスを載せると、名前・個数・（満）が出る。
+##  - マウスを載せると、名前・個数が出る。
 ## 数字の見せ方は UIKit.show_icon_numbers（false ならアイコンだけ）。
 
 const CELL := Vector2(28.0, 26.0)
@@ -35,16 +36,17 @@ func setup(item_rows: Array) -> StockGrid:
 	return self
 
 
-## 倉庫の中身と、空腹の仲間がいるかを反映する
+## 倉庫の中身と、空腹の仲間がいるかを反映する。近い／満杯は、拠点全体の積載率（重量）で決まる（アイテムごとの枠は無い）。
 func update_from(st, hungry: bool) -> void:
 	_hungry = hungry
 	_cells.clear()
+	var base_full: bool = st.enforce and st.weight_ratio() >= 1.0
+	var base_near: bool = st.enforce and st.weight_ratio() >= CargoDB.WARN_RATIO
 	for y in _rows.size():
 		for x in _rows[y].size():
 			var it: int = _rows[y][x]
 			var n: int = st.count_of(it)
-			var q: int = st.quota_of(it) if st.quota.has(it) else 0
-			_cells.append({"item": it, "n": n, "quota": q, "full": st.is_full(it), "near": q > 0 and float(n) >= 0.8 * float(q),
+			_cells.append({"item": it, "n": n, "full": base_full and n > 0, "near": base_near and n > 0,
 					"pos": Vector2(CELL.x * float(x), CELL.y * float(y))})
 	set_process(hungry)
 	queue_redraw()
@@ -98,10 +100,8 @@ func _get_tooltip(at_position: Vector2) -> String:
 		var pos: Vector2 = c["pos"]
 		if Rect2(pos, CELL).has_point(at_position):
 			var s := "%s %d" % [GameData.ITEM_NAMES[c["item"]], c["n"]]
-			if int(c["quota"]) > 0:
-				s += " / %d" % c["quota"]
 			if c["full"]:
-				s += "（いっぱい）"
+				s += "（拠点が満杯）"
 			if _hungry and int(c["item"]) == GameData.Item.FOOD:
 				s += "\n空腹の仲間がいる"
 			return s

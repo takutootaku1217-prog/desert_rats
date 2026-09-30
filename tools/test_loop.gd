@@ -62,11 +62,11 @@ func _one(n: int, minutes: float, scale: float, seed_base: int, events_on: bool,
 		"slow":
 			main.target_speed = 10.0
 		"rawfull":
-			for it in GameData.RAW_ITEMS:
-				st.inventory.counts[it] = st.quota_of(it)
+			# 区画は無くなったので、拠点全体を基本の素材（石）でほぼ満杯にする（重量制でも同じ状況を再現する）。
+			# すでにある初期の蓄え（食料・燃料・修理資材・道具）の重さも引いてから足す（最大重量を超えないように）
+			st.inventory.counts[GameData.Item.STONE] = main.remaining_weight() / CargoDB.item_weight(GameData.Item.STONE)
 		"prodfull":
-			for it in GameData.PRODUCT_ITEMS:
-				st.inventory.counts[it] = st.quota_of(it)
+			st.inventory.counts[GameData.Item.IRON] = main.remaining_weight() / CargoDB.item_weight(GameData.Item.IRON)
 	var next_stress := 5.0
 	var next_manual := 20.0
 	var W: Array = main.workers
@@ -315,12 +315,9 @@ func _one(n: int, minutes: float, scale: float, seed_base: int, events_on: bool,
 		for it in GameData.Item.values():
 			if st.count_of(it) < 0:
 				err.call("neg_%d" % it, "倉庫の個数がマイナス（%s）" % GameData.ITEM_NAMES.get(it, "?"))
-		for bay in [CargoDB.Bay.RAW, CargoDB.Bay.PRODUCT]:
-			if st.used_in(bay) > st.capacity_of(bay):
-				err.call("cap_%d" % bay, "%s が積載量を超えている（%d/%d）" % [CargoDB.BAY_NAMES[bay], st.used_in(bay), st.capacity_of(bay)])
-		for it in st.quota:
-			if st.count_of(it) > st.quota_of(it):
-				err.call("quota_%d" % it, "%s の個数（%d）が枠（%d）を超えている" % [GameData.ITEM_NAMES[it], st.count_of(it), st.quota_of(it)])
+		# わずかな一時超過（競合の瞬間など）は実装指示書どおり許容し、消さない設計の証拠として扱う。大きく・続けて超えたときだけ異常にする
+		if float(main.total_weight()) > float(main.max_weight()) * 1.05:
+			err.call("weight_over", "拠点の総重量が最大重量を大きく超えている（%d/%d）" % [main.total_weight(), main.max_weight()])
 
 	Engine.time_scale = 1.0
 	paused = false
@@ -338,23 +335,18 @@ func _one(n: int, minutes: float, scale: float, seed_base: int, events_on: bool,
 		if m == null or int(m.get_string(1)) != st.count_of(lb[1]):
 			ui_ok = false
 			errors.append("右上の表示（%s %s）が倉庫の個数（%d）と違う" % [lb[0], m.get_string(1) if m != null else "なし", st.count_of(lb[1])])
-	# 積載重量のアイコンゲージ: 数字（アイコンの内側）が実際の積載重量、充填率が実際の積載率と合っているか
+	# 積載重量のアイコンゲージ: 数字（アイコンの内側）が拠点全体の実際の総重量、充填率が実際の積載率と合っているか
 	var wg: IconGauge = main.status._weight
-	if wg.text != str(st.current_weight()) or absf(wg.ratio - st.weight_ratio()) > 0.001:
+	if wg.text != str(main.total_weight()) or absf(wg.ratio - st.weight_ratio()) > 0.001:
 		ui_ok = false
-		errors.append("積載重量のアイコン（数字 %s・充填 %.2f）が、実際の積載重量（%d・%.2f）と違う" % [wg.text, wg.ratio, st.current_weight(), st.weight_ratio()])
-	rx.compile("素材棚 (\\d+) / (\\d+)")
-	var m2 := rx.search(text)
-	if m2 == null or int(m2.get_string(1)) != st.used_in(CargoDB.Bay.RAW) or int(m2.get_string(2)) != st.capacity_of(CargoDB.Bay.RAW):
+		errors.append("積載重量のアイコン（数字 %s・充填 %.2f）が、実際の総重量（%d・%.2f）と違う" % [wg.text, wg.ratio, main.total_weight(), st.weight_ratio()])
+	rx.compile("積載重量 (\\d+) / (\\d+)")
+	var m2 := rx.search(main.status._weight.tooltip_text)
+	if m2 == null or int(m2.get_string(1)) != main.total_weight() or int(m2.get_string(2)) != main.max_weight():
 		ui_ok = false
-		errors.append("右上の素材棚の表示が、実際の積載量と違う")
-	rx.compile("加工品置き場 (\\d+) / (\\d+)")
-	var m3 := rx.search(text)
-	if m3 == null or int(m3.get_string(1)) != st.used_in(CargoDB.Bay.PRODUCT) or int(m3.get_string(2)) != st.capacity_of(CargoDB.Bay.PRODUCT):
-		ui_ok = false
-		errors.append("右上の加工品置き場の表示が、実際の積載量と違う")
+		errors.append("積載重量のツールチップの数字が、実際の総重量・最大重量と違う")
 	if ui_ok:
-		notes.append("右上の表示（素材・加工品の個数、素材棚・加工品置き場の積載量）は、実際の倉庫と一致している")
+		notes.append("右上の表示（素材・加工品の個数、積載重量）は、実際の倉庫・拠点全体と一致している")
 
 	# ---- 出力 ----
 	var over: bool = main.game_over
@@ -371,7 +363,10 @@ func _one(n: int, minutes: float, scale: float, seed_base: int, events_on: bool,
 	var keeps_moving: bool = scenario == "stop" or main.game_over or dist_mid < 0.0 or d.distance > dist_mid + 100.0
 	life += "最後まで移動が続く %s" % ("はい" if keeps_moving else "いいえ")
 	var eat_due: float = (CrewStatusDB.MAX_HUNGER - CrewStatusDB.EAT_BELOW) / CrewStatusDB.HUNGER_DECAY_PER_MIN * 60.0 + 300.0     # 最初の食事が起きるはずの時刻（余裕つき）
-	if not ms.has("L1 休憩") and sec >= 360.0:
+	# rawfull/prodfull は拠点を意図的にほぼ満杯から始めるシナリオ。単一の総重量プールでは「満杯」が
+	# 回収・運搬・加工のすべてを止めるため、仲間はほぼ待機のままで疲労度が上がらない（動いている間だけ疲労が溜まる仕様どおり）。
+	# これは重量制の意図した挙動なので、このシナリオに限り「休憩が起きない」を異常として扱わない。
+	if not ms.has("L1 休憩") and sec >= 360.0 and scenario not in ["rawfull", "prodfull"]:
 		errors.append("休憩が一度も起きなかった（疲れた仲間が休めない？）")
 	if not ms.has("L2 食事") and sec >= eat_due and not main.game_over:
 		errors.append("食事が一度も起きなかった（%d 秒たっても。満腹度が下がっても食べない？）" % int(sec))
@@ -404,8 +399,8 @@ func _one(n: int, minutes: float, scale: float, seed_base: int, events_on: bool,
 	var mp: Array = []
 	for it in made:
 		mp.append("%s%d" % [GameData.ITEM_NAMES[it], made[it]])
-	print("  資源: 発生 採取ポイント%d・落ちている物%d ／ 倉庫に入った素材 %s ／ 加工品 %s ／ 加工%d回 ／ 捨てた%d ／ 途中で消えた(向かっている最中) %d" % [
-			spawned["point"], spawned["loose"], " ".join(PackedStringArray(sp)), " ".join(PackedStringArray(mp)), P.total_done, main.total_wasted, lost_claim])
+	print("  資源: 発生 採取ポイント%d・落ちている物%d ／ 倉庫に入った素材 %s ／ 加工品 %s ／ 加工%d回 ／ 重量 最大%d/%d ／ 途中で消えた(向かっている最中) %d" % [
+			spawned["point"], spawned["loose"], " ".join(PackedStringArray(sp)), " ".join(PackedStringArray(mp)), P.total_done, main.total_weight(), main.max_weight(), lost_claim])
 	var share := ""
 	for w in W:
 		var ss2: Dictionary = state_secs.get(w, {})

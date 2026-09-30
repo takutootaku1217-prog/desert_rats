@@ -292,6 +292,30 @@ func _build_personnel(w) -> void:
 		plus.alignment = HORIZONTAL_ALIGNMENT_CENTER
 		row.add_child(plus)
 
+	_section("装備（採取道具。道具棚 tool_rack から）")
+	for slot in GatherDB.SLOTS:
+		var s: String = slot
+		var cur: int = int(w.tools.get(s, -1))
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 6)
+		_body.add_child(row)
+		row.add_child(UIKit.lbl("%s: %s" % [GatherDB.SLOTS[s], GatherDB.tool_def(cur)["name"]], 14, UIKit.C_TEXT, 200))
+		for it in GameData.TOOL_ITEMS:
+			var item: int = it
+			if GatherDB.slot_of_tool(item) != s or game.storage.count_of(item) <= 0:
+				continue
+			var b := UIKit.button("%s（在庫%d）" % [GameData.ITEM_NAMES[item], game.storage.count_of(item)], func():
+				game.equip_tool(w, item)
+				_build_detail())
+			b.custom_minimum_size = Vector2(0, 24)
+			row.add_child(b)
+		if cur >= 0:
+			var off := UIKit.button("外す", func():
+				game.unequip_tool(w, s)
+				_build_detail())
+			off.custom_minimum_size = Vector2(0, 24)
+			row.add_child(off)
+
 	_section("個体の操作")
 	_body.add_child(UIKit.lbl("解雇・名前の変更・ロックは、今後ここに追加されます", 13, UIKit.C_DIM))
 

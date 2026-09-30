@@ -32,10 +32,10 @@ const STAGE_LATE := 45000.0      # 装甲・通信設備
 
 const PARTS := [
 	# ---- 壁（外から見たときだけ）----
-	{"id": "tool_rack", "sheet": "wall_parts", "layer": "wall", "unlock": {"facility": "workbench"}},          # 作業道具（ワークベンチができたら）
+	{"id": "tool_rack", "sheet": "wall_parts", "layer": "wall", "unlock": {"facility": "tool_rack"}},          # 作業道具（道具棚ができたら。実装指示書8）
 	{"id": "wash_line", "sheet": "wall_parts", "layer": "wall", "unlock": {"beds": 2}},                        # 物干し（ベッドが2つ以上）
 	{"id": "sign_cross", "sheet": "wall_parts", "layer": "wall", "kind": "slot", "room": "infirmary"},        # 医務室の看板（部屋の配置で増える）
-	{"id": "rear_rack", "sheet": "wall_parts", "layer": "wall", "unlock": {"distance": STAGE_RACK}},          # 後ろの荷台（外部収納）
+	{"id": "rear_rack", "sheet": "wall_parts", "layer": "wall", "unlock": {"facility": "wood_cargo"}},        # 後ろの荷台（木製荷台ができたら。実装指示書7）
 	{"id": "fuel_port", "sheet": "wall_parts", "layer": "wall", "kind": "fuel_port"},                          # 燃料の口（機関室の壁）
 	# ---- 装甲（後半。外から見たときだけ）----
 	{"id": "armor_side", "sheet": "armor", "layer": "armor", "unlock": {"distance": STAGE_LATE}},

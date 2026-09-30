@@ -140,8 +140,8 @@ func _test_fuel_and_weight() -> void:
 	main.storage.add_item(GameData.Item.WOOD, 8)
 	sp._process(0.0)
 	var wg: IconGauge = sp._weight
-	check(wg.text == str(main.storage.current_weight()) and absf(wg.ratio - main.storage.weight_ratio()) < 0.0001, "積載重量: 数字はアイコンの中に実際の重量（%s）・充填は実際の積載率" % wg.text)
-	check(wg.tooltip_text.contains("素材棚") and wg.tooltip_text.contains("加工品置き場"), "区画ごとの内訳はツールチップ（情報は消えていない）")
+	check(wg.text == str(main.total_weight()) and absf(wg.ratio - main.storage.weight_ratio()) < 0.0001, "積載重量: 数字はアイコンの中に拠点全体の実際の重量（%s）・充填は実際の積載率" % wg.text)
+	check(wg.tooltip_text.contains("積載重量"), "重い順の上位アイテムなどはツールチップ（情報は消えていない）: %s" % wg.tooltip_text)
 	check(wg.color_stages == UIKit.GAUGE_STAGES_LOAD and not wg.dark_empty, "重りの色（増えるほど濃い）は、これまでどおり")
 	main.storage.inventory.counts.clear()
 
@@ -163,10 +163,9 @@ func _test_stock() -> void:
 		all_ok = all_ok and g.shown_count(it) == st.count_of(it)
 	check(all_ok, "これまで文字で出ていた11種すべてが、アイコンで出ている（情報は減らしていない）")
 	check(g.summary().contains("食料 5") and g.summary().contains("木材 3"), "（診断用の文字）%s" % g.summary())
-	for it in st.quota:
-		st.inventory.counts[it] = st.quota_of(it)
+	st.inventory.counts[GameData.Item.FOOD] = main.max_weight()   # 拠点全体を満杯にする（食料は重さ1なので個数=重量）
 	sp._process(0.0)
-	check(g.summary().contains("満") and g._cells[0]["full"], "枠がいっぱいの素材は「満」になる（枠の赤とともに表示）")
+	check(g.summary().contains("満") and g._cells[0]["full"], "拠点が満杯（積載率100%）になると、どの素材も「満」になる")
 	st.inventory.counts.clear()
 	main.hungry = true
 	sp._process(0.0)

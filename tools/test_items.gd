@@ -144,7 +144,46 @@ func _test_model() -> void:
 	var ind := InventoryModel.new()
 	ind.stacks = [a, b, c, d]
 	ind.merge_all()
-	check(ind.stacks.size() == 3, "整理しても、個体差のある物は別々のまま（%d つの束）" % ind.stacks.size())
+	# a・b は個体差（data）が違うので別（2束）。c・d は同じ道具（斧）でまとまるが、道具は1スタック1個までなので3束に分かれる（合計5束）
+	check(ind.stacks.size() == 5, "整理しても、個体差のある物は別々のまま。道具は1スタック1個までなので、まとまる分（斧3個）も3束のまま（%d つの束）" % ind.stacks.size())
+
+	# ---- スタック制（実装指示書 2.1・12）: 1スタック100個、道具は1スタック1個
+	check(ItemDB.stack_limit(GameData.Item.FOOD) == 100 and ItemDB.stack_limit(GameData.Item.AXE) == 1, "スタック上限: 通常100・道具1（ItemDB.stack_limit）")
+	var f := InventoryModel.new()
+	f.sync({GameData.Item.FOOD: 0})
+	check(f.stacks.is_empty(), "食料0個: 束は無い")
+	f.sync({GameData.Item.FOOD: 100})
+	check(_ns(f) == [100], "食料100個: [100]")
+	f.sync({GameData.Item.FOOD: 101})
+	check(_ns(f) == [100, 1], "食料101個: [100, 1]")
+	f.sync({GameData.Item.FOOD: 230})
+	check(_ns(f) == [100, 100, 30] and f.total_of(GameData.Item.FOOD) == 230, "食料230個: [100, 100, 30]（100個ずつの新しいスタックが自動でできる）")
+	f.merge_all()
+	check(_ns(f) == [100, 100, 30], "食料230個を整理しても [100, 100, 30] のまま（100を超える巨大な1スタックにはしない）")
+	check(f.split(0, 40) and _ns(f) == [60, 40, 100, 30] and f.total_of(GameData.Item.FOOD) == 230, "100のスタックを分割しても合計は変わらず、各スタックは100以下")
+	var g := InventoryModel.new()
+	g.sync({GameData.Item.FOOD: 50})
+	g.sync({GameData.Item.FOOD: 120})
+	check(_ns(g) == [100, 20], "既存の50スタックがある状態で70個追加すると [100, 20]（既存スタックを先に埋める）")
+	var tl := InventoryModel.new()
+	tl.sync({GameData.Item.AXE: 3})
+	check(_ns(tl) == [1, 1, 1], "道具3個は [1, 1, 1]（1スタック1個）")
+	tl.merge_all()
+	check(_ns(tl) == [1, 1, 1], "道具を整理しても [1, 1, 1] のまま（まとまって3にはならない）")
+	# スタックをどう操作しても、Inventory.counts（正の数量）の合計と必ず一致する
+	var h := InventoryModel.new()
+	h.sync({GameData.Item.FOOD: 230, GameData.Item.AXE: 3})
+	h.split(0, 33)
+	h.merge_all()
+	check(h.total_of(GameData.Item.FOOD) == 230 and h.total_of(GameData.Item.AXE) == 3, "スタックを分割・整理しても、合計は常に実際の数量と一致する")
+
+
+## 束の並びを、個数の配列にする（診断の比較用）
+func _ns(m: InventoryModel) -> Array:
+	var l: Array = []
+	for s in m.stacks:
+		l.append(s.n)
+	return l
 
 
 # ---------------------------------------------------------------- 制作の一覧と判定
@@ -159,14 +198,14 @@ func _test_craftdb() -> void:
 	for e in es:
 		known = known and CraftDB.CATEGORIES.has(e["cat"])
 	check(known, "どのエントリも、分類の表にある分類に入っている（分類は増減できる）")
-	# 材料は作業場で数える
-	_set_storage({GameData.Item.STONE: 50, GameData.Item.WOOD: 50})
+	# 材料は作業場で数える（重量制なので、拠点の残り重量を圧迫しない程度の量にする）
+	_set_storage({GameData.Item.STONE: 10, GameData.Item.WOOD: 10})
 	var hammer := CraftDB.entry_of("tool_hammer")               # 石2＋木材1（手作業）
 	var ev: Dictionary = CraftDB.evaluate(hammer, main, 1)
 	check(ev["state"] == "short" and ev["source"] == "作業場", "倉庫に石も木材も50個あっても、作業場に無ければ「材料不足」（倉庫の分は使えない）")
 	check(ev["can_transfer"] and ev["missing"].size() == 2, "足りない分が倉庫にあるので、「運べば作れる」と分かる")
 	var rows: Array = ev["rows"]
-	check(rows.size() == 2 and rows[0]["have"] == 0 and rows[0]["need"] in [1, 2] and not rows[0]["ok"] and rows[0]["in_storage"] == 50, "行: 必要数・作業場の数・倉庫の数（0 / 必要。倉庫 50）")
+	check(rows.size() == 2 and rows[0]["have"] == 0 and rows[0]["need"] in [1, 2] and not rows[0]["ok"] and rows[0]["in_storage"] == 10, "行: 必要数・作業場の数・倉庫の数（0 / 必要。倉庫 10）")
 	main.processor.stock.add(GameData.Item.STONE, 2)
 	main.processor.stock.add(GameData.Item.WOOD, 1)
 	ev = CraftDB.evaluate(hammer, main, 1)
@@ -190,8 +229,7 @@ func _test_craftdb() -> void:
 	check(ev["state"] == "locked" and ev["reason"].contains("ワークベンチ"), "ベッドは、ワークベンチが必要（解放待ち）")
 	# 置き場がいっぱい
 	main.storage.inventory.counts[GameData.Item.HAMMER] = 0
-	main.storage.quota[GameData.Item.FOOD] = 3
-	main.storage.inventory.counts[GameData.Item.FOOD] = 3
+	main.storage.inventory.counts[GameData.Item.STONE] = 100
 	main.processor.stock.add(GameData.Item.MEAT, 2)
 	ev = CraftDB.evaluate(CraftDB.entry_of("cook"), main, 1)
 	check(ev["state"] == "blocked" and ev["reason"] == "置き場がいっぱい" and ev["max_qty"] == 0, "作った物の置き場（倉庫の枠）がいっぱいなら「置き場がいっぱい」（捨てないため、作れない）")
@@ -203,7 +241,6 @@ func _test_transfer() -> void:
 	await _fresh(true)
 	var st: BaseStorage = main.storage
 	var P: BaseProcessor = main.processor
-	st.quota[GameData.Item.WOOD] = 40                             # 倉庫へ戻す試験のため、枠を広げる
 	_set_storage({GameData.Item.WOOD: 20, GameData.Item.STONE: 5})
 	check(main.workshop_count(GameData.Item.WOOD) == 0 and P.stock.count(GameData.Item.WOOD) == 0, "作業場の材料置き場は、最初は空（倉庫とは別の置き場）")
 	check(main.request_craft("tool_hammer", 1) == 0 and main.craft_queue.is_empty(), "倉庫に材料が100個あっても、作業場に無ければ、手動の制作は頼めない")
@@ -288,7 +325,6 @@ func _test_craft() -> void:
 	check(finished and main.total_crafted_by_hand == 3, "仲間が加工して、完成品が倉庫に入る（簡易ハンマー +3。手動で作った回数 %d）" % main.total_crafted_by_hand)
 	check(P.stock.count(GameData.Item.STONE) == 0 and P.stock.count(GameData.Item.WOOD) == 0, "材料は使い切った（作業場の材料も、注文も、残らない）")
 	# 数量（1・5・全部）
-	st.quota[GameData.Item.FOOD] = 50
 	P.stock.add(GameData.Item.MEAT, 7)
 	var ev: Dictionary = CraftDB.evaluate(CraftDB.entry_of("cook"), main, 1)
 	check(ev["max_qty"] == 7, "「全部」= 材料の範囲の最大回数（生肉 7 個 → 7 回）")
@@ -306,8 +342,8 @@ func _test_auto_unchanged() -> void:
 	await _fresh(true)
 	_set_storage({GameData.Item.MEAT: 5, GameData.Item.WOOD: 10, GameData.Item.STONE: 10, GameData.Item.IRON_ORE: 3, GameData.Item.HIDE: 4, GameData.Item.BONE: 3, GameData.Item.FAT: 3})
 	var r0: Dictionary = main.choose_recipe()
-	main.processor.stock.add(GameData.Item.MEAT, 50)
-	main.processor.stock.add(GameData.Item.WOOD, 50)
+	main.processor.stock.add(GameData.Item.MEAT, 5)
+	main.processor.stock.add(GameData.Item.WOOD, 5)
 	var r1: Dictionary = main.choose_recipe()
 	check(r0.get("id", "") == r1.get("id", "x") and r0.get("id", "") != "", "作業場に材料があっても、自動の加工の選び方は変わらない（%s）" % r0.get("name", ""))
 	# 自動の運搬は、倉庫から材料を運んで注文にする（作業場の材料は使わない）
@@ -366,7 +402,6 @@ func _test_ui() -> void:
 	check(others_ok and not b_inv.get_global_rect().intersects(b_craft.get_global_rect()), "新しいボタンは、ほかのボタンに重ならない（建設・部屋の変更・仲間の管理は残っている）")
 	# ---- インベントリ
 	_set_storage({GameData.Item.WOOD: 20, GameData.Item.STONE: 18, GameData.Item.MEAT: 8, GameData.Item.IRON: 1})
-	main.storage.quota[GameData.Item.WOOD] = 40
 	inv._unhandled_input(_key(KEY_TAB))
 	await process_frame
 	check(inv.is_open(), "Tab キーでインベントリが開く")
@@ -439,11 +474,15 @@ func _test_ui() -> void:
 	craft._refresh(true)
 	craft._qty_val = 99
 	craft._refresh(true)
-	check(craft._qty.max_value == 15 and craft._qty.all_value == 6, "選べる最大は、倉庫の材料も運べば作れる回数（15）。「全部」は、いま作れる最大の回数（6）")
+	# 期待値は CraftDB.evaluate（正本）から求める。重量制では、材料の量だけでなく作った物（簡易ハンマー）自体の
+	# 重さも拠点全体の残り重量に含まれるため、単純な「材料の量÷必要数」より小さくなることがある（実装指示書どおり）。
+	var ev2: Dictionary = CraftDB.evaluate(CraftDB.entry_of("tool_hammer"), main, 1)
+	check(craft._qty.max_value == maxi(ev2["max_qty"], ev2["max_with_storage"]) and craft._qty.all_value == ev2["max_qty"],
+			"選べる最大は、倉庫の材料も運べば作れる回数（%d）。「全部」は、いま作れる最大の回数（%d）" % [ev2["max_with_storage"], ev2["max_qty"]])
 	craft._qty_val = 1
 	craft._refresh(true)
 	_find_button(craft._qty, "全部").pressed.emit()
-	check(craft._qty.value == 6 and craft._qty_val == 6, "「全部」を押すと、いま作れる最大の回数（6 回。石12・木材6）になる")
+	check(craft._qty.value == ev2["max_qty"] and craft._qty_val == ev2["max_qty"], "「全部」を押すと、いま作れる最大の回数（%d 回）になる" % ev2["max_qty"])
 	craft._qty.set_value(5)
 	craft._do_craft()
 	check(main.craft_queue.size() == 1 and main.craft_queue[0]["n"] == 5, "［制作］で、5回分の制作の待ちが入る")

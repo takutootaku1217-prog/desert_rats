@@ -49,8 +49,6 @@ var tool_auto := true             # 採取の道具を、倉庫から自動で�
 var _tool_clock := 0.0
 var build_queue: Array = []       # 建設の依頼（設備 id。待ち）。材料と必要設備がそろうと、仲間が材料を運んで作る（data/facilities.gd）
 var total_built := 0              # 建設した設備の数（確認用）
-var total_wasted := 0             # 倉庫に入りきらず捨てた数（積載量。data/cargo.gd）
-var _waste_note_at := -999.0      # 最後に「捨てた」を記録へ出した時刻（記録が増えすぎないように）
 var last_carcass = null           # 直前に倒した生物の獲物（倒した仲間がそのまま運ぶ）
 
 var _spawn_dist := 40.0           # 次の地面の資源までの残り距離
@@ -96,7 +94,6 @@ func _ready() -> void:
 	base.game = self
 	add_child(base)
 	storage = base.storage
-	storage.overflowed.connect(_on_overflow)
 	processor = base.processor
 	if FacilityDB.start_all:
 		base.grant_all()            # 自己診断・放置比較ツール用。ゲームは設備なし（手作業）から始まる
@@ -406,28 +403,107 @@ func _feed_crafts() -> void:
 		if not started:
 			break
 
-# ---------------------------------------------------------------- 積載量（data/cargo.gd）
-## いま倉庫へ向かっている物の数（回収に向かっている・運んでいる）。空き枠から引いて、入りきらない無駄足を防ぐ。
-func gather_room() -> Dictionary:
-	var inflight := {}
+# ---------------------------------------------------------------- 積載量（重量制。data/cargo.gd）
+## 拠点全体のいまの重さ（倉庫の在庫・作業場の材料・加工設備に投入済みの材料と完成品・仲間が装備している道具・
+## 倉庫と作業場の間を運搬中のアイテムの合計）。HUD・AI・制作の判定は、必ずここ（か remaining_weight）を見る
+## （実装指示書: 「同じ値を見るようにする」正本の集計口）。獲物（CARCASS）は運搬途中の一時データなので含めない。
+func total_weight() -> int:
+	return storage.current_weight() + workshop_weight() + equipped_tools_weight() + transit_weight()
+
+
+func max_weight() -> int:
+	return storage.max_weight()
+
+
+func remaining_weight() -> int:
+	return maxi(0, max_weight() - total_weight())
+
+
+## 作業場（processor.stock）＋加工設備に投入済みの材料（orders・current の "in"）＋取り出し待ちの完成品（output）
+func workshop_weight() -> int:
+	var w := 0
+	for it in processor.stock.counts:
+		w += CargoDB.weight_of(it, processor.stock.counts[it])
+	var committed: Array = processor.orders.duplicate()
+	if not processor.current.is_empty():
+		committed.append(processor.current)
+	for r in committed:
+		for it in r["in"]:
+			w += CargoDB.weight_of(it, int(r["in"][it]))
+	for it in processor.output:
+		w += CargoDB.item_weight(it)
+	return w
+
+
+## 仲間が装備している採取の道具（倉庫にある予備は storage.current_weight にすでに含まれる）
+func equipped_tools_weight() -> int:
+	var w := 0
+	for wk in workers:
+		for slot in wk.tools:
+			w += CargoDB.item_weight(int(wk.tools[slot]))
+	return w
+
+
+## 倉庫 ⇄ 作業場を運搬中のアイテム（材料を加工設備へ運ぶ HAUL_MOVE・運搬の依頼 XFER_MOVE の間だけ）
+func transit_weight() -> int:
+	var w := 0
+	for wk in workers:
+		if wk.ai.state == CharacterAI.State.HAUL_MOVE and not wk.ai.haul_recipe.is_empty():
+			for it in wk.ai.haul_recipe["in"]:
+				w += CargoDB.weight_of(it, int(wk.ai.haul_recipe["in"][it]))
+		elif wk.ai.state == CharacterAI.State.XFER_MOVE and wk.ai.xfer_item >= 0:
+			w += CargoDB.weight_of(wk.ai.xfer_item, wk.carry_n)
+	return w
+
+
+## いま倉庫へ向かっている・回収に向かっている重さ（まだ積み込まれていなくても、新しい回収・狩猟を始める前に
+## この分を残り重量から引く。実装指示書 2.2「屋外で新しく採取した荷物は、まだ積み込まれていなくても収納予約の
+## 重量には含める」）。表示する総重量（total_weight）そのものには含めない（拠点の中に実在する重さではないため）。
+func reserved_weight() -> int:
+	var w := 0
 	for r in resources_root.get_children():
-		if r.claimed_by != null and r.item != GameData.Item.CARCASS:
-			inflight[r.item] = inflight.get(r.item, 0) + r.reserved         # 採取ポイントは袋の大きさぶん
-	for w in workers:
-		if w.carrying >= 0 and w.carrying != GameData.Item.CARCASS \
-				and w.ai.state in [CharacterAI.State.MOVE_TO_STORAGE, CharacterAI.State.STORE]:
-			inflight[w.carrying] = inflight.get(w.carrying, 0) + w.carry_n
-	return inflight
+		if r.claimed_by == null:
+			continue
+		w += _carcass_or_item_weight(r)
+	for wk in workers:
+		if wk.carrying < 0 or wk.ai.state not in [CharacterAI.State.MOVE_TO_STORAGE, CharacterAI.State.STORE]:
+			continue
+		if wk.carrying == GameData.Item.CARCASS:
+			w += _species_weight(wk.carrying_species)
+		else:
+			w += CargoDB.weight_of(wk.carrying, wk.carry_n)
+			for it in wk.carry_bonus:
+				w += CargoDB.weight_of(it, wk.carry_bonus[it])
+	return w
 
 
-## 資源 r を回収してよいか（倉庫に置き場があるか）。inflight は gather_room() の結果。
-func has_room_for(r, inflight: Dictionary) -> bool:
+func _carcass_or_item_weight(r) -> int:
+	if r.item == GameData.Item.CARCASS:
+		return _species_weight(r.species)
+	return CargoDB.weight_of(r.item, r.reserved)
+
+
+func _species_weight(species: String) -> int:
+	var w := 0
+	for it in GameData.CREATURES[species]["drops"]:
+		w += CargoDB.weight_of(it, int(GameData.CREATURES[species]["drops"][it]))
+	return w
+
+
+## 新しく回収・狩猟・運搬を予約してよい残り重量（いま向かっている・運んでいる分を引いたぶん）。複数人が
+## 同じ空きへ同時に向かわないようにする（実装指示書 2.2）。
+func available_weight_for_reservation() -> int:
+	return maxi(0, remaining_weight() - reserved_weight())
+
+
+## 資源 r を回収してよいか（その重さぶんの空きがあるか）
+func has_room_for(r) -> bool:
 	if r.item == GameData.Item.CARCASS:
 		return storage.drop_fit(r.species) >= CargoDB.MIN_DROP_FIT
-	return storage.free_for(r.item) - int(inflight.get(r.item, 0)) > 0
+	return available_weight_for_reservation() >= CargoDB.item_weight(r.item)
 
 
-## その生物を狩ってよいか（倒した獲物の素材が倉庫に入るか）
+## その生物を狩ってよいか（倒した獲物の素材の重さが入るか）
 func hunt_has_room(species: String) -> bool:
 	return storage.drop_fit(species) >= CargoDB.MIN_DROP_FIT
 
@@ -531,6 +607,17 @@ func unequip_tool(w, slot: String) -> void:
 	if old >= 0:
 		w.tools.erase(slot)
 		storage.add_item(old)
+
+
+## 道具棚（tool_rack）に表示される、倉庫にある余りの採取道具（実装指示書8。世界内の見た目と診断が読む）。
+func tool_rack_spares() -> Array:
+	if not has_facility("tool_rack"):
+		return []
+	var l: Array = []
+	for it in GameData.TOOL_ITEMS:
+		for _i in storage.count_of(it):
+			l.append(it)
+	return l
 
 
 ## その道具を作る意味があるか（もう1つ増えると、全員の総合点が上がり、予備も作りかけもない）。加工の選択（choose_recipe）で使う。
@@ -749,15 +836,6 @@ func close_other_panels(keep) -> void:
 			p.close()
 
 
-## 倉庫に入りきらず捨てたとき（記録には、他の出来事を押し出さないよう、60秒に1回だけ出す）
-func _on_overflow(item: int, amount: int) -> void:
-	total_wasted += amount
-	var now: float = director.elapsed
-	if now - _waste_note_at >= 60.0:
-		_waste_note_at = now
-		director.note("倉庫がいっぱいで捨てた（%s）" % GameData.ITEM_NAMES[item])
-
-
 ## 加工の方針に従って、次に作るレシピを選ぶ（材料が揃っていて、作り置きが足りないもの）。
 ## ★が高いものから。同じ★なら、在庫の少ない加工品を優先する。
 ## プレイヤーが依頼した建設は、方針より先（材料と必要設備がそろっていれば）。必要設備（recipe の station）がまだない物は選ばない。
@@ -788,15 +866,26 @@ func choose_recipe() -> Dictionary:
 		if r["out"] in GameData.TOOL_ITEMS and not tool_wanted(r["out"]):
 			continue                                                        # 誰の道具の更新にもならない道具は作らない
 		var have: int = storage.count_of(r["out"]) + processor.pending_of(r["out"])
-		var room: int = storage.quota_of(r["out"])                          # 積載量の枠。作り置きの上限も枠を超えない
-		var target: int = mini(GameData.STOCK_TARGET.get(r["out"], 5), room)
-		if have >= target or have + int(r["n"]) > room:
-			continue                                                        # 作り足りている、または置き場に入りきらない
-		var key: float = pr * 10.0 + (1.0 - float(have) / float(target))
+		var target: int = GameData.STOCK_TARGET.get(r["out"], 5)
+		if have >= target:
+			continue                                                        # 作り足りている
+		# 作った結果が最大重量を超えるなら作らない（実装指示書 2.4）。材料はすでに倉庫の重さに入っているので、
+		# 見るのは「出来上がる物の重さ」と「材料の重さ」の差（cook のように出来高で重くなるレシピだけが対象になる）
+		var net := CargoDB.weight_of(int(r["out"]), int(r["n"])) - _recipe_in_weight(r)
+		if net > 0 and remaining_weight() < net:
+			continue                                                        # 置き場（重量）に入りきらない
+		var key: float = pr * 10.0 + (1.0 - float(have) / float(maxi(1, target)))
 		if key > best_key:
 			best_key = key
 			best = r
 	return best
+
+
+func _recipe_in_weight(r: Dictionary) -> int:
+	var w := 0
+	for it in r["in"]:
+		w += CargoDB.weight_of(it, int(r["in"][it]))
+	return w
 
 
 # ---------------------------------------------------------------- 出現

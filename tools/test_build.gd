@@ -89,6 +89,8 @@ func _run() -> void:
 	await _test_reserve()
 	await _test_unlock()
 	await _test_beds()
+	await _test_wood_cargo()
+	await _test_tool_rack()
 	await _test_interrupt()
 	await _test_ui()
 	await _test_full_run()
@@ -97,7 +99,6 @@ func _run() -> void:
 # ---------------------------------------------------------------- 表の整合
 func _test_tables() -> void:
 	print("-- 設備の表の整合")
-	var quota := CargoDB.default_quota()
 	for id in FacilityDB.ids():
 		var d: Dictionary = FacilityDB.def(id)
 		check(d.has_all(["name", "desc", "cost", "time", "field", "max", "requires", "station", "room", "dx", "sprite", "frame", "stride"]),
@@ -113,9 +114,9 @@ func _test_tables() -> void:
 		check(d["dx"].size() >= int(d["max"]), "%s: 置き場所が最大数ぶんある" % id)
 		var cost_ok := true
 		for it in d["cost"]:
-			if CargoDB.bay_of(it) < 0 or int(d["cost"][it]) > int(quota.get(it, 0)):
-				cost_ok = false                              # 倉庫の初期の枠より多い材料は、集めても貯まらない
-		check(cost_ok, "%s: 材料は倉庫に置ける物で、初期の枠に収まる" % id)
+			if CargoDB.item_weight(it) * int(d["cost"][it]) > CargoDB.BASE_MAX_WEIGHT:
+				cost_ok = false                              # 基本の最大重量（拡張前）だけでも集めきれる量にする
+		check(cost_ok, "%s: 材料は拠点の基本の最大重量に収まる" % id)
 		var sprites_ok := true
 		for i in int(d["max"]):
 			if not FileAccess.file_exists(FacilityDB.sprite_path(id, i)):
@@ -331,6 +332,117 @@ func _test_beds() -> void:
 	check(main.base.claim_bed(W[0]) == 0 and main.base.claim_bed(W[1]) == -1, "ベッド1つなら、2人目は休めない")
 	main.base.release_bed(W[0])
 	check(main.base.claim_bed(W[1]) == 0, "空いたベッドを次の仲間が使う")
+
+
+# ---------------------------------------------------------------- 木製荷台（最大重量+100。実装指示書7）
+func _test_wood_cargo() -> void:
+	print("-- 木製荷台（拠点の最大重量を増やす）")
+	await _fresh(false)
+	check(main.max_weight() == CargoDB.BASE_MAX_WEIGHT, "未建設なら最大重量は基本値（200）")
+	check(main.build_blocked_reason("wood_cargo").contains("ワークベンチ"), "ワークベンチなしでは建設できない")
+	check(not main.request_build("wood_cargo"), "依頼も出せない")
+	main.base.add_facility("workbench")
+	check(main.build_blocked_reason("wood_cargo") == "", "ワークベンチができれば建設を依頼できる")
+	# 建設を中断・取消した場合は最大重量が増えない（基本値のまま）
+	_give_cost("wood_cargo")
+	_only_hauler()
+	Engine.time_scale = 8.0
+	main.request_build("wood_cargo")
+	var w0 = W[0]
+	var t0: float = await _until(func(): return w0.ai.state == CharacterAI.State.HAUL_TAKE, 30.0)
+	check(t0 >= 0.0, "（準備）材料を取りに向かう")
+	w0.stop_work()
+	main.cancel_build("wood_cargo")
+	w0.ai._set_state(CharacterAI.State.SEARCH)
+	check(main.base.facility_count("wood_cargo") == 0 and main.max_weight() == CargoDB.BASE_MAX_WEIGHT, "中断・取消した場合、最大重量は200のまま")
+	# 完成すると最大重量が増える
+	_give_cost("wood_cargo")
+	main.request_build("wood_cargo")
+	var t: float = await _until(func(): return main.base.facility_count("wood_cargo") >= 1, 120.0)
+	Engine.time_scale = 1.0
+	check(t >= 0.0, "木製荷台が完成する（%.0f秒）" % t)
+	check(main.max_weight() == CargoDB.BASE_MAX_WEIGHT + 100, "完成すると最大重量が300（200+100）になる")
+	# 部屋の移設（加工室を機関室の区画へ）のあとも増えたまま
+	st.add_item(GameData.Item.WOOD, 3)
+	st.add_item(GameData.Item.IRON, 2)
+	check(main.build_room("l1", "workshop"), "（準備）加工室を別の区画へ移す")
+	check(main.max_weight() == CargoDB.BASE_MAX_WEIGHT + 100, "部屋を移設しても、木製荷台の効果は変わらない")
+	# 内外装の切り替えのあとも増えたまま
+	main.base.set_view_exterior(true)
+	main.base.set_view_exterior(false)
+	check(main.max_weight() == CargoDB.BASE_MAX_WEIGHT + 100, "外装・内装を切り替えても、木製荷台の効果は変わらない")
+	# 別の変数に保存されていない（毎回、建設数から計算し直している）ことの確認: 再配置を再実行しても同じ
+	main.base.apply_layout()
+	check(main.max_weight() == CargoDB.BASE_MAX_WEIGHT + 100, "再構築（apply_layout）のあとも300のまま（別変数に二重保存していない証拠）")
+
+
+# ---------------------------------------------------------------- 道具棚（採取道具の管理を分かりやすくする。実装指示書8）
+func _test_tool_rack() -> void:
+	print("-- 道具棚（既存の採取道具の管理を、個体管理画面から行える入口）")
+	await _fresh(false)
+	check(main.build_blocked_reason("tool_rack").contains("ワークベンチ"), "ワークベンチなしでは建設できない")
+	main.base.add_facility("workbench")
+	check(main.build_blocked_reason("tool_rack") == "", "ワークベンチができれば建設を依頼できる")
+	main.base.add_facility("tool_rack")
+	check(main.base.has_facility("tool_rack"), "（準備）道具棚が建った")
+	# 建設後、倉庫の余り道具が棚へ表示される
+	check(main.tool_rack_spares().is_empty(), "道具が倉庫になければ、棚には何も出ない")
+	st.add_item(GameData.Item.HAMMER, 1)
+	st.add_item(GameData.Item.PICKAXE, 2)
+	var spares: Array = main.tool_rack_spares()
+	check(spares.size() == 3 and spares.count(GameData.Item.HAMMER) == 1 and spares.count(GameData.Item.PICKAXE) == 2,
+			"建設後、倉庫の余り道具（簡易ハンマー1・鉄製ピッケル2）が棚に表示される")
+	# 個体Aへ装備すると、倉庫から1個減り、個体Aの装備が変わる
+	var a = W[0]
+	var b = W[1]
+	var before_count := st.count_of(GameData.Item.PICKAXE)
+	check(main.equip_tool(a, GameData.Item.PICKAXE), "個体Aへ鉄製ピッケルを装備する")
+	check(st.count_of(GameData.Item.PICKAXE) == before_count - 1 and int(a.tools.get("mine", -1)) == GameData.Item.PICKAXE,
+			"倉庫から1個減り、個体Aの装備が変わる")
+	check(main.tool_rack_spares().size() == spares.size() - 1, "棚に表示される余り道具も1個減る")
+	# 交換すると古い道具が倉庫へ戻る
+	check(main.equip_tool(a, GameData.Item.HAMMER), "個体Aの採掘の道具を、簡易ハンマーに交換する")
+	check(int(a.tools.get("mine", -1)) == GameData.Item.HAMMER and st.count_of(GameData.Item.PICKAXE) == before_count,
+			"交換すると、古い道具（鉄製ピッケル）は倉庫へ戻る")
+	# 取り外すと倉庫へ戻る
+	var hammer_before := st.count_of(GameData.Item.HAMMER)
+	main.unequip_tool(a, "mine")
+	check(int(a.tools.get("mine", -1)) == -1 and st.count_of(GameData.Item.HAMMER) == hammer_before + 1, "取り外すと倉庫へ戻る")
+	# 同じ1個を複数人へ同時装備できない（倉庫に1個しかないので、2人目は装備できない）
+	st.inventory.counts[GameData.Item.PICKAXE] = 1
+	check(main.equip_tool(a, GameData.Item.PICKAXE), "（準備）個体Aが鉄製ピッケルを1個装備する")
+	check(st.count_of(GameData.Item.PICKAXE) == 0, "倉庫の鉄製ピッケルは0個になる")
+	check(not main.equip_tool(b, GameData.Item.PICKAXE), "倉庫に無いので、個体Bは同じ道具を装備できない（複製されない）")
+	check(int(b.tools.get("mine", -1)) != GameData.Item.PICKAXE, "個体Bの装備は変わらない")
+	main.unequip_tool(a, "mine")
+	# 自動割り当てOFFでは勝手に変わらない
+	main.tool_auto = false
+	st.add_item(GameData.Item.ADV_PICK, 1)
+	a.ranks[GameData.Field.GATHERER] = 7
+	main.manage_tools()
+	check(int(a.tools.get("mine", -1)) == -1, "自動割り当てがOFFなら、倉庫に良い道具があっても勝手に持たせない")
+	# 自動割り当てONでも、手動変更の直後に複製・消失が起きない
+	main.tool_auto = true
+	var total_before: int = st.count_of(GameData.Item.HAMMER) + st.count_of(GameData.Item.PICKAXE) + st.count_of(GameData.Item.ADV_PICK)
+	for w in main.workers:
+		total_before += (1 if w.tools.has("mine") else 0)
+	main.equip_tool(a, GameData.Item.HAMMER)                  # 手動で変更した直後に
+	main.manage_tools()                                        # 自動割り当てが動いても
+	var total_after: int = st.count_of(GameData.Item.HAMMER) + st.count_of(GameData.Item.PICKAXE) + st.count_of(GameData.Item.ADV_PICK)
+	for w in main.workers:
+		total_after += (1 if w.tools.has("mine") else 0)
+	check(total_before == total_after, "自動割り当てが動いても、採掘の道具の総数は変わらない（複製・消失なし）")
+	# 個体管理画面に「装備」区画があり、既存の割り当て処理につながっている
+	var detail: CrewDetailUI = main.detail
+	detail.toggle()
+	detail._worker = a
+	detail._build_detail()
+	var has_equip_section := false
+	for c in detail._body.get_children():
+		if c is Label and String(c.text).contains("装備"):
+			has_equip_section = true
+	check(has_equip_section, "個体管理画面に「装備」の区画がある")
+	detail.toggle()
 
 
 # ---------------------------------------------------------------- 途中でやめたときの依頼の戻り

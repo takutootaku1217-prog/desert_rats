@@ -61,6 +61,40 @@ def bed(i):
     return p
 
 
+def wood_cargo():
+    """木製荷台（幅8・高さ10）。丸太を積んだ荷台。実装指示書: 拠点の最大重量を増やす設備（仮のドット絵）。"""
+    p = Px(8, 10)
+    p.hline(0, 8, 8, WOOD_D)                      # 台の脚
+    p.rect(0, 6, 8, 2, WOOD)                      # 台の板
+    p.hline(0, 6, 8, WOOD_L)
+    for i, y in enumerate((2, 4)):                # 丸太を2段
+        ox = 0 if i == 0 else 1
+        for x in range(ox, 8, 3):
+            p.ellipse(x + 1, y, 1, 1, WOOD_L)
+            p.set(x, y, WOOD)
+            p.set(x + 2, y, WOOD_D)
+    p.vline(1, 1, 7, C["rust_l"])                  # 縛った縄
+    p.vline(6, 1, 7, C["rust_l"])
+    return p
+
+
+def tool_rack(frame=None):
+    """道具棚（幅8・高さ10）。壁掛けの板に、道具が2つ掛かる。実装指示書: 採取道具を個体へ割り当てる入口（仮のドット絵）。"""
+    p = Px(8, 10)
+    p.rect(0, 1, 8, 2, WOOD)                       # 壁掛けの板
+    p.hline(0, 1, 8, WOOD_L)
+    p.hline(0, 2, 8, WOOD_D)
+    p.set(1, 0, C["steel_h"]); p.set(6, 0, C["steel_h"])   # 掛けるフック
+    # ハンマー（左）
+    p.vline(2, 3, 4, WOOD)
+    p.rect(1, 3, 3, 2, C["steel_l"]); p.hline(1, 3, 3, C["steel_h"])
+    # ピッケル（右）
+    p.vline(5, 3, 5, WOOD)
+    p.line(4, 4, 7, 4, C["steel_l"])
+    p.set(4, 3, C["steel_h"]); p.set(7, 5, C["steel_h"])
+    return p
+
+
 def hull():
     # 屋根の上の物は焼き込まない（外装パーツ art_exterior.py が、外装でも内装の断面図の上でも同じ絵を重ねる）
     return art_base.build_hull(furnish=False, roof=False)
@@ -77,6 +111,8 @@ def all_images():
     l = [("base", "hull.png", hull()), ("base", "workbench.png", workbench_sheet())]
     for i in range(3):
         l.append(("base", f"bed_{i}.png", bed(i)))
+    l.append(("base", "wood_cargo.png", wood_cargo()))
+    l.append(("base", "tool_rack.png", tool_rack()))
     return l + room_images()
 
 

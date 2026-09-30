@@ -275,7 +275,9 @@ func _test_same_data() -> void:
 	# 設備の建設
 	var n0: int = ExteriorDB.visible_ids(main, ["wall", "roof"]).size()
 	main.base.add_facility("workbench")
-	check("tool_rack" in ExteriorDB.visible_ids(main, ["wall"]), "ワークベンチを建てると、外装に工具かけが付く")
+	check("tool_rack" not in ExteriorDB.visible_ids(main, ["wall"]), "ワークベンチだけでは、まだ工具かけは付かない（道具棚の完成が必要。2026-09-30 に変更）")
+	main.base.add_facility("tool_rack")
+	check("tool_rack" in ExteriorDB.visible_ids(main, ["wall"]), "道具棚を建てると、外装に工具かけが付く")
 	main.base.add_facility("bed")
 	check("canopy" in ExteriorDB.visible_ids(main, ["roof"]), "最初のベッドができると、屋根に布（日よけ）が張られる")
 	check("wash_line" not in ExteriorDB.visible_ids(main, ["wall"]), "ベッドが1つでは、まだ物干しはない")
@@ -293,7 +295,6 @@ func _test_growth() -> void:
 		[ExteriorDB.STAGE_SMALL, "crates_big", "crates_small"],
 		[ExteriorDB.STAGE_MID, "water_tank", "cloth_roll"],
 		[ExteriorDB.STAGE_MID, "antenna_mast", "antenna_small"],
-		[ExteriorDB.STAGE_RACK, "rear_rack", ""],
 		[ExteriorDB.STAGE_TANK, "fuel_tank_roof", ""],
 		[ExteriorDB.STAGE_LATE, "antenna_comm", "antenna_mast"],
 		[ExteriorDB.STAGE_LATE, "armor_side", ""],
@@ -306,6 +307,11 @@ func _test_growth() -> void:
 		main.director.distance = s[0]
 		var now_ids: Array = ExteriorDB.visible_ids(main, ["wall", "armor", "roof"])
 		check(s[1] in now_ids and (s[2] == "" or not (s[2] in now_ids)), "%s: 距離 %.0f で出る%s" % [s[1], s[0], "（%s は置き換わって消える）" % s[2] if s[2] != "" else ""])
+	# 後ろの荷台（rear_rack）は、2026-09-30 から走行距離ではなく木製荷台の完成で出る
+	check("rear_rack" not in ExteriorDB.visible_ids(main, ["wall"]), "木製荷台がなければ、後ろの荷台はまだ出ない")
+	main.base.add_facility("wood_cargo")
+	check("rear_rack" in ExteriorDB.visible_ids(main, ["wall"]), "木製荷台が完成すると、外装に後ろの荷台が付く（実装指示書7）")
+	main.base.built.erase("wood_cargo")
 	var late: Array = ExteriorDB.visible_ids(main, ["wall", "armor", "roof"])
 	check(late.size() > prev.size(), "後半は、最初よりパーツが増えている（%d → %d）" % [prev.size(), late.size()])
 	# 二重に描かない: 置き換えられたものと置き換えたものは同時に出ない

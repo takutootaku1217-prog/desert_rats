@@ -53,6 +53,11 @@ static func order_of(item: int) -> int:
 	return i if i >= 0 else ORDER.size() + item
 
 
+## 1スタックの最大数（実装指示書: 通常アイテムは100、道具は1）。
+static func stack_limit(item: int) -> int:
+	return 1 if item in GameData.TOOL_ITEMS else 100
+
+
 ## そのアイテムを材料に使うもの [{"kind": "recipe" | "build", "id": …, "name": …, "out": 作るアイテム（建設は -1）}]
 static func uses_of(item: int) -> Array:
 	var l: Array = []

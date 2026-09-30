@@ -109,16 +109,15 @@ func _png_size(path: String) -> Vector2i:
 # ---------------------------------------------------------------- 表の整合
 func _test_tables() -> void:
 	print("-- 部屋の表の整合")
-	var quota := CargoDB.default_quota()
 	var valid_items: Array = GameData.Item.values()
 	for t in Rooms.TYPES:
 		var d: Dictionary = Rooms.TYPES[t]
 		check(d.has_all(["name", "floors", "unique", "required", "min_base_level", "cost", "desc", "effects"]), "%s: 必要な項目がそろっている" % t)
 		var ok := true
 		for it in d["cost"]:
-			if not (it in valid_items) or CargoDB.bay_of(it) < 0 or int(d["cost"][it]) > int(quota.get(it, 0)):
-				ok = false            # 旧素材（今の GameData.Item にない）・倉庫に置けない物・初期の枠より多い量は不可
-		check(ok, "%s: 費用は今の素材で、倉庫に置ける物・初期の枠に収まる量" % t)
+			if not (it in valid_items) or it == GameData.Item.CARCASS or CargoDB.item_weight(it) * int(d["cost"][it]) > CargoDB.BASE_MAX_WEIGHT:
+				ok = false            # 旧素材（今の GameData.Item にない）・獲物・基本の最大重量に収まらない量は不可
+		check(ok, "%s: 費用は今の素材で、拠点の基本の最大重量に収まる量" % t)
 	var order: Array = Rooms.TYPE_ORDER.duplicate()
 	var keys: Array = Rooms.TYPES.keys()
 	order.sort()
@@ -240,13 +239,13 @@ func _test_build_flow() -> void:
 	_give("bedroom")
 	check(main.build_room("l1", "bedroom"), "空き部屋に寝室を建てる（寝室は移設）")
 	check(main.room_layout["l1"] == "bedroom" and main.room_layout["u2"] == "empty", "寝室が下の階へ移り、元の区画は空き部屋になる")
-	# 積載の枠を超えない（費用は、倉庫の初期の枠に収まる）
+	# 積載できない量ではない（費用は、拠点の基本の最大重量に収まる）
 	for t in Rooms.TYPES:
 		var fits := true
 		for it in Rooms.TYPES[t]["cost"]:
-			if st.quota_of(it) < int(Rooms.TYPES[t]["cost"][it]):
+			if CargoDB.item_weight(it) * int(Rooms.TYPES[t]["cost"][it]) > CargoDB.BASE_MAX_WEIGHT:
 				fits = false
-		check(fits, "%s: 費用が倉庫の枠に収まる（集めても貯まらない、にならない）" % t)
+		check(fits, "%s: 費用が拠点の基本の最大重量に収まる（集めても貯まらない、にならない）" % t)
 
 
 func _cost_text(cost: Dictionary) -> String:
