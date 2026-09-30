@@ -74,7 +74,7 @@ func _process(delta: float) -> void:
 			_facing = signf(_wander)
 	position.x += (ground_v - game.scroll_speed) * delta
 	# 逃げ切った・流れ去った
-	if position.x > 1340.0 or position.x < -80.0:
+	if position.x > game.camera_left() + 1340.0 or position.x < game.camera_left() - 80.0:
 		if hunted_by != null and is_instance_valid(hunted_by):
 			hunted_by = null
 		queue_free()

@@ -21,7 +21,7 @@ func _init() -> void:
 func _process(delta: float) -> void:
 	age += delta
 	position.x -= game.scroll_speed * delta
-	if position.x < -60.0:
+	if position.x < game.camera_left() - 60.0:
 		queue_redraw()
 		queue_free()
 		return

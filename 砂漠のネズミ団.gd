@@ -10,6 +10,7 @@ var scroll_speed := 60.0          # 実際の速度。燃料切れ・走行装�
 var storage: BaseStorage
 var processor: BaseProcessor
 var base: MobileBase
+var ground_sort: Node2D           # 資源・生物・敵・仲間をまとめて、足元のY位置で前後判定させる共通の親（BG-04対策）
 var resources_root: Node2D
 var creatures_root: Node2D
 var enemies_root: Node2D
@@ -132,21 +133,32 @@ func _ready() -> void:
 		for it in FacilityDB.START_STOCK:
 			storage.add_item(it, FacilityDB.START_STOCK[it])
 
+	# 地面の上の物（資源・生物・敵・仲間）を、木の順番ではなく足元のY位置で前後判定させる（BG-04: 仲間と採取ポイントの重なりが逆に見えていたのを直した）。
+	# y_sort_enabled は、この親から資源・生物・敵・仲間まで全部の階層で true にしないと、個々の絵ではなく箱（Resources/Creatures/...）単位でしか揃わない。
+	ground_sort = Node2D.new()
+	ground_sort.name = "GroundSort"
+	ground_sort.y_sort_enabled = true
+	add_child(ground_sort)
+
 	resources_root = Node2D.new()
 	resources_root.name = "Resources"
-	add_child(resources_root)
+	resources_root.y_sort_enabled = true
+	ground_sort.add_child(resources_root)
 
 	creatures_root = Node2D.new()
 	creatures_root.name = "Creatures"
-	add_child(creatures_root)
+	creatures_root.y_sort_enabled = true
+	ground_sort.add_child(creatures_root)
 
 	enemies_root = Node2D.new()
 	enemies_root.name = "Enemies"
-	add_child(enemies_root)
+	enemies_root.y_sort_enabled = true
+	ground_sort.add_child(enemies_root)
 
 	var workers_root := Node2D.new()
 	workers_root.name = "Workers"
-	add_child(workers_root)
+	workers_root.y_sort_enabled = true
+	ground_sort.add_child(workers_root)
 	for i in WORKER_DEFS.size():
 		var d: Dictionary = WORKER_DEFS[i]
 		var w := Worker.new()
@@ -856,13 +868,13 @@ func _spawn_ground_resource() -> void:
 		# 木材・石・鉄鉱石は、落ちている物ではなく採取ポイント（岩場・鉱床・枯れ木）から採る
 		var pt := GatherPoint.new()
 		pt.setup(self, GatherDB.pick_kind())
-		pt.position = Vector2(SPAWN_X, randf_range(SPAWN_Y_MIN + 6.0, SPAWN_Y_MAX - 6.0))
+		pt.position = Vector2(spawn_x(), randf_range(SPAWN_Y_MIN + 6.0, SPAWN_Y_MAX - 6.0))
 		resources_root.add_child(pt)
 		return
 	var r := ResourceNode.new()
 	r.game = self
 	r.item = _random_ground_item()
-	r.position = Vector2(SPAWN_X, randf_range(SPAWN_Y_MIN, SPAWN_Y_MAX))
+	r.position = Vector2(spawn_x(), randf_range(SPAWN_Y_MIN, SPAWN_Y_MAX))
 	resources_root.add_child(r)
 
 
@@ -891,7 +903,7 @@ func _spawn_creature() -> void:
 			break
 	var c := Creature.new()
 	c.setup(self, species)
-	c.position = Vector2(SPAWN_X, randf_range(SPAWN_Y_MIN + 20.0, SPAWN_Y_MAX - 10.0))
+	c.position = Vector2(spawn_x(), randf_range(SPAWN_Y_MIN + 20.0, SPAWN_Y_MAX - 10.0))
 	creatures_root.add_child(c)
 
 
@@ -919,7 +931,7 @@ func _spawn_wave() -> void:
 	for i in n:
 		var e := Enemy.new()
 		e.setup(self, 36.0 + wave * 6.0)
-		e.position = Vector2(SPAWN_X + i * 70.0, randf_range(SPAWN_Y_MIN, SPAWN_Y_MAX))
+		e.position = Vector2(spawn_x() + i * 70.0, randf_range(SPAWN_Y_MIN, SPAWN_Y_MAX))
 		enemies_root.add_child(e)
 
 
@@ -970,16 +982,28 @@ func _select(w) -> void:
 	follow_target = w                          # 既存の選択方法（クリック・上部カード）が、そのままカメラ追従の切り替えにもなる
 
 
+## クリックした世界座標から、選ぶ仲間を1人だけ決める（_unhandled_input から分離。world_step を渡さず world 座標だけで決まるので、
+## ヘッドレスの自己診断からも呼べる＝実際のマウス移動に頼らずに確認できる）。
+func _pick_worker_at(click_world: Vector2):
+	var best = null
+	var best_d := INF
+	for w in workers:
+		if w.away or not w.visible:                    # 遠征中・拠点の中で見えない（外装表示）仲間は、見えている絵だけを選べるように対象から外す
+			continue
+		var local: Vector2 = click_world - w.position   # 絵の範囲（足元が原点。幅±32px・上に64px。scripts/character.gd の描画と同じ大きさ）
+		if local.x < -32.0 or local.x > 32.0 or local.y < -64.0 or local.y > 6.0:
+			continue                                    # 頭の上や胴体をクリックしても外れてしまっていたのを直した
+		var d: float = w.position.distance_to(click_world)   # 絵の範囲内で重なっていれば、足元が近いほうを選ぶ
+		if d < best_d:
+			best_d = d
+			best = w
+	return best
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		var best = null
-		var best_d := 34.0
 		var click_world := get_global_mouse_position()    # カメラが動いても正しい世界座標になる（event.position は画面座標のまま）
-		for w in workers:
-			var d: float = w.position.distance_to(click_world)
-			if d < best_d:
-				best_d = d
-				best = w
+		var best = _pick_worker_at(click_world)
 		if best != null:
 			_select(best)
 	elif event is InputEventKey and event.pressed:
@@ -989,6 +1013,17 @@ func _unhandled_input(event: InputEvent) -> void:
 			target_speed = maxf(target_speed - 10.0, 0.0)
 		elif event.keycode == KEY_ESCAPE:
 			follow_target = null                # 追従の解除（選んだ仲間・優先度パネルの表示はそのまま。カメラだけ戻る）
+
+
+## いまカメラに見えている世界座標の左端（カメラなし・position=0 のときは 0.0 で、これまでと同じ）。
+## 背景の描画（world_scroll.gd）・資源や生物の出現位置・消える境界が、カメラの動きに合わせて正しくなるように、ここを共通の窓口にする。
+func camera_left() -> float:
+	return camera.position.x if camera != null else 0.0
+
+
+## 画面の右端より少し外側（これまでの SPAWN_X と同じ余白）の、いまカメラから見た世界座標。ここに資源・生物・敵を出現させる。
+func spawn_x() -> float:
+	return camera_left() + SPAWN_X
 
 
 ## カメラ追従の更新（世界側だけを動かす。仲間の位置・AI・仕事には一切触れない）。

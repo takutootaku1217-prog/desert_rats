@@ -125,7 +125,7 @@ func tick(delta: float) -> void:
 				_set_state(State.GATHER)
 		State.GATHER:
 			if not _res_valid():
-				if res is GatherPoint and ch.carrying >= 0:
+				if is_instance_valid(res) and res is GatherPoint and ch.carrying >= 0:    # res が消えている（流れ去って解放された等）ときは、is で調べようとしない
 					_finish_trip()             # 天候などで中断しても、掘った分は倉庫へ運ぶ
 					return
 				_release_task()

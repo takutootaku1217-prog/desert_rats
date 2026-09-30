@@ -2,7 +2,8 @@ extends SceneTree
 ## カメラ追従（個体管理タブとカメラ追従_仕様書のうち、カメラ追従の最小構成）の自己診断。実行:
 ##   Godot --headless --path . -s res://tools/test_camera.gd
 ## 確かめる: カメラの初期状態・選ぶと追従が始まる・追いすぎない（デッドゾーン）・揺れない・切り替え・解除・
-##   対象が無効（遠征中・拠点の中）のときに無効な位置へ飛ばず表示だけ変わる・クリック判定の窓口（get_global_mouse_position）。
+##   対象が無効（遠征中・拠点の中）のときに無効な位置へ飛ばず表示だけ変わる・クリック判定の窓口（get_global_mouse_position）・
+##   クリックで選ぶ判定そのもの（main._pick_worker_at。絵の範囲で当たる・遠征中や見えない仲間は選べない。QA報告書 CAM-01・CAM-02 対策）。
 
 var fails := 0
 var main
@@ -100,9 +101,25 @@ func _run() -> void:
 	check(main.camera.position.x >= 0.0 and main.camera.position.x <= 900.0, "見えない対象の位置（画面外）へカメラが飛ばない")
 	W[0].visible = true
 
-	# クリック判定（get_global_mouse_position でカメラのずれを補正する）は、実際のマウス位置が要るため
-	# ヘッドレスでは確かめられない。windowed のスクリーンショット確認（下の報告）で見た目とあわせて確認する。
+	# 実際のマウス位置（get_global_mouse_position）はヘッドレスでは確かめられないが、
+	# クリックした世界座標から誰を選ぶかを決める部分（main._pick_worker_at）は分離してあるので、ここから直接確認できる。
 	main.camera.position = Vector2.ZERO
+
+	print("-- クリックで選ぶ判定（main._pick_worker_at。QA報告書 CAM-01・CAM-02 対策） --")
+	W[0].away = false
+	W[0].visible = true
+	W[0].position = Vector2(500.0, GameData.LO_Y)
+	check(main._pick_worker_at(W[0].position) == W[0], "足元をクリックすると選べる（これまでどおり）")
+	check(main._pick_worker_at(W[0].position + Vector2(0, -50)) == W[0], "頭の少し上（足元から50px上）をクリックしても選べる（CAM-01: 以前は半径34pxしかなく、絵の上のほうが外れていた）")
+	check(main._pick_worker_at(W[0].position + Vector2(0, -63)) == W[0], "絵のいちばん上（足元から63px上）に近い位置でも選べる")
+	check(main._pick_worker_at(W[0].position + Vector2(0, -70)) == null, "絵の外（頭よりさらに上）はさすがに選ばない")
+	check(main._pick_worker_at(W[0].position + Vector2(40, 0)) == null, "絵の外（横に大きく外れた位置）は選ばない")
+	W[0].away = true
+	check(main._pick_worker_at(W[0].position) == null, "遠征中の仲間は、絵の場所をクリックしても選べない（CAM-02）")
+	W[0].away = false
+	W[0].visible = false
+	check(main._pick_worker_at(W[0].position) == null, "外装表示で拠点の中にいて見えない仲間も、選べない（CAM-02: 以前は車体越しに選べてしまっていた）")
+	W[0].visible = true
 
 	print("-- 既存の自動行動・仕事は変わらない --")
 	check(W[0].ai != null and W[0].ai.state != null, "追従中でも、仲間のAIは通常どおり存在し動いている（状態を持つ）")
