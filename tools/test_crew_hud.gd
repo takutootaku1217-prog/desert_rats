@@ -89,8 +89,8 @@ func _append_fixture() -> void:
 		var w := Worker.new()
 		w.setup(main, label, definition["palette"], definition["prio"], i, profile)
 		w.position = Vector2(1800.0 + i * 70.0, GameData.LO_Y)
-		w.set_process(false)
 		worker_parent.add_child(w)
+		w.set_process(false)
 		W.append(w)
 
 
@@ -101,7 +101,7 @@ func _run() -> void:
 	await _layout()
 	_hud_rect = main.ui._button.get_global_rect()
 	_hud_controls = _control_count(main.ui)
-	check(main.ui._button.text.contains("3人") and _hud_rect.size.is_equal_approx(Vector2(280, 36)), "3人の入口は人数とCキーを示す280×36の固定サイズ")
+	check(main.ui._button.text.contains("3人") and _hud_rect.size.is_equal_approx(Vector2(144, 44)), "3人の入口は人数とCキーを示す144×44の固定サイズ")
 	check(_status_view_count(main.ui) == 0, "通常HUDに個体別の状態ゲージを常駐させない")
 	main.ui._button.pressed.emit()
 	await _layout()

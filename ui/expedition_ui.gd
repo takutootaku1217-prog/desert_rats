@@ -74,6 +74,7 @@ func toggle() -> void:
 
 
 func open() -> void:
+	game.close_other_panels(self)
 	_overlay.visible = true
 	_picker.refresh()
 	_rebuild()

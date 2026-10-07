@@ -46,11 +46,12 @@ func _initialize() -> void:
 	W[2].mental = CrewStatusDB.Mental.ANXIOUS
 	for w in W:
 		w.queue_redraw()
+	main.crew_alerts._process(1.0)
 	await _frames(8)
 	var img := root.get_texture().get_image()
 	img.save_png("%s/s2_mixed.png" % dir)
-	# 通常HUDは仲間管理の入口と追従状態だけ。人数分のカードは常設しない。
-	var hud := img.get_region(Rect2i(0, 0, 330, 72))
+	# 通常HUDの管理入口・追従状態と、不調の個体だけに出る通知を切り出す。
+	var hud := img.get_region(Rect2i(0, 0, 570, 84))
 	hud.resize(hud.get_width() * 2, hud.get_height() * 2, Image.INTERPOLATE_NEAREST)
 	hud.save_png("%s/s_hud.png" % dir)
 	# 頭上の警告を拡大（仲間3人の周り）

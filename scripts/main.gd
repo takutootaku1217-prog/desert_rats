@@ -36,6 +36,7 @@ var view_switch: ViewSwitchUI     # 外装・内装の切り替えボタン（O�
 var camera: Camera2D
 var follow_target = null          # 追従中の Worker（null なら追従なし）。main._select で設定される
 var _follow_label: Label          # 仲間管理の入口の下に置く、1名分だけの追従状態
+var crew_alerts: CrewAlertUI       # 不調の個体だけを番号・キャラ画像・症状で知らせる通常HUD
 const FOLLOW_DEADZONE_HALF := 150.0   # 画面中央からこの範囲内に対象がいれば、カメラは動かさない（常に対象を追わない＝滑らかさ優先）
 const FOLLOW_SMOOTH_SPEED := 6.0      # Camera2D の内蔵スムージングの速さ
 const FOLLOW_SCREEN_CENTER_X := 640.0 # 1280x720 の画面中央x（カメラなしのときと同じ見え方の基準）
@@ -177,6 +178,10 @@ func _ready() -> void:
 	detail.game = self
 	add_child(detail)
 	ui.management_requested.connect(detail.toggle)
+	crew_alerts = CrewAlertUI.new()
+	crew_alerts.game = self
+	add_child(crew_alerts)
+	crew_alerts.build(workers)
 	policy = PolicyUI.new()
 	policy.game = self
 	add_child(policy)
@@ -184,7 +189,7 @@ func _ready() -> void:
 	follow_layer.layer = 10
 	add_child(follow_layer)
 	_follow_label = GameData.make_label("", 14, Color("ffe9b0"))
-	_follow_label.position = Vector2(10, 48)
+	_follow_label.position = Vector2(10, 56)
 	_follow_label.size = Vector2(320, 22)
 	_follow_label.clip_text = true
 	_follow_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -873,7 +878,7 @@ func build_room(slot: String, rtype: String) -> bool:
 
 ## 別の画面を開くとき、ほかの管理画面を閉じる（重ならないように）。keep はいま開く画面。
 func close_other_panels(keep) -> void:
-	for p in [build_ui, room_ui, policy, detail, expedition_ui, inventory_ui, craft_ui]:
+	for p in [build_ui, room_ui, policy, detail, expedition_ui, inventory_ui, craft_ui, crew_alerts]:
 		if p != null and p != keep and p.has_method("close"):
 			p.close()
 

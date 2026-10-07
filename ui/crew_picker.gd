@@ -9,6 +9,7 @@ signal focused(worker)
 signal selection_changed
 
 var source: Callable                 # 一覧に出す仲間の配列を返す関数
+var number_source: Callable          # 番号表示が必要な管理画面だけが指定する（Noの保存は通知HUDが担当）
 var selected := {}                   # Worker -> true
 var focus_worker = null
 
@@ -67,7 +68,9 @@ func refresh() -> void:
 		cb.custom_minimum_size = Vector2(34, 40)
 		cb.toggled.connect(func(on): _set_selected(w, on))
 		row.add_child(cb)
-		var b := UIKit.button("%s  Lv%d  %s" % [w.char_name, w.level, w.rank_letter()], func(): set_focus(w))
+		var number: int = int(number_source.call(w)) if number_source.is_valid() else 0
+		var prefix: String = "No.%02d " % number if number > 0 else ""
+		var b := UIKit.button("%s%s  Lv%d  %s" % [prefix, w.char_name, w.level, w.rank_letter()], func(): set_focus(w))
 		b.custom_minimum_size = Vector2(236, 40)
 		b.clip_text = true                   # 長い個体名でも、一覧や管理画面全体の最小幅を広げない
 		b.tooltip_text = b.text              # 一覧で省略される名前は、詳細とツールチップで全文を読める

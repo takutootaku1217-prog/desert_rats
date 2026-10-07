@@ -16,10 +16,10 @@ func build(p_workers: Array) -> void:
 	if _button == null:
 		_button = UIKit.button("", func(): management_requested.emit())
 		_button.position = Vector2(10, 8)
-		_button.custom_minimum_size = Vector2(280, 36)
-		_button.size = Vector2(280, 36)
+		_button.custom_minimum_size = Vector2(144, 44)
+		_button.size = Vector2(144, 44)
 		_button.clip_text = true
-		_button.add_theme_font_size_override("font_size", 16)
+		_button.add_theme_font_size_override("font_size", 14)
 		add_child(_button)
 	_update_count()
 

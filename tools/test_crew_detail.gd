@@ -75,9 +75,10 @@ func _run() -> void:
 	await _layout()
 	check(_text_has_height("プロフィール"), "プロフィール見出しの文字に、表示できる実高さがある")
 	check(_text_has_height(W[0].char_name), "プロフィールの個体名に、表示できる実高さがある")
+	check(_has_text("No.%02d %s" % [main.crew_alerts.number_of(W[0]), W[0].char_name]), "プロフィールは注意通知と同じ個体番号を名前に添える")
 	check(_text_has_height("武器・防具：未実装"), "武器・防具の未実装案内に、表示できる実高さがある")
 	check(main.ui.layer == 10 and detail.layer == 27 and detail._overlay.get_parent() == detail, "固定の管理入口は通常HUD、管理画面は他の管理画面より上の別レイヤー")
-	check(main.ui._button.text == "仲間 %d人 (C)" % W.size() and main.ui._button.custom_minimum_size == Vector2(280, 36), "上部HUDは仲間人数を示す固定サイズの管理入口")
+	check(main.ui._button.text == "仲間 %d人 (C)" % W.size() and main.ui._button.custom_minimum_size == Vector2(144, 44), "上部HUDは仲間人数を示す144×44pxの固定サイズの管理入口")
 	check(detail._tab_btns.size() == 2 and detail._tab_btns[0].text == "個体情報" and detail._tab_btns[1].text == "部署", "個体情報と部署の2タブ")
 	for text in ["個体ランク", "得意分野", "分野ランク", "スキル", "採取道具", "仕事の効率", "仕事の優先度"]:
 		check(_has_text(text), "個体情報に%sがある" % text)
@@ -150,7 +151,7 @@ func _run() -> void:
 	var wrapped_name := false
 	var wrapped_name_height := false
 	for l in _labels(detail._body):
-		if l.text == W[2].char_name:
+		if l.text.ends_with(W[2].char_name):
 			wrapped_name = l.autowrap_mode == TextServer.AUTOWRAP_WORD_SMART and l.get_line_count() > 1
 			var single_line_height: float = l.get_theme_font("font").get_height(l.get_theme_font_size("font_size"))
 			wrapped_name_height = l.is_visible_in_tree() and l.size.y > single_line_height and l.size.y + 1.0 >= l.get_minimum_size().y

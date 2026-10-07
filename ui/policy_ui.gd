@@ -53,6 +53,7 @@ func toggle() -> void:
 	if _overlay.visible:
 		close()
 	else:
+		game.close_other_panels(self)
 		_overlay.visible = true
 		_rebuild()
 

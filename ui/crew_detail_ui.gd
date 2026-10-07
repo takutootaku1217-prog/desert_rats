@@ -70,6 +70,7 @@ func _ready() -> void:
 	# 中: メンバー一覧（複数選択）
 	_picker = CrewPicker.new()
 	_picker.source = func(): return _members(_filter)
+	_picker.number_source = func(w): return game.crew_alerts.number_of(w) if game.crew_alerts != null else 0
 	_picker.focused.connect(_select)
 	_picker.selection_changed.connect(_on_selection_changed)
 	cols.add_child(_picker)
@@ -253,7 +254,9 @@ func _build_detail() -> void:
 	if not is_instance_valid(w) or not game.workers.has(w):
 		return
 	_section("プロフィール")
-	_body.add_child(_wrapped_label(w.char_name, 26, UIKit.C_ACCENT))
+	var number: int = game.crew_alerts.number_of(w) if game.crew_alerts != null else 0
+	var title: String = "No.%02d %s" % [number, w.char_name] if number > 0 else w.char_name
+	_body.add_child(_wrapped_label(title, 26, UIKit.C_ACCENT))
 	_body.add_child(_wrapped_label("Lv %d   %s   個体ランク %s   得意分野: %s" % [w.level, GameData.GENDER_NAMES[w.gender],
 			w.rank_letter(), w.best_fields_text()], 16))
 	_live["follow"] = UIKit.button("画面で選択・追従", _follow_worker)
