@@ -88,11 +88,10 @@ func _run() -> void:
 	d.trigger("heatwave", false)
 	d.set_stance("heatwave", "run")
 	check(is_equal_approx(d.energy_mult(), 1.7) and is_equal_approx(d.wear_mult(M), 1.8), "酷暑・走り続ける: 疲れ×1.7・加工設備の傷み×1.8")
-	var e0: float = w.stamina
-	w.stamina = 100.0
+	w.fatigue = 0.0
 	w.ai.state = CharacterAI.State.SEARCH
 	w._process(1.0)
-	check(w.stamina < 100.0 - 0.7 * 1.5, "酷暑では仲間が実際に疲れやすくなる (%.2f)" % (100.0 - w.stamina))
+	check(w.fatigue > 0.2 * 1.5, "酷暑では仲間の疲労度が実際に増えやすくなる (%.2f)" % w.fatigue)
 	# 寒波: 暖房の燃料
 	d.active.clear()
 	d.trigger("coldsnap", false)
@@ -189,7 +188,7 @@ func _run() -> void:
 	main.base.parts[H] = 100.0
 	var fighter = main.workers[1]                  # 戦闘の優先度が高い仲間
 	fighter.priorities[GameData.Job.COMBAT] = 5
-	fighter.stamina = 100.0
+	fighter.fatigue = 0.0
 	var res0: int = main.resources_root.get_child_count()
 	var killed0: int = main.kills
 	var ticks := 0

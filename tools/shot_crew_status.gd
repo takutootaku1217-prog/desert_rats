@@ -1,5 +1,5 @@
 extends SceneTree
-## 仲間のステータス（HP・スタミナ・満腹度・疲労度・精神状態）の表示を、実際のゲーム画面（ウィンドウ表示）で撮る。実行（ウィンドウが開く）:
+## 仲間のステータス（HP・満腹度・疲労度・精神状態）の表示を、実際のゲーム画面（ウィンドウ表示）で撮る。実行（ウィンドウが開く）:
 ##   Godot --path . --windowed --resolution 1280x720 --fixed-fps 60 -s res://tools/shot_crew_status.gd -- <出力フォルダ>
 ## 出力: s1_normal.png（元気な状態）／s2_mixed.png（悪い状態がいろいろ。頭上の警告つき）／s3_detail.png（仲間の管理画面）／
 ##   s_cards.png（上部のカードを拡大）／s_heads.png（仲間の頭上の警告を拡大）
@@ -32,9 +32,9 @@ func _initialize() -> void:
 		W[i].floor_i = 1
 		W[i].position = Vector2(560.0 + 150.0 * i, y)
 		W[i].target = W[i].position
-	# 1人目: HPとスタミナが低め（注意）
+	# 1人目: HPが低め・疲労度が高め（注意）
 	W[0].hp = 35.0
-	W[0].stamina = 20.0
+	W[0].fatigue = 80.0
 	W[0].mental = CrewStatusDB.Mental.BAD
 	# 2人目: とても空腹・疲労度が高い（危険）
 	W[1].hunger = 10.0

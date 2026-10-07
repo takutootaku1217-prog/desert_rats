@@ -67,6 +67,8 @@ func refresh() -> void:
 		row.add_child(cb)
 		var b := UIKit.button("%s  Lv%d  %s" % [w.char_name, w.level, w.rank_letter()], func(): set_focus(w))
 		b.custom_minimum_size = Vector2(236, 40)
+		b.clip_text = true                   # 長い個体名でも、一覧や管理画面全体の最小幅を広げない
+		b.tooltip_text = b.text              # 一覧で省略される名前は、詳細とツールチップで全文を読める
 		UIKit.style(b, w == focus_worker)
 		row.add_child(b)
 		_rows[w] = b

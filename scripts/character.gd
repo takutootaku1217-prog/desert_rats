@@ -27,7 +27,6 @@ var slot_offset := Vector2.ZERO   # 作業場所で重ならないようにす�
 var selected := false
 # ---- ステータス（設定は data/crew_status.gd、計算は scripts/crew_status.gd。ここは仲間ごとのデータ。表示は読むだけ）----
 var hp := CrewStatusDB.START_HP                 # HP（0で戦闘不能）
-var stamina := CrewStatusDB.START_STAMINA       # スタミナ（以前の「元気」。休憩で回復する）
 var hunger := CrewStatusDB.START_HUNGER         # 満腹度（100 = 満腹）
 var fatigue := CrewStatusDB.START_FATIGUE       # 疲労度（高いほど悪い）
 var stress := 0.0                               # 危険な出来事の一時的なストレス（時間で消える）
@@ -131,12 +130,13 @@ func depart() -> void:
 	position = Vector2(-2000.0, GameData.LO_Y)     # 敵の攻撃やクリックの対象にならない場所
 
 
-## 調査隊から戻る。斜路の下に現れ、スタミナを引き継ぐ。
-func arrive(new_energy: float) -> void:
+## 調査隊から戻る。斜路の下に現れ、疲労度を引き継ぐ。
+func arrive(new_fatigue: float) -> void:
 	away = false
 	visible = true
 	set_process(true)
-	stamina = new_energy
+	fatigue = clampf(new_fatigue, 0.0, CrewStatusDB.MAX_FATIGUE)
+	CrewStatus._tick_mental(self, 0.0)
 	floor_i = 0
 	position = GameData.RAMP_FOOT + Vector2(randf_range(-30.0, 30.0), 0.0)
 	target = position
@@ -163,7 +163,7 @@ func skill_mult(job: int) -> float:
 
 
 ## 分野ごとの作業の速さ（加工ではレシピの分野を使う。調理なら料理人のランク）。
-## ステータス（スタミナ・満腹度・疲労度・HP・精神状態）が悪いと遅くなる（CrewStatus.work_mult）。
+## ステータス（満腹度・疲労度・HP・精神状態）が悪いと遅くなる（CrewStatus.work_mult）。
 func field_mult(f: int) -> float:
 	var r: int = ranks.get(f, 0)
 	var s: int = best_rank()
@@ -205,7 +205,7 @@ func rank_text(field: int) -> String:
 	return GameData.RANKS[ranks.get(field, 0)]
 
 
-## ステータスが悪いと移動が遅くなる（スタミナ・満腹度・疲労度・HP のうち、いちばん悪いもの。CrewStatus.move_mult）。
+## ステータスが悪いと移動が遅くなる（満腹度・疲労度・HP のうち、いちばん悪いもの。CrewStatus.move_mult）。
 func current_speed() -> float:
 	return speed * CrewStatus.move_mult(self)
 
@@ -263,7 +263,7 @@ func _process(delta: float) -> void:
 	resting = false
 	pose = ""
 	ai.tick(delta)
-	CrewStatus.tick(self, delta)                  # スタミナ・満腹度・疲労度・HP・精神状態の増減（scripts/crew_status.gd）
+	CrewStatus.tick(self, delta)                  # 満腹度・疲労度・HP・精神状態の増減（scripts/crew_status.gd）
 	queue_redraw()
 
 

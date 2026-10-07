@@ -72,7 +72,7 @@ const HUNT_DPS := 16.0
 const HUNT_REACH := 44.0
 const REPAIR_TIME := 1.2
 const REFUEL_TIME := 0.6
-## 休憩の基準は data/crew_status.gd（CrewStatusDB）にまとめてある（スタミナ・疲労度・HP）
+## 休憩の基準は data/crew_status.gd（CrewStatusDB）にまとめてある（疲労度・HP）
 var eat_wait := 0.0      # 食料が取れなかったあと、食べに行き直すまでの待ち（食事のループにならないように）
 var xfer_item := -1      # 運搬の依頼で運んでいるアイテムと向き（Main.request_transfer）
 var xfer_dir := ""
@@ -378,7 +378,7 @@ func tick(delta: float) -> void:
 			ch.move_to_target(delta)
 			ch.attacking = true
 			enemy.take_damage(ATTACK_DPS * ch.skill_mult(GameData.Job.COMBAT) * delta)
-			ch.stamina = maxf(0.0, ch.stamina - 0.5 * delta)     # 戦うと疲れる
+			ch.fatigue = minf(CrewStatusDB.MAX_FATIGUE, ch.fatigue + CrewStatusDB.FATIGUE_COMBAT_GAIN * delta)
 
 		# ---- 休憩 ----
 		State.REST_MOVE:
@@ -389,7 +389,7 @@ func tick(delta: float) -> void:
 			ch.sleeping = true
 			ch.target = game.base.bed_point(ch.bed_index)
 			if CrewStatus.rest_done(ch) or (CrewStatus.needs_to_eat_now(ch) and _wants_to_eat()):
-				_release_task()                                     # 回復しきった（スタミナ・疲労度・HP）。とても空腹なら、先に食べに行く
+				_release_task()                                     # 回復しきった（疲労度・HP）。とても空腹なら、先に食べに行く
 				_set_state(State.SEARCH)
 
 

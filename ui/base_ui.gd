@@ -224,7 +224,7 @@ func _fx_text() -> String:
 		parts.append("休憩の回復 +%d%%" % int(round(rest * 100.0)))
 	var drain: float = game.room_effect("drain_cut")
 	if drain > 0.0:
-		parts.append("スタミナの消耗 -%d%%" % int(round(drain * 100.0)))
+		parts.append("疲労度の蓄積 -%d%%" % int(round(drain * 100.0)))
 	var tr: float = game.room_effect("train_xp")
 	if tr > 0.0:
 		parts.append("訓練の経験値 +%d%%" % int(round(tr * 100.0)))

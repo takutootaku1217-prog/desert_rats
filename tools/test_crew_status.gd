@@ -1,7 +1,7 @@
 extends SceneTree
-## 仲間のステータス（HP・スタミナ・満腹度・疲労度・精神状態。data/crew_status.gd と scripts/crew_status.gd）の自己診断。実行:
+## 仲間のステータス（HP・満腹度・疲労度・精神状態。data/crew_status.gd と scripts/crew_status.gd）の自己診断。実行:
 ##   Godot --headless --path . -s res://tools/test_crew_status.gd
-## 段階ごとに確かめる: 1 データの追加 → 2 元気からスタミナへ（動きが同じ） → 3 満腹度と食事 → 4 疲労度 → 5 精神状態 → 6 HP・戦闘不能 →
+## 段階ごとに確かめる: 1 データ → 2 疲労への一本化と設備・天候 → 3 満腹度と食事 → 4 疲労度 → 5 精神状態 → 6 HP・戦闘不能 →
 ##   7 速度への影響 → 8 自動行動（休む・食べる） → 9 表示（アイコン・頭上の警告） → 10 仲間の管理画面 → 通し（既存の動きを壊していないか）。
 
 var fails := 0
@@ -21,7 +21,7 @@ func _initialize() -> void:
 	seed(20260926)
 	await _fresh()
 	_test_step1_data()
-	_test_step2_stamina()
+	_test_step2_fatigue_loop()
 	await _test_step3_hunger()
 	await _test_step4_fatigue()
 	await _test_step5_mental()
@@ -46,7 +46,7 @@ func _fresh(all_facilities := true) -> void:
 	await process_frame
 	await process_frame
 	if all_facilities:
-		main.base.built.erase("supply_cache")     # 消耗を減らす効果（data/facilities.gd）を含まない基準で、ステータスの数値を確かめる
+		main.base.built.erase("supply_cache")     # 疲労増加を減らす設備効果を含まない基準で、数値を確かめる
 	main.director.enabled = false
 	main.target_speed = 0.0
 	W = main.workers
@@ -64,7 +64,7 @@ func _quiet(w) -> void:
 # ---------------------------------------------------------------- STEP 1: データ
 func _test_step1_data() -> void:
 	print("-- STEP 1: ステータスのデータ（設定と、仲間ごとの持ち物）")
-	check(CrewStatusDB.STATS == ["hp", "stamina", "hunger", "fatigue"], "ステータスは HP・スタミナ・満腹度・疲労度 の4つ（精神状態は計算される状態）")
+	check(CrewStatusDB.STATS == ["hp", "hunger", "fatigue"], "ステータスは HP・満腹度・疲労度 の3つ（精神状態は計算される状態）")
 	var ok := true
 	for s in CrewStatusDB.STATS:
 		ok = ok and CrewStatusDB.MAX_STAT.has(s) and CrewStatusDB.EFFECTS.has(s) and CrewStatusDB.STAT_NAMES.has(s) and CrewStatusDB.GAUGE_STAGES.has(s)
@@ -73,56 +73,109 @@ func _test_step1_data() -> void:
 	check(CrewStatusDB.is_high_bad("fatigue") and not CrewStatusDB.is_high_bad("hp") and not CrewStatusDB.is_high_bad("hunger"), "疲労度だけ「高いほど悪い」")
 	check(W.size() == 3, "仲間は3人")
 	for w in W:
-		# （起動から数コマ動いているので、スタミナ・満腹度は少し減っていてよい）
-		var init_ok: bool = is_equal_approx(w.hp, 100.0) and w.stamina > 98.0 and w.hunger > 99.0 and w.fatigue < 1.0
-		check(init_ok and w.mental == CrewStatusDB.Mental.NORMAL and not w.down, "%s: 初期値は HP100・スタミナ100・満腹度100・疲労度0・精神状態「普通」" % w.char_name)
+		# （起動から数コマ動いているので、満腹度は少し減っていてよい）
+		var init_ok: bool = is_equal_approx(w.hp, 100.0) and w.hunger > 99.0 and w.fatigue < 1.0
+		check(init_ok and w.mental == CrewStatusDB.Mental.NORMAL and not w.down, "%s: 初期値は HP100・満腹度100・疲労度0・精神状態「普通」" % w.char_name)
 	var w0 = W[0]
-	check(not ("energy" in w0), "旧名の「元気」（energy）はもう使わない（スタミナ stamina に置き換えた）")
+	check(not ("energy" in w0) and not ("stamina" in w0), "元気・スタミナの値は個体データから撤廃されている")
 
 
-# ---------------------------------------------------------------- STEP 2: 元気 → スタミナ（動きは同じ）
-func _stamina_delta(w, state: int, start: float, dt := 1.0) -> float:
-	w.ai.state = state
-	w.ai.timer = 100.0
-	w.sleeping = false
-	w.stamina = start
-	w._process(dt)
-	return w.stamina - start
-
-
-func _test_step2_stamina() -> void:
-	print("-- STEP 2: 元気 → スタミナ（増減の数字は以前と同じ）")
+# ---------------------------------------------------------------- STEP 2: 疲労への一本化（従来の天候・設備・車体状態を引き継ぐ）
+func _test_step2_fatigue_loop() -> void:
+	print("-- STEP 2: 疲労への一本化と、天候・食堂・物資庫・医務室・車体状態")
 	var w = W[0]
 	_quiet(w)
-	main.director.enabled = false
-	# 以前の数字: 眠る +9.0/秒（車体が傷んでいると +4.5）・待機 -0.25/秒・動いている間 -0.7/秒
-	var rest := _stamina_delta(w, CharacterAI.State.REST, 10.0)
-	check(is_equal_approx(rest, 9.0), "眠ると +9.0/秒（以前と同じ。実測 %.3f）" % rest)
-	var idle := _stamina_delta(w, CharacterAI.State.IDLE, 80.0)
-	check(is_equal_approx(idle, -0.25), "待機中は -0.25/秒（以前と同じ。実測 %.3f）" % idle)
-	var work := _stamina_delta(w, CharacterAI.State.COMBAT, 80.0)
-	check(is_equal_approx(work, -0.7), "動いている間は -0.7/秒（以前と同じ。実測 %.3f）" % work)
-	# 車体が傷んでいると、休憩の回復は半分
-	var hull_prev: float = main.base.parts[GameData.Part.HULL]
-	main.base.parts[GameData.Part.HULL] = GameData.PART_BAD - 1.0
-	var rest_bad := _stamina_delta(w, CharacterAI.State.REST, 10.0)
-	check(is_equal_approx(rest_bad, 4.5), "車体が傷んでいると、眠っても +4.5/秒（以前と同じ。実測 %.3f）" % rest_bad)
-	main.base.parts[GameData.Part.HULL] = hull_prev
-	# 上限・下限
-	check(is_equal_approx(_stamina_delta(w, CharacterAI.State.REST, 98.0), 2.0), "スタミナは 100 を超えない")
-	w.ai.state = CharacterAI.State.COMBAT
-	w.stamina = 0.3
-	w._process(1.0)
-	check(is_equal_approx(w.stamina, 0.0), "スタミナは 0 を下回らない")
-	# 酷暑・部屋の効果は、これまでどおり掛かる
+	var layout_before: Dictionary = main.room_layout.duplicate()
+	var built_before: Dictionary = main.base.built.duplicate(true)
+	var hull_before: float = main.base.parts[GameData.Part.HULL]
+	main.base.parts[GameData.Part.HULL] = 100.0
+	var gain := CrewStatusDB.FATIGUE_GAIN_ACTIVE
+	check(is_equal_approx(gain, 0.2), "通常の疲労増加は従来どおり0.2/秒")
+	_reset(w)
+	_tick(w, 1.0)
+	check(is_equal_approx(w.fatigue, 0.2), "独立したスタミナなしで、働くと疲労が増える")
 	main.director.trigger("heatwave", false)
 	main.director.set_stance("heatwave", "run")
-	var heat_work := _stamina_delta(w, CharacterAI.State.COMBAT, 80.0)
-	check(is_equal_approx(heat_work, -0.7 * 1.7), "酷暑（走り続ける）では、動いている間の疲れが 1.7 倍（%.3f/秒）" % heat_work)
+	_reset(w)
+	_tick(w, 1.0)
+	check(is_equal_approx(w.fatigue, gain * 1.7), "酷暑の疲れやすさは疲労増加へ反映される（1.7倍）")
 	main.director.active.clear()
-	# 休憩の判断（AI）は、設定の基準を読んでいる
-	check(CrewStatusDB.REST_STAMINA_URGENT == 25.0 and CrewStatusDB.REST_JOB_STAMINA_BELOW == 70.0 and CrewStatusDB.REST_END_STAMINA == 98.0,
-			"休憩の基準（25 未満で最優先・70 未満で休憩に入れる・98 で起きる）は、以前と同じ値で設定にまとまっている")
+	# テスト用に部屋・完成設備の状態を用意し、実際の効果集計を通して確かめる。
+	main.room_layout["l1"] = "mess"
+	_reset(w)
+	_tick(w, 1.0)
+	check(is_equal_approx(w.fatigue, gain * 0.88), "食堂1室で疲労増加が12%減る")
+	main.room_layout = layout_before.duplicate()
+	main.base.built["supply_cache"] = [0]
+	_reset(w)
+	_tick(w, 1.0)
+	check(is_equal_approx(w.fatigue, gain * 0.92), "完成した物資庫で疲労増加が8%減る")
+	main.room_layout["l1"] = "mess"
+	_reset(w)
+	_tick(w, 1.0)
+	check(is_equal_approx(w.fatigue, gain * 0.8), "食堂と物資庫の効果は加算され、疲労増加が20%減る")
+	main.director.trigger("heatwave", false)
+	main.director.set_stance("heatwave", "run")
+	_reset(w)
+	_tick(w, 1.0)
+	check(is_equal_approx(w.fatigue, gain * 1.7 * 0.8), "酷暑と設備の疲労軽減が同時に反映される")
+	main.director.active.clear()
+	# 最大軽減の集計を確かめるためだけの配置。設備や配置の保存・建て替えは行わない。
+	for slot in Rooms.SLOT_ORDER:
+		main.room_layout[slot] = "mess"
+	_reset(w)
+	_tick(w, 1.0)
+	check(is_equal_approx(main.room_effect("drain_cut"), 0.5) and is_equal_approx(w.fatigue, gain * 0.5), "食堂・物資庫の合計軽減は50%で止まり、疲労増加は0にならない")
+	main.room_layout = layout_before.duplicate()
+	main.base.built = built_before.duplicate(true)
+	_reset(w)
+	w.fatigue = 60.0
+	_tick(w, 1.0, CharacterAI.State.REST, true)
+	check(is_equal_approx(60.0 - w.fatigue, 1.2), "健康な車体で眠ると、疲労度は1.2/秒回復する")
+	main.base.parts[GameData.Part.HULL] = GameData.PART_BAD - 1.0
+	_reset(w)
+	w.fatigue = 60.0
+	_tick(w, 1.0, CharacterAI.State.REST, true)
+	check(is_equal_approx(60.0 - w.fatigue, 0.6), "車体が傷んでいると、疲労回復は半分の0.6/秒になる")
+	main.room_layout["l1"] = "infirmary"
+	main.base.parts[GameData.Part.HULL] = 100.0
+	_reset(w)
+	w.fatigue = 60.0
+	w.hp = 50.0
+	_tick(w, 1.0, CharacterAI.State.REST, true)
+	check(is_equal_approx(60.0 - w.fatigue, 1.2 * 1.25) and is_equal_approx(w.hp - 50.0, CrewStatusDB.HP_REST_RATE * 1.25), "医務室で疲労・HPの休憩回復が25%速くなる")
+	main.base.parts[GameData.Part.HULL] = GameData.PART_BAD - 1.0
+	_reset(w)
+	w.fatigue = 60.0
+	w.ai.state = CharacterAI.State.REST_HERE
+	w.resting = true
+	CrewStatus.tick(w, 1.0)
+	check(is_equal_approx(60.0 - w.fatigue, 0.6 * 1.25 * CrewStatusDB.REST_IN_PLACE_RATE), "傷んだ車体・医務室・その場の休憩の倍率が疲労回復に反映される")
+	main.room_layout = layout_before
+	main.base.built = built_before
+	main.base.parts[GameData.Part.HULL] = hull_before
+	_reset(w)
+	w.fatigue = 50.0
+	check(not CrewStatus.can_rest(w), "疲労度50では通常の休憩を始めない")
+	w.fatigue = 50.01
+	check(CrewStatus.can_rest(w), "疲労度50を超えると、優先度による休憩に入れる")
+	w.fatigue = 74.99
+	check(CrewStatus.life_needs(w).is_empty(), "疲労度75未満では、疲労だけを理由に急ぎの休憩を求めない")
+	w.fatigue = 75.0
+	check(CrewStatus.life_needs(w).has("rest") and not CrewStatus.rest_critical(w), "疲労度75から休憩を優先するが、危険域ではない")
+	w.fatigue = 89.99
+	check(not CrewStatus.rest_critical(w), "疲労度90未満では、疲労だけを理由に作業を強制中断しない")
+	w.fatigue = 90.0
+	check(CrewStatus.rest_critical(w), "疲労度90から危険域として作業中断の対象になる")
+	w.fatigue = 20.0
+	w.hp = 80.0
+	check(CrewStatus.rest_done(w), "疲労度20以下かつHP80以上なら休憩を終了できる")
+	w.hp = 79.99
+	check(not CrewStatus.rest_done(w), "疲労が回復してもHP80未満では休み続ける")
+	w.hp = 80.0
+	w.fatigue = 20.01
+	check(not CrewStatus.rest_done(w), "HPが回復しても疲労度20超では休み続ける")
+	_reset(w)
 
 
 # ---------------------------------------------------------------- STEP 3: 満腹度と食事
@@ -254,7 +307,7 @@ func _test_step3_hunger() -> void:
 	w._process(0.1)
 	w.depart()
 	check(main.food_claims == 0, "遠征に出ても、食料の取り置きは残らない")
-	w.arrive(80.0)
+	w.arrive(20.0)
 	w.set_process(false)
 	w.hunger = 100.0
 	# 旧方式の倍率は掛からない
@@ -267,13 +320,13 @@ func _test_step3_hunger() -> void:
 # ---------------------------------------------------------------- 共通: ステータスを整えて、状態（AI）と眠りを指定して1コマ進める
 func _reset(w) -> void:
 	w.hp = 100.0
-	w.stamina = 100.0
 	w.hunger = 100.0
 	w.fatigue = 0.0
 	w.stress = 0.0
 	w.calm = 0.0
 	w.down = false
 	w.sleeping = false
+	w.resting = false
 	w.mental = CrewStatusDB.Mental.NORMAL
 	w.ai.state = CharacterAI.State.SEARCH
 	w.ai.timer = 100.0
@@ -309,10 +362,6 @@ func _test_step4_fatigue() -> void:
 	check(w.fatigue == 100.0, "疲労度は 100 を超えない")
 	# 悪い状態で動き続けると、溜まりが速い（いちばん大きい倍率だけ。掛け算しない）
 	_reset(w)
-	w.stamina = 20.0
-	_tick(w, 1.0)
-	var f_stamina: float = w.fatigue
-	_reset(w)
 	w.hunger = 20.0
 	_tick(w, 1.0)
 	var f_hunger: float = w.fatigue
@@ -321,14 +370,13 @@ func _test_step4_fatigue() -> void:
 	_tick(w, 1.0)
 	var f_hp: float = w.fatigue
 	_reset(w)
-	w.stamina = 20.0
 	w.hunger = 20.0
 	w.hp = 20.0
 	_tick(w, 1.0)
 	var f_all: float = w.fatigue
 	var g := CrewStatusDB.FATIGUE_GAIN_ACTIVE
-	check(is_equal_approx(f_stamina, g * 2.0) and is_equal_approx(f_hunger, g * 1.5) and is_equal_approx(f_hp, g * 1.6), "スタミナ・満腹度・HPが低いと溜まりが速い（×2.0・×1.5・×1.6）")
-	check(is_equal_approx(f_all, g * 2.0), "3つとも悪くても、掛け算せず、いちばん大きい倍率（×2.0）だけ")
+	check(is_equal_approx(f_hunger, g * 1.5) and is_equal_approx(f_hp, g * 1.6), "満腹度・HPが低いと疲労が溜まりやすい（×1.5・×1.6）")
+	check(is_equal_approx(f_all, g * 1.6), "両方が悪くても、掛け算せず、大きい倍率（×1.6）だけ")
 	# 酷暑（疲れやすさ）も掛かる
 	_reset(w)
 	main.director.trigger("heatwave", false)
@@ -348,7 +396,7 @@ func _test_step4_fatigue() -> void:
 	w.priorities[GameData.Job.GATHER] = 0
 	for i in 100:
 		w._process(0.1)
-	check(w.fatigue >= 0.0 and w.stamina < 100.0, "（通し）動かしても値は範囲内（疲労度 %.1f・スタミナ %.1f）" % [w.fatigue, w.stamina])
+	check(w.fatigue >= 0.0 and w.fatigue <= 100.0, "（通し）動かしても疲労度は範囲内（%.1f）" % w.fatigue)
 
 
 # ---------------------------------------------------------------- STEP 5: 精神状態
@@ -531,8 +579,8 @@ func _test_step7_speed() -> void:
 	w.calm = 0.0
 	w.mental = CrewStatusDB.Mental.NORMAL
 	check(_same_pair(_mults(w), 1.0, 1.0), "すべて良好（普通）なら 作業100%・移動100%")
-	# HP・スタミナ・満腹度（低いほど悪い）: 50 以上 100/100・50〜25 90/95・25 未満 70/80・15 未満 50/60
-	for stat in ["hp", "stamina", "hunger"]:
+	# HP・満腹度（低いほど悪い）: 50 以上 100/100・50〜25 90/95・25 未満 70/80・15 未満 50/60
+	for stat in ["hp", "hunger"]:
 		var got := []
 		for v in [80.0, 40.0, 20.0, 10.0]:
 			_reset(w)
@@ -553,14 +601,12 @@ func _test_step7_speed() -> void:
 	# 掛け算しない: 全部が悪くても、いちばん悪いものだけ
 	_reset(w)
 	w.hp = 20.0
-	w.stamina = 20.0
 	w.hunger = 20.0
 	w.fatigue = 80.0
 	w.mental = CrewStatusDB.Mental.NORMAL
 	check(_same_pair(_mults(w), 0.7, 0.8), "全部が「悪い」でも、掛け算せず、いちばん悪い 70/80 のまま")
 	_reset(w)
 	w.hp = 5.0
-	w.stamina = 5.0
 	w.hunger = 5.0
 	w.fatigue = 99.0
 	w.mental = CrewStatusDB.Mental.LIMIT
@@ -575,23 +621,20 @@ func _test_step7_speed() -> void:
 	var mm_ok: bool = absf(mm[0] - 1.05) < 0.001 and absf(mm[1] - 1.0) < 0.001 and absf(mm[2] - 0.95) < 0.001 and absf(mm[3] - 0.85) < 0.001 and absf(mm[4] - 0.7) < 0.001
 	check(mm_ok, "精神状態の補正は 好調105%%・普通100%%・不安95%%・不調85%%・限界70%%（%s）" % str(mm))
 	w.mental = CrewStatusDB.Mental.BAD
-	w.stamina = 20.0                                              # 作業70%（精神状態の85%より悪い）
+	w.hunger = 20.0                                              # 作業70%（精神状態の85%より悪い）
 	check(absf(CrewStatus.work_mult(w) - 0.7) < 0.001, "精神状態は、ほかのステータスより悪いときだけ効く（掛け算しない）")
 	w.mental = CrewStatusDB.Mental.GOOD
 	check(absf(CrewStatus.work_mult(w) - 0.7) < 0.001, "好調でも、ほかのステータスが悪ければ、上乗せはない")
 	w.mental = CrewStatusDB.Mental.LIMIT
-	w.stamina = 100.0
+	w.hunger = 100.0
 	check(CrewStatus.move_mult(w) == 1.0, "精神状態は移動には影響しない（作業だけ）")
 	# 実際の作業・移動に反映される
 	_reset(w)
 	w.mental = CrewStatusDB.Mental.NORMAL
 	var sp0: float = w.current_speed()
 	var fm0: float = w.field_mult(GameData.Field.GATHERER)
-	w.stamina = 20.0
-	check(is_equal_approx(w.current_speed(), sp0 * 0.8) and is_equal_approx(w.field_mult(GameData.Field.GATHERER), fm0 * 0.7), "実際の移動速度・作業速度に反映される（スタミナ 20 → 移動×0.8・作業×0.7）")
-	w.stamina = 100.0
 	w.hunger = 10.0
-	check(is_equal_approx(w.current_speed(), sp0 * 0.6), "空腹（満腹度 10）は、その仲間だけ遅くなる")
+	check(is_equal_approx(w.current_speed(), sp0 * 0.6) and is_equal_approx(w.field_mult(GameData.Field.GATHERER), fm0 * 0.5), "空腹（満腹度 10）は、その仲間の移動・作業を遅くする")
 	check(is_equal_approx(W[1].current_speed(), W[1].speed * CrewStatus.move_mult(W[1])) and W[1].current_speed() >= W[1].speed * 0.999, "ほかの仲間は遅くならない（全員共通の空腹ではない）")
 	# 戦闘不能だけが完全に止まる（AIは動かさない）
 	_reset(w)
@@ -619,24 +662,22 @@ func _test_step8_ai() -> void:
 	w.hp = 20.0
 	w.hunger = 10.0
 	w.fatigue = 80.0
-	w.stamina = 20.0
 	w.mental = CrewStatus.mental_of(w)
 	var needs := CrewStatus.life_needs(w)
 	check(needs.slice(0, 3) == ["rest", "eat", "rest"], "急ぎの順: HPが低い→休む／満腹度が低い→食べる／疲労度が高い→休む（%s）" % str(needs))
 	_reset(w)
 	check(CrewStatus.life_needs(w).is_empty(), "元気な状態では、生活の必要はない")
-	# スタミナ 25 未満 → 休む（以前と同じ）
+	# 疲労度 75 以上 → 休む
 	_reset(w)
-	w.stamina = 20.0
+	w.fatigue = 80.0
 	w.ai.state = CharacterAI.State.SEARCH
 	w._process(0.1)
-	check(w.ai.state == CharacterAI.State.REST_MOVE, "スタミナが 25 未満なら、休憩に向かう（以前と同じ）")
+	check(w.ai.state == CharacterAI.State.REST_MOVE, "疲労度が 75 以上なら、休憩に向かう")
 	check(_run_until(w, CharacterAI.State.REST, 20.0), "ベッドへ着くと眠る")
-	# スタミナが戻っても、疲労度が高いあいだは休み続ける
+	# 疲労度が高いあいだは休み続ける
 	w.fatigue = 60.0
-	w.stamina = 100.0
 	w._process(0.1)
-	check(w.ai.state == CharacterAI.State.REST, "スタミナが満タンでも、疲労度が高いあいだは休み続ける")
+	check(w.ai.state == CharacterAI.State.REST, "疲労度が高いあいだは休み続ける")
 	var t := 0.0
 	while w.ai.state == CharacterAI.State.REST and t < 200.0:
 		w._process(0.5)
@@ -647,7 +688,7 @@ func _test_step8_ai() -> void:
 	w.hp = 30.0
 	w.ai.state = CharacterAI.State.SEARCH
 	w._process(0.1)
-	check(w.ai.state == CharacterAI.State.REST_MOVE, "HP が低い（25 未満）と、休憩に向かう")
+	check(w.ai.state == CharacterAI.State.REST_MOVE, "HP が50未満なら、通常の休憩に向かう")
 	t = 0.0
 	while w.ai.state != CharacterAI.State.SEARCH and t < 300.0:
 		w._process(0.5)
@@ -655,7 +696,7 @@ func _test_step8_ai() -> void:
 	check(w.hp >= CrewStatusDB.REST_END_HP - 0.5, "休むと HP が %d まで回復してから起きる（HP %.0f・%.0f 秒）" % [int(CrewStatusDB.REST_END_HP), w.hp, t])
 	# 休憩の優先度が 0 なら、休まない（優先度はそのまま尊重する）
 	_reset(w)
-	w.stamina = 10.0
+	w.fatigue = 80.0
 	w.priorities[GameData.Job.REST] = 0
 	w.ai.state = CharacterAI.State.SEARCH
 	w._process(0.1)
@@ -664,7 +705,7 @@ func _test_step8_ai() -> void:
 	# ベッドがなければ、ベッドへは向かわない（取り置きも残らない）。代わりに、その場で簡易休憩する（下の「ベッドがない場合の休憩」で詳しく確かめる）
 	_give_beds(0)
 	_reset(w)
-	w.stamina = 10.0
+	w.fatigue = 80.0
 	w.ai.state = CharacterAI.State.SEARCH
 	w._process(0.1)
 	check(w.ai.state == CharacterAI.State.REST_HERE and main.base.beds == [null, null, null], "ベッドがなければ、ベッドへは向かわず、その場で休憩に入る（取り置きも残らない）")
@@ -679,7 +720,7 @@ func _test_step8_ai() -> void:
 	# 空腹と疲れが同時: 満腹度がとても低ければ、食べるのが先
 	_reset(w)
 	w.hunger = 10.0
-	w.stamina = 20.0
+	w.fatigue = 80.0
 	_set_food(3)
 	w.ai.state = CharacterAI.State.SEARCH
 	w._process(0.1)
@@ -690,7 +731,7 @@ func _test_step8_ai() -> void:
 	# 加工の途中でも、危険なほど疲れていれば中断して休む（加工の注文が残っている状態で確かめる）
 	main.processor.orders.append(GameData.recipe_by_id("cook").duplicate())
 	_reset(w)
-	w.stamina = 10.0
+	w.fatigue = 95.0
 	main.processor.worker = w
 	w.ai.state = CharacterAI.State.PROCESS
 	w.ai.timer = 100.0
@@ -698,7 +739,7 @@ func _test_step8_ai() -> void:
 	check(w.ai.state == CharacterAI.State.SEARCH and main.processor.worker == null, "加工の途中でも、危険なほど疲れていれば中断する")
 	_give_beds(0)
 	_reset(w)
-	w.stamina = 10.0
+	w.fatigue = 95.0
 	main.processor.worker = w
 	w.ai.state = CharacterAI.State.PROCESS
 	w.ai.timer = 100.0
@@ -707,12 +748,12 @@ func _test_step8_ai() -> void:
 	main.processor.worker = null
 	main.processor.orders.clear()
 	_give_beds(3)
-	# 仕事の優先度は、元気なあいだは、そのまま効く（生活の必要がなければ、いつもどおり仕事を選ぶ）
+	# 仕事の優先度は、健康なあいだは、そのまま効く（生活の必要がなければ、いつもどおり仕事を選ぶ）
 	_reset(w)
 	w.priorities[GameData.Job.REST] = 3
 	w.ai.state = CharacterAI.State.SEARCH
 	w._process(0.1)
-	check(w.ai.state != CharacterAI.State.REST_MOVE and w.ai.state != CharacterAI.State.EAT_TAKE, "元気な仲間は、休憩や食事を挟まず、いつもどおり仕事を探す")
+	check(w.ai.state != CharacterAI.State.REST_MOVE and w.ai.state != CharacterAI.State.EAT_TAKE, "健康な仲間は、休憩や食事を挟まず、いつもどおり仕事を探す")
 	# 旧処理の撤去の確認
 	_reset(w)
 	_reset(w1)
@@ -723,7 +764,7 @@ func _test_step9_ui() -> void:
 	await _fresh()
 	# 絵（オリジナルのドット絵。枠と充填範囲の2枚）
 	var art_ok := true
-	for n in ["hp", "stamina", "hunger", "fatigue"]:
+	for n in ["hp", "hunger", "fatigue"]:
 		var mask := IconGauge._load_image("res://assets/ui/%s_mask.png" % n)
 		var frame := IconGauge._load_image("res://assets/ui/%s.png" % n)
 		var dots := 0
@@ -738,7 +779,7 @@ func _test_step9_ui() -> void:
 		art_ok = art_ok and good
 		if not good:
 			print("       絵に問題: %s（充填範囲 %d ドット・枠が隠す %d）" % [n, dots, covered])
-	check(art_ok, "HP・スタミナ・満腹度・疲労度のアイコンは 16x16 の絵で、充填範囲が枠に隠れない")
+	check(art_ok, "HP・満腹度・疲労度のアイコンは 16x16 の絵で、充填範囲が枠に隠れない")
 	var faces_ok := true
 	for f in CrewStatusDB.MENTAL_ICON_FILES:
 		var img := IconGauge._load_image("res://assets/ui/%s.png" % f)
@@ -751,6 +792,7 @@ func _test_step9_ui() -> void:
 	var v := CrewStatusView.new().setup(Vector2i(8, 8), 12)
 	root.add_child(v)
 	await process_frame
+	check(v._gauges.size() == 3 and not v._gauges.has("stamina"), "表示はHP・満腹度・疲労度の3ゲージで、スタミナを作らない")
 	w.hp = 40.0
 	v.update_from(w)
 	var g: IconGauge = v.gauge("hp")
@@ -760,15 +802,15 @@ func _test_step9_ui() -> void:
 	check(g.current_color() == CrewStatusDB.COLOR_DANGER and not g.blink, "HP 20: 赤・（危険の線 15 までは）点滅なし")
 	w.hp = 10.0
 	v.update_from(w)
-	var others_still := not v.gauge("stamina").blink and not v.gauge("hunger").blink and not v.gauge("fatigue").blink
+	var others_still := not v.gauge("hunger").blink and not v.gauge("fatigue").blink
 	check(g.blink and others_still, "HP 10: HP のアイコンだけが赤く点滅する")
 	w.hp = 100.0
 	v.update_from(w)
 	check(is_equal_approx(g.ratio, 1.0) and g.current_color() == CrewStatusDB.COLOR_GOOD and not g.blink, "HP 100: 満タン・緑・点滅なし")
 	# 減った部分は、いまの色の暗い色
-	w.stamina = 40.0
+	w.hunger = 40.0
 	v.update_from(w)
-	var sg: IconGauge = v.gauge("stamina")
+	var sg: IconGauge = v.gauge("hunger")
 	var img := sg.interior_image()
 	var order := sg.fill_dots()
 	var top_dot: Vector2i = order[order.size() - 1]
@@ -780,13 +822,13 @@ func _test_step9_ui() -> void:
 	w.fatigue = 0.0
 	v.update_from(w)
 	var fg: IconGauge = v.gauge("fatigue")
-	check(is_equal_approx(fg.ratio, 1.0) and fg.current_color() == CrewStatusDB.COLOR_GOOD and fg.text == "100", "疲労度 0: 余力いっぱい（緑・数字 100）")
+	check(is_equal_approx(fg.ratio, 1.0) and fg.current_color() == CrewStatusDB.COLOR_GOOD and fg.text == "0", "疲労度0: 塗りは余力100%、数字は実際の疲労度0")
 	w.fatigue = 60.0
 	v.update_from(w)
-	check(is_equal_approx(fg.ratio, 0.4) and fg.current_color() == CrewStatusDB.COLOR_WARN and not fg.blink and fg.text == "40", "疲労度 60: 余力 40%（だいだい・点滅なし・数字 40）")
+	check(is_equal_approx(fg.ratio, 0.4) and fg.current_color() == CrewStatusDB.COLOR_WARN and not fg.blink and fg.text == "60", "疲労度60: 塗りは余力40%、数字は疲労度60（だいだい・点滅なし）")
 	w.fatigue = 80.0
 	v.update_from(w)
-	check(fg.current_color() == CrewStatusDB.COLOR_DANGER and fg.blink, "疲労度 80: 赤く点滅（疲労度 75 以上）")
+	check(is_equal_approx(fg.ratio, 0.2) and fg.text == "80" and fg.current_color() == CrewStatusDB.COLOR_DANGER and fg.blink, "疲労度80: 余力20%、数字80、赤く点滅（疲労度75以上）")
 	w.fatigue = 0.0
 	# 数字
 	w.hunger = 64.0
@@ -794,7 +836,7 @@ func _test_step9_ui() -> void:
 	check(v.gauge("hunger").text == "64", "数字はアイコンの中に出る（拠点の耐久・燃料・積載重量と同じルール）")
 	UIKit.show_icon_numbers = false
 	v.update_from(w)
-	check(v.gauge("hunger").text == "" and v.gauge("hp").text == "", "数値の表示を OFF にすると、数字が消える（アイコンだけ）")
+	check(v.gauge("hunger").text == "" and v.gauge("hp").text == "" and v.gauge("fatigue").text == "", "数値の表示を OFF にすると、数字が消える（アイコンだけ）")
 	check(is_equal_approx(v.gauge("hunger").ratio, 0.64), "数字を消しても、アイコンのゲージは同じ")
 	UIKit.show_icon_numbers = true
 	w.hunger = 100.0
@@ -808,13 +850,11 @@ func _test_step9_ui() -> void:
 	v.update_from(w)
 	check(CrewStatusView.tooltip_of(w, "fatigue").contains("余力") and CrewStatusView.tooltip_of(w, "hp").contains("HP"), "アイコンに載せたときの説明（正確な値）がある")
 	v.queue_free()
-	# 頭上の警告: いちばん危険なものを1つだけ（HP > 満腹度 > 疲労度 > スタミナ > 精神状態）
+	# 頭上の警告: いちばん危険なものを1つだけ（HP > 満腹度 > 疲労度 > 精神状態）
 	_reset(w)
-	check(CrewStatus.warning(w).is_empty(), "元気なら警告なし")
-	w.stamina = 20.0
-	check(CrewStatus.warning(w).get("stat", "") == "stamina", "スタミナだけ低い → スタミナ")
+	check(CrewStatus.warning(w).is_empty(), "健康なら警告なし")
 	w.fatigue = 80.0
-	check(CrewStatus.warning(w).get("stat", "") == "fatigue", "疲労度も高い → 疲労度（スタミナより優先）")
+	check(CrewStatus.warning(w).get("stat", "") == "fatigue", "疲労度が高い → 疲労度")
 	w.hunger = 20.0
 	check(CrewStatus.warning(w).get("stat", "") == "hunger", "満腹度も低い → 満腹度（疲労度より優先）")
 	w.hp = 20.0
@@ -826,11 +866,11 @@ func _test_step9_ui() -> void:
 	w.mental = CrewStatusDB.Mental.LIMIT
 	check(CrewStatus.warning(w).get("stat", "") == "mental", "ほかが問題なくても、精神状態が限界なら警告（顔）")
 	_reset(w)
-	# 上部の仲間カード: 元気のバーの代わりに、4つのアイコンと顔
+	# 上部の仲間カード: 3つのアイコンと顔
 	var card_ok := true
 	for x in W:
 		card_ok = card_ok and main.ui._cards[x].has("view") and main.ui._cards[x]["view"] is CrewStatusView
-	check(card_ok, "上部の仲間カードに、アイコンゲージ（4つ）と顔がある")
+	check(card_ok, "上部の仲間カードに、アイコンゲージ（3つ）と顔がある")
 	W[1].hp = 30.0
 	W[1].fatigue = 60.0
 	main.ui._process(0.1)
@@ -838,12 +878,12 @@ func _test_step9_ui() -> void:
 	check(is_equal_approx(cv.gauge("hp").ratio, 0.3) and is_equal_approx(cv.gauge("fatigue").ratio, 0.4), "カードの表示が、その仲間の値を反映する（ほかの仲間とは別）")
 	check(is_equal_approx(main.ui._cards[W[0]]["view"].gauge("hp").ratio, 1.0), "ほかの仲間のカードは影響されない")
 	var found_old := _find_text(main.ui, "元気")
-	check(not found_old, "カードに「元気」の文字・バーは残っていない")
+	check(not found_old and not _find_text(main.ui, "スタミナ"), "カードに元気・スタミナの表示は残っていない")
 	_reset(W[1])
 	# アイコンは、Worker の値を読むだけ（表示が値を書き換えない）
-	var before := [W[1].hp, W[1].stamina, W[1].hunger, W[1].fatigue, W[1].mental]
+	var before := [W[1].hp, W[1].hunger, W[1].fatigue, W[1].mental]
 	main.ui._process(0.1)
-	check([W[1].hp, W[1].stamina, W[1].hunger, W[1].fatigue, W[1].mental] == before, "表示は値を読むだけで、書き換えない")
+	check([W[1].hp, W[1].hunger, W[1].fatigue, W[1].mental] == before, "表示は値を読むだけで、書き換えない")
 
 
 func _find_text(node: Node, needle: String) -> bool:
@@ -859,7 +899,7 @@ func _find_text(node: Node, needle: String) -> bool:
 
 # ---------------------------------------------------------------- STEP 10: 仲間の管理画面
 func _test_step10_detail() -> void:
-	print("-- STEP 10: 仲間の管理画面（5つの状態を、同じアイコンで表示）")
+	print("-- STEP 10: 仲間の管理画面（4つの状態を表示）")
 	await _fresh()
 	var w = W[0]
 	_quiet(w)
@@ -869,15 +909,14 @@ func _test_step10_detail() -> void:
 	var dv: CrewStatusView = main.detail._live["view"]
 	check(dv.gauge("hp").display_size.x > main.ui._cards[w]["view"].gauge("hp").display_size.x, "管理画面のアイコンは、カードより大きい（同じ部品を大きさ違いで使い回す）")
 	w.hp = 55.0
-	w.stamina = 35.0
 	w.hunger = 70.0
 	w.fatigue = 45.0
 	w.mental = CrewStatusDB.Mental.ANXIOUS
 	main.detail._update_live()
-	check(is_equal_approx(dv.gauge("hp").ratio, 0.55) and is_equal_approx(dv.gauge("stamina").ratio, 0.35) and is_equal_approx(dv.gauge("hunger").ratio, 0.70) and is_equal_approx(dv.gauge("fatigue").ratio, 0.55),
-			"HP・スタミナ・満腹度・疲労度（余力）が、その仲間の値で出る")
+	check(is_equal_approx(dv.gauge("hp").ratio, 0.55) and is_equal_approx(dv.gauge("hunger").ratio, 0.70) and is_equal_approx(dv.gauge("fatigue").ratio, 0.55),
+			"HP・満腹度・疲労度（余力）が、その仲間の値で出る")
 	check(dv.face().texture == GameData.tex("res://assets/ui/mental_anxious.png"), "精神状態（不安）の顔が出る")
-	check(not _find_text(main.detail._overlay, "元気"), "管理画面に「元気」の表示は残っていない")
+	check(not _find_text(main.detail._overlay, "元気") and not _find_text(main.detail._overlay, "スタミナ"), "管理画面に元気・スタミナの表示は残っていない")
 	check(main.detail._live["status"].text.contains(w.ai.status_text()), "行動の状態の文字も、そのまま出る")
 	# 別の仲間を選ぶと、その仲間の値に変わる
 	W[1].hp = 15.0
@@ -886,10 +925,14 @@ func _test_step10_detail() -> void:
 	var dv2: CrewStatusView = main.detail._live["view"]
 	main.detail._update_live()
 	check(is_equal_approx(dv2.gauge("hp").ratio, 0.15), "別の仲間を選ぶと、その仲間の値に切り替わる")
-	# 育成タブでも出る
+	# 個体情報にステータス・分野ランク・スキルが同居し、部署は別タブ
+	main.detail._set_tab(0)
+	await process_frame
+	check(main.detail._tab_btns.size() == 2 and main.detail._tab_btns[0].text == "個体情報" and main.detail._tab_btns[1].text == "部署", "管理画面のタブは個体情報・部署の2つ")
+	check(main.detail._live.has("view") and _find_text(main.detail._body, "分野ランク") and _find_text(main.detail._body, "スキル"), "個体情報の同じパネル内に、状態・分野ランク・スキルが出る")
 	main.detail._set_tab(1)
 	await process_frame
-	check(main.detail._live.has("view"), "「育成」タブでも、ステータスが出る")
+	check(_find_text(main.detail._body, "部署"), "部署タブへ切り替えられる")
 	main.detail._set_tab(0)
 	main.detail.close()
 	_reset(W[1])
@@ -907,37 +950,33 @@ func _test_rest_in_place() -> void:
 	w1.priorities[GameData.Job.REST] = 3
 	_give_beds(0)
 	var R: float = CrewStatusDB.REST_IN_PLACE_RATE
-	# 回復の速さ: ベッド = 従来どおり、その場 = R 倍（スタミナ・疲労度・HP）
+	# 回復の速さ: ベッド = 従来どおり、その場 = R 倍（疲労度・HP）
 	_reset(w)
-	w.stamina = 10.0
 	w.fatigue = 60.0
 	w.hp = 50.0
 	w.ai.state = CharacterAI.State.REST
 	w.sleeping = true
 	CrewStatus.tick(w, 1.0)
-	var bed_s: float = w.stamina - 10.0
 	var bed_f: float = 60.0 - w.fatigue
 	var bed_h: float = w.hp - 50.0
 	_reset(w)
-	w.stamina = 10.0
 	w.fatigue = 60.0
 	w.hp = 50.0
 	w.ai.state = CharacterAI.State.REST_HERE
 	w.resting = true
 	CrewStatus.tick(w, 1.0)
-	var here_s: float = w.stamina - 10.0
 	var here_f: float = 60.0 - w.fatigue
 	var here_h: float = w.hp - 50.0
-	check(is_equal_approx(bed_s, 9.0) and is_equal_approx(bed_f, CrewStatusDB.FATIGUE_REST_RATE) and is_equal_approx(bed_h, CrewStatusDB.HP_REST_RATE), "ベッドで眠るときの回復は、これまでと同じ（スタミナ +9・疲労度 -1.2・HP +0.7 /秒）")
-	check(is_equal_approx(here_s, bed_s * R) and is_equal_approx(here_f, bed_f * R) and is_equal_approx(here_h, bed_h * R), "その場の簡易休憩は、ベッドの %.0f%% の速さで回復する（スタミナ +%.2f・疲労度 -%.2f・HP +%.2f /秒）" % [R * 100.0, here_s, here_f, here_h])
-	check(here_s > 0.0 and here_f > 0.0 and here_h > 0.0 and R < 1.0, "簡易休憩でも、確かに回復する（ただしベッドより遅い）")
+	check(is_equal_approx(bed_f, CrewStatusDB.FATIGUE_REST_RATE) and is_equal_approx(bed_h, CrewStatusDB.HP_REST_RATE), "ベッドで眠ると、疲労度 -1.2・HP +0.7 /秒")
+	check(is_equal_approx(here_f, bed_f * R) and is_equal_approx(here_h, bed_h * R), "その場の簡易休憩は、ベッドの %.0f%% の速さで回復する（疲労度 -%.2f・HP +%.2f /秒）" % [R * 100.0, here_f, here_h])
+	check(here_f > 0.0 and here_h > 0.0 and R < 1.0, "簡易休憩でも、確かに回復する（ただしベッドより遅い）")
 	# 疲れたら、ベッドがなくても休みに入る
 	_reset(w)
-	w.stamina = 10.0
+	w.fatigue = 80.0
 	w.ai.state = CharacterAI.State.SEARCH
 	w._process(0.1)
 	w._process(0.1)                                            # 休憩の状態に入った次のコマから、休んでいる姿になる
-	check(w.ai.state == CharacterAI.State.REST_HERE and w.resting and w.ai.status_text() == "その場で休憩", "ベッドがなくても、疲れたら（スタミナ 25 未満）その場で休む")
+	check(w.ai.state == CharacterAI.State.REST_HERE and w.resting and w.ai.status_text() == "その場で休憩", "ベッドがなくても、疲労度が75以上ならその場で休む")
 	var pos0: Vector2 = w.position
 	var fat0: float = w.fatigue
 	var t := 0.0
@@ -945,7 +984,7 @@ func _test_rest_in_place() -> void:
 		w._process(0.5)
 		t += 0.5
 	check(w.position == pos0, "その場から動かない")
-	check(w.ai.state != CharacterAI.State.REST_HERE and CrewStatus.rest_done(w), "回復しきる（スタミナ %d・疲労度 %d・HP %d）と、休憩をやめる（%.0f 秒）" % [int(w.stamina), int(w.fatigue), int(w.hp), t])
+	check(w.ai.state != CharacterAI.State.REST_HERE and CrewStatus.rest_done(w), "回復しきる（疲労度 %d・HP %d）と、休憩をやめる（%.0f 秒）" % [int(w.fatigue), int(w.hp), t])
 	# 疲労度が高いままでも、永遠には働き続けない
 	_reset(w)
 	w.fatigue = 92.0
@@ -963,15 +1002,15 @@ func _test_rest_in_place() -> void:
 	w.ai.state = CharacterAI.State.SEARCH
 	w._process(0.1)
 	check(w.ai.state == CharacterAI.State.REST_HERE, "HP が低い（25 未満）ときも、ベッドなしで休む")
-	# 元気なあいだの休憩（優先度による休憩）は、これまでどおりベッドだけ
+	# 急ぎではない休憩（優先度による休憩）は、これまでどおりベッドだけ
 	_reset(w)
-	w.stamina = 60.0
+	w.fatigue = 60.0
 	w.ai.state = CharacterAI.State.SEARCH
 	w._process(0.1)
-	check(w.ai.state != CharacterAI.State.REST_HERE and w.ai.state != CharacterAI.State.REST_MOVE, "まだ疲れていない（スタミナ 60）うちは、ベッドがなければ休まず仕事を続ける（休憩の優先度の意味はそのまま）")
+	check(w.ai.state != CharacterAI.State.REST_HERE and w.ai.state != CharacterAI.State.REST_MOVE, "疲労度60の通常休憩は、ベッドがなければその場では始めない")
 	# 休憩の優先度が★0なら、休まない
 	_reset(w)
-	w.stamina = 5.0
+	w.fatigue = 80.0
 	w.priorities[GameData.Job.REST] = 0
 	w.ai.state = CharacterAI.State.SEARCH
 	w._process(0.1)
@@ -979,7 +1018,7 @@ func _test_rest_in_place() -> void:
 	w.priorities[GameData.Job.REST] = 3
 	# ベッドが空いたら、ベッドへ移る
 	_reset(w)
-	w.stamina = 5.0
+	w.fatigue = 80.0
 	w.ai.state = CharacterAI.State.SEARCH
 	w._process(0.1)
 	check(w.ai.state == CharacterAI.State.REST_HERE, "（準備）その場で休んでいる")
@@ -990,12 +1029,12 @@ func _test_rest_in_place() -> void:
 	# ベッドはあるが、すべて使用中: 待たずに、その場で休む
 	_give_beds(1)
 	_reset(w1)
-	w1.stamina = 5.0
+	w1.fatigue = 80.0
 	w1.ai.state = CharacterAI.State.SEARCH
 	w1._process(0.1)
 	check(w1.ai.state == CharacterAI.State.REST_MOVE, "ベッドが空いていれば、ベッドで休む（ベッド優先）")
 	_reset(w)
-	w.stamina = 5.0
+	w.fatigue = 80.0
 	w.ai.state = CharacterAI.State.SEARCH
 	w._process(0.1)
 	check(w.ai.state == CharacterAI.State.REST_HERE, "ベッドがすべて使用中なら、待たずに、その場で休む")
@@ -1004,7 +1043,7 @@ func _test_rest_in_place() -> void:
 	_give_beds(0)
 	# 休みながら食べる必要が出たら、先に食べる
 	_reset(w)
-	w.stamina = 5.0
+	w.fatigue = 80.0
 	w.hunger = 10.0
 	_set_food(2)
 	w.ai.state = CharacterAI.State.SEARCH

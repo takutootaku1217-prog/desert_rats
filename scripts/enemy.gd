@@ -19,7 +19,7 @@ var _flash := 0.0
 var _t := 0.0
 
 const HIT_REACH := 80.0      # 攻撃が仲間に届く距離
-const HIT_TIRE := 2.5        # 攻撃1回で仲間が失うスタミナ
+const HIT_TIRE := 2.5        # 攻撃1回で仲間に加わる疲労度
 
 
 func _init() -> void:
@@ -92,7 +92,7 @@ func _hit_nearby_worker() -> void:
 			best_d = d
 			best = w
 	if best != null:
-		best.stamina = maxf(0.0, best.stamina - HIT_TIRE)
+		best.fatigue = minf(CrewStatusDB.MAX_FATIGUE, best.fatigue + HIT_TIRE)
 		CrewStatus.damage(best, CrewStatusDB.RAID_HIT_HP * body_scale, CrewStatusDB.RAID_HIT_STRESS)
 
 

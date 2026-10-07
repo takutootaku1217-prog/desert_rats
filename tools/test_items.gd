@@ -248,7 +248,7 @@ func _test_transfer() -> void:
 	var stone_total: int = st.count_of(GameData.Item.STONE) + carrier.carry_n + P.stock.count(GameData.Item.STONE)
 	carrier.depart()
 	check(st.count_of(GameData.Item.STONE) + P.stock.count(GameData.Item.STONE) == stone_total and main.transfer_worker == null, "運搬の途中で遠征に出ても、持っていた物は倉庫に戻る（消えない）。引き受けも返す")
-	carrier.arrive(80.0)
+	carrier.arrive(20.0)
 	carrier.set_process(false)
 	main.cancel_transfers()
 	# 戻す（作業場 → 倉庫）

@@ -3,7 +3,7 @@ extends RefCounted
 ## 遺跡の探索（調査隊の派遣）。データは data/expeditions.gd。Main が毎フレーム tick() を呼ぶ。
 ##  状態: idle（何もない）→ offered（遺跡を見つけた。時間限定）→ running（調査隊が探索中）→ done（結果を表示）→ idle
 ##  調査隊のあいだ、仲間は拠点にいない（Worker.away）。人手が減るぶん、拠点の作業が回りにくくなる。
-##  結果（戦利品・設計図・仲間のスタミナ）は帰還時に反映する。設計図は game.blueprints（部署Lvによる解放の枠組みで使う）。
+##  仲間の疲労度は関門ごとに反映し、戦利品・設計図は帰還時に反映する。設計図は game.blueprints（部署Lvによる解放の枠組みで使う）。
 
 var game
 var state := "idle"
@@ -16,7 +16,6 @@ var steps: Array = []            # 関門の種類の並び
 var step_i := 0
 var step_left := 0.0
 var step_time := 1.0
-var energy := {}                 # Worker -> 遠征中のスタミナ（以前の「元気」）
 var loot := {}                   # Item -> 個数（倉庫に持ち帰れた分）
 var lost := {}                   # Item -> 個数（積載量がいっぱいで持ち帰れなかった分）
 var blueprint := ""              # 見つけた設計図のid
@@ -118,9 +117,7 @@ func start(members: Array, appr: String, bring_kit: bool) -> bool:
 		steps.append(types[_pick_weighted(ws)])
 	step_time = float(d["duration"]) * float(ExpeditionDB.approach(appr)["time"]) / float(steps.size())
 	step_left = step_time
-	energy.clear()
 	for w in party:
-		energy[w] = w.stamina
 		w.depart()
 	state = "running"
 	stats["trips"] += 1
@@ -176,14 +173,15 @@ func _resolve_step() -> void:
 			_add_log("%s: %s…修理資材で被害を防いだ" % [def["name"], def["ng"]])
 		else:
 			for w in party:
-				energy[w] = maxf(0.0, energy[w] - float(def["penalty"]))
-			_add_log("%s: %s（全員のスタミナ -%d）" % [def["name"], def["ng"], int(def["penalty"])])
+				w.fatigue = minf(CrewStatusDB.MAX_FATIGUE, w.fatigue + float(def["penalty"]))
+				CrewStatus._tick_mental(w, 0.0)           # 遠征中は通常のtickが止まるので、時間を進めず疲労に合う精神状態へ更新
+			_add_log("%s: %s（全員の疲労度 +%d）" % [def["name"], def["ng"], int(def["penalty"])])
 	step_i += 1
-	# 誰かのスタミナが尽きたら撤退
-	var min_e := 999.0
+	# 誰かの疲労度が最大値に達したら撤退
+	var max_fatigue := 0.0
 	for w in party:
-		min_e = minf(min_e, energy[w])
-	if min_e <= 0.0 and step_i < steps.size():
+		max_fatigue = maxf(max_fatigue, w.fatigue)
+	if max_fatigue >= CrewStatusDB.MAX_FATIGUE and step_i < steps.size():
 		retreated = true
 		stats["retreats"] += 1
 		_add_log("力尽きた者が出たので、撤退した")
@@ -234,7 +232,7 @@ func _finish() -> void:
 		stats["blueprints"] += 1
 	# 仲間の帰還
 	for w in party:
-		w.arrive(maxf(5.0, energy[w]))
+		w.arrive(minf(ExpeditionDB.RETURN_FATIGUE_MAX, w.fatigue))
 	state = "done"
 	result_left = ExpeditionDB.RETURN_SECONDS
 	game.director.note("調査隊が戻った！ %s" % summary())

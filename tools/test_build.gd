@@ -155,7 +155,7 @@ func _test_initial_state() -> void:
 	check(not main.has_facility("workbench"), "ワークベンチはまだない")
 	check(main.base.facility_count("bed") == 0, "ベッドは1つもない")
 	check(main.base.claim_bed(W[0]) == -1, "ベッドがないので、割り当てられない")
-	W[0].stamina = 10.0
+	W[0].fatigue = 90.0
 	W[0].priorities[GameData.Job.REST] = 5
 	check(not W[0].ai._try_start(GameData.Job.REST), "休憩の仕事は、ベッドがなければ始められない（詰まらず次へ進む）")
 	# 材料がすべてあっても、必要設備の要る物は作らない
@@ -242,7 +242,7 @@ func _test_flow() -> void:
 	# ベッドができたら、疲れた仲間が休める
 	var w1 = W[1]
 	w1.priorities[GameData.Job.REST] = 5
-	w1.stamina = 10.0
+	w1.fatigue = 90.0
 	w1.ai.on_priority_changed()
 	var t3: float = await _until(func(): return w1.sleeping, 60.0)
 	check(t3 >= 0.0 and w1.bed_index == 0, "疲れた仲間が、できたベッドで眠る（%.0f秒）" % t3)
@@ -340,7 +340,7 @@ func _test_effects() -> void:
 	_only_hauler()
 	Engine.time_scale = 8.0
 	main.base.add_facility("workbench")
-	check(is_equal_approx(main.room_effect("drain_cut"), 0.0), "建てる前は、スタミナの消耗を減らす効果はない")
+	check(is_equal_approx(main.room_effect("drain_cut"), 0.0), "建てる前は、疲労度の増加を減らす効果はない")
 	_give_cost("supply_cache")
 	check(main.request_build("supply_cache"), "物資庫を依頼する（材料 %s がある）" % FacilityDB.cost_text("supply_cache"))
 	var r: Dictionary = main.choose_recipe()
@@ -348,7 +348,7 @@ func _test_effects() -> void:
 	var t: float = await _until(func(): return main.has_facility("supply_cache"), 120.0)
 	check(t >= 0.0, "物資庫が完成する（%.0f秒）" % t)
 	check(st.count_of(GameData.Item.REPAIR_KIT) == 0 and st.count_of(GameData.Item.WOOD) == 0, "材料（%s）が一度だけ消費される" % FacilityDB.cost_text("supply_cache"))
-	check(is_equal_approx(main.room_effect("drain_cut"), 0.08), "設置後、スタミナの消耗を減らす効果（-8%）が実際に反映される（CrewStatus が room_effect を読む）")
+	check(is_equal_approx(main.room_effect("drain_cut"), 0.08), "設置後、疲労度の増加を減らす効果（-8%）が実際に反映される（CrewStatus が room_effect を読む）")
 	# 部屋の効果（食堂）と足し合わされる（食堂は data/rooms.gd。既存の部屋の変更のまま）
 	var slot := ""
 	for s in Rooms.SLOT_ORDER:
@@ -383,7 +383,7 @@ func _test_interrupt() -> void:
 	check(st.count_of(GameData.Item.WOOD) == _need("workbench", GameData.Item.WOOD)
 			and st.count_of(GameData.Item.IRON) == _need("workbench", GameData.Item.IRON), "運んでいた材料は倉庫に戻る")
 	check(main.processor.incoming.is_empty() and main.processor.pending_build("workbench") == 0, "運搬中の予約も消える")
-	w0.arrive(100.0)
+	w0.arrive(0.0)
 	var t3: float = await _until(func(): return main.has_facility("workbench"), 120.0)
 	check(t3 >= 0.0, "戻ったあと、建設が最後まで進む（%.0f秒）" % t3)
 	Engine.time_scale = 1.0
@@ -453,8 +453,8 @@ func _test_full_run() -> void:
 		await _fresh(false, true)                         # 初期の蓄え・仲間・優先度・方針・速度は、ふつうのゲームのまま
 		Engine.time_scale = 12.0
 		var done := {}                                    # 設備 -> 完成した時刻の一覧
-		var min_energy := 100.0
-		var energy0_sec := 0.0
+		var max_fatigue := 0.0
+		var fatigue_max_sec := 0.0
 		var t0: float = main.director.elapsed
 		var last: float = t0
 		main.request_build("workbench")                   # 熱心なプレイヤー: すぐ依頼し、ベッドも建てられるようになったら依頼する
@@ -467,18 +467,18 @@ func _test_full_run() -> void:
 					done[id] = done.get(id, []) + [now - t0]
 				if main.build_blocked_reason(id) == "":
 					main.request_build(id)
-			var lo := 100.0
+			var hi := 0.0
 			for w in W:
-				lo = minf(lo, w.stamina)
-			min_energy = minf(min_energy, lo)
-			if lo <= 0.0:
-				energy0_sec += now - last
+				hi = maxf(hi, w.fatigue)
+			max_fatigue = maxf(max_fatigue, hi)
+			if hi >= 99.5:
+				fatigue_max_sec += now - last
 			last = now
 		Engine.time_scale = 1.0
 		var wb: Array = done.get("workbench", [])
 		var bd: Array = done.get("bed", [])
-		print("   [回%d] ワークベンチ %s ／ ベッド %s ／ 元気の最低 %.0f（0だった時間 %.0f秒）／ 空腹はゲーム内 %s ／ 車体 %.0f" % [
-				n + 1, _times(wb), _times(bd), min_energy, energy0_sec, "あり" if main.hungry else "なし", main.base.parts[GameData.Part.HULL]])
+		print("   [回%d] ワークベンチ %s ／ ベッド %s ／ 疲労度の最大 %.0f（上限付近だった時間 %.0f秒）／ 空腹はゲーム内 %s ／ 車体 %.0f" % [
+				n + 1, _times(wb), _times(bd), max_fatigue, fatigue_max_sec, "あり" if main.hungry else "なし", main.base.parts[GameData.Part.HULL]])
 		check(not main.game_over, "[回%d] ゲームオーバーにならない" % (n + 1))
 		# 運（木が来るか・獲物が獲れるか）で遅れる回があるので、1回ごとではなく「3回のうち2回以上」で確かめる
 		if wb.size() == 1 and wb[0] < 4.0 * 60.0 and bd.size() >= 1 and bd[0] < 5.0 * 60.0:

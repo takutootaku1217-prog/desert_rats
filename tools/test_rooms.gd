@@ -2,7 +2,7 @@ extends SceneTree
 ## 部屋の変更（部屋の部品化。data/rooms.gd・ui/base_ui.gd）の自己診断。実行:
 ##   Godot --headless --path . -s res://tools/test_rooms.gd
 ## 確かめる流れ: 表の整合（費用は今の素材・絵の大きさ）→ 初期配置が今までのゲームと同じ位置 → 建てられる・建てられない条件 →
-##   空き → 建てる → 建て替え（材料の消費）→ 加工室・倉庫・寝室・機関室を移す（設備と仲間の動きが追従する）→ 効果（休憩・元気）→
+##   空き → 建てる → 建て替え（材料の消費）→ 加工室・倉庫・寝室・機関室を移す（設備と仲間の動きが追従する）→ 効果（休憩・疲労度）→
 ##   画面（区画の選択・建設ボタン・Rキー・Bキーの競合なし）→ 通し（ふつうのゲームで部屋の変更を繰り返しても回り続けるか）。
 ## 「車体の見た目が変わる」ことは、ウィンドウ表示の tools/shot_rooms.gd で画面に撮って確かめる。
 
@@ -231,7 +231,7 @@ func _test_build_flow() -> void:
 	_give("mess")
 	check(main.build_room("l1", "mess"), "医務室を食堂に建て替える")
 	check(main.room_layout["l1"] == "mess" and main.room_effect("rest_rate") == 0.0 and is_equal_approx(main.room_effect("drain_cut"), 0.12),
-			"食堂に変わり、効果も入れ替わる（元気の消耗 -12%）")
+			"食堂に変わり、効果も入れ替わる（疲労度の増加 -12%）")
 	check(not main.build_room("l1", "mess"), "同じ部屋への建て替えはできない")
 	check(not main.build_room("u1", "storage"), "置けない階には建てられない")
 	_give("training")
@@ -339,7 +339,7 @@ func _test_bedroom_move() -> void:
 	Engine.time_scale = 8.0
 	var w = W[1]
 	w.priorities[GameData.Job.REST] = 5
-	w.stamina = 10.0
+	w.fatigue = 90.0
 	w.ai.on_priority_changed()
 	var t: float = await _until(func(): return w.sleeping, 60.0)
 	check(t >= 0.0 and w.bed_index == 0 and absf(w.position.x - float(GameData.BED_X[0])) < 8.0, "疲れた仲間が、上の階の寝室で眠る（%.0f秒）" % t)
@@ -385,21 +385,21 @@ func _test_engine_fallback() -> void:
 # ---------------------------------------------------------------- 部屋の効果（医務室・食堂）
 func _rest_gain(w) -> float:
 	w.ai.state = CharacterAI.State.REST
-	w.stamina = 10.0
+	w.fatigue = 90.0
 	w._process(1.0)
-	return w.stamina - 10.0
+	return 90.0 - w.fatigue
 
 
 func _drain(w) -> float:
 	w.ai.state = CharacterAI.State.IDLE
 	w.ai.timer = 100.0
-	w.stamina = 80.0
+	w.fatigue = 20.0
 	w._process(1.0)
-	return 80.0 - w.stamina
+	return w.fatigue - 20.0
 
 
 func _test_effects() -> void:
-	print("-- 部屋の効果（休憩の回復・元気の消耗）")
+	print("-- 部屋の効果（休憩の回復・疲労度の増加）")
 	await _fresh(true)
 	main.base.built.erase("supply_cache")     # 部屋の効果だけを見るため、設備側の効果（物資庫。data/facilities.gd）は外す
 	for x in W:
@@ -408,8 +408,9 @@ func _test_effects() -> void:
 			x.priorities[j] = 0
 	var w = W[0]
 	var base_rest := _rest_gain(w)
-	var base_drain := _drain(w)
-	check(base_rest > 8.0 and base_drain > 0.0, "基準: 眠ると +%.2f/秒・待機で -%.2f/秒" % [base_rest, base_drain])
+	var base_drain := _drain_working(w)
+	check(is_equal_approx(base_rest, 1.2) and base_drain > 0.0, "基準: 眠ると疲労度 -%.2f/秒・活動で +%.2f/秒" % [base_rest, base_drain])
+	check(is_zero_approx(_drain(w)), "待機中は疲労度が増えない")
 	_give("infirmary")
 	check(main.build_room("l1", "infirmary"), "医務室を建てる")
 	var r2 := _rest_gain(w)
@@ -417,25 +418,22 @@ func _test_effects() -> void:
 	_give("mess")
 	check(main.build_room("l1", "mess"), "食堂に建て替える")
 	check(is_equal_approx(_rest_gain(w) / base_rest, 1.0), "食堂に替えると、医務室の効果はなくなる")
-	var d2 := _drain(w)
-	check(is_equal_approx(d2 / base_drain, 0.88), "食堂で、元気の消耗が 12%% 減る（%.3f → %.3f）" % [base_drain, d2])
-	# 動いている間の消耗も同じ割合で減る
-	var moving_mess := _drain_working(w)
-	main.room_layout["l1"] = "empty"                     # 食堂を外して（配置だけを書き換えて）基準を測る
-	var moving_base := _drain_working(w)
-	main.room_layout["l1"] = "mess"
-	check(moving_base > 0.0 and is_equal_approx(moving_mess / moving_base, 0.88), "作業中の元気の消耗も 12%% 減る（%.3f → %.3f）" % [moving_base, moving_mess])
+	var d2 := _drain_working(w)
+	check(is_equal_approx(d2 / base_drain, 0.88), "食堂で、活動中の疲労度の増加が 12%% 減る（%.3f → %.3f）" % [base_drain, d2])
+	check(is_zero_approx(_drain(w)), "食堂があっても、待機中の疲労度は変わらない")
 	# 食堂を重ねても、上限（50%）を超えない
 	main.room_layout = {"u1": "mess", "u2": "mess", "l1": "mess", "l2": "mess"}
-	check(main.room_effect("drain_cut") <= Rooms.CAP_DRAIN_CUT, "食堂を重ねても、元気の消耗を減らす効果には上限がある")
+	main.base.add_facility("supply_cache")               # 食堂48%＋物資庫8%で、上限を超える組み合わせを測る
+	check(is_equal_approx(main.room_effect("drain_cut"), Rooms.CAP_DRAIN_CUT), "部屋と設備を重ねても、疲労度の増加を減らす効果は50%まで")
+	check(is_equal_approx(_drain_working(w) / base_drain, 0.5), "上限時も、活動中の疲労度の増加は基準の半分になる")
 
 
-## 動いている間（待機ではない状態）の、1秒あたりの元気の減り。
+## 動いている間（待機ではない状態）の、1秒あたりの疲労度の増加。
 func _drain_working(w) -> float:
 	w.ai.state = CharacterAI.State.COMBAT               # 敵がいないので探し直し（SEARCH）になる。待機ではないので、動いている間の減り方
-	w.stamina = 80.0
+	w.fatigue = 20.0
 	w._process(1.0)
-	return 80.0 - w.stamina
+	return w.fatigue - 20.0
 
 
 # ---------------------------------------------------------------- 画面
@@ -629,10 +627,10 @@ func _soak(title: String, minutes: float, gap_min: float, gap_max: float, stress
 	for k in kinds:
 		made += " %s×%d" % [k, kinds[k]]
 	print("   部屋の変更を試した %d 回・実際に変わった %d 回:%s" % [ops, done, made])
-	print("   ワークベンチ %s・ベッド %d・加工 %d 回・回収 %d 個・狩猟 %d・建設 %d・空腹 %s・車体 %.0f・仲間の元気 %s" % [
+	print("   ワークベンチ %s・ベッド %d・加工 %d 回・回収 %d 個・狩猟 %d・建設 %d・空腹 %s・車体 %.0f・仲間の疲労度 %s" % [
 			("%.0f秒" % wb_at) if wb_at >= 0.0 else "なし", main.base.facility_count("bed"), main.processor.total_done, main.total_gathered,
 			main.total_hunted, main.total_built, "あり" if main.hungry else "なし", main.base.parts[GameData.Part.HULL],
-			str(W.map(func(w): return int(w.stamina)))])
+			str(W.map(func(w): return int(w.fatigue)))])
 	check(not main.game_over, "ゲームオーバーにならない")
 	check(done >= (20 if stress else 5), "部屋の変更が何度も行われた（%d回）" % done)
 	if not stress:

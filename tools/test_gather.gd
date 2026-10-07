@@ -36,13 +36,13 @@ func _reset() -> void:
 	main.scroll_speed = 0.0                    # 世界を止めて、採取ポイントの「選び方」だけを確かめる（追いつけるかは専用の診断で）
 	for w in main.workers:
 		if w.away:
-			w.arrive(100.0)
+			w.arrive(0.0)
 		w.ai._release_task()
 		w.carrying = -1
 		w.carry_n = 1
 		w.carry_bonus = {}
 		w.tools = {}
-		w.stamina = 100.0
+		w.fatigue = 0.0
 		w.ai._set_state(CharacterAI.State.SEARCH)
 	for root_node in [main.resources_root, main.creatures_root, main.enemies_root]:
 		for c in root_node.get_children():
@@ -379,7 +379,7 @@ func _run() -> void:
 	W[1].ai.state = CharacterAI.State.MOVE_TO_STORAGE
 	W[1].depart()
 	check(st.count_of(GameData.Item.WOOD) == 3 and st.count_of(GameData.Item.BONE) == 1 and W[1].carry_n == 1, "遠征に出る仲間の袋（複数個・副産物）は、倉庫へ戻る")
-	W[1].arrive(80.0)
+	W[1].arrive(20.0)
 	# 積載量: 袋を運んでいる分も空き枠に数える
 	_reset()
 	st.add_item(GameData.Item.WOOD, st.quota_of(GameData.Item.WOOD) - 3)

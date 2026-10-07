@@ -1,22 +1,22 @@
 class_name CrewStatusDB
 extends RefCounted
-## 仲間のステータス（HP・スタミナ・満腹度・疲労度・精神状態）の設定（プロトタイプの仮の数値）。**調整はここだけ**でよい。
+## 仲間のステータス（HP・満腹度・疲労度・精神状態）の設定（プロトタイプの仮の数値）。**調整はここだけ**でよい。
 ##
 ## 仲間1人ごとに持つ:
 ##   hp（HP）… 身体の耐久力。0 で戦闘不能（死亡ではない）。休憩で回復（医務室でさらに早い）。
-##   stamina（スタミナ）… いま、どれだけ活動できるか。以前の「元気」を置き換えた（動きは同じ）。仕事で減り、休憩で回復。
 ##   hunger（満腹度）… 100 = 満腹、0 = 完全な空腹。時間で減り、食料を食べて回復（仲間ごとに個別。全員共通の空腹は廃止）。
 ##   fatigue（疲労度）… 仕事・移動を続けた結果として蓄積する疲れ。**数値が高いほど悪い**。休憩で徐々に下がる。
 ##   精神状態 … 数値ではなく、疲労度を中心に、満腹度・HP・危険な出来事（stress）から**計算される状態**（好調・普通・不安・不調・限界）。
-## 悪い状態は「少し効率が落ちる」を基本にし、完全に止まる条件は限る（HP 0・スタミナ 0 付近・満腹度 0 付近・疲労度 100 付近）。
+## 疲れは疲労度1つで管理する。独立したスタミナ（stamina）は持たない。
+## 悪い状態は「少し効率が落ちる」を基本にし、完全に止まる条件は限る（HP 0・満腹度 0 付近・疲労度 100 付近）。
 ## 複数のステータスが悪くても、効率は掛け算せず「いちばん悪いもの」で決める。精神状態は小さな補正だけ加える。
 ## 計算は scripts/crew_status.gd（CrewStatus）、データは Worker、表示は ui/（データを読むだけ）。
 ##
-## 「悪い側」の向き: HP・スタミナ・満腹度は低いほど悪い（low_is_bad）。疲労度は高いほど悪い（high_is_bad）。
+## 「悪い側」の向き: HP・満腹度は低いほど悪い（low_is_bad）。疲労度は高いほど悪い（high_is_bad）。
 
-const STATS := ["hp", "stamina", "hunger", "fatigue"]
-const STAT_NAMES := {"hp": "HP", "stamina": "スタミナ", "hunger": "満腹度", "fatigue": "疲労度"}
-const ICON_FILES := {"hp": "hp", "stamina": "stamina", "hunger": "hunger", "fatigue": "fatigue"}      # assets/ui/<名前>.png と <名前>_mask.png
+const STATS := ["hp", "hunger", "fatigue"]
+const STAT_NAMES := {"hp": "HP", "hunger": "満腹度", "fatigue": "疲労度"}
+const ICON_FILES := {"hp": "hp", "hunger": "hunger", "fatigue": "fatigue"}      # assets/ui/<名前>.png と <名前>_mask.png
 ## 精神状態の顔の絵（Mental の並び順。assets/ui/<名前>.png。白っぽく描いてあり、MENTAL_COLORS で染める）
 const MENTAL_ICON_FILES := ["mental_good", "mental_normal", "mental_anxious", "mental_bad", "mental_limit"]
 
@@ -29,36 +29,25 @@ const MENTAL_WORK := [1.05, 1.0, 0.95, 0.85, 0.70]
 # 最大値・初期値（0〜100）
 # ------------------------------------------------------------------
 const MAX_HP := 100.0
-const MAX_STAMINA := 100.0
 const MAX_HUNGER := 100.0
 const MAX_FATIGUE := 100.0
-const MAX_STAT := {"hp": MAX_HP, "stamina": MAX_STAMINA, "hunger": MAX_HUNGER, "fatigue": MAX_FATIGUE}
+const MAX_STAT := {"hp": MAX_HP, "hunger": MAX_HUNGER, "fatigue": MAX_FATIGUE}
 ## 新しく加入した仲間・いまの3人の初期値（精神状態は「普通」から。好調は、落ち着いた時間が続くと上がる）
 const START_HP := 100.0
-const START_STAMINA := 100.0
 const START_HUNGER := 100.0
 const START_FATIGUE := 0.0
 
 # ------------------------------------------------------------------
 # 状態による速度補正: 段階 = [基準の値, 作業速度の倍率, 移動速度の倍率]
-#   low_is_bad（HP・スタミナ・満腹度）: 値 < 基準 の最初の段階（小さい基準から並べる）。どれにも当たらなければ 100%。
+#   low_is_bad（HP・満腹度）: 値 < 基準 の最初の段階（小さい基準から並べる）。どれにも当たらなければ 100%。
 #   high_is_bad（疲労度）: 値 >= 基準 の最初の段階（大きい基準から並べる）。
 # ------------------------------------------------------------------
 const _LOW_STEPS := [[15.0, 0.5, 0.6], [25.0, 0.7, 0.8], [50.0, 0.9, 0.95]]
 const EFFECTS := {
 	"hp": {"dir": "low_is_bad", "steps": _LOW_STEPS},
-	"stamina": {"dir": "low_is_bad", "steps": _LOW_STEPS},
 	"hunger": {"dir": "low_is_bad", "steps": _LOW_STEPS},
 	"fatigue": {"dir": "high_is_bad", "steps": [[90.0, 0.5, 0.6], [75.0, 0.7, 0.8], [50.0, 0.875, 0.9], [25.0, 0.95, 0.95]]},
 }
-
-# ------------------------------------------------------------------
-# スタミナ（以前の「元気」。動きは同じ数値のまま引き継いだ）
-# ------------------------------------------------------------------
-const STAMINA_DRAIN_ACTIVE := 0.7          # 動いている間（仕事・移動）の消耗/秒
-const STAMINA_DRAIN_IDLE := 0.25           # 待機中の消耗/秒
-const STAMINA_REST_RATE := 9.0             # 眠っている間の回復/秒（車体が傷んでいると半分。医務室で早くなる）
-const STAMINA_REST_RATE_HULL_BAD := 4.5
 
 # ------------------------------------------------------------------
 # 満腹度・食事
@@ -78,11 +67,12 @@ const FOOD_EFFECTS := {
 # 疲労度
 # ------------------------------------------------------------------
 const FATIGUE_GAIN_ACTIVE := 0.20          # 動いている間の上昇/秒（仕事・移動）。待機中は上がらない
-## 上がりやすくなる倍率（悪い状態で動き続けたとき）: [基準の値, 倍率]。値 < 基準 の最初の行を使う。3つのうち、いちばん大きい倍率だけを使う（掛け算しない）
-const FATIGUE_MULT_STAMINA := [[25.0, 2.0], [50.0, 1.3]]
+## 上がりやすくなる倍率（悪い状態で動き続けたとき）: [基準の値, 倍率]。値 < 基準 の最初の行を使う。2つのうち、いちばん大きい倍率だけを使う（掛け算しない）
 const FATIGUE_MULT_HUNGER := [[25.0, 1.5], [50.0, 1.2]]
 const FATIGUE_MULT_HP := [[25.0, 1.6], [50.0, 1.3]]
 const FATIGUE_REST_RATE := 1.2             # 眠っている間の低下/秒（医務室で早くなる）
+const FATIGUE_REST_RATE_HULL_BAD := 0.6    # 居住区が傷んでいると、ベッド・簡易休憩の回復は半分
+const FATIGUE_COMBAT_GAIN := 0.5          # 戦闘中の追加の疲れ/秒（戦闘は現在無効）
 const FATIGUE_DOWN_RATE := 0.5             # 戦闘不能で倒れている間の低下/秒
 
 # ------------------------------------------------------------------
@@ -117,21 +107,17 @@ const STRESS_DECAY := 0.6                  # ストレスの減り/秒（安全�
 # ------------------------------------------------------------------
 const REST_HP_URGENT := 25.0               # HPがこれ未満: 休憩・治療を優先
 const REST_HP_CRITICAL := 15.0             # 危険。基本的に仕事を続けない
-const REST_FATIGUE_URGENT := 75.0          # 疲労度がこれ以上: スタミナが残っていても休憩を優先
+const REST_FATIGUE_URGENT := 75.0          # 疲労度がこれ以上: 休憩を優先
 const REST_FATIGUE_CRITICAL := 90.0        # 極度の疲労。基本的に仕事を中断
-const REST_STAMINA_URGENT := 25.0          # スタミナがこれ未満: 最優先で休憩（以前の「元気が25未満」）
-const REST_STAMINA_CRITICAL := 15.0
 const REST_STRESS_URGENT := 60.0           # ストレスがこれ以上: 休憩・安全確保
 ## 仕事の1つとしての休憩（優先度★の中で選ばれる）を始めてよい状態
-const REST_JOB_STAMINA_BELOW := 70.0       # 以前の REST_START_BELOW
 const REST_JOB_FATIGUE_ABOVE := 50.0
 const REST_JOB_HP_BELOW := 50.0
 ## ベッドが使えない（建てていない・すべて使用中）とき、本当に休みが必要な状態（上の「急ぎ」の線）なら、その場で簡易休憩する。
-## 回復は、ベッドで眠るときの何割か（スタミナ・疲労度・HP すべてに掛かる。ベッドで眠るときの数字は変えていない）。
+## 回復は、ベッドで眠るときの何割か（疲労度・HPに掛かる）。
 ## 休憩の優先度が★0の仲間は、これも休まない。ベッドが空いたら、そちらへ移る。
 const REST_IN_PLACE_RATE := 0.33
-## 休憩をやめてよい状態（スタミナが戻っても、疲労度・HPが高ければ、しばらく休み続ける）
-const REST_END_STAMINA := 98.0             # 以前の REST_UNTIL
+## 休憩をやめてよい状態（疲労度が下がり、HPが回復するまで休み続ける）
 const REST_END_FATIGUE := 20.0
 const REST_END_HP := 80.0
 
@@ -145,19 +131,18 @@ const COLOR_WARN := Color("e8892a")
 const COLOR_DANGER := Color("e0533d")
 const GAUGE_STAGES := {
 	"hp": [[0.25, COLOR_DANGER], [0.5, COLOR_CAUTION], [1.01, COLOR_GOOD]],
-	"stamina": [[0.25, COLOR_DANGER], [0.5, COLOR_CAUTION], [1.01, COLOR_GOOD]],
 	"hunger": [[0.25, COLOR_DANGER], [0.5, COLOR_CAUTION], [1.01, COLOR_GOOD]],
 	"fatigue": [[0.25, COLOR_DANGER], [0.5, COLOR_WARN], [0.75, COLOR_CAUTION], [1.01, COLOR_GOOD]],
 }
-## 点滅する線（そのアイコンだけが点滅する）。HP・スタミナ・満腹度は 値 < この値、疲労度は 値 >= この値
-const BLINK_LINE := {"hp": 15.0, "stamina": 15.0, "hunger": 15.0, "fatigue": 75.0}
+## 点滅する線（そのアイコンだけが点滅する）。HP・満腹度は 値 < この値、疲労度は 値 >= この値
+const BLINK_LINE := {"hp": 15.0, "hunger": 15.0, "fatigue": 75.0}
 ## 精神状態のアイコンの色（好調・普通は緑、不安は黄、不調はだいだい、限界は赤）
 const MENTAL_COLORS := [COLOR_GOOD, COLOR_GOOD, COLOR_CAUTION, COLOR_WARN, COLOR_DANGER]
 ## 頭上の警告（吹き出し）。危険ラインに達したステータスのうち、いちばん危険なものを1つだけ出す（優先順位は上から）。
-## HP・満腹度・スタミナは 値 < line、疲労度は 値 >= line、精神状態は「限界」のとき。blink はより強い警告（点滅）
-const WARN_ORDER := ["hp", "hunger", "fatigue", "stamina", "mental"]
-const WARN_LINE := {"hp": 25.0, "hunger": 25.0, "fatigue": 75.0, "stamina": 25.0}
-const WARN_STRONG := {"hp": 15.0, "hunger": 15.0, "fatigue": 90.0, "stamina": 15.0}     # ここまで悪いと点滅
+## HP・満腹度は 値 < line、疲労度は 値 >= line、精神状態は「限界」のとき。blink はより強い警告（点滅）
+const WARN_ORDER := ["hp", "hunger", "fatigue", "mental"]
+const WARN_LINE := {"hp": 25.0, "hunger": 25.0, "fatigue": 75.0}
+const WARN_STRONG := {"hp": 15.0, "hunger": 15.0, "fatigue": 90.0}     # ここまで悪いと点滅
 const WARN_BUBBLE_SECONDS := 0.0           # 将来: 警告を出す時間（0 = 危険な間ずっと）。クールダウンを足せる場所
 
 # ------------------------------------------------------------------

@@ -66,7 +66,7 @@ const FACILITIES := {
 		"capacity_bonus": 60, "effects": [],
 	},
 	"supply_cache": {
-		"name": "物資庫", "desc": "修理資材を使い、消耗品の蓄えを整える棚。仲間のスタミナが減りにくくなる（-8%）",
+		"name": "物資庫", "desc": "修理資材を使い、消耗品の蓄えを整える棚。仲間の疲労度が溜まりにくくなる（-8%）",
 		"cost": {GameData.Item.REPAIR_KIT: 3, GameData.Item.WOOD: 2}, "time": 5.0, "field": GameData.Field.DEV,
 		"max": 1, "requires": "workbench", "station": false,
 		"room": "workshop", "dx": [51.0],

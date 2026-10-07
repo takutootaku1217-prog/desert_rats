@@ -1,11 +1,11 @@
 class_name CrewStatusView
 extends HBoxContainer
-## 仲間1人のステータス表示: HP・スタミナ・満腹度・疲労度の「アイコン自体がゲージ」（ui/icon_gauge.gd）＋ 精神状態の顔。
+## 仲間1人のステータス表示: HP・満腹度・疲労度の「アイコン自体がゲージ」（ui/icon_gauge.gd）＋ 精神状態の顔。
 ## 表示だけを担当し、Worker のデータを読むだけ（update_from に渡す）。ゲームの処理は変えない。
 ## 上部の仲間カード（48px）と、仲間の管理画面（64px）で同じ部品を使い回す。アイコンの大きさは size_units（ユニット）。
 ##  - 絵は assets/ui/<名前>.png（枠）と <名前>_mask.png（充填範囲）。tools/art_ui.py が作る。差し替えるだけで形を変えられる。
 ##  - 色・点滅の基準・精神状態の色は data/crew_status.gd（CrewStatusDB）。危険域（値が悪い側の線を越えた）では、そのアイコンだけが赤く点滅する。
-##  - 疲労度は「余力（100 − 疲労度）」で表す: 疲れるほどアイコンの中身が減る（ほかのステータスと同じ向き）。数字も余力。
+##  - 疲労度の塗りは「余力（100 − 疲労度）」: 疲れるほど中身が減る。数字は疲労度そのもの（高いほど疲れている）。
 ##  - 数字はアイコンの中に出す（拠点の耐久・燃料・積載重量と同じルール）。数字のON/OFFは UIKit.show_icon_numbers（OFF でもアイコンだけで状態が分かる）。
 
 var _gauges := {}                     # ステータス名 -> IconGauge
@@ -32,7 +32,14 @@ func setup(size_units: Vector2i = Vector2i(12, 12), font_size: int = 12, show_me
 		var g := IconGauge.new().setup(String(CrewStatusDB.ICON_FILES[stat]), size_units)
 		g.color_stages = CrewStatusDB.GAUGE_STAGES[stat]
 		g.dark_empty = true                                           # 減った部分は、いまの色の暗い色（どれだけ減ったかが見える）
-		add_child(g)
+		var col := VBoxContainer.new()
+		col.add_theme_constant_override("separation", 0)
+		add_child(col)
+		col.add_child(g)
+		if show_mental_name:
+			var name_label := UIKit.lbl(String(CrewStatusDB.STAT_NAMES[stat]), font_size, UIKit.C_TEXT, _icon_px)
+			name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			col.add_child(name_label)
 		_gauges[stat] = g
 	# 精神状態: 顔のアイコン（色で状態が分かる）
 	for f in CrewStatusDB.MENTAL_ICON_FILES:
@@ -59,7 +66,7 @@ func update_from(w) -> void:
 	for stat in CrewStatusDB.STATS:
 		var v: float = CrewStatus.gauge_value(w, stat)
 		var g: IconGauge = _gauges[stat]
-		g.set_value(v, CrewStatusDB.max_of(stat), str(int(round(v))) if UIKit.show_icon_numbers else "")
+		g.set_value(v, CrewStatusDB.max_of(stat), str(int(round(float(w.get(stat))))) if UIKit.show_icon_numbers else "")
 		g.set_blink(CrewStatus.is_blinking(w, stat))
 		g.tooltip_text = tooltip_of(w, stat)
 	var m: int = w.mental

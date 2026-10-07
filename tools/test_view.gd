@@ -249,7 +249,7 @@ func _test_switch() -> void:
 	W[1].depart()
 	await process_frame
 	check(not W[1].visible, "調査隊に出ている仲間は、外装でも見えない")
-	W[1].arrive(100.0)
+	W[1].arrive(0.0)
 	await process_frame
 	check(W[1].visible, "戻った仲間（斜路の下に現れる）は、外装でも見える")
 	main.base_view.set_mode(BaseView.Mode.INTERIOR, true)
@@ -527,9 +527,9 @@ func _test_soak() -> void:
 			lay_bad += 1
 	main.base_view.set_mode(BaseView.Mode.INTERIOR, true)
 	Engine.time_scale = 1.0
-	print("   切り替え %d 回・ワークベンチ %s・ベッド %d・加工 %d 回・回収 %d 個・狩猟 %d・建設 %d・空腹 %s・仲間の元気 %s・1フレームの最大の動き %.0f" % [
+	print("   切り替え %d 回・ワークベンチ %s・ベッド %d・加工 %d 回・回収 %d 個・狩猟 %d・建設 %d・空腹 %s・仲間の疲労度 %s・1フレームの最大の動き %.0f" % [
 			switches, ("%.0f秒" % wb_at) if wb_at >= 0.0 else "なし", main.base.facility_count("bed"), main.processor.total_done,
-			main.total_gathered, main.total_hunted, main.total_built, "あり" if main.hungry else "なし", str(W.map(func(w): return int(w.stamina))), max_step])
+			main.total_gathered, main.total_hunted, main.total_built, "あり" if main.hungry else "なし", str(W.map(func(w): return int(w.fatigue))), max_step])
 	check(not main.game_over, "ゲームオーバーにならない")
 	check(switches >= 100, "切り替えを何度も行った（%d回）" % switches)
 	check(jump == 0, "切り替えで、仲間の位置が飛ばない（%d回）" % jump)

@@ -38,7 +38,9 @@ func _reset() -> void:
 	main.director.forecast.clear()
 	for w in main.workers:
 		if w.away:
-			w.arrive(100.0)
+			w.arrive(CrewStatusDB.START_FATIGUE)
+		w.fatigue = CrewStatusDB.START_FATIGUE
+		CrewStatus._tick_mental(w, 0.0)
 	ex.state = "idle"
 	ex.party.clear()
 	main.blueprints.clear()
@@ -59,6 +61,108 @@ func _run_trip(members: Array, appr: String, kit: bool, site := "ruins_small") -
 		guard += 1
 		ex._resolve_step()
 	ex.state = "idle"
+
+
+## 現在の関門が失敗する乱数のseedを探し、そのseedで実際の判定を通す。
+## 偶然の成功で「疲労が増えなかった」となるのを避け、被害・修理資材・撤退を同じ条件で確認する。
+func _fail_step() -> void:
+	var chance := ex.step_chance(ex.party, ex.steps[ex.step_i], ex.step_i, ex.approach_id)
+	for rng_seed in range(1, 1000):
+		seed(rng_seed)
+		if randf() >= chance:
+			seed(rng_seed)
+			ex._resolve_step()
+			return
+	check(false, "失敗の再現に使う乱数を選べる")
+
+
+func _test_fatigue(W: Array) -> void:
+	print("== 遠征中も個体の疲労度だけを使う ==")
+	_reset()
+	var w0 = W[0]
+	var w1 = W[1]
+	w0.fatigue = 18.0
+	w1.fatigue = 35.0
+	ex.offer("ruins_small")
+	check(ex.start([w0, w1], "normal", false), "疲労度の異なる2人が出発できる")
+	check(is_equal_approx(w0.fatigue, 18.0) and is_equal_approx(w1.fatigue, 35.0), "出発するとき、疲労度をリセットしない")
+	ex.steps = ["trap", "trap", "explore"]
+	_fail_step()
+	var penalty: float = ExpeditionDB.STEPS["trap"]["penalty"]
+	check(ex.ng_count == 1 and ex.state == "running" and is_equal_approx(w0.fatigue, 18.0 + penalty)
+			and is_equal_approx(w1.fatigue, 35.0 + penalty), "失敗の疲労は帰還を待たず、全員の個体データへ加わる")
+	check(is_equal_approx(CrewStatus.gauge_value(w0, "fatigue"), CrewStatusDB.MAX_FATIGUE - w0.fatigue), "探索中も、画面は現在の疲労度を読める")
+	ex._finish()
+	check(not w0.away and not w1.away and is_equal_approx(w0.fatigue, 18.0 + penalty)
+			and is_equal_approx(w1.fatigue, 35.0 + penalty), "帰還しても、それぞれの疲労度を引き継ぐ")
+
+	_reset()
+	w0.fatigue = 10.0
+	ex.offer("ruins_small")
+	check(ex.start([w0], "normal", true), "修理資材つきで疲労の診断を始める")
+	ex.steps = ["trap", "trap", "explore"]
+	_fail_step()
+	check(ex.kit_used and is_equal_approx(w0.fatigue, 10.0), "修理資材は最初の失敗による疲労を防ぐ")
+	_fail_step()
+	check(ex.ng_count == 2 and is_equal_approx(w0.fatigue, 10.0 + penalty), "修理資材は1回だけ有効で、次の失敗では疲労が増える")
+	ex._finish()
+
+	_reset()
+	w0.fatigue = 78.0
+	ex.offer("ruins_small")
+	check(ex.start([w0], "bold", false), "疲労度が高い仲間で撤退を確認する")
+	ex.steps = ["guardian", "explore", "explore"]
+	_fail_step()
+	check(ex.retreated and ex.state == "done" and ex.step_i == 1 and not w0.away, "疲労度が最大値に達すると、残りの関門へ進まず帰還する")
+	check(is_equal_approx(w0.fatigue, ExpeditionDB.RETURN_FATIGUE_MAX), "帰還時は既存の救済として余力5を残す")
+	check(ex.log.any(func(line): return String(line).contains("全員の疲労度 +")), "失敗の記録は疲労度の増加を表示する")
+	check(w0.mental == CrewStatus.mental_of(w0), "帰還時の疲労度と精神状態が一致する")
+	_reset()
+
+
+func _test_expedition_mental(W: Array) -> void:
+	print("== 遠征の疲労から精神状態・表示・次の関門の実力を更新 ==")
+	_reset()
+	var w = W[0]
+	w.hp = CrewStatusDB.MAX_HP
+	w.hunger = CrewStatusDB.MAX_HUNGER
+	w.fatigue = 24.0
+	w.stress = 3.0
+	w.calm = CrewStatusDB.CALM_SECONDS
+	CrewStatus._tick_mental(w, 0.0)
+	check(w.mental == CrewStatusDB.Mental.GOOD, "疲労度24・落ち着いた時間を満たした仲間は好調")
+	ex.offer("ruins_small")
+	check(ex.start([w], "normal", false), "好調な仲間が出発する")
+	ex.steps = ["explore", "explore", "explore"]
+	var field: int = ExpeditionDB.STEPS["explore"]["field"]
+	var previous_power := ex.power_of([w], field)
+	_fail_step()
+	check(w.away and not w.is_processing() and is_equal_approx(w.fatigue, 32.0)
+			and w.mental == CrewStatusDB.Mental.NORMAL and is_zero_approx(w.calm), "通常のtickが止まっていても、失敗で疲労度32・普通・落ち着いた時間0になる")
+	check(is_equal_approx(w.stress, 3.0), "精神状態の再計算では時間を進めず、ストレスを減らさない")
+	check(ex.power_of([w], field) < previous_power, "次の関門は失敗後の疲労度・精神状態による実力を使う")
+	var view := CrewStatusView.new().setup(Vector2i(8, 8), 12, true)
+	root.add_child(view)
+	view.update_from(w)
+	check(view.face_label().text == CrewStatusDB.MENTAL_NAMES[CrewStatusDB.Mental.NORMAL]
+			and is_equal_approx(view.gauge("fatigue").ratio, 0.68), "探索中の表示も疲労度32・精神状態「普通」に一致する")
+	ex._finish()
+
+	_reset()
+	w.fatigue = 72.0
+	w.stress = 0.0
+	CrewStatus._tick_mental(w, 0.0)
+	ex.offer("ruins_small")
+	check(ex.start([w], "normal", false), "疲労度72の仲間が出発する")
+	ex.steps = ["explore", "explore", "explore"]
+	_fail_step()
+	view.update_from(w)
+	check(w.away and is_equal_approx(w.fatigue, 80.0) and w.mental == CrewStatusDB.Mental.BAD
+			and view.face_label().text == CrewStatusDB.MENTAL_NAMES[CrewStatusDB.Mental.BAD]
+			and is_equal_approx(view.gauge("fatigue").ratio, 0.20), "失敗で疲労度80・不調になり、表示も同じ状態になる")
+	ex._finish()
+	view.free()
+	_reset()
 
 
 func _run() -> void:
@@ -135,7 +239,7 @@ func _run() -> void:
 		guard += 1
 		ex.tick(ex.step_time + 0.1)
 	check(ex.state == "done" and not w0.away and w0.visible and w0.is_processing(), "全ての関門が終わると調査隊が戻る")
-	check(w0.position.distance_to(GameData.RAMP_FOOT) < 60.0 and w0.stamina >= 5.0 and w0.stamina <= 100.0, "斜路の下に戻り、元気を引き継ぐ (%.0f)" % w0.stamina)
+	check(w0.position.distance_to(GameData.RAMP_FOOT) < 60.0 and w0.fatigue >= 0.0 and w0.fatigue <= ExpeditionDB.RETURN_FATIGUE_MAX, "斜路の下に戻り、疲労度を引き継ぐ (%.0f)" % w0.fatigue)
 	check(ex.summary() != "" and ex.result_left > 0.0, "結果の文が出る: " + ex.summary())
 	ex.tick(ExpeditionDB.RETURN_SECONDS + 1.0)
 	check(ex.state == "idle", "結果の表示が終わると、通常に戻る")
@@ -168,7 +272,10 @@ func _run() -> void:
 	W[0].ai.state = CharacterAI.State.REFUEL_MOVE
 	W[0].depart()
 	check(not main.base.refuel_reserved, "燃料補給の途中で出発しても、予約が外れる")
-	W[0].arrive(80.0)
+	W[0].arrive(20.0)
+
+	_test_fatigue(W)
+	_test_expedition_mental(W)
 
 	print("== 関門の判定（大量に試す） ==")
 	_reset()
@@ -180,11 +287,10 @@ func _run() -> void:
 		var ok_steps := 0
 		var all_steps := 0
 		var retreats := 0
-		var e_loss := 0.0
 		for i in trips:
 			_reset()
 			for w in members:
-				w.stamina = 100.0
+				w.fatigue = CrewStatusDB.START_FATIGUE
 			_run_trip(members, cfg[0], false)
 			all_steps += ex.ok_count + ex.ng_count
 			ok_steps += ex.ok_count
@@ -201,20 +307,20 @@ func _run() -> void:
 	_reset()
 	var seen_retreat := false
 	var seen_absorb := false
-	var min_energy_ok := true
+	var return_fatigue_ok := true
 	for i in 300:
 		_reset()
-		W[0].stamina = 22.0
+		W[0].fatigue = 78.0
 		_run_trip([W[0]], "bold", i % 2 == 0, "ruins_large")
 		if ex.retreated:
 			seen_retreat = true
-			if W[0].stamina < 5.0:
-				min_energy_ok = false
+			if W[0].fatigue > ExpeditionDB.RETURN_FATIGUE_MAX:
+				return_fatigue_ok = false
 		for line in ex.log:
 			if line.contains("修理資材で被害を防いだ"):
 				seen_absorb = true
-	check(seen_retreat, "元気が尽きると撤退する")
-	check(min_energy_ok, "撤退しても、戻った仲間の元気は最低 5 は残る")
+	check(seen_retreat, "疲労度が最大値に達すると撤退する")
+	check(return_fatigue_ok, "撤退しても、戻った仲間の疲労度は帰還時の上限を超えない")
 	check(seen_absorb, "修理資材を持たせると、失敗の被害を防げることがある")
 
 	print("== 戦利品と設計図 ==")
@@ -225,7 +331,7 @@ func _run() -> void:
 	for i in 600:
 		_reset()
 		for w in W:
-			w.stamina = 100.0
+			w.fatigue = CrewStatusDB.START_FATIGUE
 		_run_trip(W.slice(0, 3), "bold", false, "ruins_large")
 		for it in ex.loot:
 			loot_total += ex.loot[it]

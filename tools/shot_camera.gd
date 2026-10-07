@@ -61,7 +61,7 @@ func _initialize() -> void:
 	W[0].depart()                                       # 調査隊に出す（away=true・画面外の待避位置へ）
 	await _settle(20)
 	_shot("f4_away_no_jump")                            # カメラは通常の構図へ戻り、遠征中の待避位置へは飛ばない
-	W[0].arrive(80.0)
+	W[0].arrive(20.0)
 
 	print("done")
 	quit()

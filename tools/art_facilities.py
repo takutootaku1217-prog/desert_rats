@@ -66,7 +66,7 @@ SACK = hexc("cbb27a"); SACK_D = hexc("a4894f")
 
 
 def supply_cache():
-    """物資庫（幅8・高さ10。修理資材でつくる棚。data/facilities.gd の supply_cache。仲間のスタミナの消耗を減らす）。
+    """物資庫（幅8・高さ10。修理資材でつくる棚。data/facilities.gd の supply_cache。仲間の疲労度の蓄積を減らす）。
     加工室が狭い（ワークベンチ・加工機と場所を分け合う）ため、幅を詰めた仮のドット絵。修理資材の小箱・瓶を並べただけ。"""
     p = Px(8, 10)
     p.vline(0, 1, 9, WOOD_D); p.vline(7, 1, 9, WOOD_D)       # 支柱

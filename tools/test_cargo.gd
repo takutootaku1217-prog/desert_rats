@@ -38,7 +38,7 @@ func _reset() -> void:
 	main.scroll_speed = 0.0                    # 世界を止めて、回収の「選び方」だけを確かめる（追いつけるかは test_gather.gd で）
 	for w in main.workers:
 		if w.away:
-			w.arrive(100.0)
+			w.arrive(0.0)
 		w.ai._release_task()
 		w.carrying = -1
 		w.ai._set_state(CharacterAI.State.SEARCH)
@@ -243,7 +243,7 @@ func _run() -> void:
 	ex.loot[GameData.Item.IRON] = 5                                       # 重さ30（あとから処理され、残り6ぶん＝1個しか入らない）
 	ex.party = [W[0]]
 	W[0].depart()
-	ex.energy = {W[0]: 50.0}
+	W[0].fatigue = 50.0
 	ex.steps = ["explore"]
 	ex.ok_count = 1
 	ex.retreated = true                 # 踏破のおまけ（追加の戦利品）を出さず、持ち帰りだけを確かめる
@@ -253,7 +253,7 @@ func _run() -> void:
 	check(ex.loot.get(GameData.Item.FUEL, 0) == 3 and st.count_of(GameData.Item.FUEL) == 3, "先に処理されて入りきった分（燃料3）は持ち帰れる")
 	check(ex.summary().contains("持ち帰れず"), "結果の文に、持ち帰れなかった分が出る: " + ex.summary())
 	ex.state = "idle"
-	W[0].arrive(80.0) if W[0].away else null
+	W[0].arrive(20.0) if W[0].away else null
 
 	print("== 画面 ==")
 	_reset()
