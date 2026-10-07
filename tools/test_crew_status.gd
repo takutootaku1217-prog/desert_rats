@@ -55,6 +55,7 @@ func _fresh(all_facilities := true) -> void:
 		w.ai.timer = 100.0
 
 
+## 仕事の割り当てだけを止める。自動の食事・休憩は止めない（必要のない診断では _reset で健康な状態を用意する）。
 func _quiet(w) -> void:
 	w.set_process(false)
 	for j in GameData.job_list():
@@ -158,7 +159,7 @@ func _test_step2_fatigue_loop() -> void:
 	w.fatigue = 50.0
 	check(not CrewStatus.can_rest(w), "疲労度50では通常の休憩を始めない")
 	w.fatigue = 50.01
-	check(CrewStatus.can_rest(w), "疲労度50を超えると、優先度による休憩に入れる")
+	check(CrewStatus.can_rest(w), "疲労度50を超えると、仕事がない場合の自動休憩に入れる")
 	w.fatigue = 74.99
 	check(CrewStatus.life_needs(w).is_empty(), "疲労度75未満では、疲労だけを理由に急ぎの休憩を求めない")
 	w.fatigue = 75.0
@@ -277,14 +278,20 @@ func _test_step3_hunger() -> void:
 	_set_food(0)
 	check(_run_until(w, CharacterAI.State.SEARCH, 20.0) and main.food_claims == 0 and w.ai.eat_wait > 0.0, "着いたときに食料がなければ、あきらめて仕事に戻る（待ち時間を置く）")
 	w.ai.eat_wait = 0.0
-	# 優先度を変えたら、取り置きは戻る
+	# 仕事の優先度を変えても食事は続け、完了時に取り置きが残らない。
 	w.hunger = 20.0
 	_set_food(2)
 	w.ai.state = CharacterAI.State.SEARCH
 	w._process(0.1)
 	check(main.food_claims == 1, "（準備）食べに向かっている")
 	w.set_priority(GameData.Job.GATHER, 3)
-	check(main.food_claims == 0, "食べに向かっている途中で優先度を変えても、取り置きが残らない")
+	check(w.ai.state == CharacterAI.State.EAT_TAKE and main.food_claims == 1, "仕事の優先度を変えても、食事へ向かう状態と食料の取り置きを保つ")
+	w.set_priority(GameData.Job.GATHER, 0)
+	check(w.ai.state == CharacterAI.State.EAT_TAKE and main.food_claims == 1, "仕事を★0にしても、進行中の食事は中断しない")
+	check(_run_until(w, CharacterAI.State.EAT, 20.0) and main.food_claims == 0, "食料を取ると取り置きを解除し、そのまま食事を始める")
+	w.set_priority(GameData.Job.GATHER, 3)
+	check(w.ai.state == CharacterAI.State.EAT and w.carrying == GameData.Item.FOOD, "食事中の仕事優先度変更でも、食べている物を保つ")
+	check(_run_until(w, CharacterAI.State.SEARCH, 5.0) and w.carrying == -1 and main.food_claims == 0, "食事は完了し、食料や取り置きが残らない")
 	w.set_priority(GameData.Job.GATHER, 0)
 	# 加工の途中でも、とても空腹なら食べに行く（加工の注文が残っていて、続けようと思えば続けられる状態で確かめる）
 	main.processor.orders.append(GameData.recipe_by_id("cook").duplicate())
@@ -316,6 +323,15 @@ func _test_step3_hunger() -> void:
 	var sp: float = w.current_speed()
 	check(is_equal_approx(sp, w.speed), "全員共通の空腹の倍率（0.65）は、もう掛からない")
 	main.hungry = false
+	# 戦闘不能は生活行動も中断し、通常の仕事優先度変更とは異なり予約を解放する。
+	w.hunger = 20.0
+	_set_food(2)
+	w.ai.state = CharacterAI.State.SEARCH
+	w._process(0.1)
+	check(main.food_claims == 1, "（準備）戦闘不能になる前は食料を取り置いている")
+	CrewStatus.damage(w, CrewStatusDB.MAX_HP)
+	check(w.down and w.ai.state == CharacterAI.State.DOWN and main.food_claims == 0, "戦闘不能になったら食事を中断し、食料の取り置きを解放する")
+	_reset(w)
 
 # ---------------------------------------------------------------- 共通: ステータスを整えて、状態（AI）と眠りを指定して1コマ進める
 func _reset(w) -> void:
@@ -656,7 +672,6 @@ func _test_step8_ai() -> void:
 	_quiet(w1)
 	_give_beds(3)
 	_set_food(5)
-	w.priorities[GameData.Job.REST] = 3
 	# 並び順
 	_reset(w)
 	w.hp = 20.0
@@ -664,7 +679,7 @@ func _test_step8_ai() -> void:
 	w.fatigue = 80.0
 	w.mental = CrewStatus.mental_of(w)
 	var needs := CrewStatus.life_needs(w)
-	check(needs.slice(0, 3) == ["rest", "eat", "rest"], "急ぎの順: HPが低い→休む／満腹度が低い→食べる／疲労度が高い→休む（%s）" % str(needs))
+	check(needs.slice(0, 3) == ["eat", "rest", "rest"], "急ぎの順: 危険な空腹を先に食事→低HPで休憩→疲労で休憩（%s）" % str(needs))
 	_reset(w)
 	check(CrewStatus.life_needs(w).is_empty(), "元気な状態では、生活の必要はない")
 	# 疲労度 75 以上 → 休む
@@ -694,14 +709,20 @@ func _test_step8_ai() -> void:
 		w._process(0.5)
 		t += 0.5
 	check(w.hp >= CrewStatusDB.REST_END_HP - 0.5, "休むと HP が %d まで回復してから起きる（HP %.0f・%.0f 秒）" % [int(CrewStatusDB.REST_END_HP), w.hp, t])
-	# 休憩の優先度が 0 なら、休まない（優先度はそのまま尊重する）
+	# 旧休憩★0が残っていても、疲れた仲間は自動で休む。仕事の変更では休憩を中断しない。
 	_reset(w)
 	w.fatigue = 80.0
 	w.priorities[GameData.Job.REST] = 0
 	w.ai.state = CharacterAI.State.SEARCH
 	w._process(0.1)
-	check(w.ai.state != CharacterAI.State.REST_MOVE, "休憩の優先度が★0なら、疲れていても休みに行かない（仕事の優先度はそのまま）")
-	w.priorities[GameData.Job.REST] = 3
+	check(w.ai.state == CharacterAI.State.REST_MOVE and main.base.bed_index_of(w) == w.bed_index, "旧休憩★0でも、疲労度75以上なら自動でベッドへ向かう")
+	var reserved_bed: int = w.bed_index
+	w.set_priority(GameData.Job.GATHER, 5)
+	check(w.ai.state == CharacterAI.State.REST_MOVE and w.bed_index == reserved_bed and main.base.beds[reserved_bed] == w, "休憩へ向かう途中の仕事優先度変更でも、状態とベッド予約を保つ")
+	check(_run_until(w, CharacterAI.State.REST, 20.0), "仕事の優先度変更後も、ベッドで眠り始める")
+	w.set_priority(GameData.Job.GATHER, 0)
+	check(w.ai.state == CharacterAI.State.REST and main.base.beds[reserved_bed] == w, "眠っている間の仕事優先度変更でも、休憩とベッド予約を保つ")
+	w.ai._release_task()
 	# ベッドがなければ、ベッドへは向かわない（取り置きも残らない）。代わりに、その場で簡易休憩する（下の「ベッドがない場合の休憩」で詳しく確かめる）
 	_give_beds(0)
 	_reset(w)
@@ -750,7 +771,6 @@ func _test_step8_ai() -> void:
 	_give_beds(3)
 	# 仕事の優先度は、健康なあいだは、そのまま効く（生活の必要がなければ、いつもどおり仕事を選ぶ）
 	_reset(w)
-	w.priorities[GameData.Job.REST] = 3
 	w.ai.state = CharacterAI.State.SEARCH
 	w._process(0.1)
 	check(w.ai.state != CharacterAI.State.REST_MOVE and w.ai.state != CharacterAI.State.EAT_TAKE, "健康な仲間は、休憩や食事を挟まず、いつもどおり仕事を探す")
@@ -946,8 +966,6 @@ func _test_rest_in_place() -> void:
 	var w1 = W[1]
 	_quiet(w)
 	_quiet(w1)
-	w.priorities[GameData.Job.REST] = 3
-	w1.priorities[GameData.Job.REST] = 3
 	_give_beds(0)
 	var R: float = CrewStatusDB.REST_IN_PLACE_RATE
 	# 回復の速さ: ベッド = 従来どおり、その場 = R 倍（疲労度・HP）
@@ -1002,20 +1020,22 @@ func _test_rest_in_place() -> void:
 	w.ai.state = CharacterAI.State.SEARCH
 	w._process(0.1)
 	check(w.ai.state == CharacterAI.State.REST_HERE, "HP が低い（25 未満）ときも、ベッドなしで休む")
-	# 急ぎではない休憩（優先度による休憩）は、これまでどおりベッドだけ
+	# 急ぎではなくても、仕事がなければベッドなしで自動休憩する。
 	_reset(w)
 	w.fatigue = 60.0
 	w.ai.state = CharacterAI.State.SEARCH
 	w._process(0.1)
-	check(w.ai.state != CharacterAI.State.REST_HERE and w.ai.state != CharacterAI.State.REST_MOVE, "疲労度60の通常休憩は、ベッドがなければその場では始めない")
-	# 休憩の優先度が★0なら、休まない
+	check(w.ai.state == CharacterAI.State.REST_HERE, "仕事がなく疲労度60なら、ベッドなしでもその場で休む")
+	# 旧休憩★0でも、自動休憩は止まらない。
 	_reset(w)
 	w.fatigue = 80.0
 	w.priorities[GameData.Job.REST] = 0
 	w.ai.state = CharacterAI.State.SEARCH
 	w._process(0.1)
-	check(w.ai.state != CharacterAI.State.REST_HERE, "休憩の優先度が★0なら、ベッドがなくても休まない")
-	w.priorities[GameData.Job.REST] = 3
+	check(w.ai.state == CharacterAI.State.REST_HERE, "旧休憩★0でも、ベッドなしで疲労度75以上なら自動で休む")
+	w.set_priority(GameData.Job.GATHER, 5)
+	check(w.ai.state == CharacterAI.State.REST_HERE, "その場の休憩も、仕事の優先度変更では中断しない")
+	w.set_priority(GameData.Job.GATHER, 0)
 	# ベッドが空いたら、ベッドへ移る
 	_reset(w)
 	w.fatigue = 80.0

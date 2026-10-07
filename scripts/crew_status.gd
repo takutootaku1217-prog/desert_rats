@@ -176,17 +176,17 @@ static func move_mult(w) -> float:
 
 
 # ------------------------------------------------------------------
-# 自動行動（STEP 8）。仕事の優先度（★0〜5）はそのまま。ここは「仕事より先に休む・食べる」の判断材料。
-# 順番: HPがとても低い → 休む／満腹度がとても低い → 食べる／疲労度がとても高い → 休む／
+# 自動行動（STEP 8）。休憩・食事は仕事の優先度とは独立して判断する。
+# 順番: 満腹度がとても低い → 食べる／HPがとても低い → 休む／疲労度がとても高い → 休む／
 #        精神状態が限界 → 休む／満腹度が低い → 食べる。そのあと、いつもの仕事。
 # ------------------------------------------------------------------
-## いま必要な生活行動を、急ぎの順に並べる（"rest" / "eat"）。実際に行けるか（ベッド・食料・休憩の優先度）は AI が見る。
+## いま必要な生活行動を、急ぎの順に並べる（"rest" / "eat"）。実際に行けるか（ベッド・食料）は AI が見る。
 static func life_needs(w) -> Array:
 	var l: Array = []
-	if w.hp < CrewStatusDB.REST_HP_URGENT:
-		l.append("rest")
 	if w.hunger < CrewStatusDB.EAT_URGENT_BELOW:
 		l.append("eat")
+	if w.hp < CrewStatusDB.REST_HP_URGENT:
+		l.append("rest")
 	if w.fatigue >= CrewStatusDB.REST_FATIGUE_URGENT:
 		l.append("rest")
 	if w.mental == CrewStatusDB.Mental.LIMIT:

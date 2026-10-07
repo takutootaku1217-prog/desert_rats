@@ -59,7 +59,7 @@ func _make_card(w) -> Control:
 	# ステータス: HP・満腹度・疲労度の「アイコン自体がゲージ」と、精神状態の顔（ui/crew_status_view.gd。値は Worker から読むだけ）
 	var view := CrewStatusView.new().setup(Vector2i(12, 12), 12)
 	v.add_child(view)
-	# 仕事の優先度（6つあるので2列に並べる）
+	# 通常仕事の優先度。休憩・食事は生活の自動行動なので、星で制限しない。
 	var stars := {}
 	var grid := GridContainer.new()
 	grid.columns = 2
@@ -67,6 +67,8 @@ func _make_card(w) -> Control:
 	grid.add_theme_constant_override("v_separation", 2)
 	v.add_child(grid)
 	for job in GameData.job_list():
+		if job == GameData.Job.REST:
+			continue
 		var row := HBoxContainer.new()
 		row.add_theme_constant_override("separation", 2)
 		grid.add_child(row)
@@ -80,6 +82,7 @@ func _make_card(w) -> Control:
 		row.add_child(star)
 		row.add_child(_make_button("＋", func(): _change(w, job, 1)))
 		stars[job] = star
+	v.add_child(GameData.make_label("休憩・食事は自動", 12, Color("9aa3b2")))
 	_cards[w] = {"status": status, "stars": stars, "view": view, "style": sb}
 	return panel
 
@@ -114,5 +117,7 @@ func _process(_delta: float) -> void:
 		c["status"].text = w.ai.status_text()
 		c["view"].update_from(w)
 		for job in GameData.job_list():
+			if job == GameData.Job.REST:
+				continue
 			var n: int = w.priorities.get(job, 0)
 			c["stars"][job].text = "★%d" % n if n > 0 else "─"

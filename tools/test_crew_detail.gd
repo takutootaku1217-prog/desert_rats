@@ -71,6 +71,11 @@ func _run() -> void:
 		check(_has_text(text), "個体情報に%sがある" % text)
 	check(detail._live["view"]._gauges.size() == 3 and not detail._live["view"]._gauges.has("stamina"), "HP・満腹度・疲労度と精神状態を表示し、スタミナはない")
 	check(_has_text("武器・防具：未実装"), "未実装の装備は機能があるように表示しない")
+	check(_has_text("休憩・食事は自動で行います。必要なら早めに促せます。"), "生活行動は自動で、促しは補助だと案内する")
+	check(not detail._live.has("prio_%d" % GameData.Job.REST), "個体情報の仕事の星に休憩を含めない")
+	for w in W:
+		check(not main.ui._cards[w]["stars"].has(GameData.Job.REST), "上部カードの仕事の星に休憩を含めない：%s" % w.char_name)
+	_test_life_controls()
 
 	print("-- 道具の現在値を、画面を閉じずに更新する --")
 	W[0].tools.clear()
@@ -157,3 +162,56 @@ func _run() -> void:
 	check(_has_text("部署Lv") and _has_text("解放"), "部署タブに既存の部署Lv・解放情報が残る")
 	detail._picker.set_focus(W[0])
 	check(detail._tab == 0 and detail._worker == W[0] and detail._live.has("view"), "部署タブからメンバーを選ぶと、その個体情報を表示する")
+
+
+func _test_life_controls() -> void:
+	print("-- 個体への促しはAIへ伝え、選択や仕事を直接変更しない --")
+	var w = W[1]
+	# 診断用の状態だけを用意する。UIコールバックはrequest_life_actionを呼ぶのみ。
+	w.stop_work()
+	w.ai._set_state(CharacterAI.State.SEARCH)
+	w.ai.life_request = ""
+	w.ai.eat_wait = 0.0
+	w.hp = CrewStatusDB.MAX_HP
+	w.fatigue = 30.0
+	w.hunger = 50.0
+	w.away = false
+	w.down = false
+	W[0].ai.life_request = ""
+	main._select(W[0])
+	detail._picker.set_focus(w)
+	var priorities: Dictionary = w.priorities.duplicate()
+	var old_state: int = w.ai.state
+	var food_before: int = main.storage.count_of(GameData.Item.FOOD)
+	var claims_before: int = main.food_claims
+	var rest_button: Button = detail._live["life_rest"]
+	check(not rest_button.disabled, "回復の余地がある仲間へ早めに休憩を促せる")
+	rest_button.pressed.emit()
+	check(w.ai.life_request == "rest" and W[0].ai.life_request.is_empty(), "休憩の促しは追従中の仲間でなく、表示中の仲間へ届く")
+	check(main.follow_target == W[0] and W[0].selected and detail._worker == w and w.priorities == priorities, "促しで追従・選択・仕事の優先度を変えない")
+	check(w.ai.state == old_state and main.food_claims == claims_before and main.storage.count_of(GameData.Item.FOOD) == food_before, "促しの受理時に作業状態・予約・食料を変更しない")
+	check(rest_button.disabled and not rest_button.tooltip_text.is_empty() and detail._live["life_pending"].visible and detail._live["life_pending"].text.contains("休憩を促しています"), "重複要求を無効にし、保留中の促しと理由を表示する")
+	rest_button.pressed.emit()       # 古いUIイベントが到着した場合も、APIが重複を拒否する。
+	check(w.ai.life_request == "rest" and main.food_claims == claims_before, "重複イベントでも要求や予約を増やさない")
+
+	w.ai.life_request = ""
+	w.fatigue = 0.0
+	w.hunger = CrewStatusDB.MAX_HUNGER
+	detail._update_live()
+	check(detail._live["life_rest"].disabled and not detail._live["life_rest"].tooltip_text.is_empty(), "回復が不要なら休憩を促せず、理由を表示する")
+	check(detail._live["life_eat"].disabled and not detail._live["life_eat"].tooltip_text.is_empty(), "満腹なら食事を促せず、理由を表示する")
+	check(not detail._live["life_pending"].visible, "要求がなくなれば保留中の表示を消す")
+	w.hunger = 50.0
+	var reserved_before: int = main.food_claims
+	main.food_claims = main.storage.count_of(GameData.Item.FOOD)
+	detail._update_live()
+	check(detail._live["life_eat"].disabled and not detail._live["life_eat"].tooltip_text.is_empty(), "食べられる食料がなければ食事を促せず、理由を表示する")
+	main.food_claims = reserved_before
+	detail._update_live()
+	var eat_button: Button = detail._live["life_eat"]
+	check(not eat_button.disabled, "食料が使えるようになれば食事ボタンもライブ更新で有効になる")
+	eat_button.pressed.emit()
+	check(w.ai.life_request == "eat" and main.follow_target == W[0] and w.priorities == priorities, "食事の促しも表示中の個体への要求だけを変える")
+	check(eat_button.disabled and detail._live["life_pending"].text.contains("食事を促しています"), "食事の促しも重複を防ぎ、保留内容を表示する")
+	w.ai.life_request = ""
+	main._select(W[0])

@@ -78,6 +78,7 @@ var xfer_item := -1      # 運搬の依頼で運んでいるアイテムと向�
 var xfer_dir := ""
 var _eat_claimed := false   # 食料の在庫を1つ取り置いている（食べに向かっている間）
 var current_job := -1
+var life_request: String = ""   # プレイヤーの促し（rest / eat）。安全な区切りで1回だけ評価する。受理時は物資・ベッドを予約しない
 
 
 func setup(worker, g) -> void:
@@ -97,9 +98,80 @@ func _set_state(s: int) -> void:
 	ch.state_changed.emit()
 
 
+## 生活行動を促せない理由。UIは理由と受付だけを使い、状態・在庫・予約には触らない。
+func life_action_reason(action: String) -> String:
+	if action not in ["rest", "eat"]:
+		return "この生活行動は促せません"
+	if ch.away:
+		return "遠征中は促せません"
+	if ch.down or state == State.DOWN:
+		return "戦闘不能のため促せません"
+	if action == "rest" and _is_rest_state():
+		return "すでに休憩しています"
+	if action == "eat" and _is_eat_state():
+		return "すでに食事に向かっています"
+	if life_request == action:
+		return "すでに%sを促しています" % ("休憩" if action == "rest" else "食事")
+	if life_request != "":
+		return "別の生活行動の促しを待っています"
+	return _requested_need_reason(action)
+
+
+func request_life_action(action: String) -> bool:
+	if life_action_reason(action) != "":
+		return false
+	life_request = action
+	return true
+
+
+## 促しの必要・利用可能な物資は、受付時と実際に始める時の両方で確認する。
+func _requested_need_reason(action: String) -> String:
+	if action == "rest":
+		return "今は休憩の必要がありません" if CrewStatus.rest_done(ch) else ""
+	if ch.hunger >= CrewStatusDB.MAX_HUNGER:
+		return "満腹なので食事の必要がありません"
+	if eat_wait > 0.0:
+		return "食料を確認し直すまで少し待っています"
+	if game.food_for_eating() <= 0:
+		return "食事に使える食料がありません（他の仲間の取り置き分を除く）"
+	return ""
+
+
+func _is_rest_state() -> bool:
+	return state in [State.REST_MOVE, State.REST, State.REST_HERE]
+
+
+func _is_eat_state() -> bool:
+	return state in [State.EAT_TAKE, State.EAT]
+
+
+## 生活行動へ移るための安全な中断。持っている材料は強制返却せず、通常の届け先まで運ぶ。
+func _interrupt_for_life_need() -> bool:
+	if state in [State.SEARCH, State.DOWN] or _is_rest_state() or _is_eat_state():
+		return false
+	if life_request != "" and _requested_need_reason(life_request) != "":
+		life_request = ""
+	if not _urgent_life_need() and life_request == "":
+		return false
+	if ch._climb_dest != null:
+		return false                                      # 斜路・ハシゴの途中では、まず今の移動を終える
+	if ch.carrying >= 0:
+		if state == State.GATHER:
+			_finish_trip()                              # 掘った分を通常どおり倉庫へ届けてから生活行動へ
+			return true
+		return false                                     # 運搬・補給・修理は、持っている物を届けてからSEARCHに戻る
+	_release_task()
+	_set_state(State.SEARCH)
+	return true
+
+
 func tick(delta: float) -> void:
+	if ch.away:
+		return
 	if eat_wait > 0.0:
 		eat_wait -= delta
+	if _interrupt_for_life_need():
+		return
 	match state:
 		State.IDLE:
 			ch.move_to_target(delta)
@@ -125,7 +197,7 @@ func tick(delta: float) -> void:
 				_set_state(State.GATHER)
 		State.GATHER:
 			if not _res_valid():
-				if is_instance_valid(res) and res is GatherPoint and ch.carrying >= 0:    # res が消えている（流れ去って解放された等）ときは、is で調べようとしない
+				if ch.carrying >= 0:                                # 対象が解放済みでも、既に掘った物資は倉庫へ運ぶ
 					_finish_trip()             # 天候などで中断しても、掘った分は倉庫へ運ぶ
 					return
 				_release_task()
@@ -261,10 +333,6 @@ func tick(delta: float) -> void:
 				_set_state(State.PROCESS)
 		State.PROCESS:
 			var p: BaseProcessor = game.processor
-			if _urgent_life_need():
-				p.worker = null                                       # 食事・休憩が急ぎなら加工を中断する（途中経過は設備に残り、次の人が続ける）
-				_set_state(State.SEARCH)
-				return
 			if not p.output.is_empty():
 				ch.carrying = p.take_output()
 				p.worker = null
@@ -348,8 +416,7 @@ func tick(delta: float) -> void:
 		# ---- ベッドが使えないときの簡易休憩（その場で休む。回復は遅い）----
 		State.REST_HERE:
 			ch.resting = true
-			if ch.priorities.get(GameData.Job.REST, 0) > 0 and game.base.has_free_bed() and _try_start(GameData.Job.REST):
-				current_job = GameData.Job.REST                     # ベッドが空いたら、ベッドで休む
+			if not CrewStatus.rest_done(ch) and game.base.has_free_bed() and _try_start_rest(true):
 				return
 			if CrewStatus.rest_done(ch) or (CrewStatus.needs_to_eat_now(ch) and _wants_to_eat()):
 				_release_task()
@@ -495,14 +562,17 @@ func _res_valid() -> bool:
 ## 優先度の高い仕事から順に、着手できるものを探す。
 func _search() -> void:
 	var jobs: Array = GameData.job_list()
+	jobs.erase(GameData.Job.REST)                              # 休憩は仕事の星から独立した生活行動
 	jobs.sort_custom(func(a, b):
 		var pa: int = ch.priorities.get(a, 0)
 		var pb: int = ch.priorities.get(b, 0)
 		if pa != pb:
 			return pa > pb
 		return a < b)
-	# 生活の必要（休む・食べる）を、仕事より先に見る。行けないもの（食料がない・ベッドがない・休憩が★0）は飛ばして、仕事を続ける
+	# 自動の生活の必要を促しや仕事より先に見る。食料がないときは仕事を続ける。休憩はベッドがなくてもできる
 	if _try_life_need():
+		return
+	if _try_life_request():
 		return
 	# 拠点の部位が壊れかけていたら（修理が0でなければ）まず直す
 	if ch.priorities.get(GameData.Job.REPAIR, 0) > 0 and game.base.has_critical_part() and _try_start(GameData.Job.REPAIR):
@@ -518,6 +588,9 @@ func _search() -> void:
 		if _try_start(j):
 			current_job = j
 			return
+	if _can_start_rest():                                     # 仕事がないときは、従来の通常休憩の基準で自分から休む
+		_start_rest()
+		return
 	current_job = -1
 	timer = 0.8
 	ch.target = Vector2(randf_range(540.0, 860.0), GameData.LO_Y)
@@ -531,22 +604,54 @@ func _try_life_need() -> bool:
 			if _try_start_eat():
 				return true
 		elif _can_start_rest():
-			if game.base.has_free_bed() and _try_start(GameData.Job.REST):
-				current_job = GameData.Job.REST                     # ベッドで休む
-			else:
-				_start_rest_here()                                  # ベッドが使えないときは、その場で簡易休憩
+			_start_rest()
 			return true
 	return false
 
 
-## 休憩を始められるか（休憩の優先度が0でなく、休むべき状態）。ベッドがなくても、その場で簡易休憩できる
+## 自動で休憩を始められるか。仕事の星に関係なく、従来の休むべき状態を見る
 func _can_start_rest() -> bool:
-	return ch.priorities.get(GameData.Job.REST, 0) > 0 and CrewStatus.can_rest(ch)
+	return CrewStatus.can_rest(ch)
+
+
+func _try_life_request() -> bool:
+	if life_request == "":
+		return false
+	var action := life_request
+	if _requested_need_reason(action) != "":
+		life_request = ""                                     # 物資・必要性が変わっていたら、予約せず通常の行動へ戻る
+		return false
+	if action == "eat":
+		return _try_start_eat(true)
+	_start_rest(true)
+	return true
+
+
+## 自動の休憩と早めの促しで、同じベッド・簡易休憩の経路を使う。
+func _start_rest(early := false) -> void:
+	if not _try_start_rest(early):
+		_start_rest_here()
+
+
+func _try_start_rest(early := false) -> bool:
+	if (CrewStatus.rest_done(ch) if early else not CrewStatus.can_rest(ch)):
+		return false
+	var bi: int = game.base.claim_bed(ch)
+	if bi < 0:
+		return false
+	ch.bed_index = bi
+	current_job = GameData.Job.REST
+	if life_request == "rest":
+		life_request = ""
+	_set_state(State.REST_MOVE)
+	return true
 
 
 ## その場で簡易休憩を始める（ベッドが使えないとき。回復はベッドより遅い: CrewStatusDB.REST_IN_PLACE_RATE）
 func _start_rest_here() -> void:
 	current_job = GameData.Job.REST
+	if life_request == "rest":
+		life_request = ""
 	_set_state(State.REST_HERE)
 
 
@@ -570,11 +675,13 @@ func _wants_to_eat() -> bool:
 
 
 ## 食事に向かう。食料の在庫を1つ取り置く（同じ1個に2人が向かわない）。
-func _try_start_eat() -> bool:
-	if not _wants_to_eat():
+func _try_start_eat(early := false) -> bool:
+	if (_requested_need_reason("eat") != "" if early else not _wants_to_eat()):
 		return false
 	game.food_claims += 1
 	_eat_claimed = true
+	if life_request == "eat":
+		life_request = ""
 	_set_state(State.EAT_TAKE)
 	return true
 
@@ -704,14 +811,7 @@ func _try_start(job: int) -> bool:
 			_set_state(State.REPAIR_TAKE)
 			return true
 		GameData.Job.REST:
-			if not CrewStatus.can_rest(ch):
-				return false
-			var bi: int = game.base.claim_bed(ch)
-			if bi < 0:
-				return false
-			ch.bed_index = bi
-			_set_state(State.REST_MOVE)
-			return true
+			return _try_start_rest()
 		GameData.Job.COMBAT:
 			var best = null
 			var best_d := INF
@@ -768,9 +868,9 @@ func on_bedroom_moved() -> void:
 		_set_state(State.REST_MOVE)
 
 
-## プレイヤーが優先度を変えたとき、荷物を持っていなければ即座に選び直す。
+## 仕事の優先度が変わったら、荷物を持っていない仕事は選び直す。生活行動は中断しない。
 func on_priority_changed() -> void:
-	if ch.carrying >= 0 or ch.down:
+	if ch.carrying >= 0 or ch.down or ch.away or _is_rest_state() or _is_eat_state():
 		return
 	if state in [State.IDLE, State.SEARCH]:
 		_set_state(State.SEARCH)

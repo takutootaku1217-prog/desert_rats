@@ -91,6 +91,7 @@ func set_priority(job: int, value: int) -> void:
 ## 仕事を中断する（調査隊として出発するとき・倒れたとき）。運んでいた材料や持っていた物は倉庫へ戻し、予約を解放する。
 func stop_work() -> void:
 	var a := ai
+	a.life_request = ""                              # 遠征・戦闘不能になったら、保留中の生活の促しは取り消す
 	match a.state:
 		CharacterAI.State.HAUL_MOVE:              # 加工設備へ運んでいる材料は倉庫へ戻す
 			if not a.haul_recipe.is_empty():

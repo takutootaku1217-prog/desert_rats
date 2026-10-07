@@ -156,8 +156,9 @@ func _test_initial_state() -> void:
 	check(main.base.facility_count("bed") == 0, "ベッドは1つもない")
 	check(main.base.claim_bed(W[0]) == -1, "ベッドがないので、割り当てられない")
 	W[0].fatigue = 90.0
-	W[0].priorities[GameData.Job.REST] = 5
-	check(not W[0].ai._try_start(GameData.Job.REST), "休憩の仕事は、ベッドがなければ始められない（詰まらず次へ進む）")
+	W[0].ai.state = CharacterAI.State.SEARCH
+	W[0]._process(0.1)
+	check(W[0].ai.state == CharacterAI.State.REST_HERE and W[0].bed_index < 0, "ベッドがなくても、疲れた仲間は予約を残さずその場で休める")
 	# 材料がすべてあっても、必要設備の要る物は作らない
 	for k in ["repair_iron", "tool_pick", "tool_iron_axe", "tool_adv_pick"]:
 		main.recipe_priority[k] = 5
@@ -241,15 +242,18 @@ func _test_flow() -> void:
 	check(main.base.built["bed"] == [0], "ベッドが1つ、最初の区画にできた")
 	# ベッドができたら、疲れた仲間が休める
 	var w1 = W[1]
-	w1.priorities[GameData.Job.REST] = 5
 	w1.fatigue = 90.0
 	w1.ai.on_priority_changed()
 	var t3: float = await _until(func(): return w1.sleeping, 60.0)
 	check(t3 >= 0.0 and w1.bed_index == 0, "疲れた仲間が、できたベッドで眠る（%.0f秒）" % t3)
 	check(absf(w1.position.x - main.base.bed_point(0).x) < 8.0, "眠る場所はベッドの位置")
 	# ワークベンチが必要な製作物（修理部品 = 鉄＋木材）を、仲間がワークベンチで作る
-	w1.priorities[GameData.Job.REST] = 0
-	w1.ai.on_priority_changed()
+	# この先は製作場所の診断。健康な状態を用意し、自然に休憩を終えるのを待つ。
+	w1.fatigue = 0.0
+	w1.hp = CrewStatusDB.MAX_HP
+	w1.hunger = CrewStatusDB.MAX_HUNGER
+	var woke: float = await _until(func(): return not w1.sleeping and w1.bed_index < 0, 5.0)
+	check(woke >= 0.0, "回復した仲間は自然に起き、ベッド予約を解放する")
 	main.recipe_priority["repair_iron"] = 5
 	st.add_item(GameData.Item.IRON, 1)
 	st.add_item(GameData.Item.WOOD, 1)

@@ -242,9 +242,33 @@ func _build_detail() -> void:
 	var view := CrewStatusView.new().setup(Vector2i(16, 16), 13, true)
 	_body.add_child(view)
 	_live["view"] = view
+	_build_life_controls(w)
 	_build_training(w)
 	_build_tools(w)
 	_build_personnel(w)
+	_update_live()
+
+
+## 生活行動は自動。ここでは個体のAIへ促しを伝え、作業や予約を直接変更しない。
+func _build_life_controls(w) -> void:
+	_body.add_child(_wrapped_label("休憩・食事は自動で行います。必要なら早めに促せます。", 13, UIKit.C_DIM))
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 8)
+	_body.add_child(row)
+	for action in ["rest", "eat"]:
+		var kind: String = action
+		var text := "休憩を促す" if kind == "rest" else "食事を促す"
+		var button := UIKit.button(text, func(): _request_life_action(w, kind))
+		button.custom_minimum_size = Vector2(150, 32)
+		row.add_child(button)
+		_live["life_%s" % kind] = button
+	_live["life_pending"] = _wrapped_label("", 13, UIKit.C_DIM)
+	_body.add_child(_live["life_pending"])
+
+
+func _request_life_action(w, action: String) -> void:
+	if is_instance_valid(w) and w == _worker:
+		w.ai.request_life_action(action)
 	_update_live()
 
 
@@ -289,6 +313,8 @@ func _build_personnel(w) -> void:
 
 	_section("仕事の優先度")
 	for job in GameData.job_list():
+		if job == GameData.Job.REST:
+			continue
 		var row := HBoxContainer.new()
 		_body.add_child(row)
 		row.add_child(UIKit.lbl(GameData.JOB_NAMES[job], 15, UIKit.C_TEXT, 60))
@@ -379,6 +405,16 @@ func _update_live() -> void:
 	_live["status"].text = "%s     配属: %s" % [w.ai.status_text(), GameData.FIELD_NAMES[w.dept]]
 	if _live.has("view"):
 		_live["view"].update_from(w)
+	for action in ["rest", "eat"]:
+		if _live.has("life_%s" % action):
+			var reason: String = w.ai.life_action_reason(action)
+			var button: Button = _live["life_%s" % action]
+			button.disabled = not reason.is_empty()
+			button.tooltip_text = reason
+	if _live.has("life_pending"):
+		var pending: String = w.ai.life_request
+		_live["life_pending"].visible = not pending.is_empty()
+		_live["life_pending"].text = "%sを促しています。今の作業を安全に区切るのを待っています。" % ("休憩" if pending == "rest" else "食事") if not pending.is_empty() else ""
 	for slot in GatherDB.SLOTS:
 		if not _live.has("tool_%s" % slot):
 			continue

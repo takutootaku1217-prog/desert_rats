@@ -254,9 +254,9 @@ func _one(n: int, minutes: float, scale: float, seed_base: int, events_on: bool,
 							GameData.ITEM_NAMES.get(pc, "?"), CharacterAI.STATE_TEXT.get(ps, "?")])
 			prev_carry[w] = w.carrying
 			prev_state[w] = s
-			# 疲労度が上限付近のまま（休憩★0の仲間は休まないので対象外）
+			# 休憩は自動生活行動なので、仕事の優先度によらず疲労度を監視する。
 			# ベッドがなくても、その場での簡易休憩で疲労度を下げられる。
-			if lasting.call("fatigue_max_" + w.char_name, w.fatigue >= 99.5 and w.priorities.get(GameData.Job.REST, 0) > 0, 60.0):
+			if lasting.call("fatigue_max_" + w.char_name, w.fatigue >= 99.5, 60.0):
 				err.call("fatigue_max_" + w.char_name, "%s の疲労度が 60 秒以上 上限付近のまま（休憩に入れない？）" % w.char_name)
 
 		# ---- 予約の取り残し ----
