@@ -42,6 +42,9 @@ const FIELD_NAMES := {
 	Field.DEV: "開発者", Field.COMBAT: "戦闘員", Field.COOK: "料理人",
 	Field.MEDIC: "保健", Field.GATHERER: "回収",
 }
+## 部署として表示・配属先に出さない分野。再表示するときはこの設定から外す。
+## 分野の能力・既存の配属・部署Lv計算は維持し、個体ランクの表示には使わない。
+const HIDDEN_DEPARTMENTS := [Field.DEV]
 const RANKS := ["E", "D", "C", "B", "A", "S", "SS", "SSS"]
 const GENDER_NAMES := ["男", "女", "ジェンダーレス"]
 ## 分野ごとの専門スキル（将来ここに効果を結びつける）
@@ -57,6 +60,19 @@ const JOB_FIELD := {
 	Job.GATHER: Field.GATHERER, Job.HAUL: Field.GATHERER, Job.PROCESS: Field.DEV,
 	Job.REST: Field.MEDIC, Job.COMBAT: Field.COMBAT, Job.REPAIR: Field.DEV, Job.HUNT: Field.COMBAT,
 }
+
+
+## 部署の表示・配属先一覧だけが使う。分野ランクや仕事の計算には Field.values() を使う。
+static func visible_departments() -> Array:
+	var fields: Array = []
+	for field in Field.values():
+		if department_visible(field):
+			fields.append(field)
+	return fields
+
+
+static func department_visible(field: int) -> bool:
+	return field in Field.values() and field not in HIDDEN_DEPARTMENTS
 
 
 ## 部署Lvによる解放（データ駆動）。恩恵の中身は検討中なので、今は「表示」だけを扱う。

@@ -68,7 +68,7 @@ func _ready() -> void:
 	left.add_child(UIKit.lbl("部署", 15, UIKit.C_DIM))
 	_dept_btns[-1] = UIKit.button("", func(): _set_filter(-1))
 	left.add_child(_dept_btns[-1])
-	for f in GameData.Field.values():
+	for f in GameData.visible_departments():
 		var b := UIKit.button("", func(): _set_filter(f))
 		_dept_btns[f] = b
 		left.add_child(b)
@@ -115,8 +115,6 @@ func toggle() -> void:
 	if _overlay.visible:
 		close()
 	else:
-		game.close_other_panels(self)
-		_overlay.visible = true
 		# 管理画面内の閲覧対象と、画面側の選択は別。開くときは現在の選択を表示する。
 		for w in game.workers:
 			if w.selected:
@@ -124,11 +122,22 @@ func toggle() -> void:
 				break
 		if not is_instance_valid(_worker):
 			_worker = game.workers[0]
-		_tab = 0
-		if _filter >= 0 and _worker.dept != _filter:
-			_filter = -1
-		_picker.focus_worker = _worker
-		_refresh_all()
+		open_worker(_worker)
+
+
+## 方針画面等から個体情報を開く。世界側の選択・追従先・一括チェックは変更しない。
+func open_worker(w) -> void:
+	if not is_instance_valid(w) or not game.workers.has(w):
+		return
+	game.close_other_panels(self)
+	_overlay.visible = true
+	_worker = w
+	_tab = 0
+	_normalize_filter()
+	if _filter >= 0 and w.dept != _filter:
+		_filter = -1
+	_picker.focus_worker = w
+	_refresh_all()
 
 
 func close() -> void:
@@ -164,6 +173,8 @@ func _process(delta: float) -> void:
 
 # ---------------------------------------------------------------- 一覧・部署
 func _members(field: int) -> Array:
+	if field >= 0 and not GameData.department_visible(field):
+		field = -1
 	var l: Array = []
 	for w in game.workers:
 		if field < 0 or w.dept == field:
@@ -176,6 +187,7 @@ func _members(field: int) -> Array:
 
 
 func _refresh_all() -> void:
+	_normalize_filter()
 	_refresh_depts()
 	_picker.refresh()
 	_refresh_tabs()
@@ -183,6 +195,13 @@ func _refresh_all() -> void:
 
 
 func _set_filter(f: int) -> void:
+	_normalize_filter()
+	if f >= 0 and not GameData.department_visible(f):
+		_refresh_depts()
+		_picker.refresh()
+		if _tab == 1:
+			_build_detail()
+		return
 	_filter = f
 	_refresh_depts()
 	_picker.refresh()
@@ -191,11 +210,13 @@ func _set_filter(f: int) -> void:
 
 
 func _refresh_depts() -> void:
+	_normalize_filter()
 	for k in _dept_btns:
 		var b: Button = _dept_btns[k]
 		if k < 0:
 			b.text = "全員   %d人" % game.workers.size()
 		else:
+			b.visible = GameData.department_visible(k)
 			b.text = "Lv%d %s   %d人" % [GameData.field_level(game.workers, k), GameData.FIELD_NAMES[k], _members(k).size()]
 		UIKit.style(b, k == _filter)
 
@@ -209,7 +230,7 @@ func _select(w) -> void:
 
 func _on_selection_changed() -> void:
 	if _tab == 0:
-		_build_detail()
+		_update_live()
 
 
 func _set_tab(t: int) -> void:
@@ -234,18 +255,20 @@ func _build_detail() -> void:
 	var w = _worker
 	if w == null:
 		return
+	_section("プロフィール")
 	_body.add_child(_wrapped_label(w.char_name, 26, UIKit.C_ACCENT))
 	_body.add_child(_wrapped_label("Lv %d   %s   個体ランク %s   得意分野: %s" % [w.level, GameData.GENDER_NAMES[w.gender],
 			w.rank_letter(), w.best_fields_text()], 16))
+	_section("状態・生活")
 	_live["status"] = _wrapped_label("", 15)
 	_body.add_child(_live["status"])
 	var view := CrewStatusView.new().setup(Vector2i(16, 16), 13, true)
 	_body.add_child(view)
 	_live["view"] = view
 	_build_life_controls(w)
-	_build_training(w)
 	_build_tools(w)
 	_build_personnel(w)
+	_build_training(w)
 	_update_live()
 
 
@@ -274,11 +297,12 @@ func _request_life_action(w, action: String) -> void:
 
 ## 個体情報内の配属・優先度。まとめて移動する対象は、詳細を見る1人とは別に保つ。
 func _build_personnel(w) -> void:
+	_section("配属と仕事")
 	_section("配属（この仲間を、押した部署へ移動）")
 	var dr := HBoxContainer.new()
 	dr.add_theme_constant_override("separation", 6)
 	_body.add_child(dr)
-	for f in GameData.Field.values():
+	for f in GameData.visible_departments():
 		var b := UIKit.button(GameData.FIELD_NAMES[f], func(): _move([w], f))
 		b.custom_minimum_size = Vector2(100, 34)
 		b.alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -286,18 +310,20 @@ func _build_personnel(w) -> void:
 		dr.add_child(b)
 
 	var sel := _picker.selected_list()
-	_section("まとめて移動（チェックした %d人 を、押した部署へ）" % sel.size())
+	_live["batch_title"] = _section("まとめて移動（チェックした %d人 を、押した部署へ）" % sel.size())
 	var mr := HBoxContainer.new()
 	mr.add_theme_constant_override("separation", 6)
 	_body.add_child(mr)
-	for f in GameData.Field.values():
+	_live["batch_move"] = []
+	for f in GameData.visible_departments():
 		var b := UIKit.button(GameData.FIELD_NAMES[f], func(): _move(_picker.selected_list(), f))
 		b.custom_minimum_size = Vector2(100, 34)
 		b.alignment = HORIZONTAL_ALIGNMENT_CENTER
 		b.disabled = sel.is_empty()
 		mr.add_child(b)
-	if sel.is_empty():
-		_body.add_child(_wrapped_label("左の一覧でチェックを付けるか、「全選択」「S以上」で選べます", 13, UIKit.C_DIM))
+		_live["batch_move"].append(b)
+	_live["batch_hint"] = _wrapped_label("左の一覧でチェックを付けるか、「全選択」「S以上」で選べます", 13, UIKit.C_DIM)
+	_body.add_child(_live["batch_hint"])
 
 	_section("仕事の効率")
 	var eff := GridContainer.new()
@@ -333,6 +359,7 @@ func _build_personnel(w) -> void:
 
 ## 既存の分野ランクとスキル。育成の新しい操作は追加しない。
 func _build_training(w) -> void:
+	_section("能力・スキル")
 	_section("分野ランク")
 	for f in GameData.Field.values():
 		var row := HBoxContainer.new()
@@ -342,27 +369,137 @@ func _build_training(w) -> void:
 		row.add_child(UIKit.lbl("%s %s" % [star, GameData.FIELD_NAMES[f]], 15, UIKit.C_ACCENT if f in w.best_fields() else UIKit.C_TEXT, 100))
 		row.add_child(_rank_bar(w.ranks.get(f, 0)))
 		row.add_child(UIKit.lbl(w.rank_text(f), 16, UIKit.C_ACCENT, 44))
-		row.add_child(UIKit.lbl("部署 Lv%d" % GameData.field_level(game.workers, f), 14, UIKit.C_DIM, 90))
+		if GameData.department_visible(f):
+			row.add_child(UIKit.lbl("部署 Lv%d" % GameData.field_level(game.workers, f), 14, UIKit.C_DIM, 90))
 	_section("スキル")
 	_body.add_child(_wrapped_label("   ".join(PackedStringArray(w.skills)) if not w.skills.is_empty() else "なし", 15,
 			UIKit.C_TEXT if not w.skills.is_empty() else UIKit.C_DIM))
 
 
-## 現在の装備は採取道具だけ。自動割り当てや方針画面での変更を、定期更新に反映する。
-func _build_tools(_w) -> void:
-	_section("採取道具")
-	for slot in GatherDB.SLOTS:
-		_live["tool_%s" % slot] = _wrapped_label("", 15)
-		_body.add_child(_live["tool_%s" % slot])
-		_live["yield_%s" % slot] = _wrapped_label("", 13, UIKit.C_DIM)
-		_body.add_child(_live["yield_%s" % slot])
-	_body.add_child(_wrapped_label("回収率は既存の採取効率です。端数や袋の上限により、実際に持ち帰る個数は変わります。", 13, UIKit.C_DIM))
-	_body.add_child(_wrapped_label("道具の変更・自動割り当ては「運営の方針」の道具ページで行います。", 13, UIKit.C_DIM))
+## 装備の実データは既存の採取道具だけ。全員共通の自動設定と、閲覧中の1人の手動操作を分ける。
+func _build_tools(w) -> void:
+	_section("装備・防具")
 	_body.add_child(_wrapped_label("武器・防具：未実装", 13, UIKit.C_DIM))
+	_section("採取道具")
+	_live["tool_auto"] = UIKit.button("", _toggle_tool_auto)
+	_live["tool_auto"].custom_minimum_size = Vector2(0, 32)
+	_body.add_child(_live["tool_auto"])
+	for slot in GatherDB.SLOTS:
+		var s: String = slot
+		_live["tool_%s" % s] = _wrapped_label("", 15)
+		_body.add_child(_live["tool_%s" % s])
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 6)
+		_body.add_child(row)
+		var choices := OptionButton.new()
+		choices.custom_minimum_size = Vector2(240, 32)
+		choices.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		choices.fit_to_longest_item = false
+		choices.clip_text = true
+		choices.add_theme_font_override("font", GameData.font())
+		for it in GameData.TOOL_ITEMS:
+			var item: int = it
+			if GatherDB.slot_of_tool(item) == s:
+				choices.add_item(GameData.ITEM_NAMES[item], item)
+		var equipped: int = int(w.tools.get(s, -1))
+		var index: int = choices.get_item_index(equipped)
+		if index >= 0:
+			choices.select(index)
+		choices.item_selected.connect(func(_index): _update_live())
+		row.add_child(choices)
+		_live["tool_select_%s" % s] = choices
+		var equip := UIKit.button("装備", func(): _equip_selected_tool(w, s))
+		equip.custom_minimum_size = Vector2(64, 32)
+		row.add_child(equip)
+		_live["tool_equip_%s" % s] = equip
+		var off := UIKit.button("外す", func(): _unequip_tool(w, s))
+		off.custom_minimum_size = Vector2(64, 32)
+		row.add_child(off)
+		_live["tool_unequip_%s" % s] = off
+		_live["tool_reason_%s" % s] = _wrapped_label("", 13, UIKit.C_DIM)
+		_body.add_child(_live["tool_reason_%s" % s])
+		_live["yield_%s" % s] = _wrapped_label("", 13, UIKit.C_DIM)
+		_body.add_child(_live["yield_%s" % s])
+	_body.add_child(_wrapped_label("回収率は既存の採取効率です。端数や袋の上限により、実際に持ち帰る個数は変わります。", 13, UIKit.C_DIM))
+
+
+func _toggle_tool_auto() -> void:
+	game.tool_auto = not game.tool_auto
+	_update_live()
+
+
+func _manual_tool_reason(w) -> String:
+	if game.tool_auto:
+		return "自動割り当てをOFFにしてから変更してください。"
+	if w.away:
+		return "遠征中は道具を変更できません。"
+	if w.down:
+		return "戦闘不能の間は道具を変更できません。"
+	return ""
+
+
+func _equip_selected_tool(w, slot: String) -> void:
+	if is_instance_valid(w) and w == _worker and _manual_tool_reason(w).is_empty():
+		var choices: OptionButton = _live["tool_select_%s" % slot]
+		game.equip_tool(w, choices.get_selected_id())
+	_update_live()
+
+
+func _unequip_tool(w, slot: String) -> void:
+	if is_instance_valid(w) and w == _worker and _manual_tool_reason(w).is_empty():
+		game.unequip_tool(w, slot)
+	_update_live()
+
+
+## 在庫・自動設定・装備の変化は部品の値だけ更新し、選んだ候補やスクロール位置を保つ。
+func _update_tool_controls(w, slot: String) -> void:
+	var choices: OptionButton = _live["tool_select_%s" % slot]
+	var current: int = int(w.tools.get(slot, -1))
+	var manual_reason := _manual_tool_reason(w)
+	for i in choices.item_count:
+		var item: int = choices.get_item_id(i)
+		var stock: int = game.storage.count_of(item)
+		var text := "%s（在庫%d%s）" % [GameData.ITEM_NAMES[item], stock, "・装備中" if item == current else ""]
+		if choices.get_item_text(i) != text:
+			choices.set_item_text(i, text)
+		var reason: String = game.tool_equip_reason(w, item)
+		if item == current:
+			reason = "すでに装備しています。"
+		choices.set_item_tooltip(i, reason)
+	choices.disabled = not manual_reason.is_empty()
+	choices.tooltip_text = manual_reason
+	var selected: int = choices.get_selected_id()
+	var equip_reason: String = game.tool_equip_reason(w, selected)
+	if selected == current:
+		equip_reason = "すでに装備しています。"
+	var off_reason: String = game.tool_unequip_reason(w, slot)
+	if current < 0:
+		off_reason = "外せる道具がありません。"
+	if not manual_reason.is_empty():
+		equip_reason = manual_reason
+		off_reason = manual_reason
+	var equip: Button = _live["tool_equip_%s" % slot]
+	var off: Button = _live["tool_unequip_%s" % slot]
+	equip.disabled = not equip_reason.is_empty()
+	off.disabled = not off_reason.is_empty()
+	equip.tooltip_text = equip_reason
+	off.tooltip_text = off_reason
+	var reasons: Array[String] = []
+	if not manual_reason.is_empty():
+		reasons.append(manual_reason)
+	else:
+		if not equip_reason.is_empty():
+			reasons.append("装備：" + equip_reason)
+		if current >= 0 and not off_reason.is_empty():
+			reasons.append("外す：" + off_reason)
+	var feedback: Label = _live["tool_reason_%s" % slot]
+	feedback.text = " ／ ".join(PackedStringArray(reasons))
+	feedback.visible = not reasons.is_empty()
 
 
 ## タブ「部署」: 選んだ部署のLvと、解放の一覧（Lvが足りない間も「こういうものがある」と見せる）
 func _build_department() -> void:
+	_normalize_filter()
 	if _filter < 0:
 		_body.add_child(UIKit.lbl("左で部署を選ぶと、その部署のLvと解放内容が見られます", 15, UIKit.C_DIM))
 		return
@@ -402,7 +539,15 @@ func _update_live() -> void:
 	var w = _worker
 	if not is_instance_valid(w) or not _live.has("status"):
 		return
-	_live["status"].text = "%s     配属: %s" % [w.ai.status_text(), GameData.FIELD_NAMES[w.dept]]
+	_live["status"].text = w.ai.status_text()
+	if GameData.department_visible(w.dept):
+		_live["status"].text += "     配属: %s" % GameData.FIELD_NAMES[w.dept]
+	if _live.has("batch_title"):
+		var count: int = _picker.selected_list().size()
+		_live["batch_title"].text = "── まとめて移動（チェックした %d人 を、押した部署へ） ──" % count
+		for button in _live["batch_move"]:
+			button.disabled = count == 0
+		_live["batch_hint"].visible = count == 0
 	if _live.has("view"):
 		_live["view"].update_from(w)
 	for action in ["rest", "eat"]:
@@ -415,11 +560,20 @@ func _update_live() -> void:
 		var pending: String = w.ai.life_request
 		_live["life_pending"].visible = not pending.is_empty()
 		_live["life_pending"].text = "%sを促しています。今の作業を安全に区切るのを待っています。" % ("休憩" if pending == "rest" else "食事") if not pending.is_empty() else ""
+	if _live.has("tool_auto"):
+		var auto: Button = _live["tool_auto"]
+		var text := "道具の自動割り当て（全員共通）：%s" % ("ON" if game.tool_auto else "OFF")
+		if auto.text != text:
+			auto.text = text
+			UIKit.style(auto, game.tool_auto)
+		auto.tooltip_text = "全員共通の設定です。手動で付け替えるときはOFFにしてください。"
 	for slot in GatherDB.SLOTS:
 		if not _live.has("tool_%s" % slot):
 			continue
 		var cur: int = int(w.tools.get(slot, -1))
 		_live["tool_%s" % slot].text = "%s：%s" % [GatherDB.SLOTS[slot], GatherDB.tool_def(cur)["name"]]
+		if _live.has("tool_select_%s" % slot):
+			_update_tool_controls(w, slot)
 		var parts: Array[String] = []
 		for kind in GatherDB.POINTS:
 			if GatherDB.POINTS[kind]["slot"] != slot:
@@ -440,7 +594,7 @@ func _update_live() -> void:
 
 ## 仲間（1人でも複数でも）を部署 f へ移す。移動先の部署の一覧に切り替えて追う。
 func _move(list: Array, f: int) -> void:
-	if list.is_empty():
+	if list.is_empty() or not GameData.department_visible(f):
 		return
 	for w in list:
 		w.dept = f
@@ -451,15 +605,25 @@ func _move(list: Array, f: int) -> void:
 
 
 func _prio(w, job: int, d: int) -> void:
+	if not is_instance_valid(w) or w != _worker or job == GameData.Job.REST:
+		return
 	w.set_priority(job, w.priorities.get(job, 0) + d)
 	_update_live()
 
 
-func _section(text: String) -> void:
+func _section(text: String) -> Label:
 	var sp := Control.new()
 	sp.custom_minimum_size = Vector2(0, 4)
 	_body.add_child(sp)
-	_body.add_child(UIKit.lbl("── " + text + " ──", 14, UIKit.C_DIM))
+	var title := _wrapped_label("── " + text + " ──", 14, UIKit.C_DIM)
+	_body.add_child(title)
+	return title
+
+
+## 過去の表示設定に非表示部署が残っていても、配属データを変更せず全員一覧へ戻す。
+func _normalize_filter() -> void:
+	if _filter >= 0 and not GameData.department_visible(_filter):
+		_filter = -1
 
 
 ## 長い名前・得意分野・説明でも、右側の表示幅を押し広げない。

@@ -219,7 +219,7 @@ func _build_tools_page() -> void:
 	var st = game.storage
 	_body.add_child(UIKit.lbl("木材・石・鉄鉱石は、採取ポイント（岩場・鉱床・枯れ木）から道具で掘ります。取れる量は「採取ポイント × 道具 × 仲間の能力」で決まります。"
 			+ "\n道具は加工でつくります（誰かの道具の更新になるときだけ作ります）。良い道具は、回収ランクの高い仲間に持たせると活きます。", 13, UIKit.C_DIM))
-	var auto_btn := UIKit.button("道具の自動割り当て: %s" % ("ON（倉庫の道具を、効果の大きい仲間へ自動で持たせる）" if game.tool_auto else "OFF（下のボタンで手動）"), func():
+	var auto_btn := UIKit.button("道具の自動割り当て: %s" % ("ON（倉庫の道具を、効果の大きい仲間へ自動で持たせる）" if game.tool_auto else "OFF（個体情報で手動）"), func():
 		game.tool_auto = not game.tool_auto
 		_rebuild())
 	auto_btn.custom_minimum_size = Vector2(560, 28)
@@ -243,6 +243,9 @@ func _build_tools_page() -> void:
 		var ab: float = w.field_mult(GameData.Field.GATHERER)
 		left.add_child(UIKit.lbl("%s　回収ランク %s（能力値 %.2f）%s" % [w.char_name, GameData.RANKS[rank], ab,
 				"" if game._uses_tools(w) else "　※回収をしない設定"], 15, UIKit.C_ACCENT))
+		var manage := UIKit.button("個体情報で管理", func(): game.detail.open_worker(w))
+		manage.custom_minimum_size = Vector2(180, 28)
+		left.add_child(manage)
 		for slot in GatherDB.SLOTS:
 			var s: String = slot
 			var cur: int = int(w.tools.get(s, -1))
@@ -250,22 +253,7 @@ func _build_tools_page() -> void:
 			row.add_theme_constant_override("separation", 4)
 			left.add_child(row)
 			row.add_child(UIKit.lbl("　%s: %s" % [GatherDB.SLOTS[s], GatherDB.tool_def(cur)["name"]], 14, UIKit.C_TEXT, 200))
-			# 持たせられる道具（倉庫にあるもの）
-			for it in GameData.TOOL_ITEMS:
-				var item: int = it
-				if GatherDB.slot_of_tool(item) != s or st.count_of(item) <= 0:
-					continue
-				var b := UIKit.button("%s（在庫%d）" % [GameData.ITEM_NAMES[item], st.count_of(item)], func():
-					game.equip_tool(w, item)
-					_rebuild())
-				b.custom_minimum_size = Vector2(0, 24)
-				row.add_child(b)
-			if cur >= 0:
-				var off := UIKit.button("外す", func():
-					game.unequip_tool(w, s)
-					_rebuild())
-				off.custom_minimum_size = Vector2(0, 24)
-				row.add_child(off)
+			# 個体への付け替え・解除は「個体情報」で行う。
 			# この枠で掘れる採取ポイントごとの結果の目安
 			var parts: Array = []
 			for k in GatherDB.POINTS:

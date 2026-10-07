@@ -558,24 +558,87 @@ func manage_tools() -> void:
 				equip_tool(w, t)
 
 
-## 倉庫の道具を仲間に持たせる。すでに同じ枠の道具を持っていれば、それは倉庫に戻る。
+## 自動割り当ても使う窓口。自動ONや遠征・行動不能による手動操作の制限はUI側で扱う。
+func _tool_target_reason(w) -> String:
+	if not is_instance_valid(w) or not (w is Worker) or not workers.has(w) or w.is_queued_for_deletion():
+		return "この仲間の装備は変更できません。"
+	if not is_instance_valid(storage):
+		return "倉庫を利用できません。"
+	return ""
+
+
+## 道具を1個戻せるか。交換時は、先に倉庫から取り出す道具の重さも差し引く。
+## 現在の採取道具は積載対象外。将来対象になっても、返却できない変更は先に断る。
+func _tool_return_fits(item: int, outgoing := -1) -> bool:
+	if item < 0 or not storage.enforce or CargoDB.bay_of(item) < 0:
+		return true
+	var after := storage.current_weight() + CargoDB.size_of(item)
+	if outgoing >= 0 and CargoDB.bay_of(outgoing) >= 0:
+		after -= CargoDB.size_of(outgoing)
+	return after <= storage.max_weight()
+
+
+## 持たせられない理由。可能なら空。現在と同じ道具は在庫を使わない。
+func tool_equip_reason(w, item: int) -> String:
+	var reason := _tool_target_reason(w)
+	if not reason.is_empty():
+		return reason
+	if not GatherDB.is_tool_item(item):
+		return "採取道具を選んでください。"
+	var old: int = int(w.tools.get(GatherDB.slot_of_tool(item), -1))
+	if old == item:
+		return ""
+	if storage.count_of(item) <= 0:
+		return "倉庫にこの道具がありません。"
+	if not _tool_return_fits(old, item):
+		return "倉庫の積載量が足りず、今の道具を戻せません。"
+	return ""
+
+
+## 外せない理由。可能なら空。素手の枠を外す操作は何も変えない。
+func tool_unequip_reason(w, slot: String) -> String:
+	var reason := _tool_target_reason(w)
+	if not reason.is_empty():
+		return reason
+	if not GatherDB.SLOTS.has(slot):
+		return "採取道具の枠を選んでください。"
+	if not _tool_return_fits(int(w.tools.get(slot, -1))):
+		return "倉庫の積載量が足りず、道具を戻せません。"
+	return ""
+
+
+## 事前確認後、数量と装備を一緒に確定してから通知する。途中の状態や廃棄を発生させない。
+func _change_tool(w, slot: String, item: int) -> void:
+	var old: int = int(w.tools.get(slot, -1))
+	var inv: Inventory = storage.inventory
+	if item >= 0:
+		inv.counts[item] = inv.count(item) - 1
+		w.tools[slot] = item
+	else:
+		w.tools.erase(slot)
+	if old >= 0:
+		inv.counts[old] = inv.count(old) + 1
+		inv.item_added.emit(old, 1, Inventory.SOURCE_TRANSFER)
+	inv.changed.emit()
+
+
+## 倉庫の道具を仲間に持たせる。旧道具を戻せない場合は、在庫も装備も変えない。
 func equip_tool(w, item: int) -> bool:
-	if not GatherDB.is_tool_item(item) or not storage.take_item(item):
+	if not tool_equip_reason(w, item).is_empty():
 		return false
 	var slot := GatherDB.slot_of_tool(item)
-	var old: int = int(w.tools.get(slot, -1))
-	w.tools[slot] = item
-	if old >= 0:
-		storage.add_item(old)
+	if int(w.tools.get(slot, -1)) != item:
+		_change_tool(w, slot, item)
 	return true
 
 
-## 持っている道具を外して倉庫に戻す。
-func unequip_tool(w, slot: String) -> void:
-	var old: int = int(w.tools.get(slot, -1))
-	if old >= 0:
-		w.tools.erase(slot)
-		storage.add_item(old)
+## 指定した枠だけを外して倉庫に戻す。もう一方の道具はそのまま。
+func unequip_tool(w, slot: String) -> bool:
+	if not tool_unequip_reason(w, slot).is_empty():
+		return false
+	if int(w.tools.get(slot, -1)) >= 0:
+		_change_tool(w, slot, -1)
+	return true
 
 
 ## その道具を作る意味があるか（もう1つ増えると、全員の総合点が上がり、予備も作りかけもない）。加工の選択（choose_recipe）で使う。

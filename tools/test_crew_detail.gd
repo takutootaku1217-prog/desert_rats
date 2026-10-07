@@ -75,7 +75,10 @@ func _run() -> void:
 	check(not detail._live.has("prio_%d" % GameData.Job.REST), "個体情報の仕事の星に休憩を含めない")
 	for w in W:
 		check(not main.ui._cards[w]["stars"].has(GameData.Job.REST), "上部カードの仕事の星に休憩を含めない：%s" % w.char_name)
+	_test_hidden_departments()
 	_test_life_controls()
+	_test_tool_controls()
+	_test_policy_entry()
 
 	print("-- 道具の現在値を、画面を閉じずに更新する --")
 	W[0].tools.clear()
@@ -137,7 +140,7 @@ func _run() -> void:
 	var last: Control = detail._body.get_child(detail._body.get_child_count() - 1)
 	var area: Rect2 = detail._scroll.get_global_rect()
 	var end: Rect2 = last.get_global_rect()
-	check(detail._scroll.scroll_vertical > 0 and end.position.y >= area.position.y - 1.0 and end.end.y <= area.end.y + 1.0, "スクロールすると末尾の優先度操作まで到達する")
+	check(detail._scroll.scroll_vertical > 0 and end.position.y >= area.position.y - 1.0 and end.end.y <= area.end.y + 1.0, "スクロールすると末尾の個体情報まで到達する")
 
 	print("-- 個体操作と一括操作を取り違えない --")
 	W[2].priorities[GameData.Job.GATHER] = 2
@@ -154,7 +157,7 @@ func _run() -> void:
 	detail._picker._set_selected(W[1], true)
 	var focused = detail._worker
 	var focused_dept: int = focused.dept
-	var target_dept: int = (focused_dept + 1) % GameData.Field.size()
+	var target_dept: int = GameData.Field.COOK if focused_dept != GameData.Field.COOK else GameData.Field.COMBAT
 	detail._move(detail._picker.selected_list(), target_dept)
 	check(W[0].dept == target_dept and W[1].dept == target_dept and focused.dept == focused_dept, "まとめて配属はチェックした2人だけ変更し、閲覧中の個体は変えない")
 	check(detail._picker.selected_list().size() == 2 and detail._members(target_dept).has(W[0]) and detail._members(target_dept).has(W[1]), "一括選択と配属後の部署一覧を保持する")
@@ -215,3 +218,118 @@ func _test_life_controls() -> void:
 	check(eat_button.disabled and detail._live["life_pending"].text.contains("食事を促しています"), "食事の促しも重複を防ぎ、保留内容を表示する")
 	w.ai.life_request = ""
 	main._select(W[0])
+
+
+func _buttons(node: Node) -> Array[Button]:
+	var list: Array[Button] = []
+	if node is Button:
+		list.append(node)
+	for child in node.get_children():
+		list.append_array(_buttons(child))
+	return list
+
+
+func _test_hidden_departments() -> void:
+	print("-- 開発部署だけを隠し、個体と能力を保持する --")
+	var depts: Array = W.map(func(w): return w.dept)
+	var points: int = GameData.field_points(W, GameData.Field.DEV)
+	check(GameData.Field.values().has(GameData.Field.DEV) and not GameData.visible_departments().has(GameData.Field.DEV), "開発の定義を残し、表示・配属先から外す")
+	check(not detail._dept_btns.has(GameData.Field.DEV) and detail._dept_btns.size() == GameData.visible_departments().size() + 1, "左の部署一覧に開発部署を表示しない")
+	check(detail._members(-1).size() == W.size(), "非表示部署の所属者も全員一覧から消えない")
+	var hidden = null
+	for w in W:
+		if w.dept == GameData.Field.DEV:
+			hidden = w
+	check(hidden != null, "既存の開発所属個体を確認できる")
+	if hidden != null:
+		detail.open_worker(hidden)
+		check(not detail._live.status.text.contains("配属: " + GameData.FIELD_NAMES[GameData.Field.DEV]), "個体の行動状態に非表示の開発部署名を出さない")
+		check(_has_text("開発者") and _has_text("分野ランク"), "開発の個体能力ランクは消さない")
+		for button in _buttons(detail._body):
+			check(button.text != GameData.FIELD_NAMES[GameData.Field.DEV], "配属先・一括配属先に開発を表示しない")
+		var rank: Dictionary = hidden.ranks.duplicate()
+		detail._move([W[0]], GameData.Field.DEV)
+		check(W.map(func(w): return w.dept) == depts and hidden.ranks == rank, "非表示部署への古い操作でも、配属・能力を変更しない")
+	detail._set_filter(GameData.Field.DEV)
+	detail._set_tab(1)
+	check(detail._filter == -1 and not _has_text("開発者"), "非表示部署フィルタを全員へ戻し、部署タブにも開発を出さない")
+	check(GameData.field_points(W, GameData.Field.DEV) == points, "表示を隠しても加工・修理に使う部署計算を変えない")
+	detail.open_worker(W[0])
+
+
+func _test_tool_controls() -> void:
+	print("-- 個体情報の道具操作と、在庫のライブ更新 --")
+	var w = W[1]
+	w.away = false
+	w.down = false
+	w.tools.clear()
+	for item in GameData.TOOL_ITEMS:
+		main.storage.inventory.counts[item] = 0
+	main.storage.add_item(GameData.Item.HAMMER, 1)
+	main.storage.add_item(GameData.Item.PICKAXE, 1)
+	main._select(W[0])
+	detail.open_worker(w)
+	main.tool_auto = true
+	detail._update_live()
+	check(detail._live.tool_auto.text.contains("全員共通") and detail._live.tool_equip_mine.disabled and detail._live.tool_select_mine.disabled, "自動割当の範囲を明示し、ONでは手動装備を無効にする")
+	var stock_before: int = main.storage.count_of(GameData.Item.HAMMER)
+	detail._live.tool_equip_mine.pressed.emit()
+	check(w.tools.is_empty() and main.storage.count_of(GameData.Item.HAMMER) == stock_before, "古い装備イベントでも自動ON中は在庫・装備を変更しない")
+	detail._live.tool_auto.pressed.emit()
+	check(not main.tool_auto and not detail._live.tool_select_mine.disabled, "既存の全員共通自動設定を明示的にOFFへ切り替えられる")
+	var choices: OptionButton = detail._live.tool_select_mine
+	choices.select(choices.get_item_index(GameData.Item.HAMMER))
+	detail._update_live()
+	var priorities: Dictionary = w.priorities.duplicate()
+	var other_tools: Dictionary = W[0].tools.duplicate()
+	var requested: String = w.ai.life_request
+	detail._live.tool_equip_mine.pressed.emit()
+	check(w.tools.get("mine", -1) == GameData.Item.HAMMER and main.storage.count_of(GameData.Item.HAMMER) == 0, "表示中の個体へ倉庫のハンマー1個を持たせる")
+	check(W[0].tools == other_tools and main.follow_target == W[0] and W[0].selected and w.priorities == priorities and w.ai.life_request == requested, "装備で他個体・追従先・仕事・生活の促しを変更しない")
+	check(detail._live.tool_equip_mine.disabled and detail._live.tool_select_mine.get_item_text(choices.get_item_index(GameData.Item.HAMMER)).contains("装備中"), "同じ装備の重複取得を防ぎ、現在装備と在庫を更新する")
+	choices.select(choices.get_item_index(GameData.Item.PICKAXE))
+	detail._update_live()
+	check(not detail._live.tool_equip_mine.disabled, "在庫のある上位道具を選べる")
+	main.storage.take_item(GameData.Item.PICKAXE)
+	detail._update_live()
+	check(detail._live.tool_equip_mine.disabled and not detail._live.tool_equip_mine.tooltip_text.is_empty(), "他の操作で選択候補の在庫が消えたら、装備を無効にする")
+	detail._live.tool_equip_mine.pressed.emit()
+	check(w.tools["mine"] == GameData.Item.HAMMER and main.storage.count_of(GameData.Item.HAMMER) == 0, "古い装備ボタンでも在庫不足なら既存装備を失わない")
+	main.storage.add_item(GameData.Item.PICKAXE, 1)
+	detail._update_live()
+	check(choices.get_selected_id() == GameData.Item.PICKAXE and not detail._live.tool_equip_mine.disabled, "候補とスクロールを再構築せず、在庫補充で装備ボタンを有効へ戻す")
+	detail._live.tool_equip_mine.pressed.emit()
+	check(w.tools["mine"] == GameData.Item.PICKAXE and main.storage.count_of(GameData.Item.PICKAXE) == 0 and main.storage.count_of(GameData.Item.HAMMER) == 1, "道具を交換すると旧道具は倉庫へ戻り、数を保存する")
+	detail._live.tool_unequip_mine.pressed.emit()
+	check(not w.tools.has("mine") and main.storage.count_of(GameData.Item.PICKAXE) == 1, "外す操作で倉庫へ戻し、素手の表示へ更新する")
+	w.away = true
+	detail._update_live()
+	check(detail._live.tool_equip_mine.disabled, "遠征中の個体は閲覧でき、道具の変更は促せない")
+	w.away = false
+	w.down = true
+	detail._update_live()
+	check(detail._live.tool_equip_mine.disabled, "戦闘不能中は道具の変更を受け付けない")
+	w.down = false
+	detail._update_live()
+	detail.open_worker(W[0])
+
+
+func _test_policy_entry() -> void:
+	print("-- 運営の方針から、指定個体の管理へ移る --")
+	main._select(W[0])
+	detail.close()
+	detail._set_filter(GameData.Field.GATHERER)
+	main.policy._page = 2
+	main.policy._overlay.visible = true
+	main.policy._rebuild()
+	var entries: Array[Button] = []
+	for button in _buttons(main.policy._body):
+		if button.text == "個体情報で管理":
+			entries.append(button)
+		check(button.text != "外す", "方針ページに個体の装備解除操作を重複させない")
+	check(entries.size() == W.size(), "各個体の道具説明から個体情報へ移れる")
+	if entries.size() > 1:
+		entries[1].pressed.emit()
+		check(detail._overlay.visible and detail._worker == W[1] and detail._tab == 0 and detail._filter == -1, "部署フィルタ外の指定個体も、個体タブで確実に表示する")
+		check(not main.policy._overlay.visible and main.follow_target == W[0] and W[0].selected, "旧画面を閉じ、表示中個体だけ変えて世界の選択・追従先を保持する")
+	detail.open_worker(W[0])
