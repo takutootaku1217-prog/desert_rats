@@ -362,7 +362,7 @@ func _test_ui() -> void:
 	var b_craft := _find_button(craft, "制作 (F)")
 	check(b_inv != null and b_craft != null, "右のボタン列に「インベントリ (Tab)」「制作 (F)」がある")
 	var others_ok := true
-	for b in [_find_button(main.build_ui, "建設 (B)"), _find_button(main.room_ui, "部屋の変更 (R)"), _find_button(main.detail, "仲間の管理 (C)")]:
+	for b in [_find_button(main.build_ui, "建設 (B)"), _find_button(main.room_ui, "部屋の変更 (R)"), main.ui._button]:
 		others_ok = others_ok and b != null and not b.get_global_rect().intersects(b_inv.get_global_rect()) and not b.get_global_rect().intersects(b_craft.get_global_rect())
 	check(others_ok and not b_inv.get_global_rect().intersects(b_craft.get_global_rect()), "新しいボタンは、ほかのボタンに重ならない（建設・部屋の変更・仲間の管理は残っている）")
 	# ---- インベントリ

@@ -359,7 +359,7 @@ func _test_ui() -> void:
 	var b_int: Button = _find_button(vs, "内装 (I)")
 	check(b_ext != null and b_int != null, "[外装 (O)] [内装 (I)] のボタンがある")
 	var overlap := false
-	for t in ["仲間の管理 (C)", "運営の方針 (P)", "遠征 (X)", "建設 (B)", "部屋の変更 (R)"]:
+	for t in ["仲間 %d人 (C)" % main.workers.size(), "運営の方針 (P)", "遠征 (X)", "建設 (B)", "部屋の変更 (R)"]:
 		var o: Button = _find_button(main, t)
 		if o == null:
 			overlap = true

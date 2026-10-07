@@ -886,24 +886,27 @@ func _test_step9_ui() -> void:
 	w.mental = CrewStatusDB.Mental.LIMIT
 	check(CrewStatus.warning(w).get("stat", "") == "mental", "ほかが問題なくても、精神状態が限界なら警告（顔）")
 	_reset(w)
-	# 上部の仲間カード: 3つのアイコンと顔
-	var card_ok := true
-	for x in W:
-		card_ok = card_ok and main.ui._cards[x].has("view") and main.ui._cards[x]["view"] is CrewStatusView
-	check(card_ok, "上部の仲間カードに、アイコンゲージ（3つ）と顔がある")
+	# 個体の表示は管理画面で確認する。上部HUDは人数が増えても固定の管理入口。
+	_reset(W[1])
 	W[1].hp = 30.0
 	W[1].fatigue = 60.0
-	main.ui._process(0.1)
-	var cv: CrewStatusView = main.ui._cards[W[1]]["view"]
-	check(is_equal_approx(cv.gauge("hp").ratio, 0.3) and is_equal_approx(cv.gauge("fatigue").ratio, 0.4), "カードの表示が、その仲間の値を反映する（ほかの仲間とは別）")
-	check(is_equal_approx(main.ui._cards[W[0]]["view"].gauge("hp").ratio, 1.0), "ほかの仲間のカードは影響されない")
-	var found_old := _find_text(main.ui, "元気")
-	check(not found_old and not _find_text(main.ui, "スタミナ"), "カードに元気・スタミナの表示は残っていない")
-	_reset(W[1])
+	main.detail.open_worker(W[1])
+	await process_frame
+	var cv: CrewStatusView = main.detail._live["view"]
+	check(cv._gauges.size() == 3 and cv.face() is TextureRect, "個体情報に、アイコンゲージ（3つ）と精神状態の顔がある")
+	check(is_equal_approx(cv.gauge("hp").ratio, 0.3) and is_equal_approx(cv.gauge("fatigue").ratio, 0.4) and cv.gauge("fatigue").text == "60", "管理画面の表示が、その仲間のHP・疲労度を反映する")
+	main.detail.show_worker(W[0])
+	await process_frame
+	var other_view: CrewStatusView = main.detail._live["view"]
+	check(is_equal_approx(other_view.gauge("hp").ratio, 1.0) and is_equal_approx(other_view.gauge("fatigue").ratio, 1.0) and W[1].hp == 30.0 and W[1].fatigue == 60.0, "別の仲間へ切り替えても、値を混同せず元の個体データを保持する")
+	main.detail.show_worker(W[1])
+	check(not _find_text(main.ui, "元気") and not _find_text(main.ui, "スタミナ") and not _find_text(main.detail._body, "元気") and not _find_text(main.detail._body, "スタミナ"), "HUD・個体情報に元気・スタミナの表示は残っていない")
 	# アイコンは、Worker の値を読むだけ（表示が値を書き換えない）
 	var before := [W[1].hp, W[1].hunger, W[1].fatigue, W[1].mental]
-	main.ui._process(0.1)
+	main.detail._update_live()
 	check([W[1].hp, W[1].hunger, W[1].fatigue, W[1].mental] == before, "表示は値を読むだけで、書き換えない")
+	main.detail.close()
+	_reset(W[1])
 
 
 func _find_text(node: Node, needle: String) -> bool:
@@ -927,7 +930,7 @@ func _test_step10_detail() -> void:
 	await process_frame
 	check(main.detail._overlay.visible and main.detail._live.has("view") and main.detail._live["view"] is CrewStatusView, "管理画面を開くと、選んだ仲間のステータスがアイコンで出る")
 	var dv: CrewStatusView = main.detail._live["view"]
-	check(dv.gauge("hp").display_size.x > main.ui._cards[w]["view"].gauge("hp").display_size.x, "管理画面のアイコンは、カードより大きい（同じ部品を大きさ違いで使い回す）")
+	check(dv.gauge("hp").display_size == Vector2(64, 64) and dv.gauge("hunger").display_size == Vector2(64, 64) and dv.gauge("fatigue").display_size == Vector2(64, 64), "管理画面のHP・満腹度・疲労度アイコンは64pxで表示する")
 	w.hp = 55.0
 	w.hunger = 70.0
 	w.fatigue = 45.0

@@ -2,7 +2,7 @@ extends SceneTree
 ## 仲間のステータス（HP・満腹度・疲労度・精神状態）の表示を、実際のゲーム画面（ウィンドウ表示）で撮る。実行（ウィンドウが開く）:
 ##   Godot --path . --windowed --resolution 1280x720 --fixed-fps 60 -s res://tools/shot_crew_status.gd -- <出力フォルダ>
 ## 出力: s1_normal.png（元気な状態）／s2_mixed.png（悪い状態がいろいろ。頭上の警告つき）／s3_detail.png（仲間の管理画面）／
-##   s_cards.png（上部のカードを拡大）／s_heads.png（仲間の頭上の警告を拡大）
+##   s_hud.png（人数によらない上部HUD）／s_heads.png（仲間の頭上の警告を拡大）／s_detail_nonum.png（詳細の数字なし）
 
 var main
 var dir := "."
@@ -49,27 +49,24 @@ func _initialize() -> void:
 	await _frames(8)
 	var img := root.get_texture().get_image()
 	img.save_png("%s/s2_mixed.png" % dir)
-	# 上部のカードを拡大
-	var cards := img.get_region(Rect2i(0, 0, 1000, 230))
-	cards.resize(cards.get_width() * 2 / 1, cards.get_height() * 2 / 1, Image.INTERPOLATE_NEAREST)
-	cards.save_png("%s/s_cards.png" % dir)
+	# 通常HUDは仲間管理の入口と追従状態だけ。人数分のカードは常設しない。
+	var hud := img.get_region(Rect2i(0, 0, 330, 72))
+	hud.resize(hud.get_width() * 2, hud.get_height() * 2, Image.INTERPOLATE_NEAREST)
+	hud.save_png("%s/s_hud.png" % dir)
 	# 頭上の警告を拡大（仲間3人の周り）
 	var heads := img.get_region(Rect2i(500, int(y) - 190, 520, 230))
 	heads.resize(heads.get_width() * 2, heads.get_height() * 2, Image.INTERPOLATE_NEAREST)
 	heads.save_png("%s/s_heads.png" % dir)
-	# 数字を消した表示（アイコンだけで状態が分かるか）
-	UIKit.show_icon_numbers = false
-	await _frames(6)
-	var img2 := root.get_texture().get_image()
-	var cards2 := img2.get_region(Rect2i(0, 0, 1000, 230))
-	cards2.resize(cards2.get_width() * 2, cards2.get_height() * 2, Image.INTERPOLATE_NEAREST)
-	cards2.save_png("%s/s_cards_nonum.png" % dir)
-	UIKit.show_icon_numbers = true
 	# 仲間の管理画面
 	main.detail.toggle()
 	main.detail._select(W[1])
 	await _frames(10)
 	root.get_texture().get_image().save_png("%s/s3_detail.png" % dir)
+	UIKit.show_icon_numbers = false
+	main.detail._update_live()
+	await _frames(6)
+	root.get_texture().get_image().save_png("%s/s_detail_nonum.png" % dir)
+	UIKit.show_icon_numbers = true
 	main.detail.close()
 	print("saved")
 	quit()

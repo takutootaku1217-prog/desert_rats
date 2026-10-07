@@ -191,9 +191,9 @@ func _test_panel() -> void:
 	check(not _find_text(sp, "加工:") and not _find_text(sp, "待ち") and not _find_text(sp, "肉"), "加工の様子や素材の名前の文字は、パネルから消えている（絵と動きへ移した）")
 	check(sp._totals.text.contains("狩猟") and sp._totals.text.contains("食事"), "累計は小さく残している")
 	var buttons_ok := true
-	for txt in ["建設 (B)", "部屋の変更 (R)", "仲間の管理 (C)", "運営の方針 (P)", "遠征 (X)"]:
+	for txt in ["建設 (B)", "部屋の変更 (R)", "仲間 %d人 (C)" % main.workers.size(), "運営の方針 (P)", "遠征 (X)"]:
 		buttons_ok = buttons_ok and _find_button_anywhere(txt)
-	check(buttons_ok, "右のボタン列の操作は、そのまま残っている")
+	check(buttons_ok, "管理入口を含む通常HUDの操作は残っている")
 	# 速度の操作（↑↓キー）は、これまでどおり
 	var s0: float = main.target_speed
 	var ev := InputEventKey.new()

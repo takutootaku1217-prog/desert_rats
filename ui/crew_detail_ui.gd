@@ -1,6 +1,6 @@
 class_name CrewDetailUI
 extends CanvasLayer
-## 仲間の管理画面。右上のボタン（またはCキー）で開閉する。
+## 仲間の管理画面。通常HUDの仲間ボタン（またはCキー）で開閉する。
 ## 左: 部署（Lv・人数） / 中: メンバー一覧（複数選択できる CrewPicker） / 右: スクロールできる個体情報。
 ## 個体情報へプロフィール・状態・能力・採取道具・優先度・配属をまとめる。部署の解放情報は別タブ。
 
@@ -8,7 +8,6 @@ var game
 var _worker
 var _filter := -1                # -1 = 全員、それ以外は GameData.Field
 var _tab := 0                    # 0 = 個体情報、1 = 部署
-var _button_layer: CanvasLayer
 var _overlay: Control
 var _dept_btns := {}             # -1 / Field -> Button
 var _tab_btns: Array = []
@@ -20,15 +19,8 @@ var _timer := 0.0
 
 
 func _ready() -> void:
-	# 開くボタンは通常HUDに、開いた管理画面は他の管理画面より上に置く。
+	# 開く入口は通常HUDに集約し、管理画面は他の管理画面より上に置く。
 	layer = 27
-	_button_layer = CanvasLayer.new()
-	_button_layer.layer = 12
-	add_child(_button_layer)
-	var btn := UIKit.button("仲間の管理 (C)", toggle)
-	btn.position = Vector2(1000, 252)
-	btn.custom_minimum_size = Vector2(272, 32)
-	_button_layer.add_child(btn)
 
 	_overlay = Control.new()
 	_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -115,12 +107,17 @@ func toggle() -> void:
 	if _overlay.visible:
 		close()
 	else:
+		if game.workers.is_empty():
+			_worker = null
+			_picker.focus_worker = null
+			_refresh_all()
+			return
 		# 管理画面内の閲覧対象と、画面側の選択は別。開くときは現在の選択を表示する。
 		for w in game.workers:
 			if w.selected:
 				_worker = w
 				break
-		if not is_instance_valid(_worker):
+		if not is_instance_valid(_worker) or not game.workers.has(_worker):
 			_worker = game.workers[0]
 		open_worker(_worker)
 
@@ -253,12 +250,15 @@ func _build_detail() -> void:
 		_build_department()
 		return
 	var w = _worker
-	if w == null:
+	if not is_instance_valid(w) or not game.workers.has(w):
 		return
 	_section("プロフィール")
 	_body.add_child(_wrapped_label(w.char_name, 26, UIKit.C_ACCENT))
 	_body.add_child(_wrapped_label("Lv %d   %s   個体ランク %s   得意分野: %s" % [w.level, GameData.GENDER_NAMES[w.gender],
 			w.rank_letter(), w.best_fields_text()], 16))
+	_live["follow"] = UIKit.button("画面で選択・追従", _follow_worker)
+	_live["follow"].custom_minimum_size = Vector2(0, 34)
+	_body.add_child(_live["follow"])
 	_section("状態・生活")
 	_live["status"] = _wrapped_label("", 15)
 	_body.add_child(_live["status"])
@@ -270,6 +270,34 @@ func _build_detail() -> void:
 	_build_personnel(w)
 	_build_training(w)
 	_update_live()
+
+
+## 一覧の閲覧では追従を変えず、この操作だけで世界側の選択へ渡す。
+func _follow_worker() -> void:
+	if not _follow_reason(_worker).is_empty():
+		_update_follow_control()
+		return
+	game._select(_worker)
+	close()
+
+
+func _follow_reason(w) -> String:
+	if not is_instance_valid(w) or not game.workers.has(w):
+		return "対象の仲間が見つかりません。"
+	if w.away:
+		return "遠征中は画面で選択・追従できません。"
+	if not w.visible:
+		return "現在表示されていない仲間は、画面で選択・追従できません。"
+	return ""
+
+
+func _update_follow_control() -> void:
+	if not _live.has("follow"):
+		return
+	var reason := _follow_reason(_worker)
+	var button: Button = _live["follow"]
+	button.disabled = not reason.is_empty()
+	button.tooltip_text = reason if not reason.is_empty() else "管理画面を閉じ、この仲間を画面で選択・追従します。Escキーで追従を解除できます。"
 
 
 ## 生活行動は自動。ここでは個体のAIへ促しを伝え、作業や予約を直接変更しない。
@@ -537,6 +565,7 @@ func _build_department() -> void:
 
 func _update_live() -> void:
 	var w = _worker
+	_update_follow_control()
 	if not is_instance_valid(w) or not _live.has("status"):
 		return
 	_live["status"].text = w.ai.status_text()

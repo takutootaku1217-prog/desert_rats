@@ -14,7 +14,9 @@ var focus_worker = null
 
 var _box: VBoxContainer
 var _count: Label
+var _scroll: ScrollContainer
 var _rows := {}                      # Worker -> Button
+var _refresh_revision := 0
 const S_RANK := 5                    # S 以上
 
 
@@ -36,14 +38,14 @@ func _init() -> void:
 		b.alignment = HORIZONTAL_ALIGNMENT_CENTER
 		b.custom_minimum_size = Vector2(88, 30)
 		bar.add_child(b)
-	var sc := ScrollContainer.new()
-	sc.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	add_child(sc)
+	_scroll = ScrollContainer.new()
+	_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	add_child(_scroll)
 	_box = VBoxContainer.new()
 	_box.custom_minimum_size = Vector2(282, 0)
 	_box.add_theme_constant_override("separation", 4)
-	sc.add_child(_box)
+	_scroll.add_child(_box)
 
 
 func refresh() -> void:
@@ -73,13 +75,34 @@ func refresh() -> void:
 		row.add_child(b)
 		_rows[w] = b
 	_update_count()
+	_refresh_revision += 1
+	call_deferred("_ensure_focus_after_layout", _refresh_revision)
 
 
 func set_focus(w) -> void:
 	focus_worker = w
 	for k in _rows:
 		UIKit.style(_rows[k], k == w)
+	_ensure_focus_visible()
 	focused.emit(w)
+
+
+## 行の再生成や絞り込みで変わる最小サイズ・スクロール範囲の配置が済んでから合わせる。
+func _ensure_focus_after_layout(revision: int, remaining_frames: int = 2) -> void:
+	if revision != _refresh_revision or not is_inside_tree():
+		return
+	if remaining_frames > 0:
+		# 名前付きメソッドへの接続は、この一覧が解放されたとき自動で解除される。
+		get_tree().process_frame.connect(_ensure_focus_after_layout.bind(revision, remaining_frames - 1), CONNECT_ONE_SHOT)
+		return
+	_ensure_focus_visible()
+
+
+## 開き直したときも、閲覧中の仲間の行がスクロール範囲内に見えるようにする。
+func _ensure_focus_visible() -> void:
+	if not is_instance_valid(focus_worker) or not _rows.has(focus_worker) or not _scroll.is_visible_in_tree():
+		return
+	_scroll.ensure_control_visible(_rows[focus_worker])
 
 
 func _visible_workers() -> Array:

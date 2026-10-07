@@ -35,7 +35,7 @@ var view_switch: ViewSwitchUI     # 外装・内装の切り替えボタン（O�
 # Camera2D は世界（背景・拠点・仲間・資源。CanvasLayer の外）だけを動かす。HUD は CanvasLayer なので触れない。
 var camera: Camera2D
 var follow_target = null          # 追従中の Worker（null なら追従なし）。main._select で設定される
-var _follow_label: Label          # 「追従中」「追従できません」の小さな表示（右上の状態の下）
+var _follow_label: Label          # 仲間管理の入口の下に置く、1名分だけの追従状態
 const FOLLOW_DEADZONE_HALF := 150.0   # 画面中央からこの範囲内に対象がいれば、カメラは動かさない（常に対象を追わない＝滑らかさ優先）
 const FOLLOW_SMOOTH_SPEED := 6.0      # Camera2D の内蔵スムージングの速さ
 const FOLLOW_SCREEN_CENTER_X := 640.0 # 1280x720 の画面中央x（カメラなしのときと同じ見え方の基準）
@@ -170,21 +170,24 @@ func _ready() -> void:
 	ui = WorkPriorityUI.new()
 	add_child(ui)
 	ui.build(workers)
-	ui.worker_selected.connect(_select)
 	status = StatusPanel.new()
 	status.game = self
 	add_child(status)
 	detail = CrewDetailUI.new()
 	detail.game = self
 	add_child(detail)
+	ui.management_requested.connect(detail.toggle)
 	policy = PolicyUI.new()
 	policy.game = self
 	add_child(policy)
-	var follow_layer := CanvasLayer.new()      # 追従の状態表示（右上の状態パネルの左）。HUD なのでカメラの影響を受けない
+	var follow_layer := CanvasLayer.new()      # 仲間管理の入口直下。HUD なのでカメラの影響を受けない
 	follow_layer.layer = 10
 	add_child(follow_layer)
 	_follow_label = GameData.make_label("", 14, Color("ffe9b0"))
-	_follow_label.position = Vector2(10, 196)
+	_follow_label.position = Vector2(10, 48)
+	_follow_label.size = Vector2(320, 22)
+	_follow_label.clip_text = true
+	_follow_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	follow_layer.add_child(_follow_label)
 	_select(workers[0])
 	# 出来事の見た目と画面（左下）
@@ -1039,10 +1042,9 @@ func _game_over() -> void:
 func _select(w) -> void:
 	for x in workers:
 		x.selected = (x == w)
-	ui.set_selected(w)
 	if detail != null:
 		detail.show_worker(w)
-	follow_target = w                          # 既存の選択方法（クリック・上部カード）が、そのままカメラ追従の切り替えにもなる
+	follow_target = w                          # 世界クリック・管理画面の明示選択から、カメラ追従を切り替える
 
 
 ## クリックした世界座標から、選ぶ仲間を1人だけ決める（_unhandled_input から分離。world_step を渡さず world 座標だけで決まるので、

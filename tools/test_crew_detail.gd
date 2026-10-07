@@ -57,6 +57,14 @@ func _has_text(needle: String) -> bool:
 	return false
 
 
+## text に文字があっても高さ0なら描画されない。配置後の実寸を別に確かめる。
+func _text_has_height(needle: String) -> bool:
+	for l in _labels(detail._body):
+		if l.text.contains(needle) and l.is_visible_in_tree() and l.size.y > 0.0:
+			return true
+	return false
+
+
 func _run() -> void:
 	print("-- 同じ個体情報で、既存情報を確認できる --")
 	main._select(W[0])
@@ -65,7 +73,11 @@ func _run() -> void:
 	key.pressed = true
 	detail._unhandled_input(key)
 	await _layout()
-	check(detail.layer == 27 and detail._overlay.get_parent() == detail and detail._button_layer.layer == 12, "開くボタンは通常HUD、管理画面は他の管理画面より上の別レイヤー")
+	check(_text_has_height("プロフィール"), "プロフィール見出しの文字に、表示できる実高さがある")
+	check(_text_has_height(W[0].char_name), "プロフィールの個体名に、表示できる実高さがある")
+	check(_text_has_height("武器・防具：未実装"), "武器・防具の未実装案内に、表示できる実高さがある")
+	check(main.ui.layer == 10 and detail.layer == 27 and detail._overlay.get_parent() == detail, "固定の管理入口は通常HUD、管理画面は他の管理画面より上の別レイヤー")
+	check(main.ui._button.text == "仲間 %d人 (C)" % W.size() and main.ui._button.custom_minimum_size == Vector2(280, 36), "上部HUDは仲間人数を示す固定サイズの管理入口")
 	check(detail._tab_btns.size() == 2 and detail._tab_btns[0].text == "個体情報" and detail._tab_btns[1].text == "部署", "個体情報と部署の2タブ")
 	for text in ["個体ランク", "得意分野", "分野ランク", "スキル", "採取道具", "仕事の効率", "仕事の優先度"]:
 		check(_has_text(text), "個体情報に%sがある" % text)
@@ -73,8 +85,7 @@ func _run() -> void:
 	check(_has_text("武器・防具：未実装"), "未実装の装備は機能があるように表示しない")
 	check(_has_text("休憩・食事は自動で行います。必要なら早めに促せます。"), "生活行動は自動で、促しは補助だと案内する")
 	check(not detail._live.has("prio_%d" % GameData.Job.REST), "個体情報の仕事の星に休憩を含めない")
-	for w in W:
-		check(not main.ui._cards[w]["stars"].has(GameData.Job.REST), "上部カードの仕事の星に休憩を含めない：%s" % w.char_name)
+	check(not ("_cards" in main.ui) and main.ui.has_signal("management_requested") and not main.ui.has_signal("worker_selected"), "上部HUDは個体カードや個体選択を持たず、管理画面への入口にする")
 	_test_hidden_departments()
 	_test_life_controls()
 	_test_tool_controls()
@@ -97,10 +108,31 @@ func _run() -> void:
 	detail.close()
 	detail._unhandled_input(key)
 	check(detail._worker == W[0] and detail._picker.focus_worker == W[0] and detail._tab == 0, "Cで再度開くと、現在選択中の個体が表示される")
-	main.ui.worker_selected.emit(W[1])
-	check(detail._worker == W[1] and detail._picker.focus_worker == W[1] and main.follow_target == W[1], "上部カードの選択はmain._select経由で個体情報へ届く")
+	detail.close()
+	main.ui._button.pressed.emit()
+	check(detail._overlay.visible and detail._worker == W[0] and main.follow_target == W[0], "固定HUDの管理要求で現在選択中の個体を開き、追従先は変えない")
+	detail._picker.set_focus(W[1])
+	check(detail._worker == W[1] and main.follow_target == W[0] and W[0].selected, "別の個体を閲覧しても、明示的な追従操作までは世界の選択を保持する")
+	var follow: Button = detail._live["follow"]
+	check(not follow.disabled, "拠点にいて表示されている個体は、明示的に追従できる")
+	follow.pressed.emit()
+	check(not detail._overlay.visible and main.follow_target == W[1] and W[1].selected and not W[0].selected, "追従ボタンはmain._select経由で世界の選択を切り替え、管理画面を閉じる")
+	detail.open_worker(W[2])
+	W[2].away = true
+	detail._update_live()
+	check(detail._live["follow"].disabled and not detail._live["follow"].tooltip_text.is_empty(), "遠征中の仲間を閲覧できても、追従は無効にして理由を示す")
+	detail._live["follow"].pressed.emit()
+	check(main.follow_target == W[1] and detail._overlay.visible, "遠征中への古い追従イベントでも、選択や画面を変更しない")
+	W[2].away = false
+	W[2].visible = false
+	detail._update_live()
+	check(detail._live["follow"].disabled, "外装等で絵が見えない仲間への追従は無効にする")
+	detail._live["follow"].pressed.emit()
+	check(main.follow_target == W[1] and detail._overlay.visible, "見えない個体への古い追従イベントでも、選択や画面を変更しない")
 	W[2].visible = true
 	W[2].away = false
+	detail._update_live()
+	check(not detail._live["follow"].disabled, "個体が拠点で再表示されれば追従ボタンも有効へ戻る")
 	W[2].position = Vector2(1150.0, 580.0)
 	var picked = main._pick_worker_at(W[2].position + Vector2(0.0, -30.0))
 	check(picked == W[2], "世界側のクリック判定は頭・胴体から個体を選べる")
@@ -116,10 +148,14 @@ func _run() -> void:
 	detail.show_worker(W[2])
 	await _layout()
 	var wrapped_name := false
+	var wrapped_name_height := false
 	for l in _labels(detail._body):
 		if l.text == W[2].char_name:
 			wrapped_name = l.autowrap_mode == TextServer.AUTOWRAP_WORD_SMART and l.get_line_count() > 1
+			var single_line_height: float = l.get_theme_font("font").get_height(l.get_theme_font_size("font_size"))
+			wrapped_name_height = l.is_visible_in_tree() and l.size.y > single_line_height and l.size.y + 1.0 >= l.get_minimum_size().y
 	check(wrapped_name, "長い個体名が折り返される")
+	check(wrapped_name_height, "長い個体名は複数行の実高さを持ち、必要な表示高さを確保する")
 	var panel: PanelContainer = null
 	for child in detail._overlay.get_children():
 		if child is PanelContainer:
