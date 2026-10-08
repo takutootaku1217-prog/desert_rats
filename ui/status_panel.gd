@@ -1,9 +1,9 @@
 class_name StatusPanel
 extends CanvasLayer
-## 右上の拠点の状態。文字を読まなくても、ひと目で状態が分かるように、アイコン中心に並べる（情報は減らしていない）。
+## 右上の拠点の状態。文字を読まなくても、ひと目で状態が分かるように、アイコン中心に並べる。
 ##  1段目: 移動の状態（短い1行）と、速度 / 目標（↑↓キー）。
 ##  2段目: アイコンゲージ（アイコンそのものが残量。数字はアイコンの中）
-##         車体の耐久 = 四角い外板／走行装置 = 丸い車輪／加工設備 = 歯車（枠＋充填範囲）／燃料 = ジェリカン／積載重量 = 重り（ARK方式）。
+##         拠点HP = 外板（枠＋充填範囲）／燃料 = ジェリカン／積載重量 = 重り（ARK方式）。
 ##  3段目: 倉庫の中身（アイテムのアイコン＋個数。ui/stock_grid.gd）。
 ##  4段目: 累計（小さく）。
 ## 絵は assets/ui/*.png（枠と充填範囲の2枚。tools/art_ui.py が作る仮素材）。差し替えるだけで形を変えられる。表示だけで、ゲームのデータは読むだけ。
@@ -20,9 +20,7 @@ const W := 272.0
 const ICON_UNITS := Vector2i(12, 12)     # アイコン1つの基準の大きさ（ユニット）= 48px（絵のドットが3pxの整数倍）
 ## 2段目のアイコンゲージ（左から）。icon = assets/ui/<icon>.png と <icon>_mask.png
 const GAUGES := [
-	{"key": "hull", "icon": "shield_hull", "name": "車体"},
-	{"key": "drive", "icon": "shield_drive", "name": "走行装置"},
-	{"key": "machine", "icon": "shield_machine", "name": "加工設備"},
+	{"key": "hull", "icon": "shield_hull", "name": "拠点HP"},
 	{"key": "fuel", "icon": "fuel", "name": "燃料"},
 	{"key": "weight", "icon": "weight", "name": "積載"},
 ]
@@ -107,11 +105,9 @@ func _process(_d: float) -> void:
 	_state.add_theme_color_override("font_color", col)
 	_speed.text = "速度 %d / %d ↑↓" % [int(game.scroll_speed), int(game.target_speed)]
 	_speed.tooltip_text = "速度 / 目標（↑↓キーで目標の速度を変える）"
-	# 2段目: 部位別の耐久アイコン・燃料（ジェリカン）
-	for spec in [["hull", GameData.Part.HULL], ["drive", GameData.Part.DRIVE], ["machine", GameData.Part.MACHINE]]:
-		var cond: float = b.condition(spec[1])
-		var nm: String = GameData.PART_NAMES[spec[1]]
-		_set_gauge(spec[0], cond, 100.0, str(int(cond)), "%s の耐久 %d / 100%s" % [nm, int(cond), "（不調）" if cond < GameData.PART_BAD else ""])
+	# 2段目: 拠点HP（外装の耐久）。走行装置・加工設備の耐久はHUDに出さない。
+	var cond: float = b.condition(GameData.Part.HULL)
+	_set_gauge("hull", cond, 100.0, str(int(cond)), "拠点HP %d / 100%s" % [int(cond), "（不調）" if cond < GameData.PART_BAD else ""])
 	_set_gauge("fuel", b.fuel, GameData.FUEL_CAP, str(int(b.fuel / GameData.FUEL_CAP * 100.0)), "燃料 %d / %d" % [int(b.fuel), int(GameData.FUEL_CAP)])
 	# 積載重量: 重りのアイコンが下から埋まり、増えるほど色が濃くなる。数字は正確な重量（アイコンの中）。
 	# 区画ごとの内訳（素材棚・加工品置き場）と捨てた数は、アイコンにマウスを載せると出る。

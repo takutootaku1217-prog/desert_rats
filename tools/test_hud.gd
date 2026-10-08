@@ -77,13 +77,13 @@ func _test_shields() -> void:
 	var sp: StatusPanel = main.status
 	var b = main.base
 	var parts := {"hull": GameData.Part.HULL, "drive": GameData.Part.DRIVE, "machine": GameData.Part.MACHINE}
-	for key in parts:
-		check(sp._gauges.has(key) and sp._gauges[key] is IconGauge, "%s の盾がある" % GameData.PART_NAMES[parts[key]])
+	check(sp._gauges.size() == 3 and sp._gauges.has("hull"), "耐久表示は拠点HPだけ（燃料・積載を含め3ゲージ）")
+	check(not sp._gauges.has("drive") and not sp._gauges.has("machine"), "走行装置・加工設備のゲージは生成しない")
 	var hg: IconGauge = sp._gauges["hull"]
 	check(hg.dark_empty and hg.display_size == Vector2(48, 48), "盾は、減った部分を暗い色で見せ、大きさは 48px（基準の大きさ×UNIT_PX）")
 	# 100 / 75 / 50 / 25 / 10 %
 	var got := []
-	for v in [100.0, 75.0, 50.0, 25.0, 10.0]:
+	for v in [100.0, 75.0, 50.0, 25.0, 10.0, 0.0]:
 		b.parts[GameData.Part.HULL] = v
 		sp._process(0.0)
 		got.append([snappedf(hg.ratio, 0.001), hg.filled_count(), hg.text, hg.blink, hg.current_color()])
@@ -95,13 +95,15 @@ func _test_shields() -> void:
 	check(got[4][3] and not got[3][3] and not got[0][3], "耐久 15%% 未満（10）だけ、危険として点滅する（25 以上は点滅しない）")
 	check(got[0][4] == UIKit.GAUGE_STAGES_BASE[2][1] and got[2][4] == UIKit.GAUGE_STAGES_BASE[1][1] and got[3][4] == UIKit.GAUGE_STAGES_BASE[0][1], "色: 緑（多い）→ 黄（半分）→ 赤（不調の線 %d 以下）" % int(GameData.PART_BAD))
 	check(got[2][2] == "50" and got[0][2] == "100", "数字は盾の中に出る（正確な値）")
-	# 部位ごとに独立（1つが危険でも、ほかの盾は点滅しない）
+	check(got[5][0] == 0.0 and got[5][1] == 0 and got[5][2] == "0" and got[5][3], "拠点HP 0: 空のゲージ・数字0・危険点滅")
+	# 拠点HPは外装の耐久。非表示の部位の耐久とは合算しない。
 	b.parts[GameData.Part.HULL] = 90.0
 	b.parts[GameData.Part.DRIVE] = 8.0
 	b.parts[GameData.Part.MACHINE] = 60.0
 	sp._process(0.0)
-	check(sp._gauges["drive"].blink and not sp._gauges["hull"].blink and not sp._gauges["machine"].blink, "走行装置だけが危険なら、その盾だけが点滅する")
-	check(sp._gauges["drive"].tooltip_text.contains("走行装置") and sp._gauges["drive"].tooltip_text.contains("不調"), "マウスを載せると、部位の名前と（不調）が出る")
+	check(is_equal_approx(hg.ratio, 0.9) and hg.text == "90" and not hg.blink, "非表示の走行装置が不調でも、拠点HPは90のまま")
+	check(hg.tooltip_text == "拠点HP 90 / 100", "ツールチップは拠点HPの名前と正確な耐久値")
+	check(b.parts[GameData.Part.DRIVE] == 8.0 and b.parts[GameData.Part.MACHINE] == 60.0, "非表示の部位の耐久も書き換えない")
 	# 数字のON/OFF
 	UIKit.show_icon_numbers = false
 	sp._process(0.0)

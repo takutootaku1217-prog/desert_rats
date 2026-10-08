@@ -283,7 +283,7 @@ func _test_status_panel() -> void:
 	# 位置: 右上の拠点の状態の中（ほかのゲージと並ぶ）。右のボタン列には重ならない
 	var wr: Rect2 = w.get_global_rect()
 	check(wr.position.x >= 1000.0 and wr.end.y < 200.0, "積載重量のアイコンは、右上の状態の中の、ほかのゲージと並ぶ位置にある（%s）" % str(wr))
-	for k in ["hull", "drive", "machine", "fuel", "weight"]:
+	for k in ["hull", "fuel", "weight"]:
 		check(sp._gauges.has(k) and sp._gauges[k] is IconGauge, "アイコンゲージ（%s）がある" % k)
 	await process_frame
 
