@@ -3,7 +3,7 @@ extends CanvasLayer
 ## 右上の拠点の状態。文字を読まなくても、ひと目で状態が分かるように、アイコン中心に並べる（情報は減らしていない）。
 ##  1段目: 移動の状態（短い1行）と、速度 / 目標（↑↓キー）。
 ##  2段目: アイコンゲージ（アイコンそのものが残量。数字はアイコンの中）
-##         車体・走行装置・加工設備の耐久 = 盾（個体のHP=ハートと同じ作り。目印で部位を見分ける）／燃料 = ジェリカン／積載重量 = 重り（ARK方式）。
+##         車体の耐久 = 四角い外板／走行装置 = 丸い車輪／加工設備 = 歯車（枠＋充填範囲）／燃料 = ジェリカン／積載重量 = 重り（ARK方式）。
 ##  3段目: 倉庫の中身（アイテムのアイコン＋個数。ui/stock_grid.gd）。
 ##  4段目: 累計（小さく）。
 ## 絵は assets/ui/*.png（枠と充填範囲の2枚。tools/art_ui.py が作る仮素材）。差し替えるだけで形を変えられる。表示だけで、ゲームのデータは読むだけ。
@@ -107,7 +107,7 @@ func _process(_d: float) -> void:
 	_state.add_theme_color_override("font_color", col)
 	_speed.text = "速度 %d / %d ↑↓" % [int(game.scroll_speed), int(game.target_speed)]
 	_speed.tooltip_text = "速度 / 目標（↑↓キーで目標の速度を変える）"
-	# 2段目: 耐久（盾）・燃料（ジェリカン）
+	# 2段目: 部位別の耐久アイコン・燃料（ジェリカン）
 	for spec in [["hull", GameData.Part.HULL], ["drive", GameData.Part.DRIVE], ["machine", GameData.Part.MACHINE]]:
 		var cond: float = b.condition(spec[1])
 		var nm: String = GameData.PART_NAMES[spec[1]]

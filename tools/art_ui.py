@@ -166,43 +166,46 @@ def fatigue_shapes():
     return silhouette_icon(s, STATUS_RIM["fatigue"], z)
 
 
-# ---------------------------------------------------------------- 拠点の耐久（盾）と燃料（ジェリカン）。個体のHP（ハート）と同じ「アイコン自体がゲージ」の作り
+# ---------------------------------------------------------------- 拠点の耐久（外板・車輪・歯車）と燃料。既存の枠＋充填範囲の形式を維持
 SHIELD_RIM = hexc("aab4c4")
 FUEL_RIM = hexc("d9793a")
-MARK = hexc("eef1f6")           # 盾の中の目印（部位を見分ける。充填しない）
+MARK = hexc("eef1f6")           # 外板の留め具など（充填しない）
 CAP = hexc("6b7482")
 
 
-def _shield_body():
-    s = Px(SIZE, SIZE)
-    s.poly([(1, 1), (14, 1), (14, 8), (10, 13), (5, 13), (1, 8)], SHIELD_RIM)
-    s.poly([(5, 13), (10, 13), (8, 15), (7, 15)], SHIELD_RIM)
-    return s
-
-
-def _mark(rows):
-    """5x3 の目印。rows = 3つの文字列（# = 点）。盾の上寄りの中央（x 5〜9・y 2〜4）に置く。"""
-    m = Px(SIZE, SIZE)
-    for j, row in enumerate(rows):
-        for i, ch in enumerate(row):
-            if ch == "#":
-                m.set(5 + i, 2 + j, MARK)
-    return m
-
-
 def shield_hull_shapes():
-    """拠点の耐久: 車体（外板の目印）。"""
-    return silhouette_icon(_shield_body(), SHIELD_RIM, _mark(["#####", "#...#", "#####"]), carve=True)
+    """車体: 四角い外板。旧 shield_* 名は既存の表示キーとの互換性のため維持する。"""
+    s = Px(SIZE, SIZE)
+    s.rect(1, 1, 14, 14, SHIELD_RIM)
+    for x, y in [(1, 1), (14, 1), (1, 14), (14, 14)]:
+        s.set(x, y, CLEAR)
+    bolts = Px(SIZE, SIZE)
+    for x, y in [(2, 2), (13, 2), (2, 13), (13, 13)]:
+        bolts.set(x, y, MARK)
+    return silhouette_icon(s, SHIELD_RIM, bolts, carve=True)
 
 
 def shield_drive_shapes():
-    """拠点の耐久: 走行装置（車輪の目印）。"""
-    return silhouette_icon(_shield_body(), SHIELD_RIM, _mark([".###.", "##.##", ".###."]), carve=True)
+    """走行装置: 丸い車輪と暗いタイヤ。中央は穴ではなく数値を置ける充填範囲。"""
+    s = Px(SIZE, SIZE)
+    s.ellipse(7.5, 7.5, 6.7, 6.7, SHIELD_RIM)
+    frame, mask = silhouette_icon(s, hexc("586270"))
+    # タイヤの外周に金属のハイライト。充填域や数字の上には描かない。
+    for x, y in [(6, 1), (7, 1), (8, 1), (9, 1), (1, 6), (1, 7),
+                 (14, 8), (14, 9), (6, 14), (7, 14), (8, 14), (9, 14)]:
+        if s.get(x, y)[3] > 0 and mask.get(x, y)[3] == 0:
+            frame.set(x, y, SHIELD_RIM)
+    return frame, mask
 
 
 def shield_machine_shapes():
-    """拠点の耐久: 加工設備（歯車の目印）。"""
-    return silhouette_icon(_shield_body(), SHIELD_RIM, _mark(["#.#.#", ".###.", "#.#.#"]), carve=True)
+    """加工設備: 外周に8つの歯を持つ歯車。中央に広い充填・数値領域を残す。"""
+    s = Px(SIZE, SIZE)
+    s.ellipse(7.5, 7.5, 5.8, 5.8, SHIELD_RIM)
+    for x, y, w, h in [(6, 0, 4, 4), (6, 12, 4, 4), (0, 6, 4, 4), (12, 6, 4, 4),
+                       (2, 2, 3, 3), (11, 2, 3, 3), (2, 11, 3, 3), (11, 11, 3, 3)]:
+        s.rect(x, y, w, h, SHIELD_RIM)
+    return silhouette_icon(s, SHIELD_RIM)
 
 
 def fuel_shapes():
