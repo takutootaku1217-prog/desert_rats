@@ -81,7 +81,7 @@ func _test_shields() -> void:
 	check(sp._gauges.size() == 3 and sp._gauges.has("hull"), "耐久表示は拠点HPだけ（燃料・積載を含め3ゲージ）")
 	check(not sp._gauges.has("drive") and not sp._gauges.has("machine"), "走行装置・加工設備のゲージは生成しない")
 	var hg: IconGauge = sp._gauges["hull"]
-	check(hg is BaseHPGauge and hg.dark_empty and hg.display_size == Vector2(144, 64), "拠点HPは144×64pxの拠点シルエット。減った部分は既存の暗い色")
+	check(hg is BaseHPGauge and hg.dark_empty and hg.display_size == Vector2(112, 48), "拠点HPは112×48pxの小型シルエット。減った部分は既存の暗い色")
 	# 100 / 75 / 50 / 25 / 10 %
 	var got := []
 	for v in [100.0, 75.0, 50.0, 25.0, 10.0, 0.0]:
