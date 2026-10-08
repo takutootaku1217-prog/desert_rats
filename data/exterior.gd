@@ -20,6 +20,7 @@ extends RefCounted
 const DIR := "res://assets/base/exterior/%s/"
 const WHEEL_SHEET := "res://assets/base/wheels.png"
 const RAMP_SHEET := "res://assets/base/ramp.png"
+const RAMP_POS := Vector2(900, 482)       # 外装とHPシルエットで同じ斜路の位置を使う
 
 ## 見える条件のキー:
 ##   distance: 走行距離（px。Director.distance）がこれ以上 / facility: その設備を建てた / beds: ベッドがこの数以上 / room: その部屋がある

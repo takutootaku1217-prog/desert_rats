@@ -30,6 +30,7 @@ func _initialize() -> void:
 		w.set_process(false)
 	_test_art()
 	await _test_shields()
+	_test_base_silhouette()
 	await _test_fuel_and_weight()
 	await _test_stock()
 	await _test_panel()
@@ -80,7 +81,7 @@ func _test_shields() -> void:
 	check(sp._gauges.size() == 3 and sp._gauges.has("hull"), "耐久表示は拠点HPだけ（燃料・積載を含め3ゲージ）")
 	check(not sp._gauges.has("drive") and not sp._gauges.has("machine"), "走行装置・加工設備のゲージは生成しない")
 	var hg: IconGauge = sp._gauges["hull"]
-	check(hg.dark_empty and hg.display_size == Vector2(48, 48), "盾は、減った部分を暗い色で見せ、大きさは 48px（基準の大きさ×UNIT_PX）")
+	check(hg is BaseHPGauge and hg.dark_empty and hg.display_size == Vector2(144, 64), "拠点HPは144×64pxの拠点シルエット。減った部分は既存の暗い色")
 	# 100 / 75 / 50 / 25 / 10 %
 	var got := []
 	for v in [100.0, 75.0, 50.0, 25.0, 10.0, 0.0]:
@@ -120,6 +121,49 @@ func _test_shields() -> void:
 
 
 # ---------------------------------------------------------------- 燃料・積載重量
+func _test_base_silhouette() -> void:
+	print("-- 拠点シルエット: 外観への追従・値と独立した表示")
+	var sp: StatusPanel = main.status
+	var g: BaseHPGauge = sp._gauges["hull"]
+	var old_distance: float = main.director.distance
+	var old_exterior: bool = main.base.view_exterior
+	var before: Dictionary = main.base.parts.duplicate()
+	var fuel: float = main.base.fuel
+	main.director.distance = 0.0
+	sp._process(0.0)
+	var first: PackedByteArray = g._frame.get_image().get_data()
+	var first_id := g._frame.get_instance_id()
+	sp._process(0.0)
+	check(g._frame.get_instance_id() == first_id, "外観が同じ間はシルエットを毎フレーム作り直さない")
+	main.base.view_exterior = not old_exterior
+	sp._process(0.0)
+	check(g._frame.get_instance_id() == first_id, "外装／内装の切替でも同じ拠点の外形を表示する")
+	var beds: Array = main.base.built["bed"].duplicate()
+	main.base.built["bed"] = []
+	sp._process(0.0)
+	check(g._frame.get_image().get_data() != first, "設備に応じた屋根の布の出現／消失も外形へ反映する")
+	main.base.built["bed"] = beds
+	var room: String = main.room_layout["u2"]
+	main.room_layout["u2"] = "mess"
+	sp._process(0.0)
+	check(g._frame.get_image().get_data() != first, "部屋変更による換気管も外形へ反映する")
+	main.room_layout["u2"] = room
+	main.director.distance = ExteriorDB.STAGE_LATE
+	sp._process(0.0)
+	check(g._frame.get_image().get_data() != first, "アンテナ・装甲・荷台など外観が変わるとシルエットも更新される")
+	check(g.text == "100" and g.ratio == 1.0 and main.base.parts == before and main.base.fuel == fuel, "外形の更新はHP・各部位耐久・燃料を変更しない")
+	var covered := 0
+	var frame: Image = g._frame.get_image()
+	for p in g.fill_dots():
+		if frame.get_pixelv(p).a > 0.05:
+			covered += 1
+	check(covered == 0 and g.fill_dots().size() > 100, "輪郭と充填範囲は分離され、外形の外へ塗りが漏れない")
+	main.director.distance = old_distance
+	main.base.view_exterior = old_exterior
+	sp._process(0.0)
+	check(g._frame.get_image().get_data() == first, "元の外観に戻すと元のシルエットに戻る")
+
+
 func _test_fuel_and_weight() -> void:
 	print("-- 燃料（ジェリカン）と積載重量（重り）: アイコンそのものがゲージ・数字はアイコンの中")
 	var sp: StatusPanel = main.status
@@ -134,7 +178,7 @@ func _test_fuel_and_weight() -> void:
 	b.fuel = GameData.FUEL_CAP
 	sp._process(0.0)
 	check(fg.ratio == 1.0 and fg.filled_count() == fg.fill_dots().size(), "燃料 100%: ジェリカンが満タン")
-	check(fg.display_size == sp._gauges["hull"].display_size and fg.display_size == sp._weight.display_size, "盾・燃料・重量は、同じ大きさのアイコンで並ぶ（数字のルールが同じ）")
+	check(fg.display_size == Vector2(48, 48) and fg.display_size == sp._weight.display_size, "燃料・重量は従来の48pxを維持（拠点シルエットだけ横長）")
 	# 燃料の数値・消費は変えていない
 	check(GameData.FUEL_CAP == 100.0 and is_equal_approx(GameData.FUEL_PER_PX, GameData.FUEL_PER_PX), "燃料の仕組み・数値には触れていない（タンク %d）" % int(GameData.FUEL_CAP))
 	# 重量

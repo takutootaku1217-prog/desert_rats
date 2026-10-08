@@ -37,8 +37,14 @@ func _init() -> void:
 ## 絵（assets/ui/<icon_name>.png と <icon_name>_mask.png）を読み込む。size_units = 絵の基準の大きさ（ユニット）。
 ## 画面上の大きさは size_units × UNIT_PX で決まり、絵のドット数には依存しない（充填は絵のドットの面積が基準なので、細かい絵ほど細かく埋まる）。
 func setup(icon_name: String, size_units: Vector2i = ArtSpec.UI_ICON) -> IconGauge:
-	_frame = GameData.tex("res://assets/ui/%s.png" % icon_name)
+	var frame := GameData.tex("res://assets/ui/%s.png" % icon_name)
 	var mask := _load_image("res://assets/ui/%s_mask.png" % icon_name)
+	return set_shape(frame, mask, size_units)
+
+
+## 実際の外観から作った枠・充填範囲も、既存の充填・色・点滅で表示する。
+func set_shape(frame: Texture2D, mask: Image, size_units: Vector2i) -> IconGauge:
+	_frame = frame
 	_icon_size = Vector2i(mask.get_width(), mask.get_height())
 	display_size = ArtSpec.px_size(size_units)
 	pixel = display_size.x / float(maxi(1, _icon_size.x))
@@ -46,6 +52,7 @@ func setup(icon_name: String, size_units: Vector2i = ArtSpec.UI_ICON) -> IconGau
 	_text_center = _center_of(mask)
 	custom_minimum_size = display_size
 	size = custom_minimum_size
+	_key = ""                                # 面積・色が同じでも、外形が変われば作り直す
 	_refresh()
 	return self
 
@@ -190,6 +197,12 @@ func _draw() -> void:
 		a = 0.55 + 0.45 * (0.5 + 0.5 * sin(_t * 8.0))
 	draw_texture_rect(_interior, Rect2(Vector2.ZERO, sz), false, Color(1, 1, 1, a))
 	draw_texture_rect(_frame, Rect2(Vector2.ZERO, sz), false)
+	_draw_text()
+
+
+## 名称付きの拠点ゲージでは、塗りと独立した2段の文字へ置き換える。
+func _draw_text() -> void:
+	var sz := display_size
 	if text != "":
 		var fs := maxi(10, int(display_size.x * 0.24))                 # 数字の大きさは、画面上の表示の大きさに合わせる（絵のドット数に依存しない。48px なら 11・64px なら 15）
 		var c := _text_center * pixel

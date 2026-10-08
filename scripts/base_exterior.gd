@@ -37,7 +37,7 @@ func _draw() -> void:
 		_draw_parts(["wall", "armor"], off)
 	_draw_parts(["roof"], off)
 	if base.view_exterior:
-		draw_texture_rect(GameData.tex(ExteriorDB.RAMP_SHEET), Rect2(Vector2(900, 482), ArtSpec.px_size(ArtSpec.RAMP)), false)   # 斜路は車体に付いているので揺れない
+		draw_texture_rect(GameData.tex(ExteriorDB.RAMP_SHEET), Rect2(ExteriorDB.RAMP_POS, ArtSpec.px_size(ArtSpec.RAMP)), false)   # 斜路は車体に付いているので揺れない
 
 
 ## 論理ユニット座標（車体の絵の左上から）→ ワールド座標

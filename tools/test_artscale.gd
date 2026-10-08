@@ -294,6 +294,9 @@ func _signature() -> Dictionary:
 	sig["worker_px"] = ArtSpec.px_size(ArtSpec.WORKER["cell"])
 	sig["wheel_px"] = ArtSpec.px_size(ArtSpec.WHEELS["cell"])
 	sig["gauge"] = main.status._weight.display_size
+	var hp: BaseHPGauge = main.status._gauges["hull"]
+	hp.update_appearance(main)
+	sig["hp_silhouette"] = [hp.display_size, hp._text_center, hp._frame.get_image().get_data(), hp.fill_dots()]
 	return sig
 
 
