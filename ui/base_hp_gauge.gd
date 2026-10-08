@@ -1,13 +1,12 @@
 class_name BaseHPGauge
 extends IconGauge
-## 外装と同じ車体・車輪・パーツから、現在の拠点のシルエットを作る。
+## 簡単な車体アイコンに、現在の外装の屋根の特徴を小さく重ねる。
 ## HPや修理の計算は行わない。外観が変わったときだけ形を更新する。
 
 const SIZE_UNITS := Vector2i(28, 12)       # 112×48px。燃料・積載と高さを揃える
 const RASTER := Vector2i(56, 24)           # HUD内のシルエットは2pxのドットで表示
-const ROOF_ROWS := 3                     # 細かな屋根の突起は短くまとめる
-const BODY_ROWS := 16                    # 車体を太めにし、名称と3桁の数値が収まる高さを残す
-const WHEEL_ROWS := 3                    # 車輪・斜路は小さい代表形として残す
+const ICON_ART := "res://assets/ui/base_hp_cartoon.png" # 後から差し替える仮素材。白い車体がHPの充填範囲
+const ROOF_ROWS := 2                     # 屋根の目印だけ現行外装に追従させる
 const CAPTION := "拠点"
 
 var _appearance_key := ""
@@ -70,35 +69,37 @@ func _build_shape() -> void:
 		canvas.blend_rect(image, Rect2i(Vector2i.ZERO, image.get_size()), entry["at"] - bounds.position)
 	var used := canvas.get_used_rect()
 	var shape := canvas.get_region(used)
-	var silhouette := Image.create(RASTER.x, RASTER.y, false, Image.FORMAT_RGBA8)
-	# HUDだけをデフォルメする。論理ユニットへ揃えた外装を3帯に分け、
-	# 屋根・車輪を縮める一方、車体の高さを確保する。世界側の絵・座標は変更しない。
-	# 元の車体絵の透明な上余白も屋根側へまとめ、見えている車体に高さを割り当てる。
+	# 参考画像の拠点だけを元にした仮素材。3輪はHUDの省略表現で、世界側の4輪は変更しない。
+	# PNGの白い面をHPマスクとして読み、輪郭・窓・車輪は値と独立して表示する。
+	var art := _load_image(ICON_ART)
+	art = art.get_region(art.get_used_rect())
+	art.resize(RASTER.x - 2, RASTER.y - ROOF_ROWS, Image.INTERPOLATE_NEAREST)
+	var frame := Image.create(RASTER.x, RASTER.y, false, Image.FORMAT_RGBA8)
+	var mask := Image.create(RASTER.x, RASTER.y, false, Image.FORMAT_RGBA8)
+	for y in art.get_height():
+		for x in art.get_width():
+			var color := art.get_pixel(x, y)
+			if color.a <= 0.5:
+				continue
+			var at := Vector2i(x + 1, y + ROOF_ROWS)
+			if minf(color.r, minf(color.g, color.b)) > 0.9:
+				mask.set_pixelv(at, Color.WHITE)
+			else:
+				color.a = 1.0
+				frame.set_pixelv(at, color)
+	# 完成素材として固定せず、布・換気管・アンテナなど外装変更の目印を上辺へ残す。
 	var body_image: Image = _sources[0]["image"]
 	var body_region := body_image.get_used_rect()
 	var body_top := clampi(body_region.position.y - bounds.position.y - used.position.y, 0, used.size.y)
-	var body_bottom := clampi(body_top + body_region.size.y, body_top, used.size.y)
-	_fit_band(shape, 0, body_top, 1, ROOF_ROWS, silhouette)
-	_fit_band(shape, body_top, body_bottom - body_top, 1 + ROOF_ROWS, BODY_ROWS, silhouette)
-	_fit_band(shape, body_bottom, used.size.y - body_bottom, 1 + ROOF_ROWS + BODY_ROWS, WHEEL_ROWS, silhouette)
-	var frame := Image.create(RASTER.x, RASTER.y, false, Image.FORMAT_RGBA8)
-	var mask := Image.create(RASTER.x, RASTER.y, false, Image.FORMAT_RGBA8)
-	for y in RASTER.y:
+	var details := Image.create(RASTER.x, RASTER.y, false, Image.FORMAT_RGBA8)
+	_fit_band(shape, 0, body_top, 0, ROOF_ROWS, details)
+	for y in ROOF_ROWS:
 		for x in RASTER.x:
-			if not _opaque(silhouette, Vector2i(x, y)):
-				continue
-			var inside := true
-			for d in [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]:
-				if not _opaque(silhouette, Vector2i(x, y) + d):
-					inside = false
-			if inside:
-				mask.set_pixel(x, y, Color.WHITE)
-			else:
-				frame.set_pixel(x, y, Color("aab4c4"))
+			if _opaque(details, Vector2i(x, y)):
+				frame.set_pixel(x, y, Color("ffe7b0"))
 	set_shape(ImageTexture.create_from_image(frame), mask, SIZE_UNITS)
-	# 文字は屋根の突起や斜路を含む全体の中心でなく、車体内の中央へ。
-	var body_center_x := float(ArtSpec.HULL.x) / 2.0 - float(bounds.position.x + used.position.x)
-	_text_center = Vector2(2.0 + body_center_x * float(RASTER.x - 4) / float(used.size.x), 1.0 + ROOF_ROWS + BODY_ROWS / 2.0)
+	# 窓・車輪を避け、文字用に空けた中央の車体へ2行を収める。
+	_text_center = Vector2(31.0, 11.0)
 
 
 func _fit_band(shape: Image, source_y: int, source_height: int, target_y: int, target_height: int, silhouette: Image) -> void:
