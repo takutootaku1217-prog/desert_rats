@@ -263,7 +263,7 @@ func _test_same_data() -> void:
 	var lay_before: Dictionary = main.room_layout.duplicate()
 	check(ExteriorDB.glass_color(main.room_layout["u1"]) == ExteriorDB.GLASS["workshop"]
 			and ExteriorDB.glass_color(main.room_layout["u2"]) == ExteriorDB.GLASS["bedroom"], "窓の色は、区画の部屋の種類から決まる（加工室・寝室）")
-	check(main.base.room_slot("engine") == "l1", "燃料の口は機関室のある区画（下・左）")
+	check(main.base.room_slot("engine") == "" and main.base.engine_point() == Rooms.fallback_fuel_pos(), "内蔵エンジンの補給口は搬入口")
 	# 外装のまま、部屋を変える
 	main.build_room("l1", "empty")
 	var infirm_cost: Dictionary = Rooms.TYPES["infirmary"]["cost"]
@@ -271,7 +271,7 @@ func _test_same_data() -> void:
 		st.add_item(it, infirm_cost[it])
 	check(main.build_room("l1", "infirmary"), "外装を見たまま、部屋を変えられる（下・左 → 医務室）")
 	check("sign_cross:l1" in ExteriorDB.visible_ids(main, ["wall"]), "外装に、医務室の十字の看板が出る（部屋の配置が外観に映る）")
-	check(main.base.room_slot("engine") == "" and Rooms.slot_of(main.room_layout, "infirmary") == "l1", "機関室を壊したので、燃料の口は別の場所（機関室なし）")
+	check(main.base.room_slot("engine") == "" and Rooms.slot_of(main.room_layout, "infirmary") == "l1", "空き部屋を使っても、内蔵エンジンの補給は続けられる")
 	var mess_cost: Dictionary = Rooms.TYPES["mess"]["cost"]
 	for it in mess_cost:
 		st.add_item(it, mess_cost[it])
@@ -282,7 +282,7 @@ func _test_same_data() -> void:
 	# 内装から見ても同じ拠点
 	main.base_view.set_mode(BaseView.Mode.INTERIOR, true)
 	check(main.room_layout["l1"] == "mess" and "roof_vent:l1" in ExteriorDB.visible_ids(main, ["roof"]), "内装に戻しても、同じ部屋の配置・同じ屋根")
-	check(lay_before["l1"] == "engine", "（元は機関室だった）")
+	check(lay_before["l1"] == "empty", "元は自由な空き部屋だった")
 	# 設備の建設
 	var n0: int = ExteriorDB.visible_ids(main, ["wall", "roof"]).size()
 	main.base.add_facility("workbench")

@@ -59,6 +59,8 @@ func _initialize() -> void:
 	main.director.enabled = false
 	main.scroll_speed = 0.0
 	main.target_speed = 0.0
+	check(main.base.room_slot("engine") == "" and main.room_layout["l1"] == "empty", "小型拠点は機関室なし・自由枠1つ")
+	check(main.base.part_point(GameData.Part.DRIVE) == Rooms.fallback_fuel_pos(), "内蔵エンジンは自由枠でなく搬入口で整備")
 	st = main.storage
 	st.inventory.counts.clear()
 	for worker in main.workers:
@@ -102,7 +104,7 @@ func _initialize() -> void:
 	main.target_speed = 0.0
 	main.scroll_speed = 0.0
 	var fuel_before := st.count_of(GameData.Item.FUEL)
-	check(job(GameData.Job.HAUL), "加工した燃料を機関室へ運び補給")
+	check(job(GameData.Job.HAUL), "加工した燃料を搬入口へ運び内蔵エンジンに補給")
 	check(st.count_of(GameData.Item.FUEL) == fuel_before - 1 and w.carrying < 0
 		and is_equal_approx(main.base.fuel, GameData.FUEL_ITEMS[GameData.Item.FUEL]), "燃料1個の実消費とタンクの既定量回復")
 	craft("repair_stone")
@@ -113,6 +115,16 @@ func _initialize() -> void:
 	check(st.count_of(GameData.Item.REPAIR_KIT) == kits_before - 1 and w.carrying < 0
 		and is_equal_approx(main.base.condition(GameData.Part.HULL), minf(100.0, hp_before + GameData.REPAIR_AMOUNT)),
 		"修理資材1個の実消費と拠点耐久の既定量回復")
+	# 追加の修理資材1個は、内蔵エンジン整備だけを検証する診断用投入。
+	st.add_item(GameData.Item.REPAIR_KIT, 1)
+	main.base.parts[GameData.Part.DRIVE] = 0.0
+	check(job(GameData.Job.REPAIR) and main.base.parts[GameData.Part.DRIVE] == GameData.REPAIR_AMOUNT,
+		"機関室なしで走行装置を実修理し、資材を消費")
+	check(st.count_of(GameData.Item.REPAIR_KIT) == 0 and w.carrying < 0, "整備の修理資材は持ち越さない")
+	for it in Rooms.TYPES["mess"]["cost"]:
+		st.add_item(it, Rooms.TYPES["mess"]["cost"][it])
+	check(main.build_room("l1", "mess") and main.base.engine_point() == Rooms.fallback_fuel_pos(),
+		"自由枠に食堂を建てても内蔵エンジンの補給口を保持")
 	check(main.total_wasted == 0, "この通し経路で物資の廃棄なし")
 	print("== 結果: %d 件失敗 ==" % fails)
 	quit(1 if fails else 0)

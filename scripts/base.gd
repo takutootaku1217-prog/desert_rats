@@ -4,7 +4,7 @@ extends Node2D
 ## 2つの見え方があり、どちらも「同じ拠点のデータ」（部屋の配置・建てた設備・耐久・燃料・走行距離）を読んで描く。
 ## 拠点自体は画面内に留まり、背景と資源が流れることで「進んでいる」ように見せる。
 ##
-## 階: 上の階(加工室・寝室・操縦室) / 下の階(機関室・倉庫・搬入口)。ハシゴでつながる。
+## 階: 上の階(加工室・寝室・操縦室) / 下の階(空き部屋・倉庫・搬入口、内蔵エンジン)。ハシゴでつながる。
 ## 部屋の配置（4つの区画に何の部屋があるか）は Main.room_layout（data/rooms.gd）。部屋を変えると apply_layout で
 ## 加工設備・倉庫の位置が移り、設備（ワークベンチ・ベッド）の置き場所も facility_spots で新しい区画に追従する。
 ## 見え方の切り替え（外装 ⇄ 内装）は scripts/base_view.gd。ここは view_exterior の旗と、描き分けだけを持つ。
@@ -240,7 +240,7 @@ func has_critical_part() -> bool:
 func part_point(part: int) -> Vector2:
 	match part:
 		GameData.Part.DRIVE:
-			return Vector2(300.0, GameData.LO_Y)       # 機関室の奥（車軸と機関）
+			return engine_point()                    # 内蔵エンジンは搬入口で整備。専用機関室があればそちらへ
 		GameData.Part.MACHINE:
 			return processor.position + Vector2(60.0, 0.0)
 	return Vector2(760.0, GameData.LO_Y)               # 車体（搬入口まわりの壁）

@@ -154,7 +154,7 @@ func _test_tables() -> void:
 	# 初期配置は、機能を持つ4つの部屋がそろっている
 	var lay := Rooms.default_layout()
 	check(Rooms.count(lay, "workshop") == 1 and Rooms.count(lay, "bedroom") == 1 and Rooms.count(lay, "storage") == 1
-			and Rooms.count(lay, "engine") == 1, "初期配置: 加工室・寝室・倉庫・機関室が1つずつ")
+			and Rooms.count(lay, "engine") == 0 and Rooms.count(lay, "empty") == 1, "初期配置: 加工室・寝室・倉庫と自由枠1つ、機関室なし")
 	check(Rooms.sanitize(lay) == lay and Rooms.sanitize({}) == lay, "配置の検査: 正しい配置はそのまま・壊れた配置は初期配置に戻る")
 
 
@@ -165,7 +165,7 @@ func _test_default_positions() -> void:
 	check(main.room_layout == Rooms.default_layout(), "最初の配置は初期配置")
 	check(main.processor.position == Vector2(GameData.MACHINE_X, GameData.UP_Y), "加工設備は、これまでと同じ位置（上の階・左）")
 	check(st.position == Vector2(GameData.STORAGE_X, GameData.LO_Y), "倉庫は、これまでと同じ位置（下の階・右）")
-	check(main.base.engine_point() == Vector2(GameData.ENGINE_X, GameData.LO_Y), "燃料の投入口は、これまでと同じ位置（下の階・左）")
+	check(main.base.engine_point() == Rooms.fallback_fuel_pos(), "内蔵エンジンの補給口は搬入口")
 	check(main.base.part_point(GameData.Part.MACHINE) == Vector2(GameData.MACHINE_X + 60.0, GameData.UP_Y), "加工設備の修理の位置も同じ")
 	check(main.base.facility_spots("workbench") == [Vector2(244.0, GameData.UP_Y)], "ワークベンチの置き場所は、これまでと同じ")
 	var bs: Array = main.base.facility_spots("bed")
@@ -184,8 +184,8 @@ func _test_rules() -> void:
 	check(String(r.call("u2", "empty")).begins_with("最後の寝室"), "最後の寝室は壊せない")
 	check(String(r.call("u1", "mess")).begins_with("最後の加工室"), "最後の加工室は壊せない")
 	check(String(r.call("l2", "engine")).begins_with("最後の倉庫") and String(r.call("l2", "empty")).begins_with("最後の倉庫"), "最後の倉庫は壊せない")
-	check(String(r.call("l1", "engine")).begins_with("すでに"), "同じ部屋には建てられない")
-	check(r.call("l1", "empty") == "", "機関室は壊せる（区画を空けられる）")
+	check(String(r.call("l1", "empty")).begins_with("すでに"), "同じ部屋には建てられない")
+	check(r.call("l1", "engine") == "", "任意の専用機関室の建設定義も保持する")
 	check(r.call("l1", "infirmary") == "" and r.call("l1", "mess") == "", "機関室のあとに別の部屋を建てられる")
 	check(r.call("l1", "workshop") == "" and r.call("l1", "storage") == "" and r.call("l1", "bedroom") == "", "加工室・倉庫・寝室は、機関室の区画へ移せる（移設）")
 	check(r.call("l1", "training") == "拠点Lv2で解放" and r.call("l1", "training", 2) == "", "訓練室は拠点Lv2から（拠点レベルは未実装なので、今は建てられない）")
@@ -211,9 +211,11 @@ func _test_build_flow() -> void:
 	var lay0: Dictionary = main.room_layout.duplicate()
 	check(not main.can_build_room("l1", "infirmary"), "材料がなければ建てられない")
 	check(not main.build_room("l1", "infirmary") and main.room_layout == lay0 and main.total_rooms_built == 0, "失敗しても、配置も記録も変わらない")
+	_give("engine")
+	check(main.build_room("l1", "engine"), "任意の機関室を建て、撤去経路も検証する")
 	var log_n: int = main.director.log.size()
 	check(main.build_room("l1", "empty"), "機関室を壊して、空き部屋にできる（費用なし）")
-	check(main.room_layout["l1"] == "empty" and main.total_rooms_built == 1, "区画が空きになる")
+	check(main.room_layout["l1"] == "empty" and main.total_rooms_built == 2, "区画が空きになる")
 	check(main.director.log.size() > log_n and String(main.director.log[-1]["text"]).contains("空き部屋"), "記録に「空き部屋にした」が出る")
 	check(main.base.engine_point() == Rooms.fallback_fuel_pos(), "機関室がなくなると、燃料は搬入口で補給する")
 	# 建てる: 材料は、費用ぶんだけ減る
@@ -360,7 +362,7 @@ func _test_bedroom_move() -> void:
 func _test_engine_fallback() -> void:
 	print("-- 機関室を壊したあとの燃料の補給")
 	await _fresh(false)
-	check(main.build_room("l1", "empty"), "機関室を壊す")
+	check(main.room_layout["l1"] == "empty", "初期から専用機関室がない")
 	_only_hauler()
 	st.add_item(GameData.Item.FUEL, 2)
 	main.base.fuel = 20.0
@@ -522,6 +524,10 @@ func _test_ui() -> void:
 	check(_rows(ui).size() == 6, "上の階の区画には、6種類（加工室・寝室・医務室・食堂・訓練室・空き部屋）が並ぶ")
 	ui.select_slot("l1")
 	check(_rows(ui).size() == 8, "下の階の区画には、8種類（倉庫・機関室を含む）が並ぶ")
+	# 任意の機関室を建て、画面から壊す経路も保持する
+	_give("engine")
+	check(main.build_room("l1", "engine"), "画面検証用に専用機関室を建てる")
+	ui._rebuild()
 	# 画面から建てる
 	var order: Array = []
 	for t in Rooms.TYPE_ORDER:

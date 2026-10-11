@@ -33,7 +33,9 @@ const SLOTS := {
 	"l2": {"name": "下階・右", "side": "l", "floor": 1, "x0": 82, "x1": 149, "top": 43, "feet": 72, "door_x": 81},
 }
 const SLOT_ORDER := ["u1", "u2", "l1", "l2"]
-const DEFAULT_LAYOUT := {"u1": "workshop", "u2": "bedroom", "l1": "engine", "l2": "storage"}
+## 小型拠点は内蔵エンジン。専用機関室を使わず、下階左を自由枠にする。
+## engine の部屋定義と任意の建設・移設は、既存配置との互換性と将来の大型モデル用に保持する。
+const DEFAULT_LAYOUT := {"u1": "workshop", "u2": "bedroom", "l1": "empty", "l2": "storage"}
 
 ## 固定の部屋（入れ替えできない。表示用）。anchors = 部屋の中の決まった位置（車体の左端からのユニット）
 const FIXED := [
@@ -72,7 +74,7 @@ const TYPES := {
 		"effects": [{"kind": "host_storage", "value": 1}]},
 	"engine": {"name": "機関室", "floors": "l", "unique": true, "required": false, "min_base_level": 1,
 		"cost": {GameData.Item.IRON: 2, GameData.Item.STONE: 2},
-		"desc": "ボイラーと炉。燃料はここで補給する（ないときは搬入口で補給）。",
+		"desc": "任意の専用機関室。小型拠点は内蔵エンジンで走り、未設置なら搬入口で補給・整備する。",
 		"effects": []},
 	"infirmary": {"name": "医務室", "floors": "ul", "unique": false, "required": false, "min_base_level": 1,
 		"cost": {GameData.Item.HIDE: 3, GameData.Item.BONE: 2},
