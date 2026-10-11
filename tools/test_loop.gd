@@ -1,7 +1,8 @@
 extends SceneTree
 ## 基本ループの確認と、異常（詰まり・予約の取り残し・アイテムの消失など）の監視。実行:
-##   Godot --headless --path . -s res://tools/test_loop.gd -- <ゲーム内の分> <回数> <倍速> <乱数の種> <出来事 0/1> [シナリオ]
+##   Godot --headless --path . -s res://tools/test_loop.gd -- <ゲーム内の分> <回数> <倍速> <乱数の種> <出来事 0/1> [シナリオ] [trace]
 ## 例: -- 10 2 12 500 0   … 出来事なしで10分を2回（基本ループだけを見る）／ -- 15 3 12 700 1 … 出来事あり
+## trace: 状態・予約・完成品待ちの開始/解消・損傷をJSON行で記録（ゲームの判断には介入しない）。
 ## vanilla: 製品の初期設備・物資・仲間をそのまま使う（出来事は引数で指定）。
 ## シナリオ（省略すると normal）: stop（90秒で拠点を止める）／ fast（速度200）／ slow（速度10）／ rawfull（素材棚が満杯から始める）／
 ##   prodfull（加工品置き場が満杯から始める）／ priostress（仲間の優先度と加工の方針を数秒ごとに乱数で変える）／
@@ -31,10 +32,12 @@ const CARRY_END_OK := [CharacterAI.State.STORE, CharacterAI.State.HAUL_MOVE, Cha
 
 var fails := 0
 var all_ok := true
+var trace_enabled := false
 
 
 func _initialize() -> void:
 	var a := OS.get_cmdline_user_args()
+	trace_enabled = a.size() > 6 and a[6] == "trace"
 	var minutes: float = float(a[0]) if a.size() > 0 else 10.0
 	var runs: int = int(a[1]) if a.size() > 1 else 2
 	var scale: float = float(a[2]) if a.size() > 2 else 12.0
@@ -70,6 +73,8 @@ func _one(n: int, minutes: float, scale: float, seed_base: int, events_on: bool,
 		"prodfull":
 			for it in GameData.PRODUCT_ITEMS:
 				st.inventory.counts[it] = st.quota_of(it)
+	var trace = load("res://tools/loop_trace.gd").new() if trace_enabled else null
+	var wall_start := Time.get_ticks_msec()
 	var next_report := 300.0
 	var next_stress := 5.0
 	var next_manual := 20.0
@@ -150,6 +155,8 @@ func _one(n: int, minutes: float, scale: float, seed_base: int, events_on: bool,
 		var t: float = d.elapsed
 		var dt: float = t - last_t
 		last_t = t
+		if trace != null:
+			trace.tick(main)
 		if t >= next_report:
 			print("進捗: 第%d回 %.0f/%.0f分 食事%d回 補給%d回 修理%d回" % [n, t / 60.0, minutes, main.total_eaten, main.base.total_refuel, main.base.total_repair])
 			next_report += 300.0
@@ -348,6 +355,9 @@ func _one(n: int, minutes: float, scale: float, seed_base: int, events_on: bool,
 		if st.current_weight() > st.max_weight():
 			err.call("cap", "積載重量が上限を超えている（%d/%d）" % [st.current_weight(), st.max_weight()])
 
+	if trace != null:
+		trace.finish(main)
+	print("実行時間: 実時間%.2f秒 / ゲーム内%.2f秒" % [(Time.get_ticks_msec() - wall_start) / 1000.0, d.elapsed])
 	Engine.time_scale = 1.0
 	paused = false
 	# ---- 画面の数字と実際の個数が合っているか ----
