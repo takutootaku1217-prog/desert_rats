@@ -57,6 +57,13 @@ func _reset() -> void:
 	main.processor.output.clear()
 
 
+func outside_count(item: int) -> int:
+	var n := 0
+	for r in main.resources_root.get_children():
+		if r is ResourceNode and r.item == item: n += 1
+	return n
+
+
 func _drop_resource(item: int, x := 600.0) -> ResourceNode:
 	var r := ResourceNode.new()
 	r.game = main
@@ -88,10 +95,10 @@ func _run() -> void:
 	check(st.is_full(GameData.Item.WOOD) and st.free_for(GameData.Item.WOOD) == 0, "積載量がいっぱいになる")
 	var got: int = st.add_item(GameData.Item.WOOD, 3)
 	check(got == 0 and st.count_of(GameData.Item.WOOD) == wq, "いっぱいのときは入らない（入った数 %d）" % got)
-	check(st.wasted.get(GameData.Item.WOOD, 0) == 3 and main.total_wasted == 3 and signals.size() == 1, "入りきらない分は捨てられ、数と通知が残る")
+	check(outside_count(GameData.Item.WOOD) == 3 and main.total_wasted == 0 and signals.is_empty(), "外部取得の超過3個は地面に保持し、自動廃棄しない")
 	_reset()
 	st.add_item(GameData.Item.STONE, st.quota_of(GameData.Item.STONE) - 1)
-	check(st.add_item(GameData.Item.STONE, 3) == 1 and main.total_wasted == 2, "あと1個ぶんの重さに3個入れると、1個入って2個捨てる")
+	check(st.add_item(GameData.Item.STONE, 3) == 1 and outside_count(GameData.Item.STONE) == 2 and main.total_wasted == 0, "残り1個分なら1個収納・2個外部保持で総数を保存")
 	# 拠点全体の重さ1本で管理するため、素材棚だけでも積載量を使い切れる（以前の「区画が別」とは違う。ARK風）
 	_reset()
 	for it in GameData.RAW_ITEMS:
@@ -137,8 +144,8 @@ func _run() -> void:
 	st.add_item(GameData.Item.MEAT, 9)                                    # 重さ18（残り2）
 	st.butcher("hump")                                                    # 肉2＋脂2＋皮1＋骨1（合計の重さ8）が増えようとする → 残り2しか入らない
 	check(st.count_of(GameData.Item.MEAT) == 10 and st.count_of(GameData.Item.FAT) == 0 and st.count_of(GameData.Item.HIDE) == 0
-			and st.count_of(GameData.Item.BONE) == 0 and st.wasted.get(GameData.Item.MEAT, 0) == 1 and st.wasted.get(GameData.Item.FAT, 0) == 2,
-			"解体: 入る分（肉1個。残りの重さ2で足りたのはここまで）だけ入り、あふれた分は捨てる")
+			and st.count_of(GameData.Item.BONE) == 0 and outside_count(GameData.Item.MEAT) == 1 and outside_count(GameData.Item.FAT) == 2 and outside_count(GameData.Item.HIDE) == 1 and outside_count(GameData.Item.BONE) == 1 and main.total_wasted == 0,
+			"解体: 入る分（肉1個。残りの重さ2で足りたのはここまで）だけ入り、残りの全素材は地面に保持する")
 
 	print("== 回収の判断（回収AIへの影響） ==")
 	_reset()
@@ -203,10 +210,10 @@ func _run() -> void:
 	check(r1.get("id", "") == "cook", "材料があり積載量に余裕があれば、加工を選ぶ（%s）" % r1.get("id", "なし"))
 	st.capacity_bonus = -(CargoDB.CAPACITY - 11)                          # 残りの重さを1にする（食料2個ぶんの重さ2に届かない）
 	var r2: Dictionary = main.choose_recipe()
-	check(r2.get("id", "") != "cook", "残りの積載量が小さくて食料2個ぶん入らないなら、調理は選ばない")
+	check(r2.get("id", "") == "cook", "材料と完成品が同重量の調理は追加の空きを要求しない")
 	st.capacity_bonus = -CargoDB.CAPACITY                                 # 残りの重さを0にする
 	st.inventory.counts[GameData.Item.FOOD] = 0
-	check(main.choose_recipe().get("id", "") != "cook", "積載量が0なら、調理は選ばない")
+	check(main.choose_recipe().get("id", "") == "cook", "容量が減っても等重量の調理を止めない")
 	# 積載量が作り置きの目標（食料12）より大きくても、目標で止まる（従来どおり）
 	_reset()
 	st.add_item(GameData.Item.MEAT, 5)
@@ -220,8 +227,8 @@ func _run() -> void:
 	W[2].ai._set_state(CharacterAI.State.STORE)
 	W[2].ai.timer = 0.0
 	W[2].ai.tick(0.1)
-	check(W[2].carrying == -1 and st.count_of(GameData.Item.FUEL) == 0 and main.total_wasted == 1,
-			"積載量がいっぱいのときに届いた完成品は捨てられ、仲間は次の仕事へ戻る")
+	check(W[2].carrying == -1 and st.count_of(GameData.Item.FUEL) == 1 and main.total_wasted == 0,
+			"保有済みの完成品は満載でも捨てず内部収納し、仲間は次の仕事へ戻る")
 	W[2].ai._set_state(CharacterAI.State.SEARCH)
 	# 運搬（材料を倉庫から取り出す）は、積載量に影響されない
 	_reset()

@@ -368,7 +368,7 @@ func request_transfer(item: int, n: int, dir: String) -> int:
 	if dir == "to_workshop":
 		can = storage.count_of(item) - _queued_transfer(item, "to_workshop")
 	elif dir == "to_storage":
-		can = mini(workshop_available(item), storage.free_for(item) - _queued_transfer(item, "to_storage"))
+		can = workshop_available(item)
 	else:
 		return 0
 	var give := mini(n, can)
@@ -416,9 +416,7 @@ func finish_transfer_trip(item: int, dir: String, n: int) -> void:
 	if dir == "to_workshop":
 		processor.stock.add(item, n, Inventory.SOURCE_TRANSFER)
 	else:
-		var stored := storage.add_item(item, n, Inventory.SOURCE_TRANSFER)
-		if stored < n:
-			processor.stock.add(item, n - stored, Inventory.SOURCE_TRANSFER)      # 倉庫に入りきらない分は、作業場に残す（捨てない）
+		storage.store_owned(item, n)
 	total_transferred += n
 
 
@@ -459,7 +457,7 @@ func _feed_crafts() -> void:
 				craft_queue.erase(q)
 				started = true
 				break
-			if not has_facility(GameData.recipe_station(r)) or not processor.stock.has_set(r["in"]):
+			if not has_facility(GameData.recipe_station(r)) or not processor.stock.has_set(r["in"]) or storage.transform_limit(r) <= 0:
 				continue
 			processor.stock.take_set(r["in"])
 			processor.receive_manual(r.duplicate())
@@ -472,16 +470,31 @@ func _feed_crafts() -> void:
 			break
 
 # ---------------------------------------------------------------- 積載量（data/cargo.gd）
+## 新規取得の収納不能分は外に残す。保有重量にはまだ入れない。
+func keep_outside(item: int, n: int, pos: Vector2) -> void:
+	if quarry.sheltered():
+		quarry.keep_overflow(item, n)
+	else:
+		for i in n:
+			var r := ResourceNode.new()
+			r.game = self
+			r.item = item
+			r.position = pos
+			resources_root.add_child(r)
+	director.note("積載上限: %s×%dを外に残しました" % [GameData.ITEM_NAMES[item], n])
+
+
 ## いま倉庫へ向かっている物の数（回収に向かっている・運んでいる）。空き枠から引いて、入りきらない無駄足を防ぐ。
 func gather_room() -> Dictionary:
 	var inflight := {}
 	for r in resources_root.get_children():
-		if r.claimed_by != null and r.item != GameData.Item.CARCASS:
-			inflight[r.item] = inflight.get(r.item, 0) + r.reserved         # 採取ポイントは袋の大きさぶん
-	for w in workers:
-		if w.carrying >= 0 and w.carrying != GameData.Item.CARCASS \
-				and w.ai.state in [CharacterAI.State.MOVE_TO_STORAGE, CharacterAI.State.STORE]:
-			inflight[w.carrying] = inflight.get(w.carrying, 0) + w.carry_n
+		if not is_instance_valid(r.claimed_by): continue
+		if r.item == GameData.Item.CARCASS:
+			for it in GameData.CREATURES[r.species]["drops"]:
+				inflight[it] = int(inflight.get(it, 0)) + int(GameData.CREATURES[r.species]["drops"][it])
+		else:
+			var held: int = r.claimed_by.carry_n if r.claimed_by.carrying == r.item else 0
+			inflight[r.item] = int(inflight.get(r.item, 0)) + maxi(0, r.reserved - held)
 	return inflight
 
 
@@ -500,7 +513,7 @@ func gather_free_for(item: int, inflight: Dictionary) -> int:
 	for it in inflight:
 		if CargoDB.bay_of(it) >= 0:
 			reserved_weight += int(inflight[it]) * CargoDB.size_of(it)
-	var room := storage.max_weight() - storage.current_weight() - reserved_weight
+	var room := storage.max_weight() - storage.current_weight() - storage.processing_reserve() - reserved_weight
 	return maxi(0, floori(float(room) / CargoDB.size_of(item)))
 
 
@@ -1028,9 +1041,8 @@ func choose_recipe() -> Dictionary:
 		if r["out"] in GameData.TOOL_ITEMS and not tool_wanted(r["out"]):
 			continue                                                        # 誰の道具の更新にもならない道具は作らない
 		var have: int = storage.count_of(r["out"]) + processor.pending_of(r["out"])
-		var room: int = storage.quota_of(r["out"])                          # 積載量の枠。作り置きの上限も枠を超えない
-		var target: int = mini(GameData.STOCK_TARGET.get(r["out"], 5), room)
-		if have >= target or have + int(r["n"]) > room:
+		var target: int = GameData.STOCK_TARGET.get(r["out"], 5)
+		if have >= target or storage.transform_limit(r) <= 0:
 			continue                                                        # 作り足りている、または置き場に入りきらない
 		var key: float = pr * 10.0 + (1.0 - float(have) / float(target))
 		if key > best_key:

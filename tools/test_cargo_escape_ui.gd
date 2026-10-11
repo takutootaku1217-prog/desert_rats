@@ -1,0 +1,38 @@
+extends "res://tools/test_equipment_ui.gd"
+func _initialize():
+	main = load("res://scenes/main.tscn").instantiate()
+	root.add_child(main)
+	await frames()
+	main.set_process(false)
+	main.director.enabled = false
+	main.quarry.select()
+	main.quarry.left = 0
+	main.quarry.tick(0)
+	main.storage.inventory.counts.clear()
+	main.storage.add_item(GameData.Item.IRON_ORE,45)
+	main.storage.add_item(GameData.Item.IRON_ORE,1)
+	main.quarry.request_departure()
+	for w in main.workers:
+		w.stop_work()
+		w.set_process(false)
+		w.floor_i = 1
+		w.ai._set_state(CharacterAI.State.RETURN_BASE)
+	await key(KEY_G)
+	await click(main.quarry_ui._discard)
+	check(main.quarry_ui._confirm.visible and main.quarry_ui._confirm_text.text.contains("鉄鉱石×1"), "実クリックで品目・数量の確認を表示")
+	await click(main.quarry_ui._confirm_no)
+	check(main.quarry.loose.get(GameData.Item.IRON_ORE,0) == 1 and main.quarry.state == "recall", "取消実入力で捨てず出発しない")
+	await click(main.quarry_ui._discard)
+	await key(KEY_ESCAPE)
+	check(not main.quarry_ui._confirm.visible and main.quarry.loose.size() == 1, "Escでも破棄を取り消す")
+	await click(main.quarry_ui._discard)
+	main.quarry.keep_overflow(GameData.Item.IRON_ORE,1)
+	await click(main.quarry_ui._confirm_yes)
+	check(main.quarry.state == "recall" and main.quarry.loose[GameData.Item.IRON_ORE] == 2, "確認後に数量が変われば実クリックしても破棄しない")
+	await click(main.quarry_ui._confirm_no)
+	await click(main.quarry_ui._discard)
+	check(main.quarry_ui._confirm_text.text.contains("鉄鉱石×2"), "最新数量で確認し直す")
+	await click(main.quarry_ui._confirm_yes)
+	check(main.quarry.state == "returning" and main.quarry.loose.is_empty() and main.storage.count_of(GameData.Item.IRON_ORE) == 45, "確認実入力で残置2個だけ破棄し保有45個のまま出発")
+	print("== 結果: %s ==" % ("すべて成功" if fails == 0 else "%d 件失敗" % fails))
+	quit(1 if fails else 0)

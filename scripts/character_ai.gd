@@ -222,7 +222,21 @@ func tick(delta: float) -> void:
 				return
 			res.gather_progress += delta * ch.skill_mult(GameData.Job.GATHER) * game.director.outdoor_mult()
 			if res.gather_progress >= ResourceNode.GATHER_TIME:
+				if res.item == GameData.Item.CARCASS:
+					var drops: Dictionary = GameData.CREATURES[res.species]["drops"]
+					var room: int = game.storage.max_weight() - game.storage.current_weight() - game.storage.processing_reserve()
+					for it in drops:
+						var got: int = int(drops[it]) if not game.storage.enforce else mini(int(drops[it]), maxi(0, room / CargoDB.size_of(it)))
+						if got > 0:
+							ch.carcass_cargo[it] = got
+							room -= got * CargoDB.size_of(it)
+						if got < int(drops[it]): game.keep_outside(it, int(drops[it]) - got, res.position)
+				elif game.storage.free_for(res.item) < 1:
+					_release_task()
+					_set_state(State.SEARCH)
+					return
 				ch.carrying = res.item
+				ch.carry_source = Inventory.SOURCE_HUNT if res.item == GameData.Item.CARCASS else Inventory.SOURCE_ENVIRONMENT
 				ch.carrying_species = res.species
 				ch.carry_n = 1
 				game.total_gathered += 1
@@ -237,16 +251,7 @@ func tick(delta: float) -> void:
 		State.STORE:
 			timer -= delta
 			if timer <= 0.0:
-				if ch.carrying == GameData.Item.CARCASS:
-					game.storage.butcher(ch.carrying_species)       # 獲物は倉庫で解体
-				else:
-					game.storage.add_item(ch.carrying, ch.carry_n)
-					for it in ch.carry_bonus:                       # 採取の副産物も一緒に入れる
-						game.storage.add_item(it, ch.carry_bonus[it])
-				ch.carrying = -1
-				ch.carrying_species = ""
-				ch.carry_n = 1
-				ch.carry_bonus = {}
+				ch.unload_owned()
 				_set_state(State.SEARCH)
 
 		# ---- 狩猟 ----
@@ -292,6 +297,7 @@ func tick(delta: float) -> void:
 			if ch.move_to_target(delta):
 				if game.storage.take_set(haul_recipe["in"]):
 					ch.carrying = haul_recipe["in"].keys()[0]
+					ch.carry_source = Inventory.SOURCE_TRANSFER
 					_set_state(State.HAUL_MOVE)
 				else:
 					game.processor.cancel_reservation(haul_recipe)
@@ -311,6 +317,7 @@ func tick(delta: float) -> void:
 			if ch.move_to_target(delta):
 				if game.storage.take_item(haul_item):
 					ch.carrying = haul_item
+					ch.carry_source = Inventory.SOURCE_TRANSFER
 					_set_state(State.REFUEL_MOVE)
 				else:
 					game.base.refuel_reserved = false
@@ -342,6 +349,7 @@ func tick(delta: float) -> void:
 					_set_state(State.SEARCH)
 					return
 				ch.carrying = p.take_output()
+				ch.carry_source = Inventory.SOURCE_PROCESSING
 				p.worker = null
 				_go_storage()
 			elif not p.current.is_empty() or (not p.orders.is_empty() and not p.only_blocked()):
@@ -359,6 +367,7 @@ func tick(delta: float) -> void:
 			if ch.move_to_target(delta):
 				if game.storage.take_item(GameData.Item.REPAIR_KIT):
 					ch.carrying = GameData.Item.REPAIR_KIT
+					ch.carry_source = Inventory.SOURCE_TRANSFER
 					_set_state(State.REPAIR_MOVE)
 				else:
 					game.base.repair_reserved.erase(repair_part)
@@ -385,6 +394,7 @@ func tick(delta: float) -> void:
 				_release_eat_claim()
 				if game.storage.take_item(GameData.Item.FOOD):
 					ch.carrying = GameData.Item.FOOD
+					ch.carry_source = Inventory.SOURCE_TRANSFER
 					timer = CrewStatusDB.EAT_SECONDS
 					_set_state(State.EAT)
 				else:
@@ -405,6 +415,7 @@ func tick(delta: float) -> void:
 				var got: int = game.begin_transfer_trip(xfer_item, xfer_dir)
 				if got > 0:
 					ch.carrying = xfer_item
+					ch.carry_source = Inventory.SOURCE_TRANSFER
 					ch.carry_n = got
 					ch.carry_bonus = {}
 					_set_state(State.XFER_MOVE)
@@ -414,9 +425,10 @@ func tick(delta: float) -> void:
 		State.XFER_MOVE:
 			ch.target = _xfer_point(false) + ch.slot_offset
 			if ch.move_to_target(delta):
-				game.finish_transfer_trip(xfer_item, xfer_dir, ch.carry_n)
+				var amount: int = ch.carry_n
 				ch.carrying = -1
 				ch.carry_n = 1
+				game.finish_transfer_trip(xfer_item, xfer_dir, amount)
 				_release_task()
 				_set_state(State.SEARCH)
 
@@ -467,27 +479,53 @@ func tick(delta: float) -> void:
 				_set_state(State.SEARCH)
 
 
-## 採取ポイントを掘る（1フレームぶん）。掘るたびに残量が減り、取れる割合ぶんだけ袋に入る。
-## 袋がいっぱい・残量が尽きたら倉庫へ運ぶ。1単位を掘る時間・取れる割合は 採取ポイント × 道具 × 自分の能力（data/gathering.gd）。
+## 採取ポイントを掘る（1フレームぶん）。完成した1単位につき残量1を袋の主素材1へ移す。
+## 袋がいっぱい・残量が尽きたら倉庫へ運ぶ。1単位を掘る基準時間・速度倍率は 採取ポイント × 道具 × 自分の能力（data/gathering.gd）。
 func _work_point(delta: float) -> void:
 	var pt: GatherPoint = res
 	if gather_ev.is_empty():
 		gather_ev = ch.gather_eval(pt.kind)
-	pt.work += delta * game.director.outdoor_mult() / maxf(0.05, float(gather_ev["seconds"]))
+	var efficiency: float = float(gather_ev["eff"])
+	if efficiency <= 0.0:
+		if _bag_n() > 0: _finish_trip()
+		else:
+			_release_task()
+			_set_state(State.SEARCH)
+		return
+	if game.storage.free_for(pt.item) < 1:
+		if _bag_n() > 0: _finish_trip()
+		else:
+			_release_task()
+			_set_state(State.SEARCH)
+		return
+	# 効率は採取速度。残量1につき主素材を必ず1個取得。未完の仕事は地点に保持。
+	pt.work += delta * game.director.outdoor_mult() * efficiency / maxf(0.05, float(gather_ev["seconds"]))
 	while pt.work >= 1.0 and pt.remaining > 0 and _bag_n() < bag_limit:
-		pt.work -= 1.0
-		pt.remaining -= 1                                        # 1単位を掘り出した
-		bag_frac += float(gather_ev["eff"])                      # そのうち手に入る割合ぶんが袋に入る
-		while bag_frac >= 1.0 and _bag_n() < bag_limit:
-			bag_frac -= 1.0
-			if ch.carrying < 0:
-				ch.carrying = pt.item
-				ch.carry_n = 1
+		if game.storage.free_for(pt.item) < 1:
+			if _bag_n() > 0: _finish_trip()
 			else:
-				ch.carry_n += 1
-			for it in gather_ev["bonus"]:                       # 副産物（道具によっては見つかる）
-				if randf() < float(gather_ev["bonus"][it]):
-					ch.carry_bonus[it] = ch.carry_bonus.get(it, 0) + 1
+				_release_task()
+				_set_state(State.SEARCH)
+			return
+		pt.work -= 1.0
+		pt.remaining -= 1
+		if ch.carrying < 0:
+			ch.carrying = pt.item
+			ch.carry_source = Inventory.SOURCE_ENVIRONMENT
+			ch.carry_n = 1
+		else: ch.carry_n += 1
+		for it in gather_ev["bonus"]:
+			if randf() < float(gather_ev["bonus"][it]):
+				if game.storage.free_for(it) > 0:
+					ch.carry_bonus[it] = int(ch.carry_bonus.get(it, 0)) + 1
+				elif game.quarry.sheltered():
+					game.quarry.keep_overflow(it, 1)
+				else:
+					var extra := ResourceNode.new()
+					extra.game = game
+					extra.item = it
+					extra.position = pt.position
+					game.resources_root.add_child(extra)
 	if _bag_n() >= bag_limit or (pt.remaining <= 0 and _bag_n() > 0):
 		_finish_trip()
 	elif pt.remaining <= 0:
@@ -506,8 +544,6 @@ func _finish_trip() -> void:
 	if res != null and is_instance_valid(res) and res.claimed_by == ch:
 		res.claimed_by = null
 		res.reserved = 1
-		if res is GatherPoint:
-			res.work = 0.0
 	res = null
 	gather_ev = {}
 	bag_frac = 0.0
@@ -847,8 +883,6 @@ func _release_task() -> void:
 		res.claimed_by = null
 		res.gather_progress = 0.0
 		res.reserved = 1
-		if res is GatherPoint:
-			res.work = 0.0
 	res = null
 	gather_ev = {}
 	bag_frac = 0.0

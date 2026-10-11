@@ -100,10 +100,10 @@ static func evaluate(e: Dictionary, game, qty: int = 1) -> Dictionary:
 	var out: int = int(e["out"])
 	var room_ok := true
 	if out >= 0:
-		var free: int = game.storage.free_for(out)
-		maxq = mini(maxq, free / maxi(1, int(e["n"])))
-		maxq_all = mini(maxq_all, free / maxi(1, int(e["n"])))
-		room_ok = free >= int(e["n"]) * qty
+		var limit: int = game.storage.transform_limit(e["recipe"])
+		maxq = mini(maxq, limit)
+		maxq_all = mini(maxq_all, limit)
+		room_ok = limit >= qty
 	res["max_qty"] = maxi(0, maxq)
 	res["max_with_storage"] = maxi(0, maxq_all)
 	res["missing"] = missing

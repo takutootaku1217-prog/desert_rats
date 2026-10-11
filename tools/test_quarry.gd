@@ -112,17 +112,12 @@ func capacity() -> void:
 	var q = main.quarry
 	main.storage.inventory.counts.clear()
 	main.storage.capacity_bonus = -CargoDB.CAPACITY
-	var w = main.workers[0]
-	w.position = Vector2(350, 630)
-	w.floor_i = 0
-	w.carrying = GameData.Item.IRON_ORE
-	w.carry_n = 3
-	w.carry_bonus = {GameData.Item.STONE: 1}
-	w.ai._set_state(CharacterAI.State.MOVE_TO_STORAGE)
+	# 保有済みの袋を容量0へ返すケースと、新規取得の残置を混同しない。
+	main.storage.add_item(GameData.Item.IRON_ORE,3)
+	main.storage.add_item(GameData.Item.STONE,1)
 	q.request_departure()
-	check(await until(func(): return w.carrying < 0, 100), "満載でも袋を搬入口の残置として保全し本人は帰還")
-	check(q.loose.get(GameData.Item.IRON_ORE, 0) == 3 and q.loose.get(GameData.Item.STONE, 0) == 1 and main.total_wasted == 0,
-		"袋と副産物を黙って捨てない")
+	check(q.loose.get(GameData.Item.IRON_ORE,0) == 3 and q.loose.get(GameData.Item.STONE,0) == 1 and main.total_wasted == 0,
+		"新規取得の収納不能分と副産物を残置へ保全")
 	check(not q.ready_to_leave() and not q.leave() and q.status_text().contains("満載"), "残置がある間は明示して出発を止める")
 	main.quarry_ui.open()
 	main.quarry_ui._refresh()
@@ -252,6 +247,9 @@ func stay() -> void:
 	check(main.total_eaten >= 3 and sleep_seen and main.base.total_repair > 0, "初期備蓄による食事・休憩・修理が続く")
 	check(main.processor.total_done > 0 and main.base.fuel < fuel, "採取物を加工し、精錬の燃料は停車中も消費")
 	check(maximum <= 60.0 and main.processor.output.is_empty(), "完成品は60秒以内に担当がつき、出力を取り残さない")
-	check(main.quarry.group_left("近場") + main.quarry.group_left("奥") == 0, "全鉱床を掘り尽くしても再生成しない")
+	var active_bags := 0
+	for w in main.workers:
+		if w.ai.state == CharacterAI.State.GATHER and w.carrying == GameData.Item.IRON_ORE: active_bags += w.carry_n
+	check(main.quarry.group_left("近場") + main.quarry.group_left("奥") + main.total_gathered + active_bags == 84, "20分後も未採取残量+回収数=84（満載で止まっても資源を消さない）")
 	main.quarry.request_departure()
 	check(await until(func(): return main.quarry.ready_to_leave(), 300), "長居の後も全員帰還して出発できる")

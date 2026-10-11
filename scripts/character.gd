@@ -17,7 +17,9 @@ var char_name := "ネズミ"
 var palette := "grey"
 var priorities := {}          # Job -> 0..MAX_PRIORITY（0 = やらない）
 var carrying := -1            # 持っている Item（-1 = なし）
+var carcass_cargo := {}       # 回収時に積載できた獲物の素材。倉庫で二重生成しない。
 var carrying_species := ""   # 獲物を運んでいるときの生物の種類
+var carry_source := Inventory.SOURCE_ENVIRONMENT
 var carry_n := 1              # 持っている個数（採取ポイントでは袋いっぱいまで。それ以外は1）
 var carry_bonus := {}         # 採取の副産物 {Item: 個数}（倉庫に運ぶとき一緒に入れる）
 var weapon := -1             # 個人武器1枠。倉庫在庫とは別所有。戦闘不能でも保持。
@@ -98,7 +100,7 @@ func stop_work() -> void:
 			if not a.haul_recipe.is_empty():
 				game.processor.cancel_reservation(a.haul_recipe)
 				for it in a.haul_recipe["in"]:
-					game.storage.add_item(it, a.haul_recipe["in"][it])
+					game.storage.store_owned(it, a.haul_recipe["in"][it])
 				a.haul_recipe = {}
 				carrying = -1
 		CharacterAI.State.REFUEL_MOVE, CharacterAI.State.REFUEL:
@@ -106,18 +108,27 @@ func stop_work() -> void:
 		CharacterAI.State.REPAIR_MOVE, CharacterAI.State.REPAIR:
 			game.base.repair_reserved.erase(a.repair_part)
 			a.repair_part = -1
-	if carrying >= 0:                              # 手に持っている物は倉庫へ
-		if carrying == GameData.Item.CARCASS:
-			game.storage.butcher(carrying_species)
-		else:
-			game.storage.add_item(carrying, carry_n)
-			for it in carry_bonus:
-				game.storage.add_item(it, carry_bonus[it])
-		carrying = -1
-		carrying_species = ""
-		carry_n = 1
-		carry_bonus = {}
+	unload_owned()
 	a._release_task()
+
+
+## 荷物は保有済み。外部取得の容量判定と混同しない。
+func unload_owned() -> void:
+	var source := carry_source
+	var items := carry_bonus.duplicate()
+	if carrying == GameData.Item.CARCASS:
+		for it in carcass_cargo:
+			items[it] = int(items.get(it, 0)) + int(carcass_cargo[it])
+		game.storage.total_butchered += 1
+	elif carrying >= 0:
+		items[carrying] = int(items.get(carrying, 0)) + carry_n
+	carrying = -1
+	carrying_species = ""
+	carcass_cargo.clear()
+	carry_n = 1
+	carry_bonus.clear()
+	carry_source = Inventory.SOURCE_ENVIRONMENT
+	for it in items: game.storage.store_owned(it, items[it], source)
 
 
 ## 調査隊として出発する。仕事を中断して、持っていた物・予約を元に戻し、拠点から姿を消す。

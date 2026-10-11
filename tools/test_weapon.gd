@@ -67,10 +67,15 @@ func _initialize():
 	# 満載出力保全。0容量を意図的に注入し、完成品を捨てない。
 	main.storage.inventory.counts.clear()
 	main.storage.capacity_bonus = -CargoDB.CAPACITY
+	main.enemies_root.remove_child(e)
+	e.free()
+	b.stop_work()
+	park_fixture()
 	var waste: int = main.total_wasted
-	check(main.storage.add_item(ITEM) == 0 and main.processor.output.count(ITEM) == 1, "満載の武器完成品を作業場へ保全")
-	check(main.processor.packed_output_blocked() and main.total_wasted == waste, "収納まで加工担当を拘束せず廃棄しない")
+	check(main.storage.add_item(ITEM) == 0 and main.quarry.loose.get(ITEM,0) == 1, "満載の新規武器は外部の残置へ保全")
+	check(main.total_wasted == waste and main.storage.current_weight() == 0, "未取得分を保有重量に混ぜず自動廃棄しない")
 	main.storage.capacity_bonus = 0
-	check(not main.processor.packed_output_blocked(), "空きが戻れば武器を運べる")
+	main.quarry.tick(0)
+	check(main.storage.count_of(ITEM) == 1 and main.quarry.loose.is_empty(), "空きが戻れば武器を1個だけ収納")
 	print("== 結果: %s ==" % ("すべて成功" if fails == 0 else "%d 件失敗" % fails))
 	quit(1 if fails else 0)

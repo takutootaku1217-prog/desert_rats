@@ -10,6 +10,12 @@ var _leave: Button
 var _cancel: Button
 var _range: Button
 var _entry: Button
+var _discard: Button
+var _confirm: ColorRect
+var _confirm_text: Label
+var _confirm_yes: Button
+var _confirm_no: Button
+var _discard_snapshot := {}
 
 func _ready() -> void:
 	layer = 27
@@ -47,8 +53,45 @@ func _ready() -> void:
 	for b in [_go, _recall, _leave]: row.add_child(b)
 	_cancel = UIKit.button("移動／帰還を取り消す", func(): game.quarry.cancel())
 	box.add_child(_cancel)
+	_discard = UIKit.button("残置品を放棄して出発…", _ask_discard)
+	box.add_child(_discard)
 	box.add_child(UIKit.button("閉じる (G / Esc)", close))
+	_confirm = ColorRect.new()
+	_confirm.color = Color(0, 0, 0, 0.8)
+	_confirm.set_anchors_preset(Control.PRESET_FULL_RECT)
+	add_child(_confirm)
+	var panel := PanelContainer.new()
+	panel.position = Vector2(250, 200)
+	panel.custom_minimum_size = Vector2(780, 260)
+	panel.add_theme_stylebox_override("panel", UIKit.box(Color("202329"), Color("bd7c67"), 3, 18))
+	_confirm.add_child(panel)
+	var confirm_box := VBoxContainer.new()
+	confirm_box.add_theme_constant_override("separation", 20)
+	panel.add_child(confirm_box)
+	_confirm_text = UIKit.lbl("", 18)
+	_confirm_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_confirm_text.custom_minimum_size = Vector2(720, 130)
+	confirm_box.add_child(_confirm_text)
+	_confirm_yes = UIKit.button("表示した品を捨てて出発", _do_discard)
+	_confirm_no = UIKit.button("取り消す（捨てない）", func(): _confirm.hide(); _discard_snapshot.clear())
+	confirm_box.add_child(_confirm_yes)
+	confirm_box.add_child(_confirm_no)
 	close()
+
+func _ask_discard() -> void:
+	_discard_snapshot = game.quarry.loose.duplicate()
+	if _discard_snapshot.is_empty() or not game.quarry.crew_ready_to_leave(): return
+	_confirm_text.text = "次の残置品を捨てて街道へ出発します。取り戻せません。\n\n" + game.quarry.cargo_text() + "\n\n倉庫・作業場・仲間の荷物は捨てません。"
+	_confirm_yes.disabled = false
+	_confirm.show()
+
+func _do_discard() -> void:
+	if not game.quarry.discard_and_leave(_discard_snapshot):
+		_confirm_text.text = "数量または帰還状況が変わりました。取り消して内容を確認し直してください。"
+		_confirm_yes.disabled = true
+		return
+	_confirm.hide()
+	_discard_snapshot.clear()
 
 func open() -> void:
 	game.close_other_panels(self)
@@ -59,6 +102,8 @@ func open() -> void:
 func close() -> void:
 	_overlay.hide()
 	_backdrop.hide()
+	if _confirm != null: _confirm.hide()
+	_discard_snapshot.clear()
 
 func is_open() -> bool:
 	return _overlay.visible
@@ -69,11 +114,12 @@ func _process(_delta: float) -> void:
 
 func _refresh() -> void:
 	var q = game.quarry
-	_info.text = "%s\n\n鉱床残量：近場 %d ／ 奥の密集群 %d\n近場は短い往復。奥は歩く距離が長く、食料と休憩の準備が必要です。\n残量は掘れる量で、持ち帰れる数は道具と能力で変わります。\n滞在中も食事・休憩・修理・天候は進みます。食材は自動補充されません。\n搬入口の残置：%s\n未採取の鉱床は再訪しても復活しません（この実行中のみ）。" % [q.status_text(), q.group_left("近場"), q.group_left("奥"), q.cargo_text()]
+	_info.text = "%s\n\n鉱床残量：近場 %d ／ 奥の密集群 %d\n近場は短い往復。奥は歩く距離が長く、食料と休憩の準備が必要です。\n残量1から主素材1個。道具と能力で採取時間が変わります。\n滞在中も食事・休憩・修理・天候は進みます。食材は自動補充されません。\n搬入口の残置：%s\n採取済みの残量は再訪しても補充されません（この実行中のみ）。" % [q.status_text(), q.group_left("近場"), q.group_left("奥"), q.cargo_text()]
 	_range.text = "採取範囲：近場のみ（押すと全体）" if q.near_only else "採取範囲：全体（押すと近場のみ）"
 	_go.disabled = q.state != "road" or game.game_over
 	_recall.disabled = q.state != "parked" or game.game_over
 	_leave.disabled = not q.ready_to_leave() or game.game_over
+	_discard.disabled = q.loose.is_empty() or not q.crew_ready_to_leave()
 	_cancel.disabled = q.state not in ["approach", "recall"] or game.game_over
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -81,4 +127,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		if event.keycode == KEY_G:
 			if is_open(): close()
 			else: open()
-		elif event.keycode == KEY_ESCAPE and is_open(): close()
+		elif event.keycode == KEY_ESCAPE and is_open():
+			if _confirm.visible:
+				_confirm.hide()
+				_discard_snapshot.clear()
+			else: close()

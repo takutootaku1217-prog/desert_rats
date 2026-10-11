@@ -151,7 +151,7 @@ func work_point() -> Vector2:
 
 
 func packed_output_blocked() -> bool:
-	return not output.is_empty() and (output[0] in GameData.PACKED_ITEMS or output[0] in GameData.WEAPON_ITEMS) and base().storage.free_for(output[0]) < 1
+	return false # 出力は既に保有重量に含む。内部収納を満載で止めない。
 
 
 func has_work_for_worker() -> bool:

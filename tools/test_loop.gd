@@ -138,7 +138,7 @@ func _one(n: int, minutes: float, scale: float, seed_base: int, events_on: bool,
 		return d.elapsed - float(wait[key]) > limit
 
 	st.inventory.item_added.connect(func(item, amount, source):
-		if source == Inventory.SOURCE_ENVIRONMENT or source == Inventory.SOURCE_HUNT:
+		if source in [Inventory.SOURCE_ENVIRONMENT, Inventory.SOURCE_HUNT, Inventory.SOURCE_PROCESSING]:
 			if item in GameData.RAW_ITEMS:
 				stored[item] = stored.get(item, 0) + amount
 				mark.call("6 素材棚に収納")
@@ -164,6 +164,12 @@ func _one(n: int, minutes: float, scale: float, seed_base: int, events_on: bool,
 				"eaten": main.total_eaten, "refuel": main.base.total_refuel, "repair": main.base.total_repair}
 		await process_frame
 		var t: float = d.elapsed
+		# 通常進行で所有物+確定加工増量が容量を越えない。rawfull/prodfullは旧境界注入専用。
+		if scenario not in ["rawfull", "prodfull"] and st.enforce:
+			var owned: int = st.current_weight()
+			var reserved: int = st.processing_reserve()
+			if owned + reserved > st.max_weight():
+				err.call("ownership_capacity", "保有重量%d＋加工増量予約%dが容量%dを超過" % [owned, reserved, st.max_weight()])
 		var dt: float = t - last_t
 		last_t = t
 		if trace != null:

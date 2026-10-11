@@ -6,7 +6,9 @@ var state := "road"                 # road / approach / parked / recall / return
 var left := 0.0
 var near_only := true
 var remaining := {}
+var progress := {}
 var points: Array = []
+var discarded := {}          # プレイヤーが確認して放棄した品目と累計
 var loose := {}                      # 満載時の搬入口残置。出発前に必ず倉庫へ回収する
 var saved_speed := 60.0
 var visits := 0
@@ -60,22 +62,30 @@ func request_departure() -> bool:
 	state = "recall"
 	return true
 
-func ready_to_leave() -> bool:
-	if game.game_over or not recalling() or not loose.is_empty():
-		return false
+func crew_ready_to_leave() -> bool:
+	if game.game_over or not recalling(): return false
 	for w in game.workers:
-		if w.away or w.floor_i == 0 or w._climb_dest != null or w.carrying >= 0:
-			return false
-		# 帰還処理が実際に仕事を解放したことも確認（室内の新規作業を残さない）。
-		if w.ai.state not in [CharacterAI.State.RETURN_BASE, CharacterAI.State.REST, CharacterAI.State.REST_HERE, CharacterAI.State.DOWN]:
-			return false
+		if w.away or w.floor_i == 0 or w._climb_dest != null or w.carrying >= 0: return false
+		if w.ai.state not in [CharacterAI.State.RETURN_BASE, CharacterAI.State.REST, CharacterAI.State.REST_HERE, CharacterAI.State.DOWN]: return false
 	return true
+
+func ready_to_leave() -> bool:
+	return loose.is_empty() and crew_ready_to_leave()
+
+## 確認画面に示した全品目・数量が変わっていない場合だけ放棄して出発。
+func discard_and_leave(snapshot: Dictionary) -> bool:
+	if snapshot.is_empty() or snapshot != loose or not crew_ready_to_leave(): return false
+	for it in snapshot: discarded[it] = int(discarded.get(it, 0)) + int(snapshot[it])
+	game.director.note("確認して残置品を放棄: " + cargo_text())
+	loose.clear()
+	return leave()
 
 func leave() -> bool:
 	if not ready_to_leave():
 		return false
 	for p in points:
 		remaining[p.get_meta("quarry_id")] = p.remaining
+		progress[p.get_meta("quarry_id")] = p.work
 		game.resources_root.remove_child(p)
 		p.queue_free()
 	points.clear()
@@ -125,6 +135,7 @@ func _arrive() -> void:
 		p.item = GameData.Item.IRON_ORE
 		p.max_amount = d["amount"]
 		p.remaining = remaining[d["id"]]
+		p.work = float(progress.get(d["id"], 0.0))
 		p.position = d["pos"]
 		p.set_meta("quarry_id", d["id"])
 		p.set_meta("quarry_group", d["group"])
@@ -163,7 +174,7 @@ func status_text() -> String:
 		"returning": return "街道へ復帰中：残り %.2f km" % (left / 2500.0)
 		"parked": return "停車採取中（襲撃なし）"
 		"recall":
-			if not loose.is_empty(): return "満載：帰還を取り消し、制作・運搬で倉庫に空きを作ってください"
+			if not loose.is_empty(): return "満載：帰還取消後に消費・加工・設置で軽くするか、全員帰還後に残置品を確認して放棄できます"
 			if ready_to_leave(): return "全員帰還・荷物収納済み。街道へ出発できます"
 			return "新規作業を止め、仲間と荷物の帰還待ち（休憩・食事は継続）"
 	return state

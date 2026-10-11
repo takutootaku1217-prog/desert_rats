@@ -194,7 +194,7 @@ func _test_craftdb() -> void:
 	main.storage.capacity_bonus = -100000
 	main.processor.stock.add(GameData.Item.MEAT, 2)
 	ev = CraftDB.evaluate(CraftDB.entry_of("cook"), main, 1)
-	check(ev["state"] == "blocked" and ev["reason"] == "置き場がいっぱい" and ev["max_qty"] == 0, "作った物の置き場（倉庫の枠）がいっぱいなら「置き場がいっぱい」（捨てないため、作れない）")
+	check(ev["state"] == "ok" and ev["max_qty"] > 0, "重量を増やさない調理は満載でも実行できる")
 
 
 # ---------------------------------------------------------------- 倉庫と作業場・運搬

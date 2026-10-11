@@ -23,28 +23,22 @@ func _init() -> void:
 	inventory.changed.connect(queue_redraw)
 
 
-## 倉庫に入れる。枠がいっぱいなら入る分だけ入れて、残りは捨てる。入った個数を返す。
+## 外部から倉庫へ取得。入る分だけ収納し、超過分は地点/地面へ保持。内部移動はstore_owned。
 func add_item(item: int, n: int = 1, source: String = Inventory.SOURCE_ENVIRONMENT) -> int:
 	var stored := mini(n, free_for(item))
 	if stored > 0:
 		inventory.add(item, stored, source)
 	if stored < n and source == Inventory.SOURCE_TRANSFER:
 		pass # 手動運搬の返却は Main.finish_transfer_trip が1回だけ行う。
-	elif stored < n and (item in GameData.PACKED_ITEMS or item in GameData.WEAPON_ITEMS) and get_parent() is MobileBase:
-		var p = get_parent().processor
-		for i in n - stored:
-			p.output.append(item)
-			p._out_times.append(Time.get_ticks_msec())
-		get_parent().game.director.note("倉庫満杯: %sは作業場で保管中" % GameData.ITEM_NAMES[item])
-	elif stored < n and get_parent() is MobileBase and get_parent().game.quarry.sheltered():
-		get_parent().game.quarry.keep_overflow(item, n - stored)
+	elif stored < n and game() != null:
+		game().keep_outside(item, n - stored, GameData.RAMP_FOOT)
 	elif stored < n:
 		wasted[item] = wasted.get(item, 0) + (n - stored)
 		overflowed.emit(item, n - stored)
 	return stored
 
 
-## 獲物を解体して素材にする（倒した・購入した・捕獲した生物で共通）。入りきらない素材は捨てる。
+## 獲物を解体して素材にする（倒した・購入した・捕獲した生物で共通）。入りきらない素材は地点/地面へ保持する。
 func butcher(species: String, source: String = Inventory.SOURCE_HUNT) -> void:
 	var drops: Dictionary = GameData.CREATURES[species]["drops"]
 	for it in drops:
@@ -53,12 +47,88 @@ func butcher(species: String, source: String = Inventory.SOURCE_HUNT) -> void:
 
 
 # ---------------------------------------------------------------- 積載重量（画面のアイコンゲージが読む。積載量そのものの窓口でもある）
-## 積載重量 = いま置いてある量の合計（素材ごとの大きさ CargoDB.SIZES で数える）。素材棚・加工品置き場の2区画の合計。
+## 保有重量。倉庫・作業場・加工材料/出力・全運搬物・装備武器・遠征修理板。設置設備と採取道具は従来どおり対象外。
 func current_weight() -> int:
 	var n := 0
 	for bay in CargoDB.BAY_NAMES:
 		n += used_in(bay)
-	return n + equipped_weapon_weight()
+	return n + equipped_weapon_weight() + workshop_weight() + carried_weight() + expedition_weight()
+
+
+func item_weight(item: int, n := 1) -> int:
+	return CargoDB.size_of(item) * n if CargoDB.bay_of(item) >= 0 else 0
+
+
+func set_weight(items: Dictionary) -> int:
+	var n := 0
+	for it in items: n += item_weight(it, items[it])
+	return n
+
+
+func game():
+	return get_parent().game if get_parent() is MobileBase else null
+
+
+func workshop_weight() -> int:
+	var g = game()
+	if g == null or not is_instance_valid(g.processor): return 0
+	var p = g.processor
+	var n: int = set_weight(p.stock.counts) + set_weight(p.committed_inputs())
+	for it in p.output: n += item_weight(it)
+	return n
+
+
+func carried_weight() -> int:
+	var g = game()
+	if g == null: return 0
+	var n := 0
+	for w in g.workers:
+		if w.ai.state == CharacterAI.State.HAUL_MOVE and not w.ai.haul_recipe.is_empty():
+			n += set_weight(w.ai.haul_recipe["in"])
+		elif w.carrying == GameData.Item.CARCASS:
+			n += set_weight(w.carcass_cargo)
+		elif w.carrying >= 0:
+			n += item_weight(w.carrying, w.carry_n)
+		n += set_weight(w.carry_bonus)
+	return n
+
+
+func expedition_weight() -> int:
+	var g = game()
+	if g != null and g.expedition != null and g.expedition.state == "running" and g.expedition.kit and not g.expedition.kit_used:
+		return item_weight(GameData.Item.REPAIR_KIT)
+	return 0
+
+
+## 正味の加工増量だけを予約。材料自体は所有場所に一度だけ数える。
+func recipe_growth(r: Dictionary) -> int:
+	return item_weight(r.get("out", -1), r.get("n", 0)) - set_weight(r.get("in", {}))
+
+
+func processing_reserve() -> int:
+	var g = game()
+	if g == null or not is_instance_valid(g.processor): return 0
+	var p = g.processor
+	var recipes: Array = p.orders + p.incoming
+	if not p.current.is_empty(): recipes.append(p.current)
+	var n := 0
+	for r in recipes: n += maxi(0, recipe_growth(r))
+	return n
+
+
+func transform_limit(r: Dictionary) -> int:
+	var growth := recipe_growth(r)
+	if not enforce or growth <= 0: return 1000000
+	var room := max_weight() - current_weight() - processing_reserve()
+	var g = game()
+	if g != null: room -= set_weight(g.gather_room())
+	return maxi(0, floori(float(room) / growth))
+
+
+## 既に保有している物の内部移動。呼出側で元の所有場所を先に外す。
+func store_owned(item: int, n := 1, source := Inventory.SOURCE_TRANSFER) -> void:
+	if n > 0: inventory.add(item, n, source)
+
 
 
 func equipped_weapon_weight() -> int:
@@ -86,7 +156,7 @@ func free_for(item: int) -> int:
 	if not enforce or CargoDB.bay_of(item) < 0:
 		return 1000000
 	var size := CargoDB.size_of(item)
-	return maxi(0, floori(float(max_weight() - current_weight()) / float(size)))
+	return maxi(0, floori(float(max_weight() - current_weight() - processing_reserve()) / float(size)))
 
 
 ## その素材を、拠点がいま最大で何個まで持てるか（いま置いてある分＋残りの重さで置ける分）。
@@ -114,7 +184,7 @@ func drop_fit(species: String) -> float:
 	var drops: Dictionary = GameData.CREATURES[species]["drops"]
 	var total := 0
 	var fit := 0
-	var room := maxi(0, max_weight() - current_weight())
+	var room := maxi(0, max_weight() - current_weight() - processing_reserve())
 	# butcher と同じ素材順で空きを使う。予測では在庫も廃棄数も変更しない。
 	for it in drops:
 		var n := int(drops[it])

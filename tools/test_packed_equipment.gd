@@ -69,16 +69,18 @@ func full_and_departure() -> void:
 	var moved: int = main.begin_transfer_trip(GameData.Item.STORAGE_BOX, "to_storage")
 	main.storage.capacity_bonus = -CargoDB.CAPACITY
 	main.finish_transfer_trip(GameData.Item.STORAGE_BOX, "to_storage", moved)
-	check(main.processor.stock.count(GameData.Item.STORAGE_BOX) == 1 and main.processor.output.count(GameData.Item.STORAGE_BOX) == 0,
-		"運搬中に満載になっても作業場へ1個だけ戻り、出力側へ複製しない")
+	check(main.storage.count_of(GameData.Item.STORAGE_BOX) == 1 and main.processor.stock.count(GameData.Item.STORAGE_BOX) == 0 and main.processor.output.count(GameData.Item.STORAGE_BOX) == 0,
+		"運搬中の容量減少でも既存所有の1個を倉庫へ返却し、出力へ複製しない")
 	main.processor.stock.counts.clear()
 	main.processor.output.clear()
 	main.processor._out_times.clear()
+	main.storage.inventory.counts.clear()
+	park_fixture()
 	var wasted: int = main.total_wasted
-	check(main.storage.add_item(GameData.Item.STORAGE_BOX) == 0, "満載の収納は成功扱いしない")
-	check(main.processor.output.count(GameData.Item.STORAGE_BOX) == 1 and main.total_wasted == wasted, "満載の箱を作業場に保持")
+	check(main.storage.add_item(GameData.Item.STORAGE_BOX) == 0, "満載の新規取得は成功扱いしない")
+	check(main.quarry.loose.get(GameData.Item.STORAGE_BOX,0) == 1 and main.total_wasted == wasted, "外部取得の箱は残置として保持")
 	for i in 50: await step()
-	check(main.processor.output.count(GameData.Item.STORAGE_BOX) == 1 and main.processor.worker == null, "箱の回収を繰り返さず生活行動を塞がない")
+	check(main.quarry.loose.get(GameData.Item.STORAGE_BOX,0) == 1 and main.processor.worker == null, "外部残置で加工担当を拘束しない")
 	main.storage.capacity_bonus = 0
 	check(await until(func(): return main.storage.count_of(GameData.Item.STORAGE_BOX) == 1, 120), "空きができると1個だけ回収")
 	main.request_build("cargo_rack")
@@ -132,5 +134,5 @@ func manual_return() -> void:
 	var n: int = main.begin_transfer_trip(GameData.Item.STONE, "to_storage")
 	main.storage.capacity_bonus = -CargoDB.CAPACITY
 	main.finish_transfer_trip(GameData.Item.STONE, "to_storage", n)
-	check(main.processor.stock.count(GameData.Item.STONE) == 1 and main.quarry.loose.is_empty() and main.total_wasted == 0,
-		"停泊中の原材料も手動運搬の返却を1回に限定（地点の退避在庫へ複製しない）")
+	check(main.storage.count_of(GameData.Item.STONE) == 1 and main.processor.stock.count(GameData.Item.STONE) == 0 and main.quarry.loose.is_empty() and main.total_wasted == 0,
+		"停泊中の原材料も保有済みなので倉庫へ1回だけ返却（残置へ複製しない）")
