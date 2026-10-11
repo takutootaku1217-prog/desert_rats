@@ -24,7 +24,7 @@ func available() -> bool:
 
 
 func display_name() -> String:
-	return GatherDB.POINTS[kind]["name"]
+	return GatherDB.POINTS[kind]["name"] + ("（%s）" % get_meta("quarry_group") if has_meta("quarry_id") else "")
 
 
 ## 絵のコマ: 0 = たっぷり / 1 = 減った / 2 = 枯れた

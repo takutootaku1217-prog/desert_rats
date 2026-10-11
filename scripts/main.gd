@@ -5,6 +5,9 @@ extends Node2D
 ##   移動 → 生物・資源が現れる → 狩猟・採取 → 倉庫へ（獲物は解体）→ 加工（食料・燃料・鉄・修理資材）
 ##   → 消費（仲間が食べる・移動と炉で燃料・時間と移動と加工で傷む）→ 補給・修理で維持 → 移動
 
+var quarry := QuarryTrip.new()
+var quarry_ui: QuarryUI
+
 var target_speed := 60.0          # プレイヤーが決める目標速度（↑↓キー）
 var scroll_speed := 60.0          # 実際の速度。燃料切れ・走行装置の故障で遅くなる
 var storage: BaseStorage
@@ -101,6 +104,7 @@ func _ready() -> void:
 	randomize()
 	director = Director.new()       # 出来事（base や仲間より先に作る。倍率を読まれるため）
 	director.setup(self)
+	quarry.setup(self)
 	expedition = Expedition.new()
 	expedition.setup(self)
 	var bg := WorldScroll.new()
@@ -223,6 +227,9 @@ func _ready() -> void:
 	view_switch = ViewSwitchUI.new()
 	view_switch.game = self
 	add_child(view_switch)
+	quarry_ui = QuarryUI.new()
+	quarry_ui.game = self
+	add_child(quarry_ui)
 
 
 func _process(delta: float) -> void:
@@ -234,7 +241,7 @@ func _process(delta: float) -> void:
 	if GameData.ENABLE_RAIDS and base.parts[GameData.Part.HULL] <= 0.0:
 		_game_over()                   # 車体が壊れきった（襲撃・嵐・放置）
 		return
-	if GameData.ENABLE_COMBAT:
+	if GameData.ENABLE_COMBAT and not quarry.sheltered():
 		_wave_timer -= delta
 		if _wave_timer <= 0.0:
 			_spawn_wave()
@@ -244,7 +251,9 @@ func _process(delta: float) -> void:
 	if not base.has_fuel():
 		scroll_speed = minf(scroll_speed, GameData.CRAWL_SPEED)
 	scroll_speed *= director.speed_mult()      # 天候の対処方針（減速・停止）
+	scroll_speed = quarry.speed_limit(scroll_speed, delta)
 	var dist := scroll_speed * delta
+	quarry.tick(dist)
 	base.burn(dist)
 	base.wear_by(delta, dist)
 	director.tick(delta, dist)                 # 出来事の進行（予報・発生・終了）
@@ -439,6 +448,8 @@ func cancel_craft(index: int) -> void:
 
 ## 手動の制作を、作業場の材料で加工設備の注文にする（材料がそろっていて、注文の空きがあるとき）
 func _feed_crafts() -> void:
+	if quarry.recalling():
+		return
 	while not craft_queue.is_empty() and processor.free_slots() > 0:
 		var started := false
 		for q in craft_queue:
@@ -890,7 +901,7 @@ func build_room(slot: String, rtype: String) -> bool:
 
 ## 別の画面を開くとき、ほかの管理画面を閉じる（重ならないように）。keep はいま開く画面。
 func close_other_panels(keep) -> void:
-	for p in [build_ui, room_ui, policy, detail, expedition_ui, inventory_ui, craft_ui, crew_alerts]:
+	for p in [build_ui, room_ui, policy, detail, expedition_ui, inventory_ui, craft_ui, crew_alerts, quarry_ui]:
 		if p != null and p != keep and p.has_method("close"):
 			p.close()
 

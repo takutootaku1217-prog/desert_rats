@@ -58,7 +58,7 @@ static func _tick_fatigue(w, delta: float) -> void:
 	elif rest_factor(w) > 0.0:
 		var rec := CrewStatusDB.FATIGUE_REST_RATE if g.base.condition(GameData.Part.HULL) >= GameData.PART_BAD else CrewStatusDB.FATIGUE_REST_RATE_HULL_BAD
 		w.fatigue = maxf(0.0, w.fatigue - rec * (1.0 + g.room_effect("rest_rate")) * rest_factor(w) * delta)
-	elif w.ai.state != CharacterAI.State.IDLE:
+	elif w.ai.state != CharacterAI.State.IDLE and not (w.ai.state == CharacterAI.State.RETURN_BASE and not w.moving):
 		var m := maxf(_low_mult(CrewStatusDB.FATIGUE_MULT_HUNGER, w.hunger), _low_mult(CrewStatusDB.FATIGUE_MULT_HP, w.hp))
 		# 旧スタミナ消耗に掛かっていた食堂・物資庫の軽減を、疲労の蓄積に引き継ぐ。
 		w.fatigue = minf(CrewStatusDB.MAX_FATIGUE, w.fatigue + CrewStatusDB.FATIGUE_GAIN_ACTIVE * m * g.director.energy_mult() * (1.0 - g.room_effect("drain_cut")) * delta)

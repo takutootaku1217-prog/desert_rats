@@ -57,7 +57,7 @@ func tick(delta: float, dist: float) -> void:
 ## 出来事を起こす。天候・襲撃は with_forecast が true なら予報から、false なら即発生。
 func trigger(id: String, with_forecast := false) -> void:
 	var d := EventDB.def(id)
-	if d.is_empty():
+	if d.is_empty() or (d["kind"] == "attack" and game.quarry.sheltered()):
 		return
 	if EventDB.is_timed(id):
 		if with_forecast:
@@ -71,6 +71,8 @@ func trigger(id: String, with_forecast := false) -> void:
 
 func _begin_timed(id: String) -> void:
 	var d := EventDB.def(id)
+	if d["kind"] == "attack" and game.quarry.sheltered():
+		return
 	var total := randf_range(d["dur"][0], d["dur"][1])
 	var entry := {"id": id, "left": total, "total": total, "stance": default_stance.get(id, d["default"]),
 			"flee_t": 0.0, "spawned": 0}
@@ -270,6 +272,8 @@ func _pick() -> String:
 	var weights: Array = []
 	for id in EventDB.EVENTS:
 		var d: Dictionary = EventDB.EVENTS[id]
+		if d["kind"] == "attack" and game.quarry.sheltered():
+			continue
 		if EventDB.is_timed(id) and _busy(d["kind"]):
 			continue                          # 天候と襲撃は、それぞれ同時に1つだけ
 		if d.get("min_distance", 0.0) > distance:

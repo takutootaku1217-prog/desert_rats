@@ -67,6 +67,8 @@ func step_chance(members: Array, step_type: String, i: int, appr: String) -> flo
 
 ## 派遣できない理由。派遣できるなら ""。
 func block_reason(members: Array, appr: String, bring_kit: bool) -> String:
+	if game.quarry.recalling():
+		return "出発前の帰還中は新しい遠征を始められません"
 	if state != "offered":
 		return "調べられる遺跡がない"
 	if members.is_empty():

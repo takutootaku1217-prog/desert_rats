@@ -28,7 +28,9 @@ func add_item(item: int, n: int = 1, source: String = Inventory.SOURCE_ENVIRONME
 	var stored := mini(n, free_for(item))
 	if stored > 0:
 		inventory.add(item, stored, source)
-	if stored < n:
+	if stored < n and get_parent() is MobileBase and get_parent().game.quarry.sheltered():
+		get_parent().game.quarry.keep_overflow(item, n - stored)
+	elif stored < n:
 		wasted[item] = wasted.get(item, 0) + (n - stored)
 		overflowed.emit(item, n - stored)
 	return stored

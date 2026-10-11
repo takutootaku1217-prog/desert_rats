@@ -19,10 +19,11 @@ enum State {
 	REST_MOVE, REST,
 	REFUEL_TAKE, REFUEL_MOVE, REFUEL,
 	HUNT_MOVE, HUNT_ATTACK,
-	EAT_TAKE, EAT, DOWN, REST_HERE, XFER_TAKE, XFER_MOVE,
+	EAT_TAKE, EAT, DOWN, REST_HERE, XFER_TAKE, XFER_MOVE, RETURN_BASE,
 }
 
 const STATE_TEXT := {
+	State.RETURN_BASE: "出発前の帰還・待機",
 	State.IDLE: "待機中",
 	State.SEARCH: "探し中…",
 	State.NOTICE: "資源を発見！",
@@ -170,6 +171,8 @@ func tick(delta: float) -> void:
 		return
 	if eat_wait > 0.0:
 		eat_wait -= delta
+	if game.quarry.recalling() and _recall_tick(delta):
+		return
 	if _interrupt_for_life_need():
 		return
 	match state:
@@ -700,6 +703,8 @@ func _urgent_life_need() -> bool:
 
 
 func _try_start(job: int) -> bool:
+	if game.quarry.recalling():
+		return false
 	match job:
 		GameData.Job.HUNT:
 			if game.director.outdoor_blocked():
@@ -729,6 +734,8 @@ func _try_start(job: int) -> bool:
 			var best_score := 0.0
 			var inflight: Dictionary = game.gather_room()
 			for r in game.resources_root.get_children():
+				if not game.quarry.allowed_resource(r):
+					continue
 				if r.claimed_by != null or r.position.x < 60.0 or r.position.x > 1250.0:
 					continue
 				var w: float = game.gather_weight(r.item)
@@ -877,3 +884,25 @@ func on_priority_changed() -> void:
 		return
 	_release_task()
 	_set_state(State.SEARCH)
+
+
+## 出発時だけの集合。持ち物は通常の届け先へ。生活・気絶は既存の回復条件を使う。
+func _recall_tick(delta: float) -> bool:
+	if ch.carrying >= 0:
+		if state == State.GATHER:
+			_finish_trip()
+		return false
+	if ch.down or _is_rest_state() or _is_eat_state():
+		return false
+	if state != State.RETURN_BASE:
+		_release_task()
+		if _try_life_need():
+			return true
+		current_job = -1
+		_set_state(State.RETURN_BASE)
+	# 待機が長引いたときも空腹や疲労を無視しない。
+	if _try_life_need():
+		return true
+	ch.target = game.storage.access_point() + ch.slot_offset
+	ch.move_to_target(delta)
+	return true
