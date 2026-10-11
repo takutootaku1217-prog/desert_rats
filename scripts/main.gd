@@ -674,6 +674,43 @@ func unequip_tool(w, slot: String) -> bool:
 
 
 ## その道具を作る意味があるか（もう1つ増えると、全員の総合点が上がり、予備も作りかけもない）。加工の選択（choose_recipe）で使う。
+## 武器は手動1枠。遠征中・戦闘不能は変更しない。自動採取道具とは独立。
+func weapon_change_reason(w, equip: bool) -> String:
+	var reason := _tool_target_reason(w)
+	if not reason.is_empty(): return reason
+	if game_over: return "ゲーム終了中は変更できません。"
+	if w.away: return "遠征中は武器を変更できません。"
+	if w.down: return "戦闘不能の間は武器を保持します。"
+	if equip:
+		if w.weapon >= 0: return "すでに武器を装備しています。"
+		if storage.count_of(GameData.Item.SIMPLE_SPEAR) < 1: return "倉庫に簡易槍がありません。"
+	elif w.weapon < 0:
+		return "武器を装備していません。"
+	return ""
+
+
+func equip_weapon(w) -> bool:
+	if not weapon_change_reason(w, true).is_empty(): return false
+	var inv: Inventory = storage.inventory
+	# 装備と在庫を同時に移す。重量はその前後で不変。
+	inv.counts[GameData.Item.SIMPLE_SPEAR] = inv.count(GameData.Item.SIMPLE_SPEAR) - 1
+	w.weapon = GameData.Item.SIMPLE_SPEAR
+	inv.changed.emit()
+	return true
+
+
+func unequip_weapon(w) -> bool:
+	if not weapon_change_reason(w, false).is_empty(): return false
+	var item: int = w.weapon
+	var inv: Inventory = storage.inventory
+	w.weapon = -1
+	# 装備重量を既に計上しているので、満載でも同じ重量の倉庫へ戻せる。
+	inv.counts[item] = inv.count(item) + 1
+	inv.item_added.emit(item, 1, Inventory.SOURCE_TRANSFER)
+	inv.changed.emit()
+	return true
+
+
 func tool_wanted(item: int) -> bool:
 	if storage.count_of(item) + processor.pending_of(item) > 0:
 		return false

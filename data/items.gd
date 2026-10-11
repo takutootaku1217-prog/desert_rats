@@ -6,15 +6,15 @@ extends RefCounted
 ## 使い道と入手先は、加工のレシピ（GameData.RECIPES）と設備の材料（FacilityDB）から自動で数える（説明の文章を別に書かない）。
 
 ## 分類（インベントリの並び順・色。増減してよい）
-const CATEGORIES := ["素材", "加工品", "食料", "燃料", "道具"]
+const CATEGORIES := ["素材", "加工品", "食料", "燃料", "道具", "武器"]
 const CATEGORY_COLORS := {
-	"素材": Color("d9b36b"), "加工品": Color("9fb8de"), "食料": Color("8fd68f"), "燃料": Color("f29a56"), "道具": Color("c9a6f2"),
+	"武器": Color("c9a6f2"), "素材": Color("d9b36b"), "加工品": Color("9fb8de"), "食料": Color("8fd68f"), "燃料": Color("f29a56"), "道具": Color("c9a6f2"),
 }
 ## インベントリに並べる順（分類の順）
 const ORDER := [
 	GameData.Item.MEAT, GameData.Item.HIDE, GameData.Item.BONE, GameData.Item.FAT, GameData.Item.WOOD, GameData.Item.STONE, GameData.Item.IRON_ORE,
 	GameData.Item.IRON, GameData.Item.REPAIR_KIT, GameData.Item.BED_PACK, GameData.Item.STORAGE_BOX, GameData.Item.FOOD, GameData.Item.FUEL,
-	GameData.Item.HAMMER, GameData.Item.PICKAXE, GameData.Item.ADV_PICK, GameData.Item.AXE, GameData.Item.IRON_AXE,
+	GameData.Item.HAMMER, GameData.Item.PICKAXE, GameData.Item.ADV_PICK, GameData.Item.AXE, GameData.Item.IRON_AXE, GameData.Item.SIMPLE_SPEAR,
 ]
 
 
@@ -32,6 +32,8 @@ static func tex(item: int) -> Texture2D:
 
 
 static func category_of(item: int) -> String:
+	if item in GameData.WEAPON_ITEMS:
+		return "武器"
 	if item in GameData.TOOL_ITEMS:
 		return "道具"
 	if item == GameData.Item.FOOD:

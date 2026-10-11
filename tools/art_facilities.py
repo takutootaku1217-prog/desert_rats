@@ -128,9 +128,20 @@ def packed_icon(box=False):
     return p
 
 
+def spear_icon():
+    p = Px(12, 12)
+    for i in range(2, 10):
+        p.set(i, 11-i, WOOD_L)
+        p.set(i, 12-i, WOOD_D)
+    p.rect(8, 1, 3, 3, C["steel_m"])
+    p.set(10, 0, C["steel_h"])
+    p.set(9, 1, C["steel_l"])
+    return p
+
+
 def all_images():
     """(フォルダ, ファイル名, 絵) の一覧"""
-    l = [("resources", "item_bed_pack.png", packed_icon()), ("resources", "item_storage_box.png", packed_icon(True)), ("base", "hull.png", hull()), ("base", "workbench.png", workbench_sheet())]
+    l = [("resources", "item_simple_spear.png", spear_icon()), ("resources", "item_bed_pack.png", packed_icon()), ("resources", "item_storage_box.png", packed_icon(True)), ("base", "hull.png", hull()), ("base", "workbench.png", workbench_sheet())]
     for i in range(3):
         l.append(("base", f"bed_{i}.png", bed(i)))
     for i in range(3):

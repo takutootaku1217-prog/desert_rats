@@ -451,7 +451,7 @@ func tick(delta: float) -> void:
 			ch.target = enemy.position + Vector2(-30, 0)
 			ch.move_to_target(delta)
 			ch.attacking = true
-			enemy.take_damage(ATTACK_DPS * ch.skill_mult(GameData.Job.COMBAT) * delta)
+			enemy.take_damage(ATTACK_DPS * ch.skill_mult(GameData.Job.COMBAT) * ch.weapon_mult() * delta)
 			ch.fatigue = minf(CrewStatusDB.MAX_FATIGUE, ch.fatigue + CrewStatusDB.FATIGUE_COMBAT_GAIN * delta)
 
 		# ---- 休憩 ----

@@ -20,6 +20,7 @@ var carrying := -1            # 持っている Item（-1 = なし）
 var carrying_species := ""   # 獲物を運んでいるときの生物の種類
 var carry_n := 1              # 持っている個数（採取ポイントでは袋いっぱいまで。それ以外は1）
 var carry_bonus := {}         # 採取の副産物 {Item: 個数}（倉庫に運ぶとき一緒に入れる）
+var weapon := -1             # 個人武器1枠。倉庫在庫とは別所有。戦闘不能でも保持。
 var tools := {}               # 持っている採取の道具 {枠: Item}（data/gathering.gd。持たない枠は素手）
 var speed := 120.0
 var target := Vector2.ZERO
@@ -145,7 +146,12 @@ func arrive(new_fatigue: float) -> void:
 	ai._set_state(CharacterAI.State.SEARCH)
 
 
-## 採取ポイント kind に使う道具（-1 = 素手）。道具は枠（採掘・伐採）ごとに1つ。
+## 迎撃時の本人の攻撃補正。採取と狩猟には適用しない。
+func weapon_mult() -> float:
+	return GameData.SIMPLE_WEAPON_MULT if weapon == GameData.Item.SIMPLE_SPEAR else 1.0
+
+
+## 採取ポイント kind に使う道具（-1 = 素手）。採掘・伐採の枠は武器と独立。
 func tool_for(kind: String) -> int:
 	return int(tools.get(GatherDB.slot_of_point(kind), -1))
 

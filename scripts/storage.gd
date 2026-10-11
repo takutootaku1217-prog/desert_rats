@@ -30,7 +30,7 @@ func add_item(item: int, n: int = 1, source: String = Inventory.SOURCE_ENVIRONME
 		inventory.add(item, stored, source)
 	if stored < n and source == Inventory.SOURCE_TRANSFER:
 		pass # 手動運搬の返却は Main.finish_transfer_trip が1回だけ行う。
-	elif stored < n and item in GameData.PACKED_ITEMS and get_parent() is MobileBase:
+	elif stored < n and (item in GameData.PACKED_ITEMS or item in GameData.WEAPON_ITEMS) and get_parent() is MobileBase:
 		var p = get_parent().processor
 		for i in n - stored:
 			p.output.append(item)
@@ -58,6 +58,15 @@ func current_weight() -> int:
 	var n := 0
 	for bay in CargoDB.BAY_NAMES:
 		n += used_in(bay)
+	return n + equipped_weapon_weight()
+
+
+func equipped_weapon_weight() -> int:
+	var n := 0
+	if get_parent() is MobileBase:
+		for w in get_parent().game.workers:
+			if is_instance_valid(w) and w.weapon in GameData.WEAPON_ITEMS:
+				n += CargoDB.size_of(w.weapon)
 	return n
 
 

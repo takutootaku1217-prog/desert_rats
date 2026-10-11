@@ -195,10 +195,10 @@ func _one(n: int, minutes: float, scale: float, seed_base: int, events_on: bool,
 			var mit: int = GameData.RAW_ITEMS[randi() % GameData.RAW_ITEMS.size()]
 			main.request_transfer(mit, 3 + randi() % 7, "to_workshop")
 			if randi() % 2 == 0:
-				var items: Array = ItemDB.all().filter(func(it): return comparison not in ["legacy_inputs", "legacy_both"] or it not in GameData.PACKED_ITEMS)
+				var items: Array = ItemDB.all().filter(func(it): return comparison not in ["legacy_inputs", "legacy_both"] or it not in GameData.PACKED_ITEMS and it not in GameData.WEAPON_ITEMS)
 				var back: int = items[randi() % items.size()]
 				main.request_transfer(back, 1 + randi() % 5, "to_storage")
-			var recipes: Array = GameData.RECIPES.filter(func(r): return comparison not in ["legacy_inputs", "legacy_both"] or r["out"] not in GameData.PACKED_ITEMS)
+			var recipes: Array = GameData.RECIPES.filter(func(r): return comparison not in ["legacy_inputs", "legacy_both"] or r["out"] not in GameData.PACKED_ITEMS and r["out"] not in GameData.WEAPON_ITEMS)
 			var rec: Dictionary = recipes[randi() % recipes.size()]
 			main.request_craft(rec["id"], 1 + randi() % 3)
 			manual_reqs += 1

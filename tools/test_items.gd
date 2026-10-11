@@ -79,7 +79,7 @@ func _test_itemdb() -> void:
 	var ok := true
 	for it in all:
 		ok = ok and ItemDB.name_of(it) != "?" and ItemDB.CATEGORIES.has(ItemDB.category_of(it)) and ItemDB.tex(it) != null
-	check(ok and all.size() == 18, "インベントリに出る18種すべてに、名前・分類・絵がある")
+	check(ok and all.size() == 19, "インベントリに出る19種すべてに、名前・分類・絵がある")
 	var covered := true
 	for it in GameData.RAW_ITEMS + GameData.PRODUCT_ITEMS + GameData.TOOL_ITEMS:
 		covered = covered and all.has(it)
@@ -154,7 +154,7 @@ func _test_craftdb() -> void:
 	var es := CraftDB.entries()
 	check(es.size() == GameData.RECIPES.size() + FacilityDB.ids().size(), "一覧は、加工のレシピ（%d）と設備の建設（%d）の全部" % [GameData.RECIPES.size(), FacilityDB.ids().size()])
 	var cats := CraftDB.categories_in_use()
-	check(cats.has("道具") and cats.has("建設") and cats.has("料理") and cats.has("加工") and not cats.has("装備"), "分類は、エントリのあるものだけ出る（%s。装備・その他は、まだない）" % str(cats))
+	check(cats.has("道具") and cats.has("建設") and cats.has("料理") and cats.has("加工") and cats.has("装備") and not cats.has("その他"), "分類は、エントリのあるものだけ出る（%s。装備あり・その他なし）" % str(cats))
 	var known := true
 	for e in es:
 		known = known and CraftDB.CATEGORIES.has(e["cat"])
@@ -417,7 +417,7 @@ func _test_ui() -> void:
 	inv._unhandled_input(_key(KEY_ESCAPE))
 	# ---- 制作
 	check(craft._cat == "道具" and craft._list.get_child_count() == 5, "制作の画面: 分類「道具」に5つ（簡易ハンマー・簡易の斧・鉄製ピッケル・鉄の斧・高性能ピッケル）")
-	check(_find_button(craft, "道具") != null and _find_button(craft, "建設") != null and _find_button(craft, "料理") != null and _find_button(craft, "加工") != null and _find_button(craft, "装備") == null, "分類の切り替え（道具・建設・料理・加工。エントリのない分類は出ない）")
+	check(_find_button(craft, "道具") != null and _find_button(craft, "建設") != null and _find_button(craft, "料理") != null and _find_button(craft, "加工") != null and _find_button(craft, "装備") != null, "分類の切り替え（道具・建設・料理・加工・装備。エントリのない分類は出ない）")
 	craft.open_entry("tool_hammer")
 	main.processor.stock.counts.clear()
 	craft._refresh(true)

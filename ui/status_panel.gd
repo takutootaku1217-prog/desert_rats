@@ -128,6 +128,7 @@ func _process(_d: float) -> void:
 	var tip := "積載重量 %d / %d" % [st.current_weight(), st.max_weight()]
 	for bay in CargoDB.BAY_NAMES:
 		tip += "\n　%s %d" % [CargoDB.BAY_NAMES[bay], st.used_in(bay)]
+	tip += "\n　装備中の武器 %d" % st.equipped_weapon_weight()
 	if game.total_wasted > 0:
 		tip += "\n　捨てた %d 個" % game.total_wasted
 	_set_gauge("weight", float(st.current_weight()), float(st.max_weight()), str(st.current_weight()), tip)
