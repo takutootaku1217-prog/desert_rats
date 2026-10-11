@@ -86,3 +86,16 @@ static func sources_of(item: int) -> Array:
 	if not makers_of(item).is_empty():
 		l.append("加工")
 	return l
+
+## 選択詳細用。効果値は実処理と同じ定義から読み、平常HUDには増やさない。
+static func effect_text(item: int) -> String:
+	match item:
+		GameData.Item.BED_PACK:
+			return "設置後に1人が眠れます（最大%d台）。基礎回復は疲労−%.1f/秒・HP＋%.1f/秒。簡易休憩はその%d%%。部屋の補正が加わり、拠点HP%d未満では疲労回復が半減します。未設置は重量%d、設置後は重量対象外。" % [FacilityDB.max_of("bed"), CrewStatusDB.FATIGUE_REST_RATE, CrewStatusDB.HP_REST_RATE, roundi(CrewStatusDB.REST_IN_PLACE_RATE*100), GameData.PART_BAD, CargoDB.size_of(item)]
+		GameData.Item.STORAGE_BOX:
+			return "設置1個で積載容量＋%d（最大%d個）。未設置は重量%dで、容量は増えません。設置後は重量対象外。" % [FacilityDB.def("cargo_rack")["capacity_bonus"], FacilityDB.max_of("cargo_rack"), CargoDB.size_of(item)]
+		GameData.Item.SIMPLE_SPEAR:
+			return "Cの個体情報で装備すると、本人の迎撃攻撃＋%d%%。狩猟や他の仲間には加算されません。重量%dは装備中も計上します。" % [roundi((GameData.SIMPLE_WEAPON_MULT-1.0)*100), CargoDB.size_of(item)]
+		GameData.Item.REPAIR_KIT:
+			return "1枚で部位の耐久＋%.1f（上限100）。右上の使用ボタンは、居住区・走行装置・加工設備のうち最も傷んだ未予約部位を自動選択。燃料・仲間HPは回復しません。" % GameData.REPAIR_AMOUNT
+	return ""

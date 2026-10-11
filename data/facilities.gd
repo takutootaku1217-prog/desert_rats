@@ -50,7 +50,7 @@ const FACILITIES := {
 		"effects": [],
 	},
 	"bed": {
-		"name": "寝床（ベッド）", "desc": "製作した寝床を設置。最大3台、休憩の効果は従来と同じ",
+		"name": "寝床（ベッド）", "desc": "製作した寝床を設置。簡易休憩より速く回復（詳しくは効果・手順）",
 		"packed_item": GameData.Item.BED_PACK, "pack_recipe": "bed_pack",
 		"cost": {GameData.Item.HIDE: 2, GameData.Item.BONE: 1}, "time": 4.0, "field": GameData.Field.DEV,
 		"max": 3, "requires": "workbench", "station": false,
@@ -68,7 +68,7 @@ const FACILITIES := {
 		"capacity_bonus": 60, "effects": [],
 	},
 	"supply_cache": {
-		"name": "物資庫", "desc": "修理資材を使い、消耗品の蓄えを整える棚。仲間の疲労度が溜まりにくくなる（-8%）",
+		"name": "物資庫", "desc": "応急修理板を使い、消耗品の蓄えを整える棚。仲間の疲労度が溜まりにくくなる（-8%）",
 		"cost": {GameData.Item.REPAIR_KIT: 3, GameData.Item.WOOD: 2}, "time": 5.0, "field": GameData.Field.DEV,
 		"max": 1, "requires": "workbench", "station": false,
 		"room": "workshop", "dx": [51.0],

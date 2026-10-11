@@ -170,7 +170,7 @@ func _build_offer(ex: Expedition) -> void:
 	# 持ち物
 	var kit_have: int = game.storage.count_of(GameData.Item.REPAIR_KIT)
 	var cb := CheckBox.new()
-	cb.text = "修理資材を1個持たせる（所持 %d。罠・守護者・危険地帯の最初の失敗の被害を防ぐ）" % kit_have
+	cb.text = "応急修理板を1枚持たせる（所持 %d。罠・守護者・危険地帯の最初の失敗の被害を防ぐ）" % kit_have
 	cb.add_theme_font_override("font", GameData.font())
 	cb.add_theme_color_override("font_color", UIKit.C_TEXT)
 	cb.button_pressed = _kit

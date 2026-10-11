@@ -77,7 +77,7 @@ func _ready() -> void:
 	_totals = UIKit.lbl("", 12, UIKit.C_DIM)
 	v.add_child(_totals)
 	_repair = UIKit.button("応急修理板を使う", func(): game.emergency_repair())
-	_repair.tooltip_text = "最も傷んだ未予約の部位を25回復（上限100）。燃料・仲間HPは回復しません"
+	_repair.tooltip_text = "最も傷んだ未予約の部位を%d回復（上限100）。燃料・仲間HPは回復しません" % GameData.REPAIR_AMOUNT
 	v.add_child(_repair)
 
 

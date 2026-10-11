@@ -129,6 +129,7 @@ func _build_left(col: VBoxContainer) -> void:
 		head.add_child(name_l)
 		var state := UIKit.lbl("", 14, UIKit.C_DIM)
 		head.add_child(state)
+		head.add_child(UIKit.button("効果・手順", func(): game.craft_ui.open_entry("build:" + id)))
 		v.add_child(UIKit.lbl(d["desc"], 12, UIKit.C_DIM))
 		var cost_row := HBoxContainer.new()
 		cost_row.add_theme_constant_override("separation", 12)
@@ -161,7 +162,7 @@ func _build_left(col: VBoxContainer) -> void:
 
 # ---------------------------------------------------------------- 右: 製作
 func _build_right(col: VBoxContainer) -> void:
-	col.add_child(UIKit.lbl("── 製作（仲間が自動で作る。作る優先は 運営の方針 (P) ） ──", 15, UIKit.C_ACCENT))
+	col.add_child(UIKit.lbl("── 製作一覧（個別依頼 F ／ 自動優先 P） ──", 15, UIKit.C_ACCENT))
 	# 手作業 → 製作設備の順（設備は data/facilities.gd で "station": true のもの）
 	var stations: Array = [""]
 	for id in FacilityDB.ids():
@@ -177,7 +178,8 @@ func _build_right(col: VBoxContainer) -> void:
 			var row := HBoxContainer.new()
 			row.add_theme_constant_override("separation", 6)
 			col.add_child(row)
-			var nm := UIKit.lbl(r["name"], 14, UIKit.C_TEXT, 190)
+			var row_name: String = ItemDB.name_of(r["out"]) + "（未設置）" if r["out"] in GameData.PACKED_ITEMS else r["name"]
+			var nm := UIKit.lbl(row_name, 14, UIKit.C_TEXT, 190)
 			row.add_child(nm)
 			row.add_child(UIKit.lbl(GameData.recipe_text(r), 12, UIKit.C_DIM))
 			var stars := UIKit.lbl("", 13, UIKit.C_ACCENT)
@@ -204,7 +206,7 @@ func _refresh() -> void:
 		var state := "未建設 %d/%d" % [built, mx]
 		var scol: Color = UIKit.C_TEXT
 		if built >= mx:
-			state = "完成 %d/%d" % [built, mx]
+			state = ("設置済み %d/%d" if d.has("packed_item") else "完成 %d/%d") % [built, mx]
 			scol = C_OK
 		elif not game.facility_unlocked(id):
 			state = "まだ建てられない"

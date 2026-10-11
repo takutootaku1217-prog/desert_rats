@@ -929,7 +929,7 @@ func emergency_repair() -> bool:
 	var target := emergency_repair_target()
 	if target < 0 or not storage.take_item(GameData.Item.REPAIR_KIT): return false
 	base.repair(target)
-	director.note("応急修理: %sの耐久+25（上限100）。燃料や仲間HPは回復しない" % GameData.PART_NAMES[target])
+	director.note("応急修理板: %sの耐久+%d（上限100）。燃料や仲間HPは回復しない" % [GameData.PART_NAMES[target], GameData.REPAIR_AMOUNT])
 	return true
 
 

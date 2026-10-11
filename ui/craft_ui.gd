@@ -82,7 +82,12 @@ func _ready() -> void:
 	_detail = VBoxContainer.new()
 	_detail.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_detail.add_theme_constant_override("separation", 8)
-	cols.add_child(_detail)
+	var detail_scroll := ScrollContainer.new()
+	detail_scroll.custom_minimum_size = Vector2(620, 540)
+	detail_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	detail_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	cols.add_child(detail_scroll)
+	detail_scroll.add_child(_detail)
 
 
 # ---------------------------------------------------------------- 開閉
@@ -184,6 +189,7 @@ func _refresh(force := false) -> void:
 		parts.append("%s:%s" % [e["key"], ev["state"]])
 	var sel := selected_entry()
 	if not sel.is_empty():
+		parts.append(CraftDB.detail_text(sel, game))
 		var evs: Dictionary = CraftDB.evaluate(sel, game, _qty_val)
 		for r in evs["rows"]:
 			parts.append("%d/%d/%d" % [r["item"], r["have"], r["in_storage"]])
@@ -290,6 +296,13 @@ func _rebuild_detail() -> void:
 		out.add_child(ItemWidgets.icon_frame(int(e["out"]), 24.0))
 		out.add_child(UIKit.lbl("×%d" % (int(e["n"]) * qty), 18, UIKit.C_TEXT))
 		out.add_child(ItemWidgets.chip(FacilityDB.name_of(String(e["station"])) if e["station"] != "" else "手作業", Color("6f7a8c"), 12))
+	var explanation := CraftDB.detail_text(e, game)
+	if explanation != "":
+		var effect := UIKit.lbl(explanation, 13, UIKit.C_TEXT)
+		effect.name = "EffectDetail"
+		effect.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		effect.custom_minimum_size = Vector2(540, 0)
+		_detail.add_child(effect)
 	# 解放待ち・不可の理由と、何をすれば解放されるか
 	if ev["reason"] != "" and state != "done":
 		var rr := HBoxContainer.new()

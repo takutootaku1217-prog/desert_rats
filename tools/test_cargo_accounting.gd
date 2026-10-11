@@ -86,6 +86,7 @@ func finite_yield():
 			w.ai._work_point(0.2)
 		w.unload_owned()
 	check(pt.remaining == 0 and main.storage.count_of(GameData.Item.IRON_ORE) == 6, "消費鉱床6=回収6。袋の区切りで永久掘り損なし")
+	check(main.quarry.visit_generated.get(GameData.Item.IRON_ORE,0) == 6, "現地生成記録は回収した主素材6に一致")
 	pt.remaining = 1
 	pt.work = 0.25
 	w.ai.res = pt

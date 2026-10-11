@@ -83,7 +83,7 @@ func block_reason(members: Array, appr: String, bring_kit: bool) -> String:
 	if game.storage.count_of(GameData.Item.FOOD) < members.size() * ExpeditionDB.FOOD_PER_MEMBER:
 		return "持たせる食料が足りない（%d個必要）" % (members.size() * ExpeditionDB.FOOD_PER_MEMBER)
 	if bring_kit and game.storage.count_of(GameData.Item.REPAIR_KIT) < 1:
-		return "修理資材がない"
+		return "応急修理板がない"
 	return ""
 
 
@@ -172,7 +172,7 @@ func _resolve_step() -> void:
 		var absorbed := kit and not kit_used and t != "explore"
 		if absorbed:
 			kit_used = true                       # 修理資材が身代わりになる
-			_add_log("%s: %s…修理資材で被害を防いだ" % [def["name"], def["ng"]])
+			_add_log("%s: %s…応急修理板で被害を防いだ" % [def["name"], def["ng"]])
 		else:
 			for w in party:
 				w.fatigue = minf(CrewStatusDB.MAX_FATIGUE, w.fatigue + float(def["penalty"]))

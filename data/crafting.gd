@@ -37,7 +37,7 @@ static func category_of_recipe(r: Dictionary) -> String:
 static func entries() -> Array:
 	var l: Array = []
 	for r in GameData.RECIPES:
-		l.append({"key": r["id"], "kind": "recipe", "id": r["id"], "name": r["name"], "cat": category_of_recipe(r), "in": r["in"], "out": int(r["out"]),
+		l.append({"key": r["id"], "kind": "recipe", "id": r["id"], "name": (ItemDB.name_of(int(r["out"])) + "の製作（未設置）") if int(r["out"]) in GameData.PACKED_ITEMS else r["name"], "cat": category_of_recipe(r), "in": r["in"], "out": int(r["out"]),
 				"n": int(r["n"]), "time": float(r["time"]), "station": GameData.recipe_station(r), "recipe": r})
 	for id in FacilityDB.ids():
 		var d: Dictionary = FacilityDB.def(id)
@@ -124,7 +124,7 @@ static func evaluate(e: Dictionary, game, qty: int = 1) -> Dictionary:
 	if not room_ok:
 		res["state"] = "blocked"
 		res["reason"] = "置き場がいっぱい"
-		res["hint"] = "倉庫の枠を空ける（使う・枠を増やす）"
+		res["hint"] = "保有重量を減らすか、収納ボックスを設置して容量を増やす"
 		return res
 	res["state"] = "ok"
 	return res
@@ -163,3 +163,15 @@ static func _evaluate_build(e: Dictionary, game, res: Dictionary) -> Dictionary:
 		return res
 	res["state"] = "ok"
 	return res
+
+static func detail_text(e: Dictionary, game) -> String:
+	var item: int = int(e["out"])
+	var stage := ""
+	if e["kind"] == "build":
+		var d := FacilityDB.def(e["id"])
+		if not d.has("packed_item"): return String(d["desc"])
+		item = int(d["packed_item"])
+		stage = "設置段階：倉庫の製作物を1個使用。無ければ材料から製作して設置します。設置済み%d/%d、倉庫の未設置%d個。\n" % [game.base.facility_count(e["id"]),d["max"],game.storage.count_of(item)]
+	elif item in GameData.PACKED_ITEMS:
+		stage = "製作段階：作業場で未設置品を作り、倉庫へ収納。効果を得るにはBで設置します。\n"
+	return stage + ItemDB.effect_text(item)

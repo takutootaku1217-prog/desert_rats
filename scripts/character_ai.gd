@@ -37,7 +37,7 @@ const STATE_TEXT := {
 	State.PROCESS: "加工中",
 	State.COMBAT_MOVE: "敵へ向かう",
 	State.COMBAT: "攻撃中！",
-	State.REPAIR_TAKE: "修理資材を取りに行く",
+	State.REPAIR_TAKE: "応急修理板を取りに行く",
 	State.REPAIR_MOVE: "修理へ向かう",
 	State.REPAIR: "修理中",
 	State.REST_MOVE: "ベッドへ向かう",
@@ -509,6 +509,7 @@ func _work_point(delta: float) -> void:
 			return
 		pt.work -= 1.0
 		pt.remaining -= 1
+		game.quarry.record_generated(pt.item, 1, pt.has_meta("quarry_id"))
 		if ch.carrying < 0:
 			ch.carrying = pt.item
 			ch.carry_source = Inventory.SOURCE_ENVIRONMENT
@@ -516,6 +517,7 @@ func _work_point(delta: float) -> void:
 		else: ch.carry_n += 1
 		for it in gather_ev["bonus"]:
 			if randf() < float(gather_ev["bonus"][it]):
+				game.quarry.record_generated(it, 1, pt.has_meta("quarry_id"))
 				if game.storage.free_for(it) > 0:
 					ch.carry_bonus[it] = int(ch.carry_bonus.get(it, 0)) + 1
 				elif game.quarry.sheltered():

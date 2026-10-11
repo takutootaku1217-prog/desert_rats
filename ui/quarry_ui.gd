@@ -16,6 +16,8 @@ var _confirm_text: Label
 var _confirm_yes: Button
 var _confirm_no: Button
 var _discard_snapshot := {}
+var _report: ColorRect
+var _report_text: Label
 
 func _ready() -> void:
 	layer = 27
@@ -51,6 +53,7 @@ func _ready() -> void:
 	_recall = UIKit.button("採取を切り上げ、全員帰還", func(): game.quarry.request_departure())
 	_leave = UIKit.button("街道へ出発", func(): game.quarry.leave())
 	for b in [_go, _recall, _leave]: row.add_child(b)
+	row.add_child(UIKit.button("採取記録", func(): _report_text.text = game.quarry.report_text(); _report.show()))
 	_cancel = UIKit.button("移動／帰還を取り消す", func(): game.quarry.cancel())
 	box.add_child(_cancel)
 	_discard = UIKit.button("残置品を放棄して出発…", _ask_discard)
@@ -76,6 +79,23 @@ func _ready() -> void:
 	_confirm_no = UIKit.button("取り消す（捨てない）", func(): _confirm.hide(); _discard_snapshot.clear())
 	confirm_box.add_child(_confirm_yes)
 	confirm_box.add_child(_confirm_no)
+	_report = ColorRect.new()
+	_report.color = Color(0,0,0,0.8)
+	_report.set_anchors_preset(Control.PRESET_FULL_RECT)
+	add_child(_report)
+	var report_panel := PanelContainer.new()
+	report_panel.position = Vector2(250,145)
+	report_panel.custom_minimum_size = Vector2(780,380)
+	report_panel.add_theme_stylebox_override("panel", UIKit.box(Color("202329"),Color("636b7a"),3,18))
+	_report.add_child(report_panel)
+	var report_box := VBoxContainer.new()
+	report_box.add_theme_constant_override("separation",18)
+	report_panel.add_child(report_box)
+	_report_text = UIKit.lbl("",18)
+	_report_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_report_text.custom_minimum_size = Vector2(720,280)
+	report_box.add_child(_report_text)
+	report_box.add_child(UIKit.button("閉じる",func(): _report.hide()))
 	close()
 
 func _ask_discard() -> void:
@@ -103,6 +123,7 @@ func close() -> void:
 	_overlay.hide()
 	_backdrop.hide()
 	if _confirm != null: _confirm.hide()
+	if _report != null: _report.hide()
 	_discard_snapshot.clear()
 
 func is_open() -> bool:
@@ -111,10 +132,11 @@ func is_open() -> bool:
 func _process(_delta: float) -> void:
 	_entry.text = "採取地点 (G)" if game.quarry.state == "road" else "採取地点 (G) ・ " + {"approach":"移動中", "parked":"停車中", "recall":"帰還待ち", "returning":"復帰中"}.get(game.quarry.state, "")
 	if is_open(): _refresh()
+	if _report.visible: _report_text.text = game.quarry.report_text()
 
 func _refresh() -> void:
 	var q = game.quarry
-	_info.text = "%s\n\n鉱床残量：近場 %d ／ 奥の密集群 %d\n近場は短い往復。奥は歩く距離が長く、食料と休憩の準備が必要です。\n残量1から主素材1個。道具と能力で採取時間が変わります。\n滞在中も食事・休憩・修理・天候は進みます。食材は自動補充されません。\n搬入口の残置：%s\n採取済みの残量は再訪しても補充されません（この実行中のみ）。" % [q.status_text(), q.group_left("近場"), q.group_left("奥"), q.cargo_text()]
+	_info.text = "%s\n\n鉱床残量：近場 %d ／ 奥の密集群 %d\n近場は短い往復。奥は歩く距離が長く、食料と休憩の準備が必要です。\n残量1から主素材1個。道具と能力で採取時間が変わります。\n滞在中も食事・休憩・修理・天候は進みます。食材は自動補充されません。\n搬入口の残置：%s\n採取済みの分は再訪しても復活せず、未採取の残量を保持します（この実行中のみ）。" % [q.status_text(), q.group_left("近場"), q.group_left("奥"), q.cargo_text()]
 	_range.text = "採取範囲：近場のみ（押すと全体）" if q.near_only else "採取範囲：全体（押すと近場のみ）"
 	_go.disabled = q.state != "road" or game.game_over
 	_recall.disabled = q.state != "parked" or game.game_over
@@ -128,7 +150,9 @@ func _unhandled_input(event: InputEvent) -> void:
 			if is_open(): close()
 			else: open()
 		elif event.keycode == KEY_ESCAPE and is_open():
-			if _confirm.visible:
+			if _report.visible:
+				_report.hide()
+			elif _confirm.visible:
 				_confirm.hide()
 				_discard_snapshot.clear()
 			else: close()
