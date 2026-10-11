@@ -477,7 +477,19 @@ func gather_room() -> Dictionary:
 func has_room_for(r, inflight: Dictionary) -> bool:
 	if r.item == GameData.Item.CARCASS:
 		return storage.drop_fit(r.species) >= CargoDB.MIN_DROP_FIT
-	return storage.free_for(r.item) - int(inflight.get(r.item, 0)) > 0
+	return gather_free_for(r.item, inflight) > 0
+
+
+## 他の回収予約を共有重量で差し引いた、item の残り個数。道具と制限なしは従来どおり。
+func gather_free_for(item: int, inflight: Dictionary) -> int:
+	if not storage.enforce or CargoDB.bay_of(item) < 0:
+		return storage.free_for(item)
+	var reserved_weight := 0
+	for it in inflight:
+		if CargoDB.bay_of(it) >= 0:
+			reserved_weight += int(inflight[it]) * CargoDB.size_of(it)
+	var room := storage.max_weight() - storage.current_weight() - reserved_weight
+	return maxi(0, floori(float(room) / CargoDB.size_of(item)))
 
 
 ## その生物を狩ってよいか（倒した獲物の素材が倉庫に入るか）

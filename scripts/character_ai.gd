@@ -757,7 +757,7 @@ func _try_start(job: int) -> bool:
 			res.claimed_by = ch
 			if res is GatherPoint:
 				# 袋の大きさ: 倉庫の空き枠（ほかの人が運んでいる分を除く）と袋の上限のうち小さいほう
-				bag_limit = clampi(game.storage.free_for(res.item) - int(inflight.get(res.item, 0)), 1, GatherDB.CARRY_MAX)
+				bag_limit = clampi(game.gather_free_for(res.item, inflight), 1, GatherDB.CARRY_MAX)
 				res.reserved = bag_limit
 				gather_ev = {}
 				bag_frac = 0.0

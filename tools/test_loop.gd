@@ -2,6 +2,7 @@ extends SceneTree
 ## 基本ループの確認と、異常（詰まり・予約の取り残し・アイテムの消失など）の監視。実行:
 ##   Godot --headless --path . -s res://tools/test_loop.gd -- <ゲーム内の分> <回数> <倍速> <乱数の種> <出来事 0/1> [シナリオ]
 ## 例: -- 10 2 12 500 0   … 出来事なしで10分を2回（基本ループだけを見る）／ -- 15 3 12 700 1 … 出来事あり
+## vanilla: 製品の初期設備・物資・仲間をそのまま使う（出来事は引数で指定）。
 ## シナリオ（省略すると normal）: stop（90秒で拠点を止める）／ fast（速度200）／ slow（速度10）／ rawfull（素材棚が満杯から始める）／
 ##   prodfull（加工品置き場が満杯から始める）／ priostress（仲間の優先度と加工の方針を数秒ごとに乱数で変える）／
 ##   manual（プレイヤーが手で、運搬の依頼（倉庫 ⇄ 作業場）と手動の制作を、20秒ごとに乱数で頼み続ける。自動の加工と一緒に回っても詰まらないか）
@@ -47,12 +48,14 @@ func _initialize() -> void:
 
 
 func _one(n: int, minutes: float, scale: float, seed_base: int, events_on: bool, scenario: String) -> void:
-	seed(seed_base + n)
-	FacilityDB.start_all = scenario != "build"      # 設備は最初から全部ある状態で確かめる（シナリオ build だけ、設備なしで始めて依頼していく）
+	FacilityDB.start_all = scenario not in ["build", "vanilla"]      # normal 等は設備あり。build は建設を依頼、vanilla は製品の設備なしを維持。
 	var main = load("res://scenes/main.tscn").instantiate()
 	root.add_child(main)
-	await process_frame
-	await process_frame
+	if not main.is_node_ready():
+		await main.ready
+	# _ready の randomize より後、世界の最初の process より前に固定する。
+	seed(seed_base + n)
+	print("seed=%d / fixed-fps=60 推奨 / 設備一括付与=%s" % [seed_base + n, FacilityDB.start_all])
 	var d: Director = main.director
 	d.enabled = events_on
 	var st: BaseStorage = main.storage
@@ -67,6 +70,7 @@ func _one(n: int, minutes: float, scale: float, seed_base: int, events_on: bool,
 		"prodfull":
 			for it in GameData.PRODUCT_ITEMS:
 				st.inventory.counts[it] = st.quota_of(it)
+	var next_report := 300.0
 	var next_stress := 5.0
 	var next_manual := 20.0
 	var W: Array = main.workers
@@ -137,10 +141,18 @@ func _one(n: int, minutes: float, scale: float, seed_base: int, events_on: bool,
 
 	Engine.time_scale = scale
 	while d.elapsed < minutes * 60.0 and not main.game_over:
+		var previous := {}
+		for w in W:
+			previous[w] = {"state": w.ai.state, "carry": w.carrying, "hunger": w.hunger,
+				"fuel": main.base.fuel, "parts": main.base.parts.duplicate(), "part": w.ai.repair_part,
+				"eaten": main.total_eaten, "refuel": main.base.total_refuel, "repair": main.base.total_repair}
 		await process_frame
 		var t: float = d.elapsed
 		var dt: float = t - last_t
 		last_t = t
+		if t >= next_report:
+			print("進捗: 第%d回 %.0f/%.0f分 食事%d回 補給%d回 修理%d回" % [n, t / 60.0, minutes, main.total_eaten, main.base.total_refuel, main.base.total_repair])
+			next_report += 300.0
 		if main.hungry:
 			hungry_t += dt
 		if scenario == "build":
@@ -204,10 +216,6 @@ func _one(n: int, minutes: float, scale: float, seed_base: int, events_on: bool,
 			mark.call("7 加工設備へ送られる")
 		if P.total_done > 0:
 			mark.call("8 加工される")
-		if main.base.total_refuel > 0:
-			mark.call("L3 燃料補給")
-		if main.base.total_repair > 0:
-			mark.call("L4 修理")
 
 		# ---- 仲間ごと ----
 		for w in W:
@@ -222,8 +230,17 @@ func _one(n: int, minutes: float, scale: float, seed_base: int, events_on: bool,
 				mark.call("3 資源を発見")
 			if s in [CharacterAI.State.REST_MOVE, CharacterAI.State.REST, CharacterAI.State.REST_HERE]:
 				mark.call("L1 休憩")
-			if s == CharacterAI.State.EAT:
+			var before: Dictionary = previous[w]
+			if before["state"] == CharacterAI.State.EAT and main.total_eaten > before["eaten"] \
+					and before["carry"] == GameData.Item.FOOD and w.carrying < 0 and w.hunger > before["hunger"]:
 				mark.call("L2 食事")
+			if before["state"] == CharacterAI.State.REFUEL and main.base.total_refuel > before["refuel"] \
+					and before["carry"] in GameData.FUEL_ITEMS and w.carrying < 0 and main.base.fuel > before["fuel"]:
+				mark.call("L3 燃料補給")
+			if before["state"] == CharacterAI.State.REPAIR and main.base.total_repair > before["repair"] \
+					and before["carry"] == GameData.Item.REPAIR_KIT and w.carrying < 0 \
+					and main.base.condition(before["part"]) > before["parts"][before["part"]]:
+				mark.call("L4 修理")
 			if s == CharacterAI.State.GATHER and w.carrying >= 0:
 				mark.call("4 資源を回収")
 			if s == CharacterAI.State.MOVE_TO_STORAGE and w.carrying >= 0:
@@ -308,7 +325,10 @@ func _one(n: int, minutes: float, scale: float, seed_base: int, events_on: bool,
 		if wait.has("orders"):
 			max_wait["orders"] = maxf(max_wait["orders"], t - float(wait["orders"]))
 		if lasting.call("output", not P.output.is_empty() and P.worker == null, 60.0):
-			err.call("output", "できあがった加工品が 60 秒以上、取り出されずに残っている")
+			var holders: Array[String] = []
+			for w in W:
+				holders.append("%s:%s 疲労%.1f 加工★%d" % [w.char_name, w.ai.status_text(), w.fatigue, w.priorities[GameData.Job.PROCESS]])
+			err.call("output", "できあがった加工品が 60 秒以上、取り出されずに残っている / " + " / ".join(holders))
 		if wait.has("output"):
 			max_wait["output"] = maxf(max_wait["output"], t - float(wait["output"]))
 		if lasting.call("current", not P.current.is_empty() and P.worker == null, 90.0):
@@ -364,6 +384,8 @@ func _one(n: int, minutes: float, scale: float, seed_base: int, events_on: bool,
 
 	# ---- 出力 ----
 	var over: bool = main.game_over
+	if over and d.elapsed < minutes * 60.0:
+		errors.append("ゲームオーバーで指定時間に未達。この回を長時間完走の成功とは扱わない")
 	print("--- 第%d回（出来事 %s・シナリオ %s）ゲーム内 %.0f 分 走行 %.1f km%s ---" % [n, "あり" if events_on else "なし", scenario, d.elapsed / 60.0,
 			d.distance / 2500.0, "  ★ゲームオーバー" if over else ""])
 	# ---- 基本ループ（生活と維持）: 休憩・食事・燃料補給・修理・最後まで移動が続く ----
@@ -383,6 +405,8 @@ func _one(n: int, minutes: float, scale: float, seed_base: int, events_on: bool,
 		errors.append("食事が一度も起きなかった（%d 秒たっても。満腹度が下がっても食べない？）" % int(sec))
 	if not ms.has("L3 燃料補給") and sec >= 480.0 and scenario != "stop" and scenario != "slow":
 		errors.append("燃料補給が一度も起きなかった（拠点の維持が回っていない？）")
+	if not ms.has("L4 修理") and sec >= 1500.0 and not main.game_over:
+		errors.append("修理資材の実消費と耐久回復を一度も確認できなかった")
 	if not keeps_moving:
 		errors.append("拠点の移動が、途中から止まったまま")
 	if not ms.has("L2 食事") and sec < eat_due:

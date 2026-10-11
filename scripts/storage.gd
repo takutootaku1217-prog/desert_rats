@@ -95,9 +95,15 @@ func drop_fit(species: String) -> float:
 	var drops: Dictionary = GameData.CREATURES[species]["drops"]
 	var total := 0
 	var fit := 0
+	var room := maxi(0, max_weight() - current_weight())
+	# butcher と同じ素材順で空きを使う。予測では在庫も廃棄数も変更しない。
 	for it in drops:
-		total += int(drops[it])
-		fit += mini(int(drops[it]), free_for(it))
+		var n := int(drops[it])
+		total += n
+		if enforce and CargoDB.bay_of(it) >= 0:
+			n = mini(n, floori(float(room) / CargoDB.size_of(it)))
+			room -= n * CargoDB.size_of(it)
+		fit += n
 	return float(fit) / float(maxi(1, total))
 
 
