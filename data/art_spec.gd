@@ -23,7 +23,7 @@ const UNIT_PX := 4                       # 論理ユニット1つ = 画面（ワ
 const WORKER := {"cell": Vector2i(16, 16), "stride": 16, "frames": 13}       # 仲間（assets/characters/mouse_*.png）
 const WHEELS := {"cell": Vector2i(28, 28), "stride": 30, "frames": 4}        # 車輪（assets/base/wheels.png）
 const MACHINE := {"cell": Vector2i(28, 24), "stride": 30, "frames": 3}       # 加工機（assets/base/machine.png）
-const HULL := Vector2i(184, 80)                                              # 車体の断面図・外装の車体（assets/base/hull.png ほか）
+const HULL := Vector2i(248, 80)                                              # 車体の断面図・外装の車体（assets/base/hull.png ほか）
 const RAMP := Vector2i(24, 18)                                               # 斜路
 const ITEM := Vector2i(12, 12)                                               # アイテムのアイコン（assets/resources/item_*.png）
 const UI_ICON := Vector2i(16, 16)                                            # UIのアイコンゲージ（assets/ui/*.png。積載重量など。将来のHP・満腹度も同じ）

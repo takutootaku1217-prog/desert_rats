@@ -631,6 +631,34 @@ def build_all():
         geo["at"][name] = list(at)
     files["armor.png"] = _pack(imgs, frames)
     geo["sheets"]["armor"] = {"file": "armor.png", "units": [files["armor.png"].w, files["armor.png"].h], "frames": frames}
+    # Rear extension: keep authored front assets and world-space equipment positions.
+    shift = art_base.REAR_WIDTH
+    old = files["body.png"]
+    rear = Px(IW + shift, IH)
+    rear.im.paste(old.im.crop((0, 0, 8, IH)), (0, 0))
+    rear.im.paste(old.im.crop((8, 0, IW, IH)), (8 + shift, 0))
+    rear.rect(8, R0, shift, IH - R0, K["sand"])
+    rear.hline(8, R0, shift, K["sand_l"])
+    rear.hline(8, IH - 1, shift, K["steel_d"])
+    rear.hline(8, UP_FEET + 1, shift, K["steel_m"])
+    for x in (22, 46, 70):
+        rear.vline(x, R0 + 2, IH - R0 - 3, K["sand_d"])
+    geo["windows"] = {k: [v[0] + shift, *v[1:]] for k, v in geo["windows"].items()}
+    for slot, y, h in (("u3", 20, 10), ("l3", 46, 9)):
+        geo["windows"][slot] = [30, y, 18, h]
+        rear.rect(29, y - 1, 20, h + 2, K["steel_d"])
+        rear.rect(30, y, 18, h, CLEAR)
+    rear.ellipse(30, ARCH_Y, ARCH_R, ARCH_R, CLEAR)
+    files["body.png"] = rear
+    geo["body"]["units"][0] += shift
+    geo["hull_size"][0] += shift
+    geo["cab_side"][0] += shift
+    geo["arches"] = [30] + [x + shift for x in geo["arches"]]
+    geo["fuel_port_fallback_x"] += shift
+    geo["roof_vent_x"] = {k: x + shift for k, x in geo["roof_vent_x"].items()}
+    geo["roof_vent_x"].update(u3=40, l3=40)
+    for at in geo["at"].values():
+        at[0] += shift
     return files, geo
 
 

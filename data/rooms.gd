@@ -4,7 +4,7 @@ extends RefCounted
 ## 部屋の効果・費用・置ける階・必要な拠点レベルはここに書く。見た目は tools/art_base.py で作る重ね絵
 ## （assets/base/rooms/<系統>/room_<区画>_<種類>.png）で、区画の位置は tools/art_base.py の SLOTS と同じ値にする。
 ##
-## 仕組み: 車体の絵 hull.png は初期配置の部屋が焼き込まれている。入れ替え可能な4つの区画には、
+## 仕組み: 車体の絵 hull.png は初期配置の部屋が焼き込まれている。入れ替え可能な6つの区画には、
 ## 部屋の種類ごとの重ね絵を上から描いて見た目を変える。加工設備・倉庫・ベッドの位置も区画から決まる。
 ## コックピット（上階・右）と搬入口（下階・右）は入れ替えできない（斜路・動線の要のため）。
 ##
@@ -27,20 +27,21 @@ const STYLE := "desert"        # 見た目の系統。将来サイバーパン�
 ## floor は GameData の階（2=上 1=下）、side は "u"/"l"（部屋の "floors" と対応）。
 ## door_x = ハシゴの側（隣の区画へ抜ける）入口の列。今は仲間の経路には使っていない（区画の間は自由に歩ける）が、将来、入口を通る経路にするときの基準。
 const SLOTS := {
-	"u1": {"name": "上階・左", "side": "u", "floor": 2, "x0": 8, "x1": 71, "top": 16, "feet": 40, "door_x": 72},
-	"u2": {"name": "上階・右", "side": "u", "floor": 2, "x0": 82, "x1": 137, "top": 16, "feet": 40, "door_x": 81},
-	"l1": {"name": "下階・左", "side": "l", "floor": 1, "x0": 8, "x1": 71, "top": 43, "feet": 72, "door_x": 72},
-	"l2": {"name": "下階・右", "side": "l", "floor": 1, "x0": 82, "x1": 149, "top": 43, "feet": 72, "door_x": 81},
+	"u3": {"name": "上階・後方", "side": "u", "floor": 2, "x0": 8, "x1": 69, "top": 16, "feet": 40, "door_x": 70},
+	"u1": {"name": "上階・中央", "side": "u", "floor": 2, "x0": 72, "x1": 135, "top": 16, "feet": 40, "door_x": 136},
+	"u2": {"name": "上階・前方", "side": "u", "floor": 2, "x0": 146, "x1": 201, "top": 16, "feet": 40, "door_x": 145},
+	"l3": {"name": "下階・後方", "side": "l", "floor": 1, "x0": 8, "x1": 69, "top": 43, "feet": 72, "door_x": 70},
+	"l1": {"name": "下階・中央", "side": "l", "floor": 1, "x0": 72, "x1": 135, "top": 43, "feet": 72, "door_x": 136},
+	"l2": {"name": "下階・前方", "side": "l", "floor": 1, "x0": 146, "x1": 213, "top": 43, "feet": 72, "door_x": 145},
 }
-const SLOT_ORDER := ["u1", "u2", "l1", "l2"]
-## 小型拠点は内蔵エンジン。専用機関室を使わず、下階左を自由枠にする。
-## engine の部屋定義と任意の建設・移設は、既存配置との互換性と将来の大型モデル用に保持する。
-const DEFAULT_LAYOUT := {"u1": "workshop", "u2": "bedroom", "l1": "empty", "l2": "storage"}
+const SLOT_ORDER := ["u3", "u1", "u2", "l3", "l1", "l2"]
+## 内蔵エンジンを維持し、追加した後方上下2室も空けて始める。設備容量は増やさない。
+const DEFAULT_LAYOUT := {"u3": "empty", "u1": "workshop", "u2": "bedroom", "l3": "empty", "l1": "empty", "l2": "storage"}
 
 ## 固定の部屋（入れ替えできない。表示用）。anchors = 部屋の中の決まった位置（車体の左端からのユニット）
 const FIXED := [
 	{"name": "操縦室", "side": "u"},
-	{"name": "搬入口", "side": "l", "anchors": {"fuel": 165.0}},        # 機関室がないときの燃料の投入口
+	{"name": "搬入口", "side": "l", "anchors": {"fuel": 229.0}},        # 機関室がないときの燃料の投入口
 ]
 
 ## 部屋の種類ごとの「部屋の中の決まった位置」（区画の左端からのユニット）。加工設備・倉庫・炉の口は、部屋の見た目ではなく、ここで決まる。
@@ -170,7 +171,7 @@ static func sanitize(raw) -> Dictionary:
 		return default_layout()
 	var out := {}
 	for s in SLOT_ORDER:
-		var t = raw.get(s, "")
+		var t = raw.get(s, "empty" if s in ["u3", "l3"] else "")
 		if not can_place(str(t), s):
 			return default_layout()
 		out[s] = str(t)

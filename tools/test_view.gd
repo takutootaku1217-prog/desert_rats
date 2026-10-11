@@ -146,7 +146,7 @@ func _test_tables() -> void:
 			for x in w.size.x * d:
 				if body.get_pixel(w.position.x * d + x, w.position.y * d + y).a > 0.0:
 					holes_ok = false
-	check(win_ok, "窓は、4つの区画それぞれの内側にある")
+	check(win_ok, "窓は、6つの区画それぞれの内側にある")
 	check(holes_ok, "窓の場所は、車体の絵で透明な穴になっている（ガラスの色が見える）")
 	var cab := ExteriorDB.cab_rect()
 	check(body.get_pixel((cab.position.x + 6) * d, (cab.position.y + 4) * d).a == 0.0, "運転席の窓も穴になっている")

@@ -42,7 +42,7 @@ func _run() -> void:
 	print("-- カメラの初期状態 --")
 	check(main.camera != null and main.camera is Camera2D, "Camera2D がある")
 	check(main.camera.anchor_mode == Camera2D.ANCHOR_MODE_FIXED_TOP_LEFT, "position が画面左上の世界座標になる設定（カメラなしのときと同じ見え方の基準）")
-	check(main.camera.position == Vector2.ZERO, "最初はカメラの位置が0（これまでと同じ見え方）")
+	check(main.camera.position == Vector2(GameData.HULL_POS.x, 0), "最初は後方2室を含む通常構図")
 	check(main.camera.zoom == Vector2.ONE, "拡大縮小はしない（ドット絵がぼやけない）")
 	check(main.camera.position_smoothing_enabled, "内蔵のスムージングが有効（滑らかに追う）")
 	check(main.follow_target == W[0], "起動時は、最初に選ばれている仲間（W[0]）を追従先にしている")
@@ -80,7 +80,7 @@ func _run() -> void:
 	print("-- 追従の解除（Escキー相当） --")
 	main.follow_target = null
 	_tick(300, 0.1)
-	check(is_equal_approx(main.camera.position.x, 0.0), "解除すると、通常の拠点を見渡す構図（カメラ位置0）に戻る")
+	check(is_equal_approx(main.camera.position.x, GameData.HULL_POS.x), "解除すると、通常の拠点を見渡す構図（車体左端）に戻る")
 	check(main._follow_label.text == "", "解除すると、追従の表示も消える")
 	check(W[1].selected, "追従を解除しても、仲間の選択（優先度パネルなどの対象）はそのまま")
 
@@ -98,7 +98,7 @@ func _run() -> void:
 	W[0].visible = false                   # 拠点の中にいて、外装表示では見えない状態を模す
 	_tick(5, 0.1)
 	check(main._follow_label.text.contains("拠点の中"), "見えない（外装表示）ときは「拠点の中」で追従できないことが表示される: %s" % main._follow_label.text)
-	check(main.camera.position.x >= 0.0 and main.camera.position.x <= 900.0, "見えない対象の位置（画面外）へカメラが飛ばない")
+	check(main.camera.position.x >= GameData.HULL_POS.x and main.camera.position.x <= 900.0, "見えない対象の位置（画面外）へカメラが飛ばない")
 	W[0].visible = true
 
 	# 実際のマウス位置（get_global_mouse_position）はヘッドレスでは確かめられないが、

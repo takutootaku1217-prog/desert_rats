@@ -59,7 +59,7 @@ func _initialize() -> void:
 	main.director.enabled = false
 	main.scroll_speed = 0.0
 	main.target_speed = 0.0
-	check(main.base.room_slot("engine") == "" and main.room_layout["l1"] == "empty", "小型拠点は機関室なし・自由枠1つ")
+	check(main.base.room_slot("engine") == "" and main.room_layout["l1"] == "empty", "小型拠点は機関室なし・自由枠3つ")
 	check(main.base.part_point(GameData.Part.DRIVE) == Rooms.fallback_fuel_pos(), "内蔵エンジンは自由枠でなく搬入口で整備")
 	st = main.storage
 	st.inventory.counts.clear()

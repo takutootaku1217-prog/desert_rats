@@ -154,8 +154,19 @@ func _test_tables() -> void:
 	# 初期配置は、機能を持つ4つの部屋がそろっている
 	var lay := Rooms.default_layout()
 	check(Rooms.count(lay, "workshop") == 1 and Rooms.count(lay, "bedroom") == 1 and Rooms.count(lay, "storage") == 1
-			and Rooms.count(lay, "engine") == 0 and Rooms.count(lay, "empty") == 1, "初期配置: 加工室・寝室・倉庫と自由枠1つ、機関室なし")
+			and Rooms.count(lay, "engine") == 0 and Rooms.count(lay, "empty") == 3, "初期配置: 加工室・寝室・倉庫と自由枠3つ、機関室なし")
 	check(Rooms.sanitize(lay) == lay and Rooms.sanitize({}) == lay, "配置の検査: 正しい配置はそのまま・壊れた配置は初期配置に戻る")
+	var old := {"u1": "bedroom", "u2": "workshop", "l1": "storage", "l2": "mess"}
+	var migrated := Rooms.sanitize(old)
+	check(migrated["u1"] == "bedroom" and migrated["u2"] == "workshop" and migrated["l1"] == "storage"
+		and migrated["l2"] == "mess" and migrated["u3"] == "empty" and migrated["l3"] == "empty", "旧4区画の配置を保持し、後方2室だけ空室で補完")
+	check(Rooms.SLOT_ORDER.size() == 6 and Rooms.FIXED.size() == 2, "可変6室と固定2室を区別")
+	for id in FacilityDB.ids():
+		var slot := "l3" if FacilityDB.room_of(id) == "storage" else "u3"
+		for dx in FacilityDB.def(id)["dx"]:
+			var half := float(FacilityDB.def(id)["frame"].x) / 2.0
+			check(float(dx) - half >= 0 and float(dx) + half <= Rooms.slot_size(slot).x, "後方区画に設備が収まる: " + id)
+
 
 
 # ---------------------------------------------------------------- 初期配置は、今までのゲームと同じ位置
@@ -515,9 +526,9 @@ func _test_ui() -> void:
 	await process_frame
 	var hull_btns: Array = []
 	_buttons_with_tooltip(ui._left, hull_btns)
-	check(hull_btns.size() == 4, "車体の断面図に、区画のボタンが4つある")
+	check(hull_btns.size() == 6, "車体の断面図に、区画のボタンが6つある")
 	for b in hull_btns:
-		if String(b.tooltip_text).begins_with("上階・右"):
+		if String(b.tooltip_text).begins_with("上階・前方"):
 			b.pressed.emit()
 	check(ui._slot == "u2", "断面図の区画を押すと、その区画が選ばれる")
 	ui.select_slot("u1")

@@ -15,14 +15,17 @@ LO_TOP, LO_FEET = 43, 72      # 下の階
 
 # 部屋を入れ替えられる区画（スロット）。x0..x1 は部屋の内側の列、top..feet は上端行と床(足元)の行。
 # scripts / data/rooms.gd の SLOTS と同じ値にすること（tools/selftest.gd が食い違いを検出する）。
-SLOTS = {
+FRONT_SLOTS = {
     "u1": dict(x0=8,  x1=71,  top=UP_TOP, feet=UP_FEET),
     "u2": dict(x0=82, x1=137, top=UP_TOP, feet=UP_FEET),
     "l1": dict(x0=8,  x1=71,  top=LO_TOP, feet=LO_FEET),
     "l2": dict(x0=82, x1=149, top=LO_TOP, feet=LO_FEET),
 }
-SLOT_ORDER = ("u1", "u2", "l1", "l2")
-DEFAULT_LAYOUT = {"u1": "workshop", "u2": "bedroom", "l1": "engine", "l2": "storage"}
+REAR_WIDTH = 64
+SLOTS = {k: dict(v, x0=v["x0"] + REAR_WIDTH, x1=v["x1"] + REAR_WIDTH) for k, v in FRONT_SLOTS.items()}
+SLOTS.update(u3=dict(x0=8, x1=69, top=UP_TOP, feet=UP_FEET), l3=dict(x0=8, x1=69, top=LO_TOP, feet=LO_FEET))
+SLOT_ORDER = ("u3", "u1", "u2", "l3", "l1", "l2")
+DEFAULT_LAYOUT = {"u1": "workshop", "u2": "bedroom", "l1": "empty", "l2": "storage", "u3": "empty", "l3": "empty"}
 # 部屋の種類ごとに置ける階（u = 上の階 / l = 下の階）。data/rooms.gd の "floors" と同じにすること。
 ROOM_FLOORS = {
     "workshop": "ul", "bedroom": "ul", "engine": "l", "storage": "l",
@@ -408,7 +411,7 @@ ROOM_FUNCS = {
 }
 
 
-def build_hull(layout=None, furnish=True, roof=True):
+def _front_hull(layout=None, furnish=True, roof=True):
     """車体の絵。layout は {区画: 部屋の種類}。省略すると初期配置（従来の hull.png と同じ絵）。
     furnish=False にすると、建設で増える家具（ワークベンチ・ベッド）を描かない（ゲームで使う hull.png はこちら）。
     roof=False にすると、屋根の上の物（アンテナ・排気筒・タンクなど）を描かない。ゲームでは、屋根の上の物は外装パーツ
@@ -419,8 +422,8 @@ def build_hull(layout=None, furnish=True, roof=True):
     lay.update(layout or {})
     p = Px(IW, IH)
     hull_shell(p)
-    ROOM_FUNCS[lay["u1"]](p, SLOTS["u1"]); ROOM_FUNCS[lay["u2"]](p, SLOTS["u2"]); room_cockpit(p)
-    ROOM_FUNCS[lay["l1"]](p, SLOTS["l1"]); ROOM_FUNCS[lay["l2"]](p, SLOTS["l2"]); room_bay(p)
+    ROOM_FUNCS[lay["u1"]](p, FRONT_SLOTS["u1"]); ROOM_FUNCS[lay["u2"]](p, FRONT_SLOTS["u2"]); room_cockpit(p)
+    ROOM_FUNCS[lay["l1"]](p, FRONT_SLOTS["l1"]); ROOM_FUNCS[lay["l2"]](p, FRONT_SLOTS["l2"]); room_bay(p)
     floors(p)
     ladder(p)
     partition(p, 72, UP_TOP + 2, UP_FEET, 20); partition(p, 81, UP_TOP + 2, UP_FEET, 20)
@@ -429,6 +432,26 @@ def build_hull(layout=None, furnish=True, roof=True):
     partition(p, 150, LO_TOP + 2, LO_FEET, 22)
     if roof:
         roof_details(p)
+    return p
+
+
+def build_hull(layout=None, furnish=True, roof=True):
+    """Keep front module geometry; append two full-width rooms behind it."""
+    lay = dict(DEFAULT_LAYOUT)
+    lay.update(layout or {})
+    front = _front_hull(lay, furnish, roof)
+    p = Px(IW + REAR_WIDTH, IH)
+    p.im.paste(front.im.crop((0, 0, 8, IH)), (0, 0))
+    p.im.paste(front.im.crop((8, 0, IW, IH)), (8 + REAR_WIDTH, 0))
+    # Extend the shell, ceiling and floor with the same structural strips.
+    for x in range(8, 8 + REAR_WIDTH):
+        p.im.paste(front.im.crop((10, 0, 11, IH)), (x, 0))
+    for slot in ("u3", "l3"):
+        r = SLOTS[slot]
+        ROOM_FUNCS[lay[slot]](p, r)
+        p.rect(8, r["feet"], REAR_WIDTH, 3, C["steel_m"])
+        p.hline(8, r["feet"], REAR_WIDTH, C["steel_h"])
+        partition(p, 70, r["top"] + 2, r["feet"], 20)
     return p
 
 

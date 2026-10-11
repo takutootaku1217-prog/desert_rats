@@ -18,7 +18,7 @@ const C_DIM := UIKit.C_DIM
 const C_ACCENT := UIKit.C_ACCENT
 const C_OK := Color("86efac")
 const C_BAD := Color("f87171")
-const HULL_SCALE := 2                 # 断面図の拡大（論理ユニット1つを何pxで描くか）
+const HULL_SCALE := 1.45                 # 断面図の拡大（論理ユニット1つを何pxで描くか）
 
 
 func _ready() -> void:
@@ -157,12 +157,12 @@ func _rebuild_left() -> void:
 	_left.add_child(_note(fx if fx != "" else "部屋の効果: なし", 13))
 	_left.add_child(_lbl("── 区画の一覧 ──", 14, C_DIM))
 	_left.add_child(_lbl("上の階", 13, C_DIM))
-	_left.add_child(_slot_row(["u1", "u2"], Rooms.FIXED[0]["name"]))
+	_left.add_child(_slot_row(["u3", "u1", "u2"], Rooms.FIXED[0]["name"]))
 	_left.add_child(_lbl("下の階", 13, C_DIM))
-	_left.add_child(_slot_row(["l1", "l2"], Rooms.FIXED[1]["name"]))
+	_left.add_child(_slot_row(["l3", "l1", "l2"], Rooms.FIXED[1]["name"]))
 	_left.add_child(_note("操縦室・搬入口は入れ替えできません。加工室・寝室・倉庫・機関室は拠点に1つだけ。"
 			+ "別の区画に建てると移設になり、中の設備も一緒に動きます（元の区画は空き部屋）。"))
-	_left.add_child(_note("小型拠点は内蔵エンジン。初期の空きは1室。機関室なしでも搬入口で補給・整備できます。加工室・寝室・倉庫は必須です。"))
+	_left.add_child(_note("小型拠点は内蔵エンジン。可変6区画、初期の空きは3室。機関室なしでも搬入口で補給・整備できます。加工室・寝室・倉庫は必須です。"))
 	_left.add_child(_note("ワークベンチ・ベッドは、この画面ではなく「建設・製作 (B)」で部屋の中に建てます。"))
 
 
@@ -237,11 +237,11 @@ func _slot_row(slots: Array, fixed_name: String) -> Control:
 	for s in slots:
 		var rt: String = game.room_layout.get(s, "empty")
 		var b := UIKit.button("%s\n%s" % [Rooms.SLOTS[s]["name"], Rooms.TYPES[rt]["name"]], func(): _select_slot(s))
-		b.custom_minimum_size = Vector2(112, 54)
+		b.custom_minimum_size = Vector2(86, 54)
 		UIKit.style(b, s == _slot)
 		row.add_child(b)
 	var fb := UIKit.button("\n%s\n(固定)" % fixed_name, func(): pass)
-	fb.custom_minimum_size = Vector2(112, 54)
+	fb.custom_minimum_size = Vector2(86, 54)
 	fb.disabled = true
 	row.add_child(fb)
 	return row

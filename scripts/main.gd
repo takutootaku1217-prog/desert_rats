@@ -116,6 +116,7 @@ func _ready() -> void:
 	camera.anchor_mode = Camera2D.ANCHOR_MODE_FIXED_TOP_LEFT   # position を「画面左上に来る世界座標」にする（中央基準だとカメラなしの見え方とズレる）
 	camera.position_smoothing_enabled = true                   # 内蔵のスムージングで、滑らかに追う・滑らかに戻る
 	camera.position_smoothing_speed = FOLLOW_SMOOTH_SPEED
+	camera.position = Vector2(GameData.HULL_POS.x, 0.0)
 	camera.zoom = Vector2.ONE                                  # 拡大縮小はしない（ドット絵がぼやけるのを避ける）
 	add_child(camera)
 	camera.make_current()
@@ -1131,7 +1132,7 @@ func _update_camera(_delta: float) -> void:
 		camera.position.x = clampf(camera.position.x, lo, hi)
 		_follow_label.text = "◎ %s を追従中（Escキーで解除）" % target.char_name
 	else:
-		camera.position.x = 0.0                 # 通常の、拠点を見渡す構図に戻る
+		camera.position.x = GameData.HULL_POS.x # 通常の、拠点を見渡す構図に戻る
 		if target == null:
 			_follow_label.text = ""
 		else:

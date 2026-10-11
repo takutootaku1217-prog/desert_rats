@@ -5,7 +5,7 @@ extends Node2D
 ## 拠点自体は画面内に留まり、背景と資源が流れることで「進んでいる」ように見せる。
 ##
 ## 階: 上の階(加工室・寝室・操縦室) / 下の階(空き部屋・倉庫・搬入口、内蔵エンジン)。ハシゴでつながる。
-## 部屋の配置（4つの区画に何の部屋があるか）は Main.room_layout（data/rooms.gd）。部屋を変えると apply_layout で
+## 部屋の配置（6つの区画に何の部屋があるか）は Main.room_layout（data/rooms.gd）。部屋を変えると apply_layout で
 ## 加工設備・倉庫の位置が移り、設備（ワークベンチ・ベッド）の置き場所も facility_spots で新しい区画に追従する。
 ## 見え方の切り替え（外装 ⇄ 内装）は scripts/base_view.gd。ここは view_exterior の旗と、描き分けだけを持つ。
 ## 描く仕組み: このノードが車輪・煙・砂ぼこり（どちらの画面でも同じ）と、内装の断面図を描く。外装（車体・窓・外装パーツ）は
@@ -38,7 +38,7 @@ var _puffs: Array = []                   # 煙・砂ぼこり
 var _puff_timer := 0.0
 var _dust_timer := 0.0
 
-const WHEEL_X := [296.0, 424.0, 664.0, 792.0]
+const WHEEL_X := [40.0, 296.0, 424.0, 664.0, 792.0]
 const WHEEL_Y := 506.0
 const STACK_X := [664.0, 696.0]
 const HULL_H := ArtSpec.HULL.y           # 車体の高さ（ユニット。内装の断面図と外装の車体で同じ）
@@ -308,7 +308,7 @@ func _process(delta: float) -> void:
 	queue_redraw()
 
 
-## 4つの区画の部屋の絵を、車体（初期配置の部屋が焼き込まれた hull.png）の上に重ねて描く。
+## 6つの区画の部屋の絵を、車体（初期配置の部屋が焼き込まれた hull.png）の上に重ねて描く。
 ## 部屋を変えるとここが変わる（重ね絵は assets/base/rooms/<系統>/。初期配置と同じ部屋でも同じ絵を重ねるので継ぎ目は出ない）。
 func _draw_rooms(off: Vector2) -> void:
 	var now := Time.get_ticks_msec()

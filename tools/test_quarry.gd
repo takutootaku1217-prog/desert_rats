@@ -17,6 +17,10 @@ func fresh(all_facilities := false) -> void:
 	await process_frame
 	seed(951)
 	main.director.enabled = false
+	if "rear" in OS.get_cmdline_user_args():
+		main.room_layout = Rooms.with_room(main.room_layout, "u3", "workshop")
+		main.room_layout = Rooms.with_room(main.room_layout, "l3", "storage")
+		main.base.apply_layout()
 	for w in main.workers:
 		w.stop_work()
 		for j in GameData.job_list(): w.priorities[j] = 0
