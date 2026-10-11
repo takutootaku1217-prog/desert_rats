@@ -138,16 +138,17 @@ static func job_list() -> Array:
 # 狩猟・採取・購入・捕獲・探索の持ち帰りは、すべて同じ Item / Inventory に集約する。
 # ------------------------------------------------------------------
 enum Item { MEAT, HIDE, BONE, FAT, WOOD, STONE, IRON_ORE, IRON, FOOD, FUEL, REPAIR_KIT, CARCASS,
-		HAMMER, PICKAXE, ADV_PICK, AXE, IRON_AXE }        # 後ろの5つは採取の道具（data/gathering.gd）。倉庫の積載量の対象外
+		HAMMER, PICKAXE, ADV_PICK, AXE, IRON_AXE, BED_PACK, STORAGE_BOX }        # 後ろの5つは採取の道具（data/gathering.gd）。倉庫の積載量の対象外
 const TOOL_ITEMS := [Item.HAMMER, Item.PICKAXE, Item.ADV_PICK, Item.AXE, Item.IRON_AXE]
 const CREATURE_ITEMS := [Item.MEAT, Item.HIDE, Item.BONE, Item.FAT]   # 生物から取れる素材
 const GROUND_ITEMS := [Item.WOOD, Item.STONE, Item.IRON_ORE]          # 地面で採取する基本資源
 const RAW_ITEMS := [Item.MEAT, Item.HIDE, Item.BONE, Item.FAT, Item.WOOD, Item.STONE, Item.IRON_ORE]
-const PRODUCT_ITEMS := [Item.IRON, Item.FOOD, Item.FUEL, Item.REPAIR_KIT]
+const PACKED_ITEMS := [Item.BED_PACK, Item.STORAGE_BOX]
+const PRODUCT_ITEMS := [Item.IRON, Item.FOOD, Item.FUEL, Item.REPAIR_KIT, Item.BED_PACK, Item.STORAGE_BOX]
 const ITEM_NAMES := {
 	Item.MEAT: "生肉", Item.HIDE: "皮", Item.BONE: "骨", Item.FAT: "脂肪",
 	Item.WOOD: "木材", Item.STONE: "石", Item.IRON_ORE: "鉄鉱石",
-	Item.IRON: "鉄", Item.FOOD: "食料", Item.FUEL: "燃料", Item.REPAIR_KIT: "修理資材",
+	Item.IRON: "鉄", Item.FOOD: "食料", Item.FUEL: "燃料", Item.REPAIR_KIT: "応急修理板", Item.BED_PACK: "寝床", Item.STORAGE_BOX: "収納ボックス",
 	Item.CARCASS: "獲物",
 	Item.HAMMER: "簡易ハンマー", Item.PICKAXE: "鉄製ピッケル", Item.ADV_PICK: "高性能ピッケル",
 	Item.AXE: "簡易の斧", Item.IRON_AXE: "鉄の斧",
@@ -155,7 +156,7 @@ const ITEM_NAMES := {
 const ITEM_FILES := {
 	Item.MEAT: "meat", Item.HIDE: "hide", Item.BONE: "bone", Item.FAT: "fat",
 	Item.WOOD: "wood", Item.STONE: "stone", Item.IRON_ORE: "iron_ore",
-	Item.IRON: "iron", Item.FOOD: "ration", Item.FUEL: "fuel", Item.REPAIR_KIT: "repair_kit",
+	Item.IRON: "iron", Item.FOOD: "ration", Item.FUEL: "fuel", Item.REPAIR_KIT: "repair_kit", Item.BED_PACK: "bed_pack", Item.STORAGE_BOX: "storage_box",
 	Item.CARCASS: "meat",
 	Item.HAMMER: "hammer", Item.PICKAXE: "pickaxe", Item.ADV_PICK: "adv_pick", Item.AXE: "axe", Item.IRON_AXE: "iron_axe",
 }
@@ -169,6 +170,10 @@ const GROUND_WEIGHTS := {Item.WOOD: 4.0, Item.STONE: 3.0, Item.IRON_ORE: 1.5}
 ##    その設備が拠点にないうちは作られず、あるときは仲間がその設備の場所で作る。
 ## 設備の建設もレシピの形で流れる（FacilityDB.recipe_of。"out" が -1、"build" に設備の id）。
 const RECIPES := [
+	{"id": "bed_pack", "name": "寝床の製作", "in": {Item.HIDE: 2, Item.BONE: 1}, "out": Item.BED_PACK, "n": 1,
+		"time": 4.0, "tank_fuel": 0.0, "field": Field.DEV, "station": "workbench"},
+	{"id": "storage_box", "name": "収納ボックスの製作", "in": {Item.WOOD: 6, Item.IRON: 3}, "out": Item.STORAGE_BOX, "n": 1,
+		"time": 5.0, "tank_fuel": 0.0, "field": Field.DEV, "station": "workbench"},
 	{"id": "cook", "name": "調理（食料）", "in": {Item.MEAT: 1}, "out": Item.FOOD, "n": 2, "time": 2.5,
 		"tank_fuel": 0.0, "field": Field.COOK},
 	{"id": "tallow", "name": "油脂の燃料", "in": {Item.FAT: 1}, "out": Item.FUEL, "n": 2, "time": 2.5,

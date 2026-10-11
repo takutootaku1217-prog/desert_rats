@@ -337,6 +337,10 @@ func tick(delta: float) -> void:
 		State.PROCESS:
 			var p: BaseProcessor = game.processor
 			if not p.output.is_empty():
+				if p.packed_output_blocked():
+					p.worker = null
+					_set_state(State.SEARCH)
+					return
 				ch.carrying = p.take_output()
 				p.worker = null
 				_go_storage()

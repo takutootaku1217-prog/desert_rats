@@ -79,7 +79,7 @@ func _test_itemdb() -> void:
 	var ok := true
 	for it in all:
 		ok = ok and ItemDB.name_of(it) != "?" and ItemDB.CATEGORIES.has(ItemDB.category_of(it)) and ItemDB.tex(it) != null
-	check(ok and all.size() == 16, "インベントリに出る16種すべてに、名前・分類・絵がある")
+	check(ok and all.size() == 18, "インベントリに出る18種すべてに、名前・分類・絵がある")
 	var covered := true
 	for it in GameData.RAW_ITEMS + GameData.PRODUCT_ITEMS + GameData.TOOL_ITEMS:
 		covered = covered and all.has(it)

@@ -231,7 +231,7 @@ func _test_flow() -> void:
 	check(main.request_build("bed"), "ベッドを依頼する（材料 %s がある）" % FacilityDB.cost_text("bed"))
 	var near := {"n": 0, "far": 0}
 	var cond2 := func() -> bool:
-		if main.processor.is_active_at("workbench") and main.processor.current.get("build", "") == "bed":
+		if main.processor.is_active_at("workbench") and main.processor.current.get("id", "") == "bed_pack":
 			near["n"] += 1
 			if absf(w0.position.x - main.base.facility_spots("workbench")[0].x) > 60.0:
 				near["far"] += 1

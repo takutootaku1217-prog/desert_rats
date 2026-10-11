@@ -150,7 +150,12 @@ func work_point() -> Vector2:
 	return station_point(r) if not r.is_empty() else global_position
 
 
+func packed_output_blocked() -> bool:
+	return not output.is_empty() and output[0] in GameData.PACKED_ITEMS and base().storage.free_for(output[0]) < 1
+
+
 func has_work_for_worker() -> bool:
+	if packed_output_blocked(): return false
 	if worker != null:
 		return false
 	if not output.is_empty() or not current.is_empty():

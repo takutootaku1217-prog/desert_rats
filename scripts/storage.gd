@@ -28,7 +28,15 @@ func add_item(item: int, n: int = 1, source: String = Inventory.SOURCE_ENVIRONME
 	var stored := mini(n, free_for(item))
 	if stored > 0:
 		inventory.add(item, stored, source)
-	if stored < n and get_parent() is MobileBase and get_parent().game.quarry.sheltered():
+	if stored < n and source == Inventory.SOURCE_TRANSFER:
+		pass # 手動運搬の返却は Main.finish_transfer_trip が1回だけ行う。
+	elif stored < n and item in GameData.PACKED_ITEMS and get_parent() is MobileBase:
+		var p = get_parent().processor
+		for i in n - stored:
+			p.output.append(item)
+			p._out_times.append(Time.get_ticks_msec())
+		get_parent().game.director.note("倉庫満杯: %sは作業場で保管中" % GameData.ITEM_NAMES[item])
+	elif stored < n and get_parent() is MobileBase and get_parent().game.quarry.sheltered():
 		get_parent().game.quarry.keep_overflow(item, n - stored)
 	elif stored < n:
 		wasted[item] = wasted.get(item, 0) + (n - stored)
@@ -138,13 +146,15 @@ func access_point() -> Vector2:
 
 
 func _draw() -> void:
-	# 倉庫の中心（初期配置では x = GameData.STORAGE_X）からの相対で並べる。部屋の変更で倉庫が別の区画へ移っても、その中に描かれる
-	# 素材: 棚の上（棚板の上面 = 足元から56px上）。少し小さめに7種並べる
-	for i in GameData.RAW_ITEMS.size():
-		_slot(GameData.RAW_ITEMS[i], RAW_X0 - GameData.STORAGE_X + i * RAW_DX, -56.0, 36.0)
-	# 加工品: 床の上
-	for i in GameData.PRODUCT_ITEMS.size():
-		_slot(GameData.PRODUCT_ITEMS[i], PROD_X0 - GameData.STORAGE_X + i * PROD_DX, 0.0, 44.0)
+	# 区画幅から棚の列幅を決め、後方区画や製作物追加でも絵をはみ出させない。
+	var slot: String = get_parent().room_slot("storage")
+	var width := Rooms.slot_size(slot).x * Rooms.UNIT - 12.0
+	var left := -float(Rooms.ANCHORS["storage"]["storage"]) * Rooms.UNIT + 6.0
+	for group in [GameData.RAW_ITEMS, GameData.PRODUCT_ITEMS]:
+		var dx: float = width / group.size()
+		var y := -56.0 if group == GameData.RAW_ITEMS else 0.0
+		for i in group.size():
+			_slot(group[i], left + dx * (i + 0.5), y, minf(36.0 if y < 0 else 44.0, dx - 2.0))
 
 
 func _slot(item: int, cx: float, base_y: float, sz: float) -> void:

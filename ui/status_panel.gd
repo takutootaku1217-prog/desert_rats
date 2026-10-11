@@ -14,6 +14,7 @@ var _speed: Label
 var _gauges := {}            # key -> IconGauge
 var _weight: IconGauge       # 積載重量（= _gauges["weight"]。診断ツールが読む）
 var _stock: StockGrid
+var _repair: Button
 var _totals: Label
 
 const W := 272.0
@@ -75,6 +76,9 @@ func _ready() -> void:
 	# 4段目: 累計（小さく）
 	_totals = UIKit.lbl("", 12, UIKit.C_DIM)
 	v.add_child(_totals)
+	_repair = UIKit.button("応急修理板を使う", func(): game.emergency_repair())
+	_repair.tooltip_text = "最も傷んだ未予約の部位を25回復（上限100）。燃料・仲間HPは回復しません"
+	v.add_child(_repair)
 
 
 func _set_gauge(key: String, value: float, maximum: float, label: String, tip: String) -> void:
@@ -94,6 +98,8 @@ func _process(_d: float) -> void:
 	if game == null or game.base == null:
 		return
 	var b = game.base
+	_repair.disabled = game.emergency_repair_target() < 0 or game.storage.count_of(GameData.Item.REPAIR_KIT) <= 0
+	_repair.text = "応急修理板を使う（%d）" % game.storage.count_of(GameData.Item.REPAIR_KIT)
 	# 1段目
 	var move := "停止中"
 	var col := Color("fff7dc")

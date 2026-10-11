@@ -22,6 +22,8 @@ const QUANTITIES := [1, 5, -1]
 
 static func category_of_recipe(r: Dictionary) -> String:
 	var out: int = int(r["out"])
+	if out in GameData.PACKED_ITEMS:
+		return "建設"
 	if out in GameData.TOOL_ITEMS:
 		return "道具"
 	if out == GameData.Item.FOOD:
@@ -37,7 +39,7 @@ static func entries() -> Array:
 				"n": int(r["n"]), "time": float(r["time"]), "station": GameData.recipe_station(r), "recipe": r})
 	for id in FacilityDB.ids():
 		var d: Dictionary = FacilityDB.def(id)
-		l.append({"key": "build:" + id, "kind": "build", "id": id, "name": d["name"], "cat": "建設", "in": d["cost"], "out": -1,
+		l.append({"key": "build:" + id, "kind": "build", "id": id, "name": d["name"] + ("の設置" if d.has("packed_item") else ""), "cat": "建設", "in": d["cost"], "out": -1,
 				"n": 0, "time": float(d["time"]), "station": String(d["requires"]), "recipe": FacilityDB.recipe_of(id)})
 	return l
 
@@ -130,8 +132,8 @@ static func _evaluate_build(e: Dictionary, game, res: Dictionary) -> Dictionary:
 	var id: String = e["id"]
 	res["source"] = "倉庫"
 	var missing := {}
-	for it in e["in"]:
-		var need: int = int(e["in"][it])
+	for it in game.build_cost(id):
+		var need: int = int(game.build_cost(id)[it])
 		var have: int = game.storage.count_of(it)
 		res["rows"].append({"item": it, "need": need, "have": have, "ok": have >= need, "in_storage": have})
 		if have < need:

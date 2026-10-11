@@ -50,7 +50,8 @@ const FACILITIES := {
 		"effects": [],
 	},
 	"bed": {
-		"name": "ベッド", "desc": "仲間が休める。多いほど同時に休める人数が増える",
+		"name": "寝床（ベッド）", "desc": "製作した寝床を設置。最大3台、休憩の効果は従来と同じ",
+		"packed_item": GameData.Item.BED_PACK, "pack_recipe": "bed_pack",
 		"cost": {GameData.Item.HIDE: 2, GameData.Item.BONE: 1}, "time": 4.0, "field": GameData.Field.DEV,
 		"max": 3, "requires": "workbench", "station": false,
 		"room": "bedroom", "dx": [9.0, 24.0, 39.0],
@@ -58,7 +59,8 @@ const FACILITIES := {
 		"effects": [],
 	},
 	"cargo_rack": {
-		"name": "荷台の増設", "desc": "倉庫の脇に荷台を組む。拠点全体の積載できる重さが増える（1つ+60）",
+		"name": "収納ボックス", "desc": "製作した箱を倉庫の荷台枠へ設置。最大3個、1個で積載+60",
+		"packed_item": GameData.Item.STORAGE_BOX, "pack_recipe": "storage_box",
 		"cost": {GameData.Item.WOOD: 6, GameData.Item.IRON: 3}, "time": 5.0, "field": GameData.Field.DEV,
 		"max": 3, "requires": "workbench", "station": false,
 		"room": "storage", "dx": [38.0, 47.0, 56.0],
@@ -133,3 +135,11 @@ static func cost_text(id: String) -> String:
 	for it in c:
 		parts.append("%s×%d" % [GameData.ITEM_NAMES[it], c[it]])
 	return "＋".join(PackedStringArray(parts))
+
+
+## 製作済みの設備を材料として設置する。素材の再消費・加工時間の二重加算はしない。
+static func installation_recipe(id: String) -> Dictionary:
+	var r := recipe_of(id)
+	r["in"] = {int(def(id)["packed_item"]): 1}
+	r["time"] = 0.0
+	return r

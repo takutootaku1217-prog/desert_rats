@@ -214,7 +214,9 @@ func _rebuild_cats() -> void:
 # ---------------------------------------------------------------- 一覧（左）
 ## エントリの絵（作る物のアイコン。建設は道具の絵で代用する仮）
 func _entry_item(e: Dictionary) -> int:
-	return int(e["out"]) if int(e["out"]) >= 0 else GameData.Item.HAMMER
+	if e["kind"] == "build":
+		return int(FacilityDB.def(e["id"]).get("packed_item", GameData.Item.HAMMER))
+	return int(e["out"])
 
 
 func _rebuild_list() -> void:
@@ -320,7 +322,11 @@ func _rebuild_detail() -> void:
 	acts.add_theme_constant_override("separation", 8)
 	_detail.add_child(acts)
 	if is_build:
-		_craft_btn = UIKit.button("建設を依頼する", _do_build)
+		var label := "建設を依頼する"
+		var d := FacilityDB.def(e["id"])
+		if d.has("packed_item"):
+			label = "製作物の設置を依頼する" if game.storage.count_of(d["packed_item"]) > 0 else "製作して設置を依頼する"
+		_craft_btn = UIKit.button(label, _do_build)
 		_craft_btn.disabled = not (state in ["ok", "short"])
 	else:
 		_craft_btn = UIKit.button("制作", _do_craft)

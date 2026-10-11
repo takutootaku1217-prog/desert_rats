@@ -13,7 +13,7 @@ const CATEGORY_COLORS := {
 ## インベントリに並べる順（分類の順）
 const ORDER := [
 	GameData.Item.MEAT, GameData.Item.HIDE, GameData.Item.BONE, GameData.Item.FAT, GameData.Item.WOOD, GameData.Item.STONE, GameData.Item.IRON_ORE,
-	GameData.Item.IRON, GameData.Item.REPAIR_KIT, GameData.Item.FOOD, GameData.Item.FUEL,
+	GameData.Item.IRON, GameData.Item.REPAIR_KIT, GameData.Item.BED_PACK, GameData.Item.STORAGE_BOX, GameData.Item.FOOD, GameData.Item.FUEL,
 	GameData.Item.HAMMER, GameData.Item.PICKAXE, GameData.Item.ADV_PICK, GameData.Item.AXE, GameData.Item.IRON_AXE,
 ]
 
@@ -60,7 +60,7 @@ static func uses_of(item: int) -> Array:
 		if r["in"].has(item):
 			l.append({"kind": "recipe", "id": r["id"], "name": r["name"], "out": int(r["out"])})
 	for id in FacilityDB.ids():
-		if FacilityDB.def(id)["cost"].has(item):
+		if FacilityDB.def(id)["cost"].has(item) or int(FacilityDB.def(id).get("packed_item", -1)) == item:
 			l.append({"kind": "build", "id": id, "name": "%sの建設" % FacilityDB.name_of(id), "out": -1})
 	return l
 

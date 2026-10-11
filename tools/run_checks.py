@@ -38,7 +38,7 @@ def diagnostic(name: str, marker: str = "== 結果: すべて成功 ==") -> Chec
 
 CHECKS = {c.id: c for c in [
     Check("import", ("--editor", "--import", "--quit"), timeout=120),
-    *(diagnostic(n) for n in ("quarry", "gather", "cargo", "items", "crew_status", "life_actions", "tool_management", "rooms", "view", "camera", "artscale")),
+    *(diagnostic(n) for n in ("quarry", "gather", "cargo", "items", "crew_status", "life_actions", "tool_management", "rooms", "view", "camera", "artscale", "packed_equipment", "equipment_ui", "build")),
     *(diagnostic(n, "== 結果: 0 件失敗 ==") for n in ("cargo_reservations", "consumption_loop")),
     Check("loop_vanilla", ("-s", "res://tools/test_loop.gd", "--", "32", "2", "12", "500", "0", "vanilla"),
           "== 結果: 問題なし ==", 300, 32, 2),
@@ -49,10 +49,12 @@ CHECKS = {c.id: c for c in [
     Check("loop_events", ("-s", "res://tools/test_loop.gd", "--", "32", "1", "12", "500", "1", "vanilla", "trace"),
           "== 結果: 問題なし ==", 300, 32, 1),
     Check("quarry_rear", ("-s", "res://tools/test_quarry.gd", "--", "rear"), "== 結果: すべて成功 =="),
+    Check("manual_repro", ("-s", "res://tools/test_loop.gd", "--", "28", "3", "12", "700", "0", "manual", "trace"), "== 結果: 問題なし ==", 400, 28, 3),
+    *(Check("manual_" + mode, ("-s", "res://tools/test_loop.gd", "--", "28", "1", "12", "700", "0", "manual", "trace", mode), "== 結果: 問題なし ==", 300, 28, 1) for mode in ("legacy_inputs", "legacy_boundary", "legacy_both")),
     Check("startup", ("--quit-after", "300")),
 ]}
 SUITES = {
-    "core": ["quarry", "gather", "cargo", "items", "crew_status", "life_actions", "tool_management",
+    "core": ["equipment_ui", "packed_equipment", "quarry", "gather", "cargo", "items", "crew_status", "life_actions", "tool_management",
              "cargo_reservations", "consumption_loop", "loop_vanilla", "loop_normal", "startup"],
     "extra": ["loop_manual", "loop_events"],
     "layout": ["rooms", "view", "camera", "artscale", "quarry", "quarry_rear", "consumption_loop"],

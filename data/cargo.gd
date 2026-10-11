@@ -31,6 +31,7 @@ const SIZES := {
 	GameData.Item.WOOD: 4, GameData.Item.FUEL: 4, GameData.Item.REPAIR_KIT: 4,
 	GameData.Item.STONE: 6, GameData.Item.IRON: 6,
 	GameData.Item.IRON_ORE: 8,
+	GameData.Item.BED_PACK: 3, GameData.Item.STORAGE_BOX: 42, # 元の材料と同じ重量
 }
 
 const WARN_RATIO := 0.8                  # 積載率がこの割合を超えたら、表示を警告色にする

@@ -60,7 +60,11 @@ func _ready() -> void:
 	root.add_child(UIKit.lbl("何を作るかを決めると、仲間が材料を運んで作ります。材料が足りないうちは、集まるまで取っておきます。", 13, UIKit.C_DIM))
 	var cols := HBoxContainer.new()
 	cols.add_theme_constant_override("separation", 30)
-	root.add_child(cols)
+	var scroll := ScrollContainer.new()
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	root.add_child(scroll)
+	scroll.add_child(cols)
 	var left := VBoxContainer.new()
 	left.custom_minimum_size = Vector2(560, 0)
 	left.add_theme_constant_override("separation", 8)
@@ -129,7 +133,7 @@ func _build_left(col: VBoxContainer) -> void:
 		var cost_row := HBoxContainer.new()
 		cost_row.add_theme_constant_override("separation", 12)
 		v.add_child(cost_row)
-		cost_row.add_child(UIKit.lbl("材料", 13, UIKit.C_DIM))
+		cost_row.add_child(UIKit.lbl("製作材料（製作済みなら不要）" if d.has("packed_item") else "材料", 13, UIKit.C_DIM))
 		var costs := {}
 		for it in d["cost"]:
 			var l := UIKit.lbl("", 14)
@@ -217,14 +221,19 @@ func _refresh() -> void:
 			var need: int = int(d["cost"][it])
 			var have: int = st.count_of(it)
 			var l: Label = row["costs"][it]
+			l.visible = not d.has("packed_item") or st.count_of(d["packed_item"]) == 0
 			l.text = "%s %d/%d%s" % [GameData.ITEM_NAMES[it], have, need, "（枠不足）" if st.quota_of(it) < need else ""]
 			l.add_theme_color_override("font_color", UIKit.C_DIM if (built >= mx or not game.facility_unlocked(id)) else \
 					(C_BAD if st.quota_of(it) < need else (C_OK if have >= need else C_SHORT)))    # 完成済み・まだ建てられない設備の材料は薄く
 		var rq: String = d["requires"]
 		row["req"].text = "必要設備: %s" % ("なし（手作業でできる）" if rq == "" else "%s（%s）" % [FacilityDB.name_of(rq), "ある" if game.has_facility(rq) else "まだない"])
+		if d.has("packed_item"):
+			row["req"].text += " ／ 製作済み%d個・設置に1個" % st.count_of(d["packed_item"])
 		var b: Button = row["build"]
 		b.disabled = reason != ""
 		b.text = "建設を依頼する（仲間が材料を運んで作る）" if reason == "" else reason
+		if d.has("packed_item") and reason == "":
+			b.text = "製作物を設置する" if st.count_of(d["packed_item"]) > 0 else "製作して設置（材料を自動運搬）"
 		row["cancel"].visible = queued > 0
 	for sid in _station_heads:
 		var have_station: bool = game.has_facility(sid)

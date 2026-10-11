@@ -111,9 +111,26 @@ def room_images():
     return [(f"base/rooms/{art_base.STYLE}", f"room_{slot}_{rtype}.png", px) for slot, rtype, px in art_base.room_overlays(furnish=False)]
 
 
+def packed_icon(box=False):
+    p = Px(12, 12)
+    if box:
+        p.rect(1, 2, 10, 9, WOOD_D)
+        p.rect(2, 3, 8, 7, WOOD)
+        p.hline(1, 2, 10, WOOD_L)
+        p.hline(1, 6, 10, C["steel_l"])
+        p.vline(5, 2, 9, C["steel_m"])
+    else:
+        p.rect(0, 5, 12, 4, WOOD_D)
+        p.rect(1, 3, 10, 4, hexc("efe7d2"))
+        p.rect(5, 3, 6, 4, C["red"])
+        p.vline(1, 8, 3, WOOD_L)
+        p.vline(10, 8, 3, WOOD_L)
+    return p
+
+
 def all_images():
     """(フォルダ, ファイル名, 絵) の一覧"""
-    l = [("base", "hull.png", hull()), ("base", "workbench.png", workbench_sheet())]
+    l = [("resources", "item_bed_pack.png", packed_icon()), ("resources", "item_storage_box.png", packed_icon(True)), ("base", "hull.png", hull()), ("base", "workbench.png", workbench_sheet())]
     for i in range(3):
         l.append(("base", f"bed_{i}.png", bed(i)))
     for i in range(3):

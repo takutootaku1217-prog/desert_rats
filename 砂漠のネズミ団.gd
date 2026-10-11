@@ -769,10 +769,35 @@ func finish_build(id: String) -> void:
 
 
 ## 材料と必要設備がそろっていて、いま始められる建設のレシピ（なければ空）。待ちの先頭から順に。
+## 製作物があれば設置、なければ同じ製作レシピで1個ずつ準備する。
+## 製作中に設置を取り消しても、完成品は倉庫へ残る。
+func packed_in_transit(item: int) -> int:
+	var n: int = processor.pending_of(item) + workshop_count(item)
+	for w in workers:
+		if w.carrying == item: n += w.carry_n
+	return n
+
+
+func build_cost(id: String) -> Dictionary:
+	var d: Dictionary = FacilityDB.def(id)
+	var item: int = d.get("packed_item", -1)
+	if item >= 0 and storage.count_of(item) > 0:
+		return {item: 1}
+	return d["cost"]
+
+
 func _next_build_recipe() -> Dictionary:
 	for id in build_queue:
 		var d: Dictionary = FacilityDB.def(id)
-		if has_facility(d["requires"]) and storage.has_set(d["cost"]):
+		if not has_facility(d["requires"]): continue
+		var item: int = d.get("packed_item", -1)
+		if item >= 0:
+			if storage.count_of(item) > 0:
+				return FacilityDB.installation_recipe(id)
+			if packed_in_transit(item) > 0: continue
+			var r := GameData.recipe_by_id(d["pack_recipe"])
+			if storage.has_set(r["in"]): return r
+		elif storage.has_set(d["cost"]):
 			return FacilityDB.recipe_of(id)
 	return {}
 
@@ -783,7 +808,7 @@ func reserved_for_builds() -> Dictionary:
 	var need := {}
 	var costs: Array = []
 	for id in build_queue:
-		costs.append(FacilityDB.def(id)["cost"])
+		costs.append(build_cost(id))
 	for w in workers:
 		if w.ai.state == CharacterAI.State.HAUL_TAKE and w.ai.haul_recipe.has("build"):
 			costs.append(w.ai.haul_recipe["in"])                 # まだ倉庫にあって、これから取りに行く材料
@@ -836,6 +861,26 @@ func _builds_need_iron() -> bool:
 ## 拠点レベルは未実装（範囲外）なので、部屋の解放条件の判定には常に Lv1 を渡す（Lv2 が要る訓練室は建てられない）。
 func base_level() -> int:
 	return 1
+
+
+## 応急修理板を1個即時使用。予約済み部位はAIに任せ、別の損傷部位を選ぶ。
+func emergency_repair_target() -> int:
+	if game_over: return -1
+	var target := -1
+	var low := 100.0
+	for p in base.parts:
+		if not base.repair_reserved.has(p) and float(base.parts[p]) < low:
+			low = float(base.parts[p])
+			target = p
+	return target
+
+
+func emergency_repair() -> bool:
+	var target := emergency_repair_target()
+	if target < 0 or not storage.take_item(GameData.Item.REPAIR_KIT): return false
+	base.repair(target)
+	director.note("応急修理: %sの耐久+25（上限100）。燃料や仲間HPは回復しない" % GameData.PART_NAMES[target])
+	return true
 
 
 ## 部屋と設備の効果の合計（休憩の回復・元気の消耗など。Worker（CrewStatus）が読む）。設備の効果は data/facilities.gd の

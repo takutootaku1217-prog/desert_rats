@@ -33,11 +33,14 @@ const CARRY_END_OK := [CharacterAI.State.STORE, CharacterAI.State.HAUL_MOVE, Cha
 var fails := 0
 var all_ok := true
 var trace_enabled := false
+var comparison := "current"
 
 
 func _initialize() -> void:
 	var a := OS.get_cmdline_user_args()
 	trace_enabled = a.size() > 6 and a[6] == "trace"
+	comparison = a[7] if a.size() > 7 else "current"
+	print("comparison=", comparison)
 	var minutes: float = float(a[0]) if a.size() > 0 else 10.0
 	var runs: int = int(a[1]) if a.size() > 1 else 2
 	var scale: float = float(a[2]) if a.size() > 2 else 12.0
@@ -53,6 +56,14 @@ func _initialize() -> void:
 func _one(n: int, minutes: float, scale: float, seed_base: int, events_on: bool, scenario: String) -> void:
 	FacilityDB.start_all = scenario not in ["build", "vanilla"]      # normal 等は設備あり。build は建設を依頼、vanilla は製品の設備なしを維持。
 	var main = load("res://scenes/main.tscn").instantiate()
+	# 調査専用対照条件。製品ソースや判定閾値を変更しない。
+	if comparison in ["legacy_boundary", "legacy_both"]:
+		var fixture := GDScript.new()
+		fixture.source_code = 'extends "res://scripts/main.gd"\nfunc camera_left() -> float:\n\treturn 0.0\n'
+		if fixture.reload() != OK:
+			all_ok = false
+			return
+		main.set_script(fixture)
 	root.add_child(main)
 	if not main.is_node_ready():
 		await main.ready
@@ -184,9 +195,11 @@ func _one(n: int, minutes: float, scale: float, seed_base: int, events_on: bool,
 			var mit: int = GameData.RAW_ITEMS[randi() % GameData.RAW_ITEMS.size()]
 			main.request_transfer(mit, 3 + randi() % 7, "to_workshop")
 			if randi() % 2 == 0:
-				var back: int = ItemDB.all()[randi() % ItemDB.all().size()]
+				var items: Array = ItemDB.all().filter(func(it): return comparison not in ["legacy_inputs", "legacy_both"] or it not in GameData.PACKED_ITEMS)
+				var back: int = items[randi() % items.size()]
 				main.request_transfer(back, 1 + randi() % 5, "to_storage")
-			var rec: Dictionary = GameData.RECIPES[randi() % GameData.RECIPES.size()]
+			var recipes: Array = GameData.RECIPES.filter(func(r): return comparison not in ["legacy_inputs", "legacy_both"] or r["out"] not in GameData.PACKED_ITEMS)
+			var rec: Dictionary = recipes[randi() % recipes.size()]
 			main.request_craft(rec["id"], 1 + randi() % 3)
 			manual_reqs += 1
 			for it2 in ItemDB.all():
@@ -364,7 +377,7 @@ func _one(n: int, minutes: float, scale: float, seed_base: int, events_on: bool,
 	main.status._process(0.0)
 	var text: String = main.status.stock_summary() + "\n" + main.status._weight.tooltip_text     # 倉庫の中身はアイコン＋個数（その文字にしたもの）。素材棚・加工品置き場の内訳は、重りのアイコンのツールチップ
 	var rx := RegEx.new()
-	var labels := [["食料", GameData.Item.FOOD], ["燃料", GameData.Item.FUEL], ["修理資材", GameData.Item.REPAIR_KIT], ["生肉", GameData.Item.MEAT],
+	var labels := [["食料", GameData.Item.FOOD], ["燃料", GameData.Item.FUEL], ["応急修理板", GameData.Item.REPAIR_KIT], ["生肉", GameData.Item.MEAT],
 			["皮", GameData.Item.HIDE], ["骨", GameData.Item.BONE], ["脂肪", GameData.Item.FAT], ["木材", GameData.Item.WOOD], ["石", GameData.Item.STONE],
 			["鉄鉱石", GameData.Item.IRON_ORE], ["鉄", GameData.Item.IRON]]
 	var ui_ok := true
