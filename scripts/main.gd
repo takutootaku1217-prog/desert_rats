@@ -7,6 +7,7 @@ extends Node2D
 
 var quarry := QuarryTrip.new()
 var quarry_ui: QuarryUI
+var save_ui: SaveUI
 
 var target_speed := 60.0          # プレイヤーが決める目標速度（↑↓キー）
 var scroll_speed := 60.0          # 実際の速度。燃料切れ・走行装置の故障で遅くなる
@@ -231,6 +232,9 @@ func _ready() -> void:
 	quarry_ui = QuarryUI.new()
 	quarry_ui.game = self
 	add_child(quarry_ui)
+	save_ui = SaveUI.new()
+	save_ui.game = self
+	add_child(save_ui)
 
 
 func _process(delta: float) -> void:
@@ -1033,7 +1037,7 @@ func build_room(slot: String, rtype: String) -> bool:
 
 ## 別の画面を開くとき、ほかの管理画面を閉じる（重ならないように）。keep はいま開く画面。
 func close_other_panels(keep) -> void:
-	for p in [build_ui, room_ui, policy, detail, expedition_ui, inventory_ui, craft_ui, crew_alerts, quarry_ui]:
+	for p in [build_ui, room_ui, policy, detail, expedition_ui, inventory_ui, craft_ui, crew_alerts, quarry_ui, save_ui]:
 		if p != null and p != keep and p.has_method("close"):
 			p.close()
 
@@ -1184,7 +1188,7 @@ func _game_over() -> void:
 	bg.color = Color(0, 0, 0, 0.6)
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_over_layer.add_child(bg)
-	var l := GameData.make_label("拠点が動かなくなった…\n走行 %.1f km ・ 撃破 %d ・ 撃退 %d\n\nクリックでやり直し" % [
+	var l := GameData.make_label("拠点が動かなくなった…\n走行 %.1f km ・ 撃破 %d ・ 撃退 %d\n\n右の「保存 / 続きから」で再開・ニューゲーム" % [
 			director.distance / 2500.0, kills, director.stats["repelled"]], 36)
 	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
@@ -1192,8 +1196,7 @@ func _game_over() -> void:
 	_over_layer.add_child(l)
 	bg.gui_input.connect(func(ev):
 		if ev is InputEventMouseButton and ev.pressed:
-			get_tree().paused = false
-			get_tree().reload_current_scene())
+			save_ui.open())
 	get_tree().paused = true
 
 

@@ -1,54 +1,423 @@
 class_name SaveGame
 extends RefCounted
-## 仮のセーブ・ロード（JSON）。個体・倉庫・進行速度を保存する。
-## ヘッドレス実行（動作確認）ではプレイヤーのセーブを壊さないよう、既定では無効。
-
-const VERSION := 1
-
-
-## true にすると、セーブを読み書きしない（画面確認ツールなどが、遊んでいるセーブに影響されないように）
+## 現行モデル専用。ObjectをデコードしないVariant payload + SHA256付きJSON。
+## UIの停止中、またはフレーム内の同期呼出しでsnapshot。自動保存はしない。
+const VERSION := 2
+const PATH := "user://save.json"
+static var last_error := ""
 static var disabled := false
+const MAIN := ["target_speed", "scroll_speed", "room_layout", "total_rooms_built", "recipe_priority", "gather_policy", "hunt_policy", "blueprints", "total_gathered", "total_hunted", "total_eaten", "tool_auto", "_tool_clock", "build_queue", "total_built", "total_wasted", "_waste_note_at", "_spawn_dist", "_creature_dist", "wave", "kills", "_wave_timer", "transfer_queue", "craft_queue", "total_transferred", "total_crafted_by_hand", "_feed_clock"]
+const WORKER := ["char_name", "palette", "priorities", "carrying", "carcass_cargo", "carrying_species", "carry_source", "carry_n", "carry_bonus", "weapon", "tools", "speed", "target", "position", "slot_offset", "hp", "hunger", "fatigue", "stress", "calm", "mental", "down", "floor_i", "facing", "level", "gender", "ranks", "skills", "dept", "away", "bed_index", "_climb_dest", "_climb_floor", "_climb_kind"]
+const AI := ["state", "timer", "haul_item", "haul_recipe", "repair_part", "gather_ev", "bag_limit", "bag_frac", "eat_wait", "xfer_item", "xfer_dir", "current_job", "life_request"]
+const BASE := ["built", "max_hp", "hp", "fuel", "parts", "total_refuel", "total_repair"]
+const PROCESSOR := ["orders", "current", "progress", "output", "total_done", "waiting_fuel"]
+const DIRECTOR := ["active", "forecast", "default_stance", "log", "elapsed", "distance", "stats", "enabled", "_next_in"]
+const QUARRY := ["state", "left", "near_only", "remaining", "progress", "visit_generated", "visit_nearby", "visit_discarded", "last_report", "_food_start", "discarded", "loose", "saved_speed", "visits"]
+const EXPEDITION := ["state", "site_id", "offer_left", "approach_id", "kit", "steps", "step_i", "step_left", "step_time", "loot", "lost", "blueprint", "ok_count", "ng_count", "kit_used", "retreated", "log", "result_left", "stats"]
+const RESOURCE := ["position", "item", "species", "gather_progress", "age"]
+const GATHER := ["kind", "remaining", "max_amount", "work"]
+const CREATURE := ["position", "species", "max_hp", "hp", "dead", "capturable", "_flee_speed", "_wander", "_wander_t", "_fleeing", "_facing"]
+const ENEMY := ["position", "kind", "max_hp", "hp", "dead", "hold_x", "run_speed", "damage", "body_scale", "_body", "_atk_timer"]
 
+static func fields(obj, names: Array) -> Dictionary:
+	var d := {}
+	for k in names: d[k] = obj.get(k)
+	return d.duplicate(true)
 
-static func enabled() -> bool:
-	return not disabled and DisplayServer.get_name() != "headless"
+static func put(obj, d: Dictionary, names: Array) -> void:
+	for k in names: obj.set(k, d[k].duplicate(true) if d[k] is Dictionary or d[k] is Array else d[k])
 
+static func live_children(node: Node) -> Array:
+	return node.get_children().filter(func(n): return not n.is_queued_for_deletion())
 
-static func exists(path: String = Balance.SAVE_PATH) -> bool:
-	return FileAccess.file_exists(path)
+static func capture(g) -> Dictionary:
+	var resources := live_children(g.resources_root)
+	var creatures := live_children(g.creatures_root)
+	var enemies := live_children(g.enemies_root)
+	var d := {"version": VERSION, "main": fields(g, MAIN), "base": fields(g.base, BASE),
+		"processor": fields(g.processor, PROCESSOR), "stock": g.processor.stock.counts.duplicate(true),
+		"inventory": g.storage.inventory.counts.duplicate(true), "wasted": g.storage.wasted.duplicate(true),
+		"butchered": g.storage.total_butchered, "capacity": g.storage.capacity_bonus, "weight": g.storage.current_weight(),
+		"director": fields(g.director, DIRECTOR), "quarry": fields(g.quarry, QUARRY), "expedition": fields(g.expedition, EXPEDITION),
+		"party": [], "crew": [], "resources": [], "creatures": [], "enemies": [],
+		"camera": g.camera.position, "follow": g.workers.find(g.follow_target), "scroll": 0.0}
+	for node in g.get_children():
+		if node is WorldScroll: d.scroll = node.scroll_x
+	for w in g.expedition.party: d.party.append(g.workers.find(w))
+	for w in g.workers:
+		d.crew.append({"worker": fields(w, WORKER), "ai": fields(w.ai, AI), "res": resources.find(w.ai.res), "prey": creatures.find(w.ai.prey), "enemy": enemies.find(w.ai.enemy)})
+	for r in resources:
+		var row := {"resource": fields(r, RESOURCE), "gather": {}, "quarry_id": "", "quarry_group": ""}
+		if r is GatherPoint: row.gather = fields(r, GATHER)
+		if r.has_meta("quarry_id"):
+			row.quarry_id = r.get_meta("quarry_id")
+			row.quarry_group = r.get_meta("quarry_group")
+			d.quarry.remaining[row.quarry_id] = r.remaining
+			d.quarry.progress[row.quarry_id] = r.work
+		d.resources.append(row)
+	for c in creatures: d.creatures.append(fields(c, CREATURE))
+	for e in enemies: d.enemies.append(fields(e, ENEMY))
+	return d
 
+## フィールド名と型を許可リストで検査。Object/Callable/RIDは保存しない。
+static func safe(value, depth := 0) -> bool:
+	if depth > 32: return false
+	match typeof(value):
+		TYPE_NIL, TYPE_BOOL, TYPE_INT, TYPE_STRING: return true
+		TYPE_FLOAT: return is_finite(value)
+		TYPE_VECTOR2: return value.is_finite()
+		TYPE_COLOR: return is_finite(value.r) and is_finite(value.g) and is_finite(value.b) and is_finite(value.a)
+		TYPE_ARRAY:
+			if value.size() > 10000: return false
+			for x in value:
+				if not safe(x, depth + 1): return false
+			return true
+		TYPE_DICTIONARY:
+			if value.size() > 10000: return false
+			for k in value:
+				if typeof(k) not in [TYPE_STRING, TYPE_INT] or not safe(value[k], depth + 1): return false
+			return true
+	return false
 
-## game の状態を path に書く。成功で true。
-static func write(game, path: String = Balance.SAVE_PATH) -> bool:
-	var crew: Array = []
-	for w in game.workers:
-		crew.append(w.to_dict())
-	var data := {
-		"version": VERSION,
-		"crew": crew,
-		"inventory": game.storage.inventory.counts,
-		"scroll_speed": game.scroll_speed,
-		"rooms": game.room_layout,
-	}
-	var f := FileAccess.open(path, FileAccess.WRITE)
-	if f == null:
-		push_warning("セーブできません: %s (%d)" % [path, FileAccess.get_open_error()])
-		return false
-	f.store_string(JSON.stringify(data))
+static func shape(d, obj, names: Array) -> bool:
+	if not d is Dictionary or d.size() != names.size(): return false
+	for k in names:
+		if not d.has(k): return false
+		if k == "_climb_dest":
+			if typeof(d[k]) not in [TYPE_NIL, TYPE_VECTOR2]: return false
+		elif typeof(d[k]) != typeof(obj.get(k)): return false
 	return true
 
+static func counts(d) -> bool:
+	if not d is Dictionary: return false
+	for it in d:
+		if not it is int or it not in GameData.Item.values() or not d[it] is int or d[it] < 0: return false
+	return true
 
-## 読み込む。ファイルがない・壊れているときは空の Dictionary。
-static func read(path: String = Balance.SAVE_PATH) -> Dictionary:
-	if not FileAccess.file_exists(path):
+static func recipe(r) -> bool:
+	if not r is Dictionary: return false
+	if r.is_empty(): return true
+	for k in ["id", "in", "out", "n", "time", "field", "tank_fuel"]:
+		if not r.has(k): return false
+	if not counts(r["in"]) or not r.id is String: return false
+	var canonical: Dictionary
+	if r.has("build"):
+		if not r.build is String or not FacilityDB.has(r.build): return false
+		canonical = FacilityDB.installation_recipe(r.build) if FacilityDB.def(r.build).has("packed_item") else FacilityDB.recipe_of(r.build)
+	else:
+		canonical = GameData.recipe_by_id(r.id)
+	if canonical.is_empty(): return false
+	for k in ["in", "out", "n", "time", "field", "tank_fuel", "station"]:
+		if r.get(k, "" if k == "station" else null) != canonical.get(k, "" if k == "station" else null): return false
+	return true
+
+static func validate(d, g) -> bool:
+	if not d is Dictionary or not safe(d) or d.get("version") != VERSION: return false
+	for k in ["main", "base", "processor", "stock", "inventory", "wasted", "butchered", "capacity", "weight", "director", "quarry", "expedition", "party", "crew", "resources", "creatures", "enemies", "camera", "follow", "scroll"]:
+		if not d.has(k): return false
+	for row in [[d.main,g,MAIN],[d.base,g.base,BASE],[d.processor,g.processor,PROCESSOR],[d.director,g.director,DIRECTOR],[d.quarry,g.quarry,QUARRY],[d.expedition,g.expedition,EXPEDITION]]:
+		if not shape(row[0],row[1],row[2]): return false
+	for k in ["party", "crew", "resources", "creatures", "enemies"]:
+		if not d[k] is Array: return false
+	if d.crew.size() != g.workers.size() or not d.camera is Vector2 or not d.follow is int or d.follow < -1 or d.follow >= d.crew.size(): return false
+	if not d.scroll is float: return false
+	for key in d.main.recipe_priority:
+		if not key is String or GameData.recipe_by_id(key).is_empty() or not d.main.recipe_priority[key] is int or d.main.recipe_priority[key] < 0 or d.main.recipe_priority[key] > 5: return false
+	for key in d.main.gather_policy:
+		if key not in GameData.Item.values() or not d.main.gather_policy[key] is int or d.main.gather_policy[key] < 0 or d.main.gather_policy[key] > 5: return false
+	for key in d.main.hunt_policy:
+		if not GameData.CREATURES.has(key) or not d.main.hunt_policy[key] is bool: return false
+	for k in ["weight", "capacity", "butchered"]:
+		if not d[k] is int or d[k] < 0: return false
+	for v in [d.inventory,d.stock,d.wasted,d.quarry.loose,d.quarry.discarded,d.quarry.visit_generated,d.quarry.visit_nearby,d.quarry.visit_discarded,d.expedition.loot,d.expedition.lost]:
+		if not counts(v): return false
+	if Rooms.sanitize(d.main.room_layout) != d.main.room_layout: return false
+	var capacity := 0
+	for id in d.base.built:
+		if not FacilityDB.has(id) or not d.base.built[id] is Array: return false
+		var seen := []
+		for slot in d.base.built[id]:
+			if not slot is int or slot < 0 or slot >= FacilityDB.max_of(id) or slot in seen: return false
+			seen.append(slot)
+		capacity += seen.size() * int(FacilityDB.def(id).get("capacity_bonus",0))
+	if d.capacity != capacity or d.base.fuel < 0 or d.base.fuel > GameData.FUEL_CAP: return false
+	if d.base.parts.size() != GameData.Part.size(): return false
+	for k in d.base.parts:
+		if k not in GameData.Part.values() or typeof(d.base.parts[k]) not in [TYPE_FLOAT,TYPE_INT] or d.base.parts[k] < 0 or d.base.parts[k] > 100: return false
+	for r in d.processor.orders:
+		if not recipe(r) or r.is_empty(): return false
+	if not recipe(d.processor.current): return false
+	if d.processor.progress < 0: return false
+	for it in d.processor.output:
+		if not it is int or it not in ItemDB.ORDER: return false
+	for id in d.main.build_queue:
+		if not id is String or not FacilityDB.has(id): return false
+	for t in d.main.transfer_queue:
+		if not t is Dictionary or not t.get("item") is int or t.item not in ItemDB.ORDER or not t.get("n") is int or t.n <= 0 or t.get("dir") not in ["to_workshop","to_storage"]: return false
+	for c in d.main.craft_queue:
+		if not c is Dictionary or not c.get("id") is String or GameData.recipe_by_id(c.id).is_empty() or not c.get("n") is int or c.n <= 0: return false
+	if d.quarry.state not in ["road","approach","parked","recall","returning"]: return false
+	for p in QuarryDB.POINTS:
+		if not d.quarry.remaining.get(p.id) is int or d.quarry.remaining[p.id] < 0 or d.quarry.remaining[p.id] > p.amount: return false
+	for k in d.quarry.progress:
+		if typeof(d.quarry.progress[k]) not in [TYPE_FLOAT,TYPE_INT] or d.quarry.progress[k] < 0: return false
+	var resource := ResourceNode.new()
+	var gather := GatherPoint.new()
+	var creature := Creature.new()
+	var enemy := Enemy.new()
+	var valid := _entities_valid(d, resource, gather, creature, enemy)
+	resource.free(); gather.free(); creature.free(); enemy.free()
+	if not valid: return false
+	var used := {"res":[],"prey":[],"bed":[],"repair":[]}
+	var processor_count := 0
+	var transfer_count := 0
+	var fuel_count := 0
+	for i in d.crew.size():
+		var row = d.crew[i]
+		if not row is Dictionary or not shape(row.get("worker"),g.workers[i],WORKER) or not shape(row.get("ai"),g.workers[i].ai,AI): return false
+		var w: Dictionary = row.worker
+		var a: Dictionary = row.ai
+		if a.state not in CharacterAI.State.values() or w.floor_i not in [0,1,2] or w._climb_floor not in [0,1,2]: return false
+		if w.hp < 0 or w.hp > 100 or w.hunger < 0 or w.hunger > 100 or w.fatigue < 0 or w.fatigue > 100: return false
+		if w.palette not in ["grey","tan","pink"] or w.weapon not in [-1,GameData.Item.SIMPLE_SPEAR]: return false
+		if w.carrying != -1 and w.carrying not in GameData.Item.values(): return false
+		if w.carry_n < 1 or not counts(w.carry_bonus) or not counts(w.carcass_cargo) or not recipe(a.haul_recipe): return false
+		for key in w.priorities:
+			if key not in GameData.Job.values() or not w.priorities[key] is int or w.priorities[key] < 0 or w.priorities[key] > GameData.MAX_PRIORITY: return false
+		for key in w.ranks:
+			if key not in GameData.Field.values() or not w.ranks[key] is int or w.ranks[key] < 0 or w.ranks[key] > 7: return false
+		for key in w.tools:
+			if key not in GatherDB.SLOTS or not w.tools[key] is int or not GatherDB.TOOLS.has(w.tools[key]) or GatherDB.TOOLS[w.tools[key]].slot != key: return false
+		for key in ["res","prey","enemy"]:
+			var pool: Array = d.resources if key == "res" else (d.creatures if key == "prey" else d.enemies)
+			if not row.get(key) is int or row[key] < -1 or row[key] >= pool.size(): return false
+			if key != "enemy" and row[key] >= 0:
+				if row[key] in used[key]: return false
+				used[key].append(row[key])
+		if a.state in [CharacterAI.State.HAUL_TAKE,CharacterAI.State.HAUL_MOVE] and a.haul_recipe.is_empty(): return false
+		if a.state in [CharacterAI.State.REST,CharacterAI.State.REST_MOVE]:
+			if w.bed_index not in d.base.built.get("bed",[]) or w.bed_index in used.bed: return false
+			used.bed.append(w.bed_index)
+		if a.state in [CharacterAI.State.REPAIR_TAKE,CharacterAI.State.REPAIR_MOVE,CharacterAI.State.REPAIR]:
+			if a.repair_part not in GameData.Part.values() or a.repair_part in used.repair: return false
+			used.repair.append(a.repair_part)
+		if a.state in [CharacterAI.State.PROCESS,CharacterAI.State.MOVE_TO_MACHINE]: processor_count += 1
+		if a.state in [CharacterAI.State.XFER_TAKE,CharacterAI.State.XFER_MOVE]:
+			transfer_count += 1
+			if a.xfer_item not in ItemDB.ORDER or a.xfer_dir not in ["to_workshop","to_storage"]: return false
+		if a.state in [CharacterAI.State.REFUEL_TAKE,CharacterAI.State.REFUEL_MOVE,CharacterAI.State.REFUEL]:
+			fuel_count += 1
+			if a.haul_item not in GameData.FUEL_ITEMS: return false
+		if a.state in [CharacterAI.State.HAUL_MOVE,CharacterAI.State.REPAIR_MOVE,CharacterAI.State.REPAIR,CharacterAI.State.REFUEL_MOVE,CharacterAI.State.REFUEL,CharacterAI.State.EAT,CharacterAI.State.XFER_MOVE] and w.carrying < 0: return false
+		if w.level < 1 or w.gender not in [0,1] or w.dept not in GameData.Field.values(): return false
+		if not a.gather_ev.is_empty():
+			for key in ["eff","seconds"]:
+				if typeof(a.gather_ev.get(key)) not in [TYPE_FLOAT,TYPE_INT]: return false
+	if processor_count > 1 or transfer_count > 1 or fuel_count > 1: return false
+	var party_seen := []
+	for i in d.party:
+		if not i is int or i < 0 or i >= d.crew.size() or i in party_seen: return false
+		party_seen.append(i)
+	if d.expedition.state not in ["idle","offered","running","done"]: return false
+	if d.expedition.state != "idle" and not ExpeditionDB.SITES.has(d.expedition.site_id): return false
+	for k in d.expedition.steps:
+		if not ExpeditionDB.STEPS.has(k): return false
+	if d.expedition.step_i < 0 or d.expedition.step_i > d.expedition.steps.size() or d.expedition.step_time <= 0: return false
+	for row in d.director.active + d.director.forecast:
+		if not row is Dictionary or not row.get("id") is String or EventDB.def(row.id).is_empty() or typeof(row.get("left")) not in [TYPE_FLOAT,TYPE_INT]: return false
+	for row in d.director.active:
+		if not row.get("stance") is String or not row.get("spawned") is int: return false
+		for k in ["total","flee_t"]:
+			if typeof(row.get(k)) not in [TYPE_FLOAT,TYPE_INT]: return false
+	for key in ["weather","attack","trouble","chance","repelled","escaped","kills"]:
+		if not d.director.stats.get(key) is int or d.director.stats[key] < 0: return false
+	for key in ["trips","steps_ok","steps_ng","blueprints","retreats"]:
+		if not d.expedition.stats.get(key) is int or d.expedition.stats[key] < 0: return false
+	for row in d.director.log:
+		if not row is Dictionary or not row.get("text") is String or typeof(row.get("at")) not in [TYPE_FLOAT,TYPE_INT]: return false
+	for line in d.expedition.log:
+		if not line is String: return false
+	for i in d.crew.size():
+		if d.crew[i].worker.away != (d.expedition.state == "running" and i in d.party): return false
+	return saved_weight(d) == d.weight
+
+static func _entities_valid(d, resource, gather, creature, enemy) -> bool:
+	var quarry_ids := []
+	for row in d.resources:
+		if not row is Dictionary or not shape(row.get("resource"),resource,RESOURCE) or not row.get("gather") is Dictionary: return false
+		if row.resource.item not in GameData.Item.values(): return false
+		if row.resource.item == GameData.Item.CARCASS and not GameData.CREATURES.has(row.resource.species): return false
+		if not row.gather.is_empty():
+			if not shape(row.gather,gather,GATHER) or not GatherDB.POINTS.has(row.gather.kind) or row.gather.remaining < 0 or row.gather.remaining > row.gather.max_amount or row.gather.work < 0: return false
+		if not row.get("quarry_id") is String or not row.get("quarry_group") is String: return false
+		if row.quarry_id != "":
+			if row.gather.is_empty() or row.quarry_id in quarry_ids: return false
+			var found := false
+			for p in QuarryDB.POINTS:
+				if p.id == row.quarry_id and p.group == row.quarry_group and row.gather.remaining == d.quarry.remaining[p.id] and row.gather.work == d.quarry.progress.get(p.id,0.0): found = true
+			if not found: return false
+			quarry_ids.append(row.quarry_id)
+	if d.quarry.state in ["parked","recall"] and quarry_ids.size() != QuarryDB.POINTS.size(): return false
+	if d.quarry.state not in ["parked","recall"] and not quarry_ids.is_empty(): return false
+	for row in d.creatures:
+		if not shape(row,creature,CREATURE) or not GameData.CREATURES.has(row.species): return false
+	for row in d.enemies:
+		if not shape(row,enemy,ENEMY) or not EventDB.ENEMIES.has(row.kind): return false
+	return true
+
+## 検査済みsnapshotのみ。予約は空から作り直し、プロセス内のObject参照を使い回さない。
+static func apply(g, d: Dictionary) -> bool:
+	if not validate(d,g):
+		last_error = "保存内容の形式・数量・参照を検証できません。現在の進行は変更しません。"
+		return false
+	put(g,d.main,MAIN); put(g.base,d.base,BASE); put(g.processor,d.processor,PROCESSOR)
+	g.storage.inventory.counts = d.inventory.duplicate(true)
+	g.storage.wasted = d.wasted.duplicate(true)
+	g.storage.total_butchered = d.butchered
+	g.storage.capacity_bonus = d.capacity
+	g.processor.stock.counts = d.stock.duplicate(true)
+	g.processor.incoming.clear(); g.processor.worker = null
+	g.processor._out_times.clear(); g.processor._drops.clear()
+	g.base.beds = [null,null,null]; g.base.refuel_reserved = false; g.base.repair_reserved.clear()
+	g.base.apply_layout()
+	put(g.director,d.director,DIRECTOR); put(g.quarry,d.quarry,QUARRY); put(g.expedition,d.expedition,EXPEDITION)
+	g.quarry.points.clear(); g.expedition.party.clear()
+	g.food_claims = 0; g.transfer_worker = null; g.last_carcass = null
+	for parent in [g.resources_root,g.creatures_root,g.enemies_root]:
+		for node in parent.get_children():
+			parent.remove_child(node)
+			node.queue_free()
+	var resources := []; var creatures := []; var enemies := []
+	for row in d.resources:
+		var r = ResourceNode.new() if row.gather.is_empty() else GatherPoint.new()
+		r.game = g
+		put(r,row.resource,RESOURCE)
+		if not row.gather.is_empty(): put(r,row.gather,GATHER)
+		if row.quarry_id != "":
+			r.set_meta("quarry_id",row.quarry_id); r.set_meta("quarry_group",row.quarry_group)
+			g.quarry.points.append(r)
+		g.resources_root.add_child(r); resources.append(r)
+	for row in d.creatures:
+		var c := Creature.new(); c.game = g; put(c,row,CREATURE)
+		g.creatures_root.add_child(c); creatures.append(c)
+	for row in d.enemies:
+		var e := Enemy.new(); e.game = g; put(e,row,ENEMY)
+		g.enemies_root.add_child(e); enemies.append(e)
+	for i in d.crew.size():
+		var w = g.workers[i]; var row: Dictionary = d.crew[i]
+		put(w,row.worker,WORKER); put(w.ai,row.ai,AI)
+		w._sheet = GameData.tex("res://assets/characters/mouse_%s.png" % w.palette)
+		w.visible = not w.away; w.set_process(not w.away)
+		w.sleeping = false; w.resting = false
+		var a = w.ai
+		a.res = resources[row.res] if row.res >= 0 else null
+		a.prey = creatures[row.prey] if row.prey >= 0 else null
+		a.enemy = enemies[row.enemy] if row.enemy >= 0 else null
+		if a.res != null: a.res.claimed_by = w; a.res.reserved = a.bag_limit if a.res is GatherPoint else 1
+		if a.prey != null: a.prey.hunted_by = w
+		var S = CharacterAI.State
+		# 消滅済み対象だけ再選択。保有品を瞬間移動させず、現在位置から倉庫へ運ぶ。
+		if (a.state in [S.NOTICE,S.MOVE_TO_RESOURCE,S.GATHER] and a.res == null) or (a.state in [S.HUNT_MOVE,S.HUNT_ATTACK] and a.prey == null) or (a.state in [S.COMBAT_MOVE,S.COMBAT] and a.enemy == null):
+			a.state = S.MOVE_TO_STORAGE if w.carrying >= 0 else S.SEARCH
+		if a.state in [S.HAUL_TAKE,S.HAUL_MOVE]: g.processor.incoming.append(a.haul_recipe)
+		if a.state in [S.MOVE_TO_MACHINE,S.PROCESS]: g.processor.worker = w
+		if a.state in [S.REST_MOVE,S.REST]: g.base.beds[w.bed_index] = w
+		if a.state in [S.REFUEL_TAKE,S.REFUEL_MOVE,S.REFUEL]: g.base.refuel_reserved = true
+		if a.state in [S.REPAIR_TAKE,S.REPAIR_MOVE,S.REPAIR]: g.base.repair_reserved[a.repair_part] = w
+		if a.state in [S.XFER_TAKE,S.XFER_MOVE]: g.transfer_worker = w
+		a._eat_claimed = a.state == S.EAT_TAKE
+		if a._eat_claimed: g.food_claims += 1
+	for i in d.party: g.expedition.party.append(g.workers[i])
+	g.camera.position = d.camera; g.camera.reset_smoothing()
+	g.follow_target = g.workers[d.follow] if d.follow >= 0 else null
+	for node in g.get_children():
+		if node is WorldScroll: node.scroll_x = d.scroll
+	g.storage.queue_redraw(); g.base.queue_redraw()
+	last_error = ""
+	return true
+
+static func item_mass(item: int, n := 1) -> int:
+	return CargoDB.size_of(item) * n if CargoDB.bay_of(item) >= 0 else 0
+
+static func mass(items: Dictionary) -> int:
+	var n := 0
+	for it in items: n += item_mass(it,items[it])
+	return n
+
+static func saved_weight(d: Dictionary) -> int:
+	var n := mass(d.inventory) + mass(d.stock)
+	for r in d.processor.orders + [d.processor.current]: n += mass(r.get("in",{}))
+	for it in d.processor.output: n += item_mass(it)
+	for row in d.crew:
+		var w: Dictionary = row.worker
+		if row.ai.state == CharacterAI.State.HAUL_MOVE:
+			n += mass(row.ai.haul_recipe["in"])
+		elif w.carrying == GameData.Item.CARCASS:
+			n += mass(w.carcass_cargo)
+		elif w.carrying >= 0: n += item_mass(w.carrying,w.carry_n)
+		n += mass(w.carry_bonus)
+		if w.weapon >= 0: n += item_mass(w.weapon)
+	if d.expedition.state == "running" and d.expedition.kit and not d.expedition.kit_used: n += item_mass(GameData.Item.REPAIR_KIT)
+	return n
+
+static func exists(path: String = PATH) -> bool:
+	return FileAccess.file_exists(path)
+
+static func read(path: String = PATH) -> Dictionary:
+	last_error = ""
+	if not exists(path):
+		last_error = "セーブがありません。"
 		return {}
-	var parsed = JSON.parse_string(FileAccess.get_file_as_string(path))
-	if typeof(parsed) != TYPE_DICTIONARY or not parsed.has("crew") or parsed["crew"].is_empty():
-		push_warning("セーブデータを読めません: " + path)
+	if FileAccess.get_file_as_bytes(path).size() > 8000000:
+		last_error = "セーブが大きすぎます。"
 		return {}
-	return parsed
+	var parser := JSON.new()
+	var parse_error := parser.parse(FileAccess.get_file_as_string(path))
+	var envelope = parser.data if parse_error == OK else null
+	if not envelope is Dictionary or envelope.get("version") != VERSION or not envelope.get("payload") is String or not envelope.get("sha256") is String:
+		last_error = "破損または未対応の旧形式です。元のファイルは変更しません。"
+		return {}
+	var bytes := Marshalls.base64_to_raw(envelope.payload)
+	var hash := HashingContext.new(); hash.start(HashingContext.HASH_SHA256); hash.update(bytes)
+	if hash.finish().hex_encode() != envelope.sha256:
+		last_error = "セーブの整合性検査に失敗しました。"
+		return {}
+	var d = bytes_to_var(bytes) # allow_objects=false。コード・Objectは復元しない。
+	if not d is Dictionary or not safe(d):
+		last_error = "セーブ内容を読めません。"
+		return {}
+	return d
 
-
-static func delete(path: String = Balance.SAVE_PATH) -> void:
-	if FileAccess.file_exists(path):
-		DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
+static func write(g, path: String = PATH, overwrite := false) -> bool:
+	if g.game_over: last_error = "ゲーム終了状態は保存できません。"; return false
+	if disabled: last_error = "検証モードではプレイヤーの保存は無効です。"; return false
+	var paused: bool = g.get_tree().paused
+	g.get_tree().paused = true
+	var d := capture(g)
+	var valid := validate(d,g)
+	g.get_tree().paused = paused
+	if not valid: last_error = "保存状態を検証できません。既存の保存は変更しません。"; return false
+	if exists(path) and not overwrite: last_error = "上書きの確認が必要です。"; return false
+	var bytes := var_to_bytes(d)
+	var hash := HashingContext.new(); hash.start(HashingContext.HASH_SHA256); hash.update(bytes)
+	var envelope := {"version": VERSION, "payload": Marshalls.raw_to_base64(bytes), "sha256": hash.finish().hex_encode()}
+	var temp := path + ".tmp"
+	var f := FileAccess.open(temp,FileAccess.WRITE)
+	if f == null: last_error = "一時ファイルを書けません。既存の保存は変更しません。"; return false
+	f.store_string(JSON.stringify(envelope)); f.flush()
+	var err := f.get_error(); f.close()
+	if err != OK or read(temp) != d:
+		last_error = "一時ファイルの検証に失敗。既存の保存は変更しません。"
+		return false
+	if exists(path):
+		var previous := read(path)
+		var backup := path + (".bak" if not previous.is_empty() and validate(previous,g) else ".damaged")
+		# バックアップも一時ファイルを経由。主保存の切替が失敗しても主保存は残る。
+		if DirAccess.dir_exists_absolute(backup + ".tmp") or DirAccess.dir_exists_absolute(backup) or DirAccess.copy_absolute(path,backup + ".tmp") != OK or DirAccess.rename_absolute(backup + ".tmp",backup) != OK:
+			last_error = "バックアップを保全できないため保存を中止しました。"
+			return false
+	if DirAccess.rename_absolute(temp,path) != OK:
+		last_error = "保存の切替に失敗しました。元の保存は残っています。"
+		return false
+	last_error = ""
+	return true

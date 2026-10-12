@@ -1,6 +1,6 @@
 class_name QuarryTrip
 extends RefCounted
-## 街道 ⇄ 1鉱床の小さな状態機械。地点の残量はこのゲーム実行中だけ保持する。
+## 街道 ⇄ 1鉱床の小さな状態機械。地点の残量・採取途中の進捗は手動セーブにも保存する。
 var game
 var state := "road"                 # road / approach / parked / recall / returning
 var left := 0.0
