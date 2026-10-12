@@ -113,13 +113,16 @@ func processing_reserve() -> int:
 	if not p.current.is_empty(): recipes.append(p.current)
 	var n := 0
 	for r in recipes: n += maxi(0, recipe_growth(r))
+	# 未投入分も受付時から増量を予約。材料はstock側で一度だけ所有。
+	for q in g.craft_queue:
+		n += maxi(0, recipe_growth(GameData.recipe_by_id(q["id"]))) * int(q["n"])
 	return n
 
 
-func transform_limit(r: Dictionary) -> int:
+func transform_limit(r: Dictionary, reserved_units := 0) -> int:
 	var growth := recipe_growth(r)
 	if not enforce or growth <= 0: return 1000000
-	var room := max_weight() - current_weight() - processing_reserve()
+	var room := max_weight() - current_weight() - processing_reserve() + growth * reserved_units
 	var g = game()
 	if g != null: room -= set_weight(g.gather_room())
 	return maxi(0, floori(float(room) / growth))

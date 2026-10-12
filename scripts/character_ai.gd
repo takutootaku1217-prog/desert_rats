@@ -344,12 +344,15 @@ func tick(delta: float) -> void:
 				_set_state(State.PROCESS)
 		State.PROCESS:
 			var p: BaseProcessor = game.processor
-			if not p.output.is_empty():
+			if not p.output.is_empty() and not p.continue_batch(ch.carry_limit()):
 				if p.packed_output_blocked():
 					p.worker = null
 					_set_state(State.SEARCH)
 					return
-				ch.carrying = p.take_output()
+				var stack: Dictionary = p.take_output_stack(ch.carry_limit())
+				ch.carrying = stack["item"]
+				ch.carry_n = stack["n"]
+				ch.carry_bonus = {}
 				ch.carry_source = Inventory.SOURCE_PROCESSING
 				p.worker = null
 				_go_storage()

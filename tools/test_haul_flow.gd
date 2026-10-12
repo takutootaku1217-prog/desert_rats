@@ -1,8 +1,9 @@
 extends "res://tools/test_world_flow.gd"
 func _initialize():
- seed(501)
- main=load("res://scenes/main.tscn").instantiate();root.add_child(main);await main.ready
- seed(501);Engine.time_scale=12
+ seed(diagnostic_seed())
+ main=load("res://scenes/main.tscn").instantiate();main.set_meta("diagnostic_seed",diagnostic_seed());root.add_child(main);await main.ready
+ seed(diagnostic_seed());Engine.time_scale=12
+ print("DIAGNOSTIC_SEED ",diagnostic_seed())
  print("HAUL_FLOW 通常初期物資・既定出来事・実AI・定期保存復元。数量注入なし。")
  main.request_build("workbench")
  if not await wait_for("作業台完成",func():return main.has_facility("workbench"),600):finish();return

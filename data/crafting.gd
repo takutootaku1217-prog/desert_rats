@@ -96,6 +96,8 @@ static func evaluate(e: Dictionary, game, qty: int = 1) -> Dictionary:
 		maxq_all = mini(maxq_all, (have + game.storage.count_of(it)) / maxi(1, per))
 		if not ok:
 			missing[it] = need - have
+	res["material_qty"] = maxi(0,maxq)
+	res["material_with_storage"] = maxi(0,maxq_all)
 	# 作った物の置き場（倉庫の枠）。いっぱいで入らないなら、作らせない（捨てないため）
 	var out: int = int(e["out"])
 	var room_ok := true
@@ -123,8 +125,8 @@ static func evaluate(e: Dictionary, game, qty: int = 1) -> Dictionary:
 		return res
 	if not room_ok:
 		res["state"] = "blocked"
-		res["reason"] = "置き場がいっぱい"
-		res["hint"] = "保有重量を減らすか、収納ボックスを設置して容量を増やす"
+		res["reason"] = "選択した全回分の増加重量を予約できません"
+		res["hint"] = "1回または少量へ戻すか、保有重量を減らしてください（今は最大%d回）" % maxi(0,maxq)
 		return res
 	res["state"] = "ok"
 	return res

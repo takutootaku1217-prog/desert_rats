@@ -813,3 +813,40 @@
 - 修正後 `/workspace/desert-rats-checks/haul-final-ui/20261012T065217Z-u4iogtc6/results.json` はimport/haul_support/haul_ui/haul_flow/items/artscale/crew_detailの7件全成功。上記3runは全てsource_changed_during_run=false。集約は `/workspace/desert-rats-checks/haul-release-coverage.json`。前のartscale失敗は削除/成功への書換えなし。
 - 描画あり最終版 `haul-window-final.log` は実入力の製作注文/装備/解除/持替え/重量内訳が全成功。`haul-ui.png` と `haul-back.png` を目視確認。ハーネス自己検査8件成功 (`haul-harness.log`)。mainスクリプトとルートのミラーは同一、git diff --check成功。
 - この一式を既存mainでcommit・通常pushする。完全SHAと実際の共有状態は終了報告を正とする。荷役をここで一区切りとし、まとめ加工は次turnへ残す。
+
+## 2026-10-12 まとめ加工：診断完走後の区切り（未コミット・未完）
+
+- 親から「実行中診断を完走後、安全な区切りで最終応答。未完分は保全し次ターンで継続」の指示を受け、全coreと関連を中断せず完走して停止した。基準/共有HEADは c40f636ca980d3830f7260343be57750b4e76423（荷役完成）。今回のまとめ加工はローカル保存だけ。commit・pushしていない。
+- 実装済みローカル: Fの既存1/5/全部を使い全回分の材料/正味増量を予約。単位材料/成果/時間/燃料は不変、canonicalの単位注文として加工待ち枠へ順次投入。同品の複数回手動注文では、担当者の持てる数に達するまで加工を続け、同種成果を基本3/フレーム5個まで回収する。未投入、投入済未着手、現在1回の進捗、共有出力トレイを分離表示。品目単位の未着手取消は未投入予約を解放、投入済未着手材料を作業場へ返す。現在の1回/進捗/完成品/運搬中は維持。素材運搬ボタンは未到着分を差し引き連打の過剰注文を防ぐ。製作と設置は別のまま。
+- 対照実測: 同じ仲間/同じ初期条件、生肉6→食料12。1回ずつ6回は投入6便+回収6便=12便、まとめ6回は投入2便+回収4便=6便、フレーム併用は投入2便+回収3便=5便。全便で3/5個上限内。ゲーム秒83.4/66.6/57.4は境界fixtureの値。**これは新コードの操作単位比較であり旧Fの同じ6回注文との比較ではない。旧Fでも投入の数量運搬は既に可能だった。** 新規改善は全量増量予約とまとめ回収/連続加工/内訳/取消。
+- 新規batch_craftingでは全回分の容量拒否/少量、満載回収、材料/成果/重量保存、連打、途中/部分完成の保存復元、取消後の残り時間、精錬3回で単位時間3.5×3/燃料3×3、作業台撤去拒否、担当/優先度変更、別レシピ取消、旧saveのbatchタグ省略を確認。batch_uiはViewport実入力で既存5ボタン/素材運搬連打/合計表示/注文/内訳/取消/1回に戻す操作が成功。batch_flowは通常初期物資/出来事から木材3を採り、作業場へ運搬→薪3回注文→保存→集合/地図移動→都市で3単位完了回収。数量注入なし。
+- 対象診断 `/workspace/desert-rats-checks/batch-second/20261012T070400Z-cbys6dbh/results.json` はimport+新規3診断の全4件成功。描画あり `batch-window.log` 全成功、`batch-ui.png` を目視確認。Linux/Godot4.6.3、OS入力/スマホ/Windows4.7.2/音声は未検証。
+- **全coreは未合格**: `/workspace/desert-rats-checks/batch-release-core/20261012T070454Z-rwoq7m8n/results.json` は36件中34成功、progressionとconsumption_loopが失敗。関連 `/workspace/desert-rats-checks/batch-release-related/20261012T071214Z-b8wmy7oo/results.json` は9件中8成功、save_progressionが失敗。両run source_changed_during_run=false、完走後の対象ファイルSHA256も検証時と一致（この記録追記前）。集約batch-checkpoint.json。失敗を削除/合格へ書き換えていない。
+- progression/save_progressionはlegacy-world-testの近場採取で満載停滞。888.2秒、重量414/420、石39・鉱石14等、近場12単位を完了できなかった。consumption_loopは単位調理の出力2個を一度に回収したため、従来の1個ずつ2回の検査で2回目が未達。現在のtake_output_stackは**単発/自動加工にもまとめ回収を適用している**。承認された複数回手動注文だけへ限定し、既存進行の変化を避けるのが次の修正案。まだ適用/再検証しておらず、この因果が全失敗を解消するとは未確認。
+- 次工程の修正案は `/workspace/desert-rats-checks/batch-scope-fix-DRAFT.py` に保全（未実行、適用前にレビュー）。BaseProcessorへ保存対象bool batch_outputを追加し、複数回手動由来の出力だけまとめ回収/継続加工、自動/単発は従来1個回収に戻す。SaveGameはprocessorの旧省略項目をfalse補完する案。単位キュー/時間/容量は維持する。適用後は少量/自動のUI説明、対照便数の更新（単発は従来の12回収便へ戻る見込み）、旧save/出力旗の保存、全core/関連/UI/正規進行/荷役/撤去/地図を再実行する。草稿batch-note.txtは旧広域回収の記述があるため完成ログとしてそのまま貼らない。
+- 未コミット対象: data/crafting.gd、scripts/{character_ai,main,processor,save_game,storage}.gd、ルートmainミラー、tools/run_checks.py、ui/craft_ui.gd、新規tools/test_batch_{crafting,ui,flow}.gdと各uid、本記録/CLAUDE追記。mainとルートミラー一致、git diff --check成功。元の/workspace/-は未変更。旧生成済み地点の骨不足、遠方追跡、難度、施設tier/役割分割、中継サービスは対象外で未変更。
+
+## 2026-10-12 まとめ加工：範囲修正後の区切り（未コミット・未完）
+
+- 親から最新診断を完走後に安全な区切りで最終報告し、残りを次turnへ引継ぐ指示。診断は中断せず完走した。共有mainは c40f636ca980d3830f7260343be57750b4e76423 のまま。今回も未コミット・未pushで、ローカルの変更を破棄していない。
+- 前節の範囲修正DRAFTを確認して適用し、manualかつbatchの出力だけをまとめ回収へ限定した。processor.batch_outputを保存し、旧saveの省略はfalseとして検査/適用。単発を連打してキューに2回以上たまってもbatchへ勝手に昇格しない。自動/単発の1個回収は従来どおり。通常進行/消費ループ/保存進行の前回3失敗は、同じ容量/閾値/seed501で解消した（batch-scope-fixed/20261012T071814Z-hg5d5y1a/results.json、6/6成功）。
+- 最終仕様の再計測: 同じ仲間・生肉6→食料12・加工6単位。単発6回は投入6便+回収12便=18便、明示的なまとめ6回は投入2便+回収4便=6便、フレーム併用は投入2便+回収3便=5便。最大積荷1/3/5、ゲーム秒143.8/66.6/57.4（境界fixture条件）。前節の単発12便は広域回収版の途中値なので、今後はこの18便を使う。旧Fの同じ数量注文と投入便数を比較した値ではない点は変わらない。
+- 追加検査: 材料不足5回を表示して可能な単発へ戻す、予約脂肪2個は取り出せず余り1個だけ倉庫へ戻す依頼が可能、全量取消→少量注文でstock移動による容量回避なし、単発連打は非batch、フレーム上限5でも単発出力は1個ずつ、まとめ出力の旗/進捗の保存復元。既存の部分完了/取消/時間/燃料/撤去依存/満載/別レシピ検査も成功。
+- 一度目の範囲修正後core（batch-final-core/20261012T072038Z-dm2zwzq5/results.json）は36件中35成功、haul_uiのみFの製作クリック失敗。説明が1行増えボタンが下がったため、ゲーム処理を変えず説明1文を短くした。batch-short-label/20261012T072853Z-g4rb8x9u/results.jsonはimport/haul_ui/batch_ui全成功。最終描画ログbatch-window-final.logとbatch-haul-window-final.logも全成功、batch-ui.pngを目視確認。ハーネス自己検査8件成功。
+- 最新全core `/workspace/desert-rats-checks/batch-complete-core/20261012T072941Z-m65g72f3/results.json` は **36件中35成功、packing_flowだけ失敗**。progression/consumption_loop/荷役/UI/地図/保存/長時間2ループ等は成功。関連 `/workspace/desert-rats-checks/batch-final-related/20261012T072634Z-b79kojtm/results.json` は **9/9成功**。両run source_changed=false。最新core対象の変更ファイルSHA256は完走後と全一致（本記録追記前）。関連からの差はFの説明1文だけで、修正後のUIは再検証済み。集約 `/workspace/desert-rats-checks/batch-scope-checkpoint.json`。
+- 残失敗の現象: packing_flowが中央交易都市で寝床材料を確保できず建設未達（810.8秒、build_queue=[bed]、骨/皮在庫なし）。同じゲーム処理で直前runは成功していた。**診断冒頭のseed(501)をMain._readyのrandomize()が上書きし、初期生成が固定されない点をコードで確認**。_ready後にもseed(501)があるが初期生成後なので遅い。これが揺らぎの原因候補で、修正により今回の失敗を解消できるかはまだ未検証。閾値や容量を緩めず、成功するseedへの変更もしない。
+- 次の未適用案は `/workspace/desert-rats-checks/batch-seed-fix-DRAFT.py`。Mainがdiagnostic_seedメタデータを明示された診断時だけ初期生成前からそのseedを使い、通常起動のrandomizeを維持する。packing_flow/haul_flow/batch_flowがrootへ追加する前に501を指定する案。素材や地域状態を生成後に注入/再生成する方式ではない。**まだ実行していない**。適用前レビュー→同じ501で初期状態の再現を確認→対象進行→全core/関連/描画を再実行し、合格した時だけcommit・通常push・remote一致へ。seedを固定しても失敗する場合は正規操作/実挙動を調べ、成功までseed選別しない。
+- 変更はdata/crafting.gd、scripts/{character_ai,main,processor,save_game,storage}.gd、ルートmainミラー、tools/run_checks.py、ui/craft_ui.gd、新規tools/test_batch_{crafting,ui,flow}.gdと各uid、CLAUDE/本記録。GameDataレシピ、CargoDB容量/重量、施設費用、WorldMapDBは共有HEADから不変。mainミラー一致、git diff --check成功。旧生成済み地点の骨不足、遠方追跡、難度、施設tier/用途分割、中継サービスは未変更。batch-complete-note.txtは完成候補の草稿で、未達を解消して最終証跡を加えるまでは完成ログへ流用しない。
+
+## 2026-10-12 まとめ加工：最終実装と回帰検証
+
+- 既存Fの1/5/全部と素材運搬を使い、複数回の手動注文に限って同品の完成品を通常3個/フレーム5個までまとめ回収する。単発・自動は従来1個ずつ。材料・成果・単位時間・燃料の割引なし。全回分の正味増量予約、連打時の未到着材料の二重依頼防止、未投入/投入済未着手/加工中/完成品の表示を追加。
+- 品目ごとの未着手取消は予約を解放し、投入済未着手材料を作業場へ返す。現在加工中の1回の時間/燃料・完成品・運搬物・別品目は保持。保存はbatchタグとbatch_outputを維持し、旧省略形式は単発扱い。作業台依存の予約/加工中は撤去を拒否する。
+
+- 初期生成前の診断seed注入を追加し、通常起動のrandomizeは維持。501/502/503各3回の初期保存状態一致。501の撤去進行は既存「振り切る」操作を使って独立2回成功。502/503の撤去シナリオは寝床材料不足で未達、狩猟/有限素材の根本原因切分けは未完。全結果と修正前失敗は6区画記録末尾に保存。
+- 最終便数（生肉6→食料12）：単発は投入6+回収12=18、まとめは2+4=6、フレーム併用は2+3=5。以前の12は単発成果2個まで一括回収した途中版の6+6で、従来の1個回収を戻したため18に訂正。旧Fでも数量素材運搬は集約済みなので旧版同数量との投入削減比較ではない。
+
+- 最終coreは36/36成功：`/workspace/desert-rats-checks/batch-release-seeded-core/20261012T074643Z-78riy5gl/results.json`。関連は9/9成功：`/workspace/desert-rats-checks/batch-release-seeded-related/20261012T074856Z-94kn4_d2/results.json`。ともにsource_changed_during_run=false、完走後に変更対象全ファイルのSHA256一致を確認してから本記録だけを追記。保存/地図/撤去/荷役/UI/通常進行/食事・燃料・修理消費/長時間既存ループを含む。coreの長時間ループは既存legacy-world-test条件であり、地図・襲撃ありの全条件保証ではない。
+- 描画あり実Viewport入力はbatch-window-seeded-final.log / haul-window-seeded-final.log全成功。batch-ui.pngを目視し、操作ボタン・取消・状態表示が枠内に収まることを確認。ハーネス自己検査8件成功（batch-harness-final.log）。Linux/Godot4.6.3で実施。スマホ実機、Windows/Godot4.7.2、OS入力、音声は未検証。
+- 旧全地点生成済みsaveの骨不足、遠方追跡、難度/長時間放置敗北、グローバル乱数列非保存は未解決のまま。施設tier/用途分割/中継サービス/地域や素材追加は行わない。GameDataレシピ・CargoDB容量重量・FacilityDB費用・WorldMapDBは基準HEADから不変。
+- 作業先は既存/workspace/desert_rats main、開始HEAD c40f636ca980d3830f7260343be57750b4e76423。本体/ミラー、CraftDB、AI、processor/storage/save、F UI、ハーネス、batch診断3本、seed初期化診断、既存packing/haul/world_flowの診断共通処理、関連文書を承認済の一式としてcommit・通常pushする。初期/workspace/-はwork / 05370b65d2f243335b22d7d7bb3f31e965e25669のままcleanで未変更。旧失敗ログを削除/成功へ改変していない。

@@ -184,6 +184,7 @@ func _refresh(force := false) -> void:
 		_key = es[0]["key"] if not es.is_empty() else ""
 	# 目印: 分類・選択・各エントリの状態・選んだ物の材料の数・待ち行列
 	var parts: Array = [_cat, _key, str(_qty_val)]
+	if not selected_entry().is_empty(): parts.append(str(game.processor.manual_status(selected_entry()["id"])))
 	for e in es:
 		var ev: Dictionary = CraftDB.evaluate(e, game, 1)
 		parts.append("%s:%s" % [e["key"], ev["state"]])
@@ -296,6 +297,12 @@ func _rebuild_detail() -> void:
 		out.add_child(ItemWidgets.icon_frame(int(e["out"]), 24.0))
 		out.add_child(UIKit.lbl("×%d" % (int(e["n"]) * qty), 18, UIKit.C_TEXT))
 		out.add_child(ItemWidgets.chip(FacilityDB.name_of(String(e["station"])) if e["station"] != "" else "手作業", Color("6f7a8c"), 12))
+	if not is_build:
+		var summary := UIKit.lbl("%d回まとめて予約 / 成果%d個 / 基準加工時間 %.1f秒（1回%.1f秒×%d、能力補正前）\n複数回だけまとめ回収：通常3個／フレーム5個。単発・自動は1個ずつ。割引なし。" % [qty,int(e["n"])*qty,float(e["time"])*qty,float(e["time"]),qty],13,UIKit.C_DIM)
+		summary.name = "BatchSummary"
+		summary.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		summary.custom_minimum_size = Vector2(540,0)
+		_detail.add_child(summary)
 	var explanation := CraftDB.detail_text(e, game)
 	if explanation != "":
 		var effect := UIKit.lbl(explanation, 13, UIKit.C_TEXT)
@@ -323,7 +330,7 @@ func _rebuild_detail() -> void:
 	if not is_build and state != "locked":
 		_detail.add_child(UIKit.lbl("回数", 13, UIKit.C_DIM))
 		_qty = QtyPicker.new().setup([1, 5, -1])
-		var top_n: int = maxi(int(ev["max_qty"]), int(ev["max_with_storage"]))                          # 材料が足りなくても、必要な数を見るために、倉庫の分まで選べる
+		var top_n: int = maxi(int(ev["material_qty"]), int(ev["material_with_storage"]))                          # 材料が足りなくても、必要な数を見るために、倉庫の分まで選べる
 		_qty.set_max(top_n, int(ev["max_qty"]) if int(ev["max_qty"]) > 0 else int(ev["max_with_storage"]))
 		_qty.set_value(_qty_val, false)
 		_qty_val = _qty.value
@@ -342,7 +349,7 @@ func _rebuild_detail() -> void:
 		_craft_btn = UIKit.button(label, _do_build)
 		_craft_btn.disabled = not (state in ["ok", "short"])
 	else:
-		_craft_btn = UIKit.button("制作", _do_craft)
+		_craft_btn = UIKit.button("1回制作" if qty == 1 else "%d回まとめて制作" % qty, _do_craft)
 		_craft_btn.disabled = state != "ok"
 	_craft_btn.alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_craft_btn.custom_minimum_size = Vector2(190, 38)
@@ -363,6 +370,22 @@ func _rebuild_detail() -> void:
 	_msg.autowrap_mode = TextServer.AUTOWRAP_ARBITRARY
 	_msg.custom_minimum_size = Vector2(500, 0)
 	_detail.add_child(_msg)
+	if not is_build:
+		var s: Dictionary = game.processor.manual_status(e["id"])
+		var status_text := "未投入 %d回 / 投入済・未着手 %d回 / 加工中 %d回（%.1f / %.1f秒）\n完成品未回収 %d個（同じ品目の共有トレイ）。加工中の1回は取消せず完了させます。" % [s.queued,s.loaded,s.active,s.progress,s.time,s.output]
+		var batch_status := UIKit.lbl(status_text,13,UIKit.C_DIM)
+		batch_status.name = "BatchStatus"
+		batch_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		batch_status.custom_minimum_size = Vector2(540,0)
+		_detail.add_child(batch_status)
+		var rid: String = e["id"]
+		var cancel := UIKit.button("この品目の未着手分を取消",func():
+			var count: int = game.cancel_manual_craft(rid)
+			_say("未着手%d回を取消。投入済の未着手材料は作業場へ返却。加工中・完成品・運搬中は保持。" % count)
+			_refresh(true))
+		cancel.name = "CancelUnstarted"
+		cancel.disabled = s.queued+s.loaded == 0
+		_detail.add_child(cancel)
 	_add_queue()
 
 
@@ -404,7 +427,7 @@ func _make_req_row(r: Dictionary, locked: bool) -> PanelContainer:
 ## 制作の待ちと、運搬の依頼（アイコンと数）
 func _add_queue() -> void:
 	if not game.craft_queue.is_empty():
-		_detail.add_child(UIKit.lbl("制作の待ち", 13, UIKit.C_DIM))
+		_detail.add_child(UIKit.lbl("未投入の制作予約（材料は作業場）", 13, UIKit.C_DIM))
 		var qb := HFlowContainer.new()
 		qb.add_theme_constant_override("h_separation", 10)
 		_detail.add_child(qb)
@@ -445,7 +468,7 @@ func _do_craft() -> void:
 	var got: int = game.request_craft(e["id"], _qty_val)
 	_refresh(true)
 	if got > 0:
-		_say("制作を頼んだ: %s ×%d回（作業場の材料で、加工設備が作る）" % [e["name"], got])
+		_say("制作を頼んだ: %s ×%d回（材料と増量を予約。1回ずつ加工し、完成品をまとめて回収）" % [e["name"], got])
 	else:
 		_say("頼めない（材料・置き場・必要設備を確認）")
 
@@ -467,7 +490,7 @@ func _do_carry() -> void:
 	var ev: Dictionary = CraftDB.evaluate(e, game, _qty_val)
 	var total := 0
 	for it in ev["missing"]:
-		total += game.request_transfer(int(it), int(ev["missing"][it]), "to_workshop")
+		total += game.request_transfer(int(it), maxi(0,int(ev["missing"][it])-game.workshop_incoming(int(it))), "to_workshop")
 	_refresh(true)
 	if total > 0:
 		_say("足りない材料 %d 個の運搬を頼んだ（仲間が運ぶ）" % total)

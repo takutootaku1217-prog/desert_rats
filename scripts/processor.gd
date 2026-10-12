@@ -25,6 +25,7 @@ var orders: Array = []       # 加工待ちのレシピ（Dictionary）
 var incoming: Array = []     # 運搬中のレシピ（予約）
 var current := {}            # 加工中のレシピ（空 = なし）
 var progress := 0.0
+var batch_output := false    # 現在の出力は複数回の手動注文由来。単発/自動回収の挙動は維持。
 var output: Array = []       # 完成して取り出し待ちの加工品（Item）
 var worker = null            # 作業中の Worker
 var total_done := 0          # 加工した回数（確認用）
@@ -166,7 +167,49 @@ func has_work_for_worker() -> bool:
 func take_output() -> int:
 	if not _out_times.is_empty():
 		_out_times.pop_front()
-	return output.pop_front()
+	var item: int = output.pop_front()
+	if output.is_empty(): batch_output = false
+	return item
+
+
+## 同一品目のまとめ注文は、持てる数に近づくまで単位加工を続ける。
+## 燃料待ち/別レシピ/注文終了なら完成品を持ち帰り、待ち続けない。
+func continue_batch(limit: int) -> bool:
+	if output.is_empty() or not batch_output: return false
+	var item: int = output[0]
+	var n := 0
+	for it in output:
+		if it != item: break
+		n += 1
+	if n >= limit: return false
+	var r: Dictionary = current if not current.is_empty() else _peek_next()
+	return r.get("batch", false) and r.get("out", -1) == item
+
+
+## 保有済みの同種完成品を、担当者の個数上限までまとめて回収する。
+func take_output_stack(limit: int) -> Dictionary:
+	if output.is_empty(): return {}
+	limit = limit if batch_output else 1
+	var item: int = output[0]
+	var n := 0
+	while not output.is_empty() and output[0] == item and n < maxi(1,limit):
+		take_output()
+		n += 1
+	return {"item":item,"n":n}
+
+
+func manual_status(id: String) -> Dictionary:
+	var d := {"queued":0,"loaded":0,"active":0,"progress":0.0,"time":0.0,"output":0}
+	for q in base().game.craft_queue:
+		if q["id"] == id: d.queued += int(q["n"])
+	for r in orders:
+		if r.get("manual",false) and r["id"] == id: d.loaded += 1
+	if current.get("manual",false) and current.get("id","") == id:
+		d.active = 1; d.progress = progress; d.time = current["time"]
+	var recipe := GameData.recipe_by_id(id)
+	for it in output:
+		if it == recipe.get("out",-1): d.output += 1
+	return d
 
 
 ## 作業者がいる間だけ呼ばれる。speed_of(field) = 作業者の腕前などの倍率。
@@ -188,6 +231,8 @@ func work(delta: float, speed_of: Callable) -> void:
 		if done.has("build"):
 			b.game.finish_build(done["build"])            # 建設: 設備が拠点にできる（アイテムは出ない）
 		else:
+			var grouped: bool = done.get("manual",false) and done.get("batch",false)
+			batch_output = grouped if output.is_empty() else (batch_output and grouped)
 			for i in done["n"]:
 				output.append(done["out"])
 				_out_times.append(Time.get_ticks_msec())

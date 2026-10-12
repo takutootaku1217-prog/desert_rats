@@ -106,7 +106,11 @@ const WORKER_DEFS := [
 
 
 func _ready() -> void:
-	randomize()
+	# 診断が明示した場合だけ、初期生成から同じ乱数列を使う。通常起動は従来どおり。
+	if has_meta("diagnostic_seed"):
+		seed(int(get_meta("diagnostic_seed")))
+	else:
+		randomize()
 	director = Director.new()       # 出来事（base や仲間より先に作る。倍率を読まれるため）
 	director.setup(self)
 	quarry.setup(self)
@@ -348,6 +352,15 @@ func workshop_count(item: int) -> int:
 	return processor.stock.count(item)
 
 
+## 作業場へ未到着の運搬分。素材運搬ボタンの連打で同じ不足分を重ねない。
+func workshop_incoming(item: int) -> int:
+	var n := _queued_transfer(item,"to_workshop")
+	for w in workers:
+		if w.ai.state == CharacterAI.State.XFER_MOVE and w.ai.xfer_dir == "to_workshop" and w.carrying == item:
+			n += w.carry_n
+	return n
+
+
 ## 手動の制作の待ちが使う予定の材料の数
 func workshop_reserved(item: int) -> int:
 	var n := 0
@@ -485,10 +498,10 @@ func request_craft(id: String, n: int) -> int:
 	if give <= 0:
 		return 0
 	for q in craft_queue:
-		if q["id"] == id:
+		if q["id"] == id and bool(q.get("batch",false)) == (give > 1):
 			q["n"] += give
 			return give
-	craft_queue.append({"id": id, "n": give})
+	craft_queue.append({"id": id, "n": give, "batch": give > 1})
 	return give
 
 
@@ -496,6 +509,21 @@ func request_craft(id: String, n: int) -> int:
 func cancel_craft(index: int) -> void:
 	if index >= 0 and index < craft_queue.size():
 		craft_queue.remove_at(index)
+
+
+## 同じ品目の未着手分だけ取消。加工中の1回/完成品/運搬中は保持する。
+func cancel_manual_craft(id: String) -> int:
+	var cancelled := 0
+	for q in craft_queue.duplicate():
+		if q["id"] == id:
+			cancelled += int(q["n"])
+			craft_queue.erase(q)
+	for r in processor.orders.duplicate():
+		if r.get("manual", false) and r["id"] == id:
+			processor.orders.erase(r)
+			for it in r["in"]: processor.stock.add(it, r["in"][it], Inventory.SOURCE_TRANSFER)
+			cancelled += 1
+	return cancelled
 
 
 ## 手動の制作を、作業場の材料で加工設備の注文にする（材料がそろっていて、注文の空きがあるとき）
@@ -510,10 +538,12 @@ func _feed_crafts() -> void:
 				craft_queue.erase(q)
 				started = true
 				break
-			if not has_facility(GameData.recipe_station(r)) or not processor.stock.has_set(r["in"]) or storage.transform_limit(r) <= 0:
+			if not has_facility(GameData.recipe_station(r)) or not processor.stock.has_set(r["in"]) or storage.transform_limit(r, int(q["n"])) <= 0:
 				continue
 			processor.stock.take_set(r["in"])
-			processor.receive_manual(r.duplicate())
+			var unit := r.duplicate()
+			unit["batch"] = q.get("batch", false)
+			processor.receive_manual(unit)
 			q["n"] -= 1
 			if int(q["n"]) <= 0:
 				craft_queue.erase(q)

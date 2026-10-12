@@ -1,5 +1,9 @@
 extends "res://tools/test_progression.gd"
 var _next_save:=20.0
+func diagnostic_seed() -> int:
+ for arg in OS.get_cmdline_user_args():
+  if arg.begins_with("--diagnostic-seed="): return int(arg.get_slice("=",1))
+ return 501
 func wait_for(label: String, condition: Callable, seconds: float) -> bool:
  phase=label
  var end:float=main.director.elapsed+seconds

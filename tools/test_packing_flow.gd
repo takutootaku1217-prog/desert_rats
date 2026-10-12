@@ -1,8 +1,16 @@
 extends "res://tools/test_world_flow.gd"
+func _process(_delta: float) -> bool:
+ if main!=null and main.is_node_ready():
+  for event in main.director.focus_list():
+   if EventDB.def(event["id"])["kind"]=="attack" and event["stance"]!="flee":
+    print("ACTION 襲撃への対処を振り切るへ ",event["id"])
+    main.director.set_stance(event["id"],"flee")
+ return false
 func _initialize():
- seed(501) # 地域の初回資源生成より前に固定する。
- main=load("res://scenes/main.tscn").instantiate(); root.add_child(main); await main.ready
- seed(501); Engine.time_scale=12
+ seed(diagnostic_seed()) # 地域の初回資源生成より前に固定する。
+ main=load("res://scenes/main.tscn").instantiate();main.set_meta("diagnostic_seed",diagnostic_seed()); root.add_child(main); await main.ready
+ seed(diagnostic_seed()); Engine.time_scale=12
+ print("DIAGNOSTIC_SEED ",diagnostic_seed())
  print("PACKING_FLOW 初期物資・既定出来事・仲間の正規行動で建設→撤去→保存再開→再設置。数量注入なし。")
  var prior_hunt:int=main.workers[0].priorities[GameData.Job.HUNT]
  for id in ["workbench","bed","cargo_rack","supply_cache"]:
