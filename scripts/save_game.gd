@@ -2,7 +2,7 @@ class_name SaveGame
 extends RefCounted
 ## 現行モデル専用。ObjectをデコードしないVariant payload + SHA256付きJSON。
 ## UIの停止中、またはフレーム内の同期呼出しでsnapshot。自動保存はしない。
-const VERSION := 2
+const VERSION := 3
 const PATH := "user://save.json"
 static var last_error := ""
 static var disabled := false
@@ -14,10 +14,10 @@ const PROCESSOR := ["orders", "current", "progress", "output", "total_done", "wa
 const DIRECTOR := ["active", "forecast", "default_stance", "log", "elapsed", "distance", "stats", "enabled", "_next_in"]
 const QUARRY := ["state", "left", "near_only", "remaining", "progress", "visit_generated", "visit_nearby", "visit_discarded", "last_report", "_food_start", "discarded", "loose", "saved_speed", "visits"]
 const EXPEDITION := ["state", "site_id", "offer_left", "approach_id", "kit", "steps", "step_i", "step_left", "step_time", "loot", "lost", "blueprint", "ok_count", "ng_count", "kit_used", "retreated", "log", "result_left", "stats"]
-const RESOURCE := ["position", "item", "species", "gather_progress", "age"]
+const RESOURCE := ["world_id","position", "item", "species", "gather_progress", "age"]
 const GATHER := ["kind", "remaining", "max_amount", "work"]
-const CREATURE := ["position", "species", "max_hp", "hp", "dead", "capturable", "_flee_speed", "_wander", "_wander_t", "_fleeing", "_facing"]
-const ENEMY := ["position", "kind", "max_hp", "hp", "dead", "hold_x", "run_speed", "damage", "body_scale", "_body", "_atk_timer"]
+const CREATURE := ["world_id","position", "species", "max_hp", "hp", "dead", "capturable", "_flee_speed", "_wander", "_wander_t", "_fleeing", "_facing"]
+const ENEMY := ["world_id","position", "kind", "max_hp", "hp", "dead", "hold_x", "run_speed", "damage", "body_scale", "_body", "_atk_timer"]
 
 static func fields(obj, names: Array) -> Dictionary:
 	var d := {}
@@ -31,10 +31,11 @@ static func live_children(node: Node) -> Array:
 	return node.get_children().filter(func(n): return not n.is_queued_for_deletion())
 
 static func capture(g) -> Dictionary:
+	g.world.sync()
 	var resources := live_children(g.resources_root)
 	var creatures := live_children(g.creatures_root)
 	var enemies := live_children(g.enemies_root)
-	var d := {"version": VERSION, "main": fields(g, MAIN), "base": fields(g.base, BASE),
+	var d := {"version": VERSION, "world": fields(g.world,WorldTrip.FIELDS), "main": fields(g, MAIN), "base": fields(g.base, BASE),
 		"processor": fields(g.processor, PROCESSOR), "stock": g.processor.stock.counts.duplicate(true),
 		"inventory": g.storage.inventory.counts.duplicate(true), "wasted": g.storage.wasted.duplicate(true),
 		"butchered": g.storage.total_butchered, "capacity": g.storage.capacity_bonus, "weight": g.storage.current_weight(),
@@ -113,6 +114,7 @@ static func recipe(r) -> bool:
 
 static func validate(d, g) -> bool:
 	if not d is Dictionary or not safe(d) or d.get("version") != VERSION: return false
+	if not WorldTrip.valid(d.get("world"),g): return false
 	for k in ["main", "base", "processor", "stock", "inventory", "wasted", "butchered", "capacity", "weight", "director", "quarry", "expedition", "party", "crew", "resources", "creatures", "enemies", "camera", "follow", "scroll"]:
 		if not d.has(k): return false
 	for row in [[d.main,g,MAIN],[d.base,g.base,BASE],[d.processor,g.processor,PROCESSOR],[d.director,g.director,DIRECTOR],[d.quarry,g.quarry,QUARRY],[d.expedition,g.expedition,EXPEDITION]]:
@@ -167,7 +169,7 @@ static func validate(d, g) -> bool:
 	var enemy := Enemy.new()
 	var valid := _entities_valid(d, resource, gather, creature, enemy)
 	resource.free(); gather.free(); creature.free(); enemy.free()
-	if not valid: return false
+	if not valid or not WorldTrip.live_valid(d): return false
 	var used := {"res":[],"prey":[],"bed":[],"repair":[]}
 	var processor_count := 0
 	var transfer_count := 0
@@ -270,6 +272,7 @@ static func apply(g, d: Dictionary) -> bool:
 	if not validate(d,g):
 		last_error = "保存内容の形式・数量・参照を検証できません。現在の進行は変更しません。"
 		return false
+	put(g.world,d.world,WorldTrip.FIELDS)
 	put(g,d.main,MAIN); put(g.base,d.base,BASE); put(g.processor,d.processor,PROCESSOR)
 	g.storage.inventory.counts = d.inventory.duplicate(true)
 	g.storage.wasted = d.wasted.duplicate(true)
@@ -363,7 +366,7 @@ static func saved_weight(d: Dictionary) -> int:
 static func exists(path: String = PATH) -> bool:
 	return FileAccess.file_exists(path)
 
-static func read(path: String = PATH) -> Dictionary:
+static func read(path: String = PATH, allow_legacy := false) -> Dictionary:
 	last_error = ""
 	if not exists(path):
 		last_error = "セーブがありません。"
@@ -374,7 +377,10 @@ static func read(path: String = PATH) -> Dictionary:
 	var parser := JSON.new()
 	var parse_error := parser.parse(FileAccess.get_file_as_string(path))
 	var envelope = parser.data if parse_error == OK else null
-	if not envelope is Dictionary or envelope.get("version") != VERSION or not envelope.get("payload") is String or not envelope.get("sha256") is String:
+	if envelope is Dictionary and envelope.get("version")==2 and not allow_legacy:
+		last_error="旧version2です。地域移行の確認が必要です。元ファイルは変更しません。"
+		return {}
+	if not envelope is Dictionary or (envelope.get("version") != VERSION and not (allow_legacy and envelope.get("version") == 2)) or not envelope.get("payload") is String or not envelope.get("sha256") is String:
 		last_error = "破損または未対応の旧形式です。元のファイルは変更しません。"
 		return {}
 	var bytes := Marshalls.base64_to_raw(envelope.payload)
@@ -410,8 +416,11 @@ static func write(g, path: String = PATH, overwrite := false) -> bool:
 		last_error = "一時ファイルの検証に失敗。既存の保存は変更しません。"
 		return false
 	if exists(path):
-		var previous := read(path)
-		var backup := path + (".bak" if not previous.is_empty() and validate(previous,g) else ".damaged")
+		var previous := read(path,true)
+		var backup := path + (".legacy-v2" if previous.get("version")==2 else (".bak" if not previous.is_empty() and validate(previous,g) else ".damaged"))
+		if previous.get("version")==2 and FileAccess.file_exists(backup) and FileAccess.get_file_as_bytes(backup)!=FileAccess.get_file_as_bytes(path):
+			# 過去に保全した別の旧セーブも失わない。
+			backup += "." + FileAccess.get_sha256(path)
 		# バックアップも一時ファイルを経由。主保存の切替が失敗しても主保存は残る。
 		if DirAccess.dir_exists_absolute(backup + ".tmp") or DirAccess.dir_exists_absolute(backup) or DirAccess.copy_absolute(path,backup + ".tmp") != OK or DirAccess.rename_absolute(backup + ".tmp",backup) != OK:
 			last_error = "バックアップを保全できないため保存を中止しました。"
@@ -421,3 +430,27 @@ static func write(g, path: String = PATH, overwrite := false) -> bool:
 		return false
 	last_error = ""
 	return true
+
+
+## 明示確認後だけ呼ぶ。旧街道には地域を推測で与えない。
+static func migrate_v2(raw: Dictionary, g) -> Dictionary:
+	if raw.get("version")!=2: last_error="移行対象のversion2ではありません。"; return {}
+	if not safe(raw): last_error="旧保存に不正な値があります。"; return {}
+	for key in ["resources","creatures","enemies"]:
+		if not raw.get(key) is Array: last_error="旧保存の屋外データ形式が不正です。"; return {}
+	var d:=raw.duplicate(true)
+	d.version=VERSION
+	var world:=WorldTrip.new()
+	world.active=false
+	if not d.get("quarry") is Dictionary: return {}
+	if d.quarry.get("state") in ["parked","recall"]:
+		world.active=true; world.region="old_mine"
+	d["world"]=fields(world,WorldTrip.FIELDS)
+	for row in d.get("resources",[]):
+		if not row is Dictionary or not row.get("resource") is Dictionary: return {}
+		row.resource["world_id"]=""
+	for row in d.get("creatures",[])+d.get("enemies",[]):
+		if not row is Dictionary: return {}
+		row["world_id"]=""
+	if not validate(d,g): last_error="旧保存を安全に移行できません。元ファイルは保持します。"; return {}
+	return d

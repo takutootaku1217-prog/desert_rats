@@ -8,6 +8,8 @@ var _overlay: ColorRect
 var _text: Label
 var _confirm: Button
 var _action := ""
+var _legacy: Button
+var _legacy_path := ""
 var _was_paused := false
 
 func _ready() -> void:
@@ -40,6 +42,9 @@ func _ready() -> void:
 	for pair in [["手動で保存", "save"],["続きから", "load"],["バックアップから再開", "backup"],["ニューゲーム", "new"]]:
 		var action: String = pair[1]
 		box.add_child(UIKit.button(pair[0],func(): ask(action)))
+	_legacy = UIKit.button("旧version2を確認して移行",func(): ask("migrate"))
+	box.add_child(_legacy)
+	_legacy.hide()
 	_confirm = UIKit.button("実行する",execute)
 	box.add_child(_confirm)
 	box.add_child(UIKit.button("キャンセル / ゲームへ戻る",close))
@@ -55,6 +60,7 @@ func open() -> void:
 		get_tree().paused = true
 	_overlay.show()
 	_action = ""
+	_legacy.hide()
 	_confirm.hide()
 	_text.text = "この画面を開いている間は時間が止まります。\n保存は手動です。終了時の自動保存・オフライン進行はありません。\n" + ("保存済みデータがあります。" if SaveGame.exists(path) else "まだ保存はありません。手動で保存すると最初の保存を作ります。")
 
@@ -71,8 +77,9 @@ func ask(action: String) -> void:
 	_action = action
 	_confirm.show()
 	match action:
-		"save": _text.text = ("既存の保存を現在の進行で上書きします。直前の有効な保存はバックアップへ残します。" if SaveGame.exists(path) else "現在の進行を最初の保存として記録します。") + "\n破損・旧形式の保存を置き換える場合も元ファイルを .damaged に保全します。\n実行しますか？"
+		"save": _text.text = ("既存の保存を現在の進行で上書きします。直前の有効な保存はバックアップへ残します。" if SaveGame.exists(path) else "現在の進行を最初の保存として記録します。") + "\n旧version2は .legacy-v2、破損・その他の旧形式は .damaged に保全します。\n実行しますか？"
 		"load", "backup": _text.text = "未保存の現在の進行を破棄し、%sから再開します。\n読込に失敗した場合は、現在の進行もファイルも変更しません。\n実行しますか？" % ("バックアップ" if action == "backup" else "保存")
+		"migrate": _text.text = "旧保存を消さず進行を読み込みます。鉱床滞在は大鉱山入口へ対応付けます。\n地域不明の街道は未配置で保持し、地図で村を出発地点にする際に別途同意が必要です。\n新形式の保存はこの後の手動保存で確認します。"
 		"new": _text.text = "未保存の現在の進行を終了して、新しく始めます。\n既存の保存は削除しません。次に手動保存して上書きを確認するまで残ります。\n実行しますか？"
 
 func execute() -> void:
@@ -87,6 +94,8 @@ func execute() -> void:
 			var d := SaveGame.read(path + (".bak" if action == "backup" else ""))
 			if d.is_empty():
 				_text.text = SaveGame.last_error
+				_legacy.visible = SaveGame.last_error.begins_with("旧version2")
+				_legacy_path = path + (".bak" if action=="backup" else "")
 				return
 			if not SaveGame.apply(game,d):
 				_text.text = SaveGame.last_error
@@ -95,6 +104,15 @@ func execute() -> void:
 			if is_instance_valid(game._over_layer): game._over_layer.queue_free()
 			_was_paused = false
 			_text.text = "再開データを読み込みました。ゲームへ戻ると時間が進みます。"
+		"migrate":
+			var raw:=SaveGame.read(_legacy_path,true)
+			var converted:=SaveGame.migrate_v2(raw,game)
+			if converted.is_empty() or not SaveGame.apply(game,converted):
+				_text.text="移行できません。元ファイルは変更していません。"+SaveGame.last_error
+				return
+			_legacy.hide(); _was_paused=false; game.game_over=false
+			if is_instance_valid(game._over_layer): game._over_layer.queue_free()
+			_text.text="旧保存を読み込みました。元ファイルは未変更です。地域未配置の場合は地図を開いて移行を確認してください。"
 		"new":
 			skip_start_once = true
 			get_tree().paused = false

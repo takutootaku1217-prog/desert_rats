@@ -6,6 +6,7 @@ extends Node2D
 const GATHER_TIME := 0.9
 
 var game
+var world_id := ""
 var item: int = GameData.Item.WOOD
 var species := ""       # item が獲物（CARCASS）のときの生物の種類
 var claimed_by = null   # 回収予約している Worker
@@ -20,8 +21,9 @@ func _init() -> void:
 
 func _process(delta: float) -> void:
 	age += delta
-	position.x -= game.scroll_speed * delta
+	if not game.world.project_resource(self): position.x -= game.scroll_speed * delta
 	if not has_meta("quarry_id") and position.x < game.camera_left() - 60.0:
+		game.world.remember(self)
 		queue_redraw()
 		queue_free()
 		return

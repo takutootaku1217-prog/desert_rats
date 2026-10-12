@@ -27,6 +27,7 @@ func _init() -> void:
 
 
 func _process(delta: float) -> void:
+	modulate = game.world.tint()
 	scroll_x += game.scroll_speed * delta
 	queue_redraw()
 
@@ -61,3 +62,32 @@ func _draw() -> void:
 		var k_range := tile_range(cam_left, off, w)
 		for k in range(k_range.x, k_range.y + 1):
 			draw_texture_rect(t, Rect2(-off + float(k) * w, y, w, h), false)
+	_draw_landmark(cam_left)
+
+
+## 地域を見分ける小さな道標。サービス機能は持たない。
+func _draw_landmark(cam_left: float) -> void:
+	if not game.world.active or game.world.phase!="stopped": return
+	var id:String=game.world.region
+	var origin:=Vector2(cam_left+870,226)
+	var stone:=Color("806957")
+	match id:
+		"south_oasis":
+			draw_rect(Rect2(origin+Vector2(-36,-18),Vector2(72,26)),stone)
+			draw_rect(Rect2(origin+Vector2(-25,-14),Vector2(50,8)),Color("659da0"))
+			for x in [-30,30]: draw_rect(Rect2(origin+Vector2(x,-68),Vector2(6,55)),Color("796043"))
+			draw_line(origin+Vector2(-36,-68),origin+Vector2(36,-68),stone,8)
+		"east_sands":
+			draw_colored_polygon(PackedVector2Array([origin+Vector2(-70,0),origin+Vector2(-20,-48),origin+Vector2(50,0)]),Color("c6a76d"))
+			draw_rect(Rect2(origin+Vector2(12,-72),Vector2(6,72)),stone)
+			draw_rect(Rect2(origin+Vector2(0,-65),Vector2(54,18)),Color("a17b47"))
+		"central_trade":
+			for x in [-60,40]: draw_rect(Rect2(origin+Vector2(x,-72),Vector2(22,80)),stone)
+			draw_rect(Rect2(origin+Vector2(-60,-78),Vector2(122,18)),Color("b4976a"))
+			draw_colored_polygon(PackedVector2Array([origin+Vector2(-45,-32),origin+Vector2(0,-60),origin+Vector2(45,-32)]),Color("a55948"))
+		"old_mine":
+			draw_colored_polygon(PackedVector2Array([origin+Vector2(-78,8),origin+Vector2(-42,-85),origin+Vector2(32,-65),origin+Vector2(78,8)]),Color("79716c"))
+			draw_rect(Rect2(origin+Vector2(-26,-43),Vector2(52,51)),Color("343238"))
+			for x in [-32,26]: draw_rect(Rect2(origin+Vector2(x,-50),Vector2(7,58)),Color("a0825a"))
+			draw_line(origin+Vector2(-32,-50),origin+Vector2(33,-50),Color("a0825a"),8)
+	GameData.draw_text(self,origin+Vector2(0,-98),WorldMapDB.name_of(id),14,Color("463b30"),260)

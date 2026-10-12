@@ -5,6 +5,7 @@ extends Node2D
 ## 車体の被害は「防備を固める」で減る。近くで戦っている仲間は疲れる。
 
 var game
+var world_id := ""
 var kind := "scorpion"
 var max_hp := 40.0
 var hp := 40.0
@@ -57,6 +58,7 @@ func take_damage(amount: float) -> void:
 	_flash = 0.1
 	if hp <= 0.0:
 		dead = true
+		game.world.consume(self)
 		game.on_enemy_killed(self)
 		queue_free()
 

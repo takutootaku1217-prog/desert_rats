@@ -138,7 +138,8 @@ func _refresh() -> void:
 	var q = game.quarry
 	_info.text = "%s\n\n鉱床残量：近場 %d ／ 奥の密集群 %d\n近場は短い往復。奥は歩く距離が長く、食料と休憩の準備が必要です。\n残量1から主素材1個。道具と能力で採取時間が変わります。\n滞在中も食事・休憩・修理・天候は進みます。食材は自動補充されません。\n搬入口の残置：%s\n採取済みの分は再訪しても復活せず、未採取の残量を保持します（手動セーブに保存）。" % [q.status_text(), q.group_left("近場"), q.group_left("奥"), q.cargo_text()]
 	_range.text = "採取範囲：近場のみ（押すと全体）" if q.near_only else "採取範囲：全体（押すと近場のみ）"
-	_go.disabled = q.state != "road" or game.game_over
+	_go.disabled = q.state != "road" or game.game_over or (game.world.active and (game.world.region != "old_mine" or game.world.phase != "stopped"))
+	_go.tooltip_text = "地図で大鉱山入口へ到着すると利用できます" if _go.disabled else "鉱床へ向かう"
 	_recall.disabled = q.state != "parked" or game.game_over
 	_leave.disabled = not q.ready_to_leave() or game.game_over
 	_discard.disabled = q.loose.is_empty() or not q.crew_ready_to_leave()

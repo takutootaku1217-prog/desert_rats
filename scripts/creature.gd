@@ -5,6 +5,7 @@ extends Node2D
 ## 将来: 捕獲（capturable）・飼育・購入・交換は、同じ species と drops を使って追加する。
 
 var game
+var world_id := ""
 var species := "hare"
 var max_hp := 16.0
 var hp := 16.0
@@ -47,6 +48,7 @@ func take_damage(amount: float) -> void:
 	_fleeing = true
 	if hp <= 0.0:
 		dead = true
+		game.world.consume(self)
 		game.on_creature_killed(self)
 		queue_free()
 
@@ -77,6 +79,7 @@ func _process(delta: float) -> void:
 	if position.x > game.camera_left() + 1340.0 or position.x < game.camera_left() - 80.0:
 		if hunted_by != null and is_instance_valid(hunted_by):
 			hunted_by = null
+		game.world.remember(self)
 		queue_free()
 		return
 	queue_redraw()

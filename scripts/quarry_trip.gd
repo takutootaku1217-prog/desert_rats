@@ -38,7 +38,7 @@ func hostile() -> bool:
 	return false
 
 func select() -> bool:
-	if state != "road" or game.game_over:
+	if state != "road" or game.game_over or (game.world.active and (game.world.region != "old_mine" or game.world.phase != "stopped")):
 		return false
 	saved_speed = game.target_speed if game.target_speed > 0.0 else 60.0
 	game.target_speed = saved_speed

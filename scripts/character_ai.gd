@@ -171,7 +171,7 @@ func tick(delta: float) -> void:
 		return
 	if eat_wait > 0.0:
 		eat_wait -= delta
-	if game.quarry.recalling() and _recall_tick(delta):
+	if (game.quarry.recalling() or game.world.recalling()) and _recall_tick(delta):
 		return
 	if _interrupt_for_life_need():
 		return
@@ -240,6 +240,7 @@ func tick(delta: float) -> void:
 				ch.carrying_species = res.species
 				ch.carry_n = 1
 				game.total_gathered += 1
+				game.world.consume(res)
 				res.queue_free()
 				res = null
 				_go_storage()

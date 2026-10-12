@@ -5,6 +5,8 @@ extends Node2D
 ##   移動 → 生物・資源が現れる → 狩猟・採取 → 倉庫へ（獲物は解体）→ 加工（食料・燃料・鉄・修理資材）
 ##   → 消費（仲間が食べる・移動と炉で燃料・時間と移動と加工で傷む）→ 補給・修理で維持 → 移動
 
+var world := WorldTrip.new()
+var map_ui: WorldMapUI
 var quarry := QuarryTrip.new()
 var quarry_ui: QuarryUI
 var save_ui: SaveUI
@@ -235,6 +237,10 @@ func _ready() -> void:
 	save_ui = SaveUI.new()
 	save_ui.game = self
 	add_child(save_ui)
+	world.setup(self)
+	map_ui = WorldMapUI.new()
+	map_ui.game = self
+	add_child(map_ui)
 
 
 func _process(delta: float) -> void:
@@ -257,8 +263,10 @@ func _process(delta: float) -> void:
 		scroll_speed = minf(scroll_speed, GameData.CRAWL_SPEED)
 	scroll_speed *= director.speed_mult()      # 天候の対処方針（減速・停止）
 	scroll_speed = quarry.speed_limit(scroll_speed, delta)
+	scroll_speed = world.speed_limit(scroll_speed, delta)
 	var dist := scroll_speed * delta
 	quarry.tick(dist)
+	world.tick(dist)
 	base.burn(dist)
 	base.wear_by(delta, dist)
 	director.tick(delta, dist)                 # 出来事の進行（予報・発生・終了）
@@ -273,6 +281,9 @@ func _process(delta: float) -> void:
 		_feed_clock = 0.0
 		_feed_crafts()
 	# 地面の資源と生物は、進んだ距離に応じて現れる（天候で出にくくなる）
+	if world.active:
+		_update_camera(delta)
+		return # 地図の道中資源・生物は有限の道路記録から生成する
 	_spawn_dist -= dist * director.spawn_mult()
 	if _spawn_dist <= 0.0:
 		_spawn_ground_resource()
@@ -1037,7 +1048,7 @@ func build_room(slot: String, rtype: String) -> bool:
 
 ## 別の画面を開くとき、ほかの管理画面を閉じる（重ならないように）。keep はいま開く画面。
 func close_other_panels(keep) -> void:
-	for p in [build_ui, room_ui, policy, detail, expedition_ui, inventory_ui, craft_ui, crew_alerts, quarry_ui, save_ui]:
+	for p in [build_ui, room_ui, policy, detail, expedition_ui, inventory_ui, craft_ui, crew_alerts, quarry_ui, save_ui, map_ui]:
 		if p != null and p != keep and p.has_method("close"):
 			p.close()
 

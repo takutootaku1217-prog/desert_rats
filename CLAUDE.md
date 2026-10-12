@@ -738,3 +738,31 @@
 - 操作: 右の「保存 / 続きから」→「手動で保存」→「実行する」。再開は「続きから」→確認。問題時は同画面の「バックアップから再開」。キャンセル/Escで未実行の操作を取り消せる。画面中は時間停止。ニューゲームは未保存の進行を破棄する確認を出すが、既存ファイルは次の明示的な上書きまで削除しない。
 - 保存先はGodotの端末内ユーザーデータ `user://save.json`。直前の有効版は `save.json.bak`、明示的に上書きした旧形式/破損版は `save.json.damaged`。ゲームのソースをGitHubにpushしてもプレイデータをクラウド同期する機能ではない。旧version1は未対応として拒否し、推測復元しない。自動保存・オフライン進行・将来の乱数列/一時演出/UI選択の保存はなし。
 - 作業先は既存 `/workspace/desert_rats` main。開始HEADは `5f99398abef067a97d90c5a3658058b42bf0d392`。本変更のcommit/push後の完全SHAとremote一致・cleanは終了報告で確認する。元の `/workspace/-` は変更しない。
+
+
+## 2026-10-12 地図実装途中・診断完走後の安全区切り（未コミット）
+
+- 親の区切り指示により、進行中の診断を中断せず完走して保全。作業先 `/workspace/desert_rats` main、ローカルHEADとGitHub mainは `9cd6bc28125903869e6fbf7af2108d7aa7784610`（2026-10-12確認）。以下はローカル保存のみ、commit/push未実施。元の `/workspace/-` はcleanのまま。
+- 実装途中: 正本10地域12道路を保持し、村・東部砂原・中央交易都市・大鉱山入口の4地域4道路を操作可能にするWorldMapDB/WorldTrip/WorldMapUIを追加。画面ボタン/Mキー、仲間・荷物帰還待ち、出発取消/道中引返し、有限屋外資源台帳、既存鉱床への入口制限、背景色の遷移、version3保存と明示的version2移行を接続。道路距離2400（既存鉱床片道1200×2）、8採取地点は暫定値。店舗/給油/修理改造サービスは未実装表示。
+- 診断証跡: `/workspace/desert-rats-checks/world-fourth/20261012T053858Z-v3fto3fx/results.json`。import、world_flow、save_ui成功。world_mapは旧v2移行ボタンの実入力→確認表示の1項目が失敗し、全体failedとして保持。移行APIと旧ファイル保全の診断は通ったが、確認UIの操作が通ったとは扱わない。前の world-second のsave_game成功、world-third のworld_flow成功も保存。
+- world_flowは通常初期物資・既定出来事を使い、作業台建設→村→砂原→交易都市→鉱山入口→鉱床近場12単位採取→全員帰還→交易都市→村を完走。25ゲーム秒ごとに保存/再開して持続状態一致を検査。成功状態の在庫注入はしない。満載時は既存倉庫廃棄の操作APIを使う方針。時間短縮のEngine.time_scale=12とseed501を用いた通常進行診断であり、スマホ実機入力の検証ではない。
+- world_mapで新規地図既定、非接続/未公開拒否、地図画面の行先実入力、仲間の歩行帰還、燃料/距離/進捗、6回引返し、資源残量/採取進捗保持、道中保存の別プロセス再開、旧v2無確認拒否、移行後保存時の `.legacy-v2` 元バイト列一致を確認。
+- 未完: 移行確認UIの失敗原因切分け・修正、旧鉱床/接近中/帰路の移行ケース、満載帰還と加工/予約継続の地図境界検証、台帳とライブ実体の不整合拒否の追加確認、ランドマーク/地域差の表示確認、描画あり地図スクリーンショット、全coreと関連回帰、文書整備、commit・通常push・remote照合。
+- 回帰の範囲: tools/run_checks.pyは既存診断へ明示的 `legacy-world-test` を渡し、旧街道ループを維持して実行する。通常アプリとworld_*診断は地図モード。既存core成功だけで新しい地図の通常進行を検証済みとは扱わない。今回全coreは未実行。グローバル乱数列非保存の従来制限も残る。
+- 未コミット対象: scripts/{main,character_ai,creature,enemy,expedition,quarry_trip,resource,save_game,world_scroll}.gd、同一内容のルートミラー、ui/{quarry_ui,save_ui}.gd、tools/run_checks.py、新規data/world_map.gd・scripts/world_trip.gd・ui/world_map_ui.gd・tools/test_world_map.gd・tools/test_world_flow.gd（各uid含む）、CLAUDE.md、本記録。追加のデバッグ/診断ログは `/workspace/desert-rats-checks` に保全。
+- 次段階のユーザー回答: 設備撤去は完成設備を損失なく未設置品として返す一対一交換で、再製作材料不要。容量減少・返却重量・予約を加味し不成立/利用中は拒否、確認取消・二重返却・保存復元を検査する。地図完了後に荷役補助、まとめ加工、撤去の順。これらは今回まだ実装していない。
+
+## 2026-10-12 地図・地域往復の検証完了
+
+- 前節の未完を継続。旧v2移行ボタンの失敗は、新表示のContainer子がレイアウトされる前の座標でクリックしていた検査不具合。表示待ちを加えた実Viewport入力で、移行ボタン→説明→実行、Esc取消、再確認が成功。確認APIの直呼びへの置換や失敗項目の除去はしていない。
+- 新規ゲームはオアシスの交易村に停泊。右の「地図 / 行先 (M)」から、隣接する行先を選んで出発する。画面中は時間停止。公開接続は01村–東部砂原、03村–中央交易都市、04砂原–都市、06都市–大鉱山入口の4本。その他6地域8道路は正本データに保持し未公開。地図の線、現在地マーカー、選択・走行道路、目的地の一致を検査した。
+- 仲間と荷物の帰還後に地理を切り替える。道中引返しでも同じ道路の座標と資源残量・採取進捗を共有する。採取済み/消費済み物資を再配布しない。台帳の重複ID、消費済み台帳とライブ実体の矛盾は保存適用前に拒否。満載時の正規収納・倉庫廃棄・鉱床残置の数量確認/取消/放棄も地図モードで確認。
+- 暫定距離は既存鉱床片道1200×2の2400（速度60で約40秒）、各道路8採取地点。初回の残量範囲は既存GatherDBを使い再訪で再抽選しない。村/砂原/都市の少量の既存採取地点、背景色遷移、井戸/砂丘と道標/門と天幕/坑口の目印を追加。これは最終バランスや新施設サービスの実装ではない。
+- 保存形式version3に地域・道路・方向・進捗・全地点の資源台帳を含める。旧v2は自動適用せず、明示確認後だけ読み込む。鉱床parked/recallは大鉱山入口に対応、旧approach/returningは到着まで地域未確定、旧roadは地図で村への対応付けに別途同意する。旧ファイルは読み込みだけでは変更しない。手動保存での上書き確認後は `.legacy-v2` に元バイト列を保全。別の旧版が既に保全されている場合はSHA256接尾辞を付けて両方を残し、既存 `.bak` も保持する。旧v1/不正形式の推測復元は行わない。
+- 検証対象を分けた。world_map/world_flow/world_boundariesとstartupは通常の地図モード。既存ループ診断は `legacy-world-test` を明示して旧街道のfixtureで実施する。地図で初期物資から作業台を作り、4地域を移動し鉱床12単位を採取して村へ帰る診断は別に実行。25ゲーム秒ごとに保存/再開し、全持続状態の一致を確認。地図切替の満載・加工中・完成品・装備・所有数量維持、旧セーブの接近/滞在/帰還待ち/帰路も確認。
+- グローバル乱数列の保存、スマホ実機入力、Windows/Godot4.7.2、音声は未検証/未実装の従来制限。遠距離追跡と既知extraの長時間敗北は対象外で、解決済みとはしない。荷役補助、まとめ加工、完成設備としての撤去・再設置は次段階であり今回未実装。
+
+- 証跡: `/workspace/desert-rats-checks/world-final-core/20261012T054701Z-6xrmrqw0/results.json` はcore27項目すべて成功、source_changed=false。最後の変更はWorldScrollの目印とラベルの描画位置2箇所だけで、`world-final-related/20261012T055211Z-7d2fj5ll/results.json` の地図3診断・save_progression・rooms・build・crew_detail・quarry_rear・camera・view・artscaleとimportの12項目が最終版で成功、source_changed=false。集約 `/workspace/desert-rats-checks/world-final-coverage.json` に差分範囲を明記。ハーネス自己診断も8項目成功。
+- 描画あり検証: `world-final-window.log`（地図/移行確認/取消/旧版保全）、`world-boundaries-window.log`（満載/残置確認と帰還）、`world-return-ui-final.log`（出発前取消/道中引返し/帰路表示/Esc）が全成功。最終描画実行は音声をDummy指定しエラーなし、V-Sync非対応警告のみ。`map-selected.png`、`map-travelling.png`、`map-migrate-confirm.png` と `region-*.png` を目視確認。初回描画runの音声デバイス不在ログは保存し、最終版と区別した。
+- 初回の型宣言/保存バージョン数値比較/StringNameキー生成/表示待ち不足/一時停止下での採取UI入力/追加描画のインデント不一致の失敗runは削除せず残した。実装の不具合は修正、検査タイミングやfixtureの不具合は実入力を保持して修正した。
+- 作業先は既存 `/workspace/desert_rats` main。開始HEADは `9cd6bc28125903869e6fbf7af2108d7aa7784610`。全変更を対象確認してcommit・通常pushし、完全SHA・remote一致・cleanは終了報告で照合する。`scripts/main.gd` とルートミラーは同一。元の `/workspace/-` はHEAD `05370b65d2f243335b22d7d7bb3f31e965e25669`・cleanのまま。
