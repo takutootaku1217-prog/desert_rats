@@ -345,6 +345,42 @@ func workshop_available(item: int) -> int:
 	return maxi(0, workshop_count(item) - workshop_reserved(item) - _queued_transfer(item, "to_storage"))
 
 
+## 廃棄できるのは倉庫で未予約の物だけ。運び出した材料は倉庫にはない。
+func warehouse_discard_available(item: int) -> int:
+	var held := int(reserved_for_builds().get(item, 0)) + _queued_transfer(item, "to_workshop")
+	for w in workers:
+		var a = w.ai
+		match a.state:
+			CharacterAI.State.HAUL_TAKE:
+				if not a.haul_recipe.has("build"):
+					held += int(a.haul_recipe.get("in", {}).get(item, 0))
+			CharacterAI.State.EAT_TAKE:
+				if item == GameData.Item.FOOD: held += 1
+			CharacterAI.State.REFUEL_TAKE:
+				if item == a.haul_item: held += 1
+			CharacterAI.State.REPAIR_TAKE:
+				if item == GameData.Item.REPAIR_KIT: held += 1
+	return maxi(0, storage.count_of(item) - held)
+
+
+## 確認画面が承認する数量・在庫・予約・重量を固定する。
+func warehouse_discard_snapshot(item: int, n: int) -> Dictionary:
+	if game_over or not item in ItemDB.ORDER or n <= 0 or n > warehouse_discard_available(item): return {}
+	return {"item": item, "n": n, "stock": storage.count_of(item),
+		"available": warehouse_discard_available(item), "weight": storage.current_weight()}
+
+
+func discard_warehouse(snapshot: Dictionary) -> bool:
+	if snapshot.is_empty(): return false
+	var item := int(snapshot.get("item", -1))
+	var n := int(snapshot.get("n", 0))
+	if warehouse_discard_snapshot(item, n) != snapshot: return false
+	if storage.inventory.take_n(item, n) != n: return false
+	storage.wasted[item] = int(storage.wasted.get(item, 0)) + n
+	director.note("倉庫から廃棄: %s ×%d" % [ItemDB.name_of(item), n])
+	return true
+
+
 func _queued_transfer(item: int, dir: String) -> int:
 	var n := 0
 	for t in transfer_queue:

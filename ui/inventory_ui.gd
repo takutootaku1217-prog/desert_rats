@@ -22,6 +22,13 @@ var _qty_val := 1                               # 数量の選び方の値（束
 var _qty: QtyPicker
 var _split_box: HBoxContainer
 var _split_qty: QtyPicker
+var _discard_available: Label
+var _discard_btn: Button
+var _discard_dialog: ColorRect
+var _discard_text: Label
+var _discard_yes: Button
+var _discard_no: Button
+var _discard_snapshot := {}
 var _move_btn: Button
 var _split_btn: Button
 var _msg: Label
@@ -111,6 +118,28 @@ func _ready() -> void:
 	_detail.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_detail.add_theme_constant_override("separation", 8)
 	cols.add_child(_detail)
+	_discard_dialog = ColorRect.new()
+	_discard_dialog.color = Color(0, 0, 0, 0.8)
+	_discard_dialog.set_anchors_preset(Control.PRESET_FULL_RECT)
+	add_child(_discard_dialog)
+	var confirm_panel := PanelContainer.new()
+	confirm_panel.position = Vector2(300, 200)
+	confirm_panel.custom_minimum_size = Vector2(680, 280)
+	confirm_panel.add_theme_stylebox_override("panel", UIKit.box(Color("1b1e24"), UIKit.C_ACCENT, 4, 20))
+	_discard_dialog.add_child(confirm_panel)
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 18)
+	confirm_panel.add_child(box)
+	box.add_child(UIKit.lbl("倉庫の選択廃棄", 22, UIKit.C_ACCENT))
+	_discard_text = UIKit.lbl("", 18)
+	_discard_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_discard_text.custom_minimum_size = Vector2(620, 110)
+	box.add_child(_discard_text)
+	_discard_yes = UIKit.button("廃棄する", _confirm_discard)
+	_discard_no = UIKit.button("キャンセル", _cancel_discard)
+	box.add_child(_discard_yes)
+	box.add_child(_discard_no)
+	_discard_dialog.hide()
 
 
 # ---------------------------------------------------------------- 開閉
@@ -128,6 +157,7 @@ func open() -> void:
 
 
 func close() -> void:
+	_cancel_discard()
 	_overlay.visible = false
 
 
@@ -137,6 +167,10 @@ func is_open() -> bool:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
+		if _discard_dialog.visible:
+			if event.keycode in [KEY_ESCAPE, KEY_TAB]: _cancel_discard()
+			get_viewport().set_input_as_handled()
+			return
 		if event.keycode == KEY_TAB:
 			toggle()
 		elif event.keycode == KEY_ESCAPE and _overlay.visible:
@@ -162,6 +196,7 @@ func _counts() -> Dictionary:
 
 
 func _set_tab(t: int) -> void:
+	_cancel_discard()
 	_tab = t
 	_sel = -1
 	_msg_clear()
@@ -302,6 +337,8 @@ func _rebuild_detail() -> void:
 	_qty = null
 	_split_box = null
 	_move_btn = null
+	_discard_btn = null
+	_discard_available = null
 	_split_btn = null
 	_msg = null
 	var s := selected_stack()
@@ -380,6 +417,12 @@ func _rebuild_detail() -> void:
 	_split_btn.custom_minimum_size = Vector2(110, 36)
 	_split_btn.tooltip_text = "束を2つに分ける"
 	acts.add_child(_split_btn)
+	if _tab == 0:
+		_discard_btn = UIKit.button("廃棄…", _ask_discard)
+		_discard_btn.custom_minimum_size = Vector2(100, 36)
+		acts.add_child(_discard_btn)
+		_discard_available = UIKit.lbl("", 14, UIKit.C_DIM)
+		_detail.add_child(_discard_available)
 	# 分割の数量（開いたときだけ出る）
 	_split_box = HBoxContainer.new()
 	_split_box.add_theme_constant_override("separation", 8)
@@ -433,6 +476,10 @@ func _update_dynamic() -> void:
 	_qty.set_max(s.n)
 	if _move_btn != null:
 		_move_btn.disabled = _qty.value < 1
+	if _discard_available != null:
+		_discard_available.text = "廃棄可能 ×%d（予約分を除く）" % game.warehouse_discard_available(s.item)
+	if _discard_btn != null:
+		_discard_btn.disabled = _qty.value < 1 or _qty.value > game.warehouse_discard_available(s.item)
 	if _split_btn != null:
 		_split_btn.disabled = s.n < 2
 		if s.n < 2 and _split_box != null:
@@ -473,3 +520,31 @@ func _do_split() -> void:
 		_say("%s ×%d を ×%d と ×%d に分けた" % [ItemDB.name_of(s.item), before, before - n, n])
 	else:
 		_say("その数では分けられない")
+
+
+func _cancel_discard() -> void:
+	_discard_snapshot = {}
+	if _discard_dialog != null: _discard_dialog.hide()
+
+
+func _ask_discard() -> void:
+	var s := selected_stack()
+	if _tab != 0 or s == null or _qty == null: return
+	_discard_snapshot = game.warehouse_discard_snapshot(s.item, mini(_qty.value, s.n))
+	if _discard_snapshot.is_empty():
+		_say("廃棄できません。数量・在庫・予約を確認してください")
+		return
+	var n := int(_discard_snapshot["n"])
+	var weight := int(_discard_snapshot["weight"])
+	var reduction: int = game.storage.item_weight(s.item, n)
+	_discard_text.text = "%s ×%d を倉庫から廃棄します。\n保有重量 %d → %d（−%d）\n廃棄した物は戻せません。" % [ItemDB.name_of(s.item), n, weight, weight - reduction, reduction]
+	_discard_dialog.show()
+
+
+func _confirm_discard() -> void:
+	var snapshot := _discard_snapshot.duplicate()
+	_cancel_discard() # 連打・再表示で同じ確認を使い回さない
+	if snapshot.is_empty(): return
+	var ok: bool = game.discard_warehouse(snapshot)
+	_refresh(true)
+	_say("廃棄しました: %s ×%d" % [ItemDB.name_of(snapshot["item"]), snapshot["n"]] if ok else "在庫・予約・重量が変わりました。廃棄せず、選び直してください")
