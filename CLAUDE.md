@@ -796,3 +796,20 @@
 - 最終検証: core30件すべて成功（`/workspace/desert-rats-checks/packing-release-core/20261012T062335Z-18x6nj1d/results.json`）、関連9件すべて成功（`/workspace/desert-rats-checks/packing-release-related/20261012T062801Z-bjejb6un/results.json`）。両runともsource_changed_during_run=false、完走後の変更ファイルSHA256も検証時と全件一致。関連はimport、save_progression、rooms、build、crew_detail、quarry_rear、camera、view、artscale。
 - world_*、facility_packing、packing_flow、startupは通常地図、その他のゲーム診断は明示したlegacy-world-test fixture。描画ありの撤去/UIはpacking-window.logで全成功、packing-confirm.pngで表示確認。Linux Godot4.6.3での検証であり、スマホ実機、Windows4.7.2、OS入力、音声は未検証。グローバル乱数列の非保存と長時間襲撃敗北は従来の制限。
 - 作業先は既存/workspace/desert_ratsのmain。新clone/ブランチなし、元の/workspace/-は未変更。今回のコード・診断・3文書を一式commitし通常pushする。実際の共有結果と完全SHAは終了報告を正とする。
+
+## 2026-10-12 荷役補助：背負いフレーム
+
+- 既存main e6bebeba96eec3d17c2c3b9eb1a197e720c04606を継続。完成設備撤去を保護し、荷役補助のみ追加。まとめ加工は次段階。元の/workspace/-、他ブランチ、地図/残量/生物定義、遠方追跡、難度、施設tier、中継サービスは変更しない。
+- 個人の仕事補助1枠を武器/採取道具と独立して追加。F→装備→背負いフレームを製作し、Cの個体情報→仕事補助から装備/解除できる。持替えは外す→別個体で装備。基本3個、装備者のみ採取袋と倉庫⇄作業場の1便を5個へ。これは調整用初期値。加工材料一式の搬入、完成品の1個ずつの回収、燃料/修理/食事/獲物の処理は従来のまま（まとめ加工とは別）。
+- 暫定レシピは既存の木材2+皮1+鉄1、作業台、基準加工時間4秒、1個完成。骨不要。材料合計と同じ重量15を倉庫・運搬・装備中も計上し、拠点の最大積載量は増やさない。既存レシピの費用/時間は変更しない。新アイテムID22を末尾追加、既存IDは維持。自動製作は初期OFF、既存の手動製作経路を使用する。
+- 便開始時に運搬上限を決定。採取は予約時、倉庫⇄作業場は積込み時に参照。途中装備変更でも現在の荷物や予約を縮めず、次便から反映。満載解除は既に計上済みの重量を倉庫へ移す。遠征/戦闘不能時の装備変更、在庫0、重複クリック、運搬注文に予約された在庫の装備を拒否。仕事切替/残注文取消/戦闘不能でも荷物と装備を保全し、復帰で保持する（このゲームに死亡削除はない）。
+- SaveGame version3のworkerにwork_supportを保存。旧v2/v3の省略は未装備-1として検査/適用し、元snapshotや元ファイルを変更しない。不正ID/型は拒否。重量検査にも装備を含める。運搬中5個のまま解除した保存、採取予約5個のまま解除した保存も数量/予約を保持する。
+- オリジナルの小さな木製フレーム/布帯PNGと再生成スクリプトを追加。背面の箱は最大2段、頭より低く制限、左右の向きへ追従。表示サイズは20×36px、箱は20×12px、既存キャラを巨大な箱塔で覆わない。専用アイコンとCのスクロール表示を実画面で確認した。
+- 効果の実測: 同じ仲間/同じ位置/同じ15個の木材/同じ重量で、倉庫→作業場を実AIで運搬。基本3個は5便、フレーム5個は3便（便数40%減）。初便5個の運搬途中に外すと、5+3+3+3+1の5便。全15個の到着、倉庫と作業場と装備の単一所有、総重量不変を確認。移動時間や疲労を一定率改善するとまでは主張しない。
+- 正規進行: 初期物資/既定出来事から作業台を建て、村→砂原→都市で狩猟と獲物回収。木2/皮1を先に作業場へ運び、鉱床近場を採取して鉄1を運搬、製作→装備→保存再開→解除→持替え→都市へ移動。物資/完成品の成功状態への注入なし。狩猟優先度変更はCと同じAPI、25ゲーム秒ごとの保存復元で全持続状態一致を検査。境界検査とUI検査のみ、必要な状態/材料をfixtureで設定した。
+- 初回importはstorageのgameがメソッドであるのを見落とした参照で失敗し修正。第2runは各検査成功でも新uid生成でsource_changed=trueとなったため最終合格扱いにしない。初回通常進行は皮未回収、次は鉱山までに木材が自動加工で消費されて停滞。製作材料を先に作業場へ確保し、狩猟/回収完了を待つ正規手順で解消した。画像のitem_接頭辞不足も修正。失敗ログはhaul-first/second/targeted/targeted2/flow-thirdに保持。
+- 従来制限: 旧地図で公開全地点生成済みかつ骨/骨を得る獲物がないセーブの骨不足はそのまま。残量の再生成や無断補填なし。グローバル乱数列非保存、遠方追跡、長時間襲撃敗北は未対応。スマホ実機、Windows/Godot4.7.2、OS入力、音声は未検証。Linux/Godot4.6.3、描画ありViewport入力と画像確認を使用。
+- 最終証跡: core33/33成功 `/workspace/desert-rats-checks/haul-release-core/20261012T064324Z-lbxda2nz/results.json`。関連は `/workspace/desert-rats-checks/haul-release-related/20261012T064915Z-yuh55cj7/results.json` で9件中8成功、artscaleのみ失敗（新画像が規格12×12でなく16×20だった）。生成元とPNGを12×12へ修正し、重量内訳に仕事補助15の表示を追加。ゲーム処理はcore成功時から変更なし。
+- 修正後 `/workspace/desert-rats-checks/haul-final-ui/20261012T065217Z-u4iogtc6/results.json` はimport/haul_support/haul_ui/haul_flow/items/artscale/crew_detailの7件全成功。上記3runは全てsource_changed_during_run=false。集約は `/workspace/desert-rats-checks/haul-release-coverage.json`。前のartscale失敗は削除/成功への書換えなし。
+- 描画あり最終版 `haul-window-final.log` は実入力の製作注文/装備/解除/持替え/重量内訳が全成功。`haul-ui.png` と `haul-back.png` を目視確認。ハーネス自己検査8件成功 (`haul-harness.log`)。mainスクリプトとルートのミラーは同一、git diff --check成功。
+- この一式を既存mainでcommit・通常pushする。完全SHAと実際の共有状態は終了報告を正とする。荷役をここで一区切りとし、まとめ加工は次turnへ残す。

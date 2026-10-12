@@ -22,6 +22,7 @@ var carrying_species := ""   # 獲物を運んでいるときの生物の種類
 var carry_source := Inventory.SOURCE_ENVIRONMENT
 var carry_n := 1              # 持っている個数（採取ポイントでは袋いっぱいまで。それ以外は1）
 var carry_bonus := {}         # 採取の副産物 {Item: 個数}（倉庫に運ぶとき一緒に入れる）
+var work_support := -1       # 武器・採取道具と独立した仕事補助1枠。
 var weapon := -1             # 個人武器1枠。倉庫在庫とは別所有。戦闘不能でも保持。
 var tools := {}               # 持っている採取の道具 {枠: Item}（data/gathering.gd。持たない枠は素手）
 var speed := 120.0
@@ -155,6 +156,11 @@ func arrive(new_fatigue: float) -> void:
 	target = position
 	ai.timer = 0.0
 	ai._set_state(CharacterAI.State.SEARCH)
+
+
+## 便の開始時だけ参照。積込み済みの個数や採取予約を縮めない。
+func carry_limit() -> int:
+	return GameData.HAUL_FRAME_LIMIT if work_support == GameData.Item.HAUL_FRAME else GatherDB.CARRY_MAX
 
 
 ## 迎撃時の本人の攻撃補正。採取と狩猟には適用しない。
@@ -301,6 +307,16 @@ func _frame() -> int:
 	return F_IDLE0 + (int(_t * 1.6) % 2)
 
 
+var _bundle_style: StyleBoxFlat
+func _haul_bundle() -> StyleBoxFlat:
+	if _bundle_style == null:
+		_bundle_style = StyleBoxFlat.new()
+		_bundle_style.bg_color = Color("98754b")
+		_bundle_style.border_color = Color("493b30")
+		_bundle_style.set_border_width_all(2)
+	return _bundle_style
+
+
 func _draw() -> void:
 	# 絵の1ドットの格子に合わせて描く（絵の細かさは、絵の幅から自動で決まる。data/art_spec.gd）
 	var spec := ArtSpec.WORKER
@@ -314,6 +330,12 @@ func _draw() -> void:
 		draw_rect(Rect2(snap + Vector2(-28, 0), Vector2(56, 4)), c)
 		draw_rect(Rect2(snap + Vector2(-20, 4), Vector2(40, 4)), c)
 	draw_set_transform(snap + lift, 0.0, Vector2(facing, 1.0))
+	if work_support == GameData.Item.HAUL_FRAME and not sleeping and not down:
+		draw_texture_rect(GameData.item_tex(work_support), Rect2(-30, -51, 20, 36), false)
+		if carrying >= 0:
+			# Visual bundles cap at 2, regardless of count. Remains below head height.
+			for i in mini(2, ceili(float(carry_n)/3.0)):
+				draw_style_box(_haul_bundle(), Rect2(-32, -32-i*14, 20, 12))
 	var cell_px := ArtSpec.px_size(spec["cell"])                     # 画面上の大きさ（基準の大きさ×UNIT_PX。絵の細かさに依存しない）
 	draw_texture_rect_region(_sheet, Rect2(Vector2(-cell_px.x / 2.0, -cell_px.y), cell_px), ArtSpec.frame_src(_sheet, spec, fr))
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)

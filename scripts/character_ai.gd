@@ -413,7 +413,7 @@ func tick(delta: float) -> void:
 		State.XFER_TAKE:
 			ch.target = _xfer_point(true) + ch.slot_offset
 			if ch.move_to_target(delta):
-				var got: int = game.begin_transfer_trip(xfer_item, xfer_dir)
+				var got: int = game.begin_transfer_trip(xfer_item, xfer_dir, ch)
 				if got > 0:
 					ch.carrying = xfer_item
 					ch.carry_source = Inventory.SOURCE_TRANSFER
@@ -807,7 +807,7 @@ func _try_start(job: int) -> bool:
 			res.claimed_by = ch
 			if res is GatherPoint:
 				# 袋の大きさ: 倉庫の空き枠（ほかの人が運んでいる分を除く）と袋の上限のうち小さいほう
-				bag_limit = clampi(game.gather_free_for(res.item, inflight), 1, GatherDB.CARRY_MAX)
+				bag_limit = clampi(game.gather_free_for(res.item, inflight), 1, ch.carry_limit())
 				res.reserved = bag_limit
 				gather_ev = {}
 				bag_frac = 0.0

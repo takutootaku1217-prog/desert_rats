@@ -6,15 +6,16 @@ extends RefCounted
 ## 使い道と入手先は、加工のレシピ（GameData.RECIPES）と設備の材料（FacilityDB）から自動で数える（説明の文章を別に書かない）。
 
 ## 分類（インベントリの並び順・色。増減してよい）
-const CATEGORIES := ["素材", "加工品", "食料", "燃料", "道具", "武器"]
+const CATEGORIES := ["素材", "加工品", "食料", "燃料", "道具", "武器", "仕事補助"]
 const CATEGORY_COLORS := {
+	"仕事補助": Color("c9b68b"),
 	"武器": Color("c9a6f2"), "素材": Color("d9b36b"), "加工品": Color("9fb8de"), "食料": Color("8fd68f"), "燃料": Color("f29a56"), "道具": Color("c9a6f2"),
 }
 ## インベントリに並べる順（分類の順）
 const ORDER := [
 	GameData.Item.MEAT, GameData.Item.HIDE, GameData.Item.BONE, GameData.Item.FAT, GameData.Item.WOOD, GameData.Item.STONE, GameData.Item.IRON_ORE,
 	GameData.Item.IRON, GameData.Item.REPAIR_KIT, GameData.Item.BED_PACK, GameData.Item.STORAGE_BOX, GameData.Item.WORKBENCH_PACK, GameData.Item.SUPPLY_CACHE_PACK, GameData.Item.FOOD, GameData.Item.FUEL,
-	GameData.Item.HAMMER, GameData.Item.PICKAXE, GameData.Item.ADV_PICK, GameData.Item.AXE, GameData.Item.IRON_AXE, GameData.Item.SIMPLE_SPEAR,
+	GameData.Item.HAMMER, GameData.Item.PICKAXE, GameData.Item.ADV_PICK, GameData.Item.AXE, GameData.Item.IRON_AXE, GameData.Item.SIMPLE_SPEAR, GameData.Item.HAUL_FRAME,
 ]
 
 
@@ -32,6 +33,7 @@ static func tex(item: int) -> Texture2D:
 
 
 static func category_of(item: int) -> String:
+	if item in GameData.SUPPORT_ITEMS: return "仕事補助"
 	if item in GameData.WEAPON_ITEMS:
 		return "武器"
 	if item in GameData.TOOL_ITEMS:
@@ -91,6 +93,8 @@ static func sources_of(item: int) -> Array:
 ## 選択詳細用。効果値は実処理と同じ定義から読み、平常HUDには増やさない。
 static func effect_text(item: int) -> String:
 	match item:
+		GameData.Item.HAUL_FRAME:
+			return "Cの仕事補助枠で装備。採取袋・倉庫⇄作業場の1便を%d→%d個にします（調整用）。今の荷物・予約は保持し、次の便から反映。拠点容量は増えません。重量%dは装備中も計上。" % [GatherDB.CARRY_MAX, GameData.HAUL_FRAME_LIMIT, CargoDB.size_of(item)]
 		GameData.Item.WORKBENCH_PACK:
 			return "撤去した完成品。Bで材料・作業台なしで再設置できます。未設置重量%d、設置後は重量対象外。設置枠・加工室は必要です。" % CargoDB.size_of(item)
 		GameData.Item.SUPPLY_CACHE_PACK:

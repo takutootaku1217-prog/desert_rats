@@ -7,7 +7,7 @@ const PATH := "user://save.json"
 static var last_error := ""
 static var disabled := false
 const MAIN := ["target_speed", "scroll_speed", "room_layout", "total_rooms_built", "recipe_priority", "gather_policy", "hunt_policy", "blueprints", "total_gathered", "total_hunted", "total_eaten", "tool_auto", "_tool_clock", "build_queue", "total_built", "total_wasted", "_waste_note_at", "_spawn_dist", "_creature_dist", "wave", "kills", "_wave_timer", "transfer_queue", "craft_queue", "total_transferred", "total_crafted_by_hand", "_feed_clock"]
-const WORKER := ["char_name", "palette", "priorities", "carrying", "carcass_cargo", "carrying_species", "carry_source", "carry_n", "carry_bonus", "weapon", "tools", "speed", "target", "position", "slot_offset", "hp", "hunger", "fatigue", "stress", "calm", "mental", "down", "floor_i", "facing", "level", "gender", "ranks", "skills", "dept", "away", "bed_index", "_climb_dest", "_climb_floor", "_climb_kind"]
+const WORKER := ["char_name", "palette", "priorities", "carrying", "carcass_cargo", "carrying_species", "carry_source", "carry_n", "carry_bonus", "weapon", "work_support", "tools", "speed", "target", "position", "slot_offset", "hp", "hunger", "fatigue", "stress", "calm", "mental", "down", "floor_i", "facing", "level", "gender", "ranks", "skills", "dept", "away", "bed_index", "_climb_dest", "_climb_floor", "_climb_kind"]
 const AI := ["state", "timer", "haul_item", "haul_recipe", "repair_part", "gather_ev", "bag_limit", "bag_frac", "eat_wait", "xfer_item", "xfer_dir", "current_job", "life_request"]
 const BASE := ["built", "max_hp", "hp", "fuel", "parts", "total_refuel", "total_repair"]
 const PROCESSOR := ["orders", "current", "progress", "output", "total_done", "waiting_fuel"]
@@ -115,6 +115,12 @@ static func recipe(r) -> bool:
 		if r.get(k, "" if k == "station" else null) != canonical.get(k, "" if k == "station" else null): return false
 	return true
 
+## 旧v2/v3の省略項目だけ補完。呼出し側のsnapshotや元ファイルは変更しない。
+static func worker_data(row: Dictionary) -> Dictionary:
+	var result := row.duplicate(true)
+	if not result.has("work_support"): result["work_support"] = -1
+	return result
+
 static func validate(d, g) -> bool:
 	if not d is Dictionary or not safe(d) or d.get("version") != VERSION: return false
 	if not WorldTrip.valid(d.get("world"),g): return false
@@ -179,12 +185,13 @@ static func validate(d, g) -> bool:
 	var fuel_count := 0
 	for i in d.crew.size():
 		var row = d.crew[i]
-		if not row is Dictionary or not shape(row.get("worker"),g.workers[i],WORKER) or not shape(row.get("ai"),g.workers[i].ai,AI): return false
-		var w: Dictionary = row.worker
+		if not row is Dictionary or not row.get("worker") is Dictionary or not shape(worker_data(row.worker),g.workers[i],WORKER) or not shape(row.get("ai"),g.workers[i].ai,AI): return false
+		var w: Dictionary = worker_data(row.worker)
 		var a: Dictionary = row.ai
 		if a.state not in CharacterAI.State.values() or w.floor_i not in [0,1,2] or w._climb_floor not in [0,1,2]: return false
 		if w.hp < 0 or w.hp > 100 or w.hunger < 0 or w.hunger > 100 or w.fatigue < 0 or w.fatigue > 100: return false
 		if w.palette not in ["grey","tan","pink"] or w.weapon not in [-1,GameData.Item.SIMPLE_SPEAR]: return false
+		if w.work_support not in [-1,GameData.Item.HAUL_FRAME]: return false
 		if w.carrying != -1 and w.carrying not in GameData.Item.values(): return false
 		if w.carry_n < 1 or not counts(w.carry_bonus) or not counts(w.carcass_cargo) or not recipe(a.haul_recipe): return false
 		for key in w.priorities:
@@ -312,7 +319,7 @@ static func apply(g, d: Dictionary) -> bool:
 		g.enemies_root.add_child(e); enemies.append(e)
 	for i in d.crew.size():
 		var w = g.workers[i]; var row: Dictionary = d.crew[i]
-		put(w,row.worker,WORKER); put(w.ai,row.ai,AI)
+		put(w,worker_data(row.worker),WORKER); put(w.ai,row.ai,AI)
 		w._sheet = GameData.tex("res://assets/characters/mouse_%s.png" % w.palette)
 		w.visible = not w.away; w.set_process(not w.away)
 		w.sleeping = false; w.resting = false
@@ -356,7 +363,7 @@ static func saved_weight(d: Dictionary) -> int:
 	for r in d.processor.orders + [d.processor.current]: n += mass(r.get("in",{}))
 	for it in d.processor.output: n += item_mass(it)
 	for row in d.crew:
-		var w: Dictionary = row.worker
+		var w: Dictionary = worker_data(row.worker)
 		if row.ai.state == CharacterAI.State.HAUL_MOVE:
 			n += mass(row.ai.haul_recipe["in"])
 		elif w.carrying == GameData.Item.CARCASS:
@@ -364,6 +371,7 @@ static func saved_weight(d: Dictionary) -> int:
 		elif w.carrying >= 0: n += item_mass(w.carrying,w.carry_n)
 		n += mass(w.carry_bonus)
 		if w.weapon >= 0: n += item_mass(w.weapon)
+		if w.work_support >= 0: n += item_mass(w.work_support)
 	if d.expedition.state == "running" and d.expedition.kit and not d.expedition.kit_used: n += item_mass(GameData.Item.REPAIR_KIT)
 	return n
 

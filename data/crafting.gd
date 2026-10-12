@@ -22,7 +22,7 @@ const QUANTITIES := [1, 5, -1]
 
 static func category_of_recipe(r: Dictionary) -> String:
 	var out: int = int(r["out"])
-	if out in GameData.WEAPON_ITEMS:
+	if out in GameData.WEAPON_ITEMS or out in GameData.SUPPORT_ITEMS:
 		return "装備"
 	if out in GameData.PACKED_ITEMS:
 		return "建設"

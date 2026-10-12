@@ -426,6 +426,22 @@ func _build_tools(w) -> void:
 	_live["weapon_reason"] = _wrapped_label("", 13, UIKit.C_DIM)
 	_body.add_child(_live["weapon_reason"])
 	_body.add_child(_wrapped_label("迎撃中の本人の攻撃 +%d%%。装備中も積載重量に含みます。持替えは外す→別の仲間で装備。" % roundi((GameData.SIMPLE_WEAPON_MULT - 1.0) * 100), 13, UIKit.C_DIM))
+	_section("仕事補助（1枠）")
+	_live["work_support"] = _wrapped_label("", 15)
+	_body.add_child(_live["work_support"])
+	var work_support_row := HBoxContainer.new()
+	_body.add_child(work_support_row)
+	_live["work_support_equip"] = UIKit.button("背負いフレームを装備", func():
+		if is_instance_valid(w) and w == _worker: game.equip_work_support(w)
+		_update_live())
+	_live["work_support_off"] = UIKit.button("外して倉庫へ", func():
+		if is_instance_valid(w) and w == _worker: game.unequip_work_support(w)
+		_update_live())
+	work_support_row.add_child(_live["work_support_equip"])
+	work_support_row.add_child(_live["work_support_off"])
+	_live["work_support_reason"] = _wrapped_label("", 13, UIKit.C_DIM)
+	_body.add_child(_live["work_support_reason"])
+	_body.add_child(_wrapped_label(ItemDB.effect_text(GameData.Item.HAUL_FRAME), 13, UIKit.C_DIM))
 	_section("採取道具")
 	_live["tool_auto"] = UIKit.button("", _toggle_tool_auto)
 	_live["tool_auto"].custom_minimum_size = Vector2(0, 32)
@@ -614,6 +630,13 @@ func _update_live() -> void:
 		_live["weapon_equip"].disabled = not equip_reason.is_empty()
 		_live["weapon_off"].disabled = not off_reason.is_empty()
 		_live["weapon_reason"].text = off_reason if w.weapon >= 0 else equip_reason
+	if _live.has("work_support"):
+		_live["work_support"].text = "仕事補助：%s ／ 倉庫のフレーム %d" % [ItemDB.name_of(w.work_support) if w.work_support >= 0 else "なし", game.storage.count_of(GameData.Item.HAUL_FRAME)]
+		var equip_reason: String = game.work_support_change_reason(w, true)
+		var off_reason: String = game.work_support_change_reason(w, false)
+		_live["work_support_equip"].disabled = not equip_reason.is_empty()
+		_live["work_support_off"].disabled = not off_reason.is_empty()
+		_live["work_support_reason"].text = off_reason if w.work_support >= 0 else equip_reason
 	if _live.has("tool_auto"):
 		var auto: Button = _live["tool_auto"]
 		var text := "道具の自動割り当て（全員共通）：%s" % ("ON" if game.tool_auto else "OFF")

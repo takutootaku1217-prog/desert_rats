@@ -130,6 +130,7 @@ func _process(_d: float) -> void:
 		tip += "\n　%s %d" % [CargoDB.BAY_NAMES[bay], st.used_in(bay)]
 	tip += "\n　作業場・加工 %d / 運搬中 %d" % [st.workshop_weight(), st.carried_weight()]
 	tip += "\n　装備中の武器 %d / 遠征携行 %d" % [st.equipped_weapon_weight(), st.expedition_weight()]
+	tip += "\n　装備中の仕事補助 %d" % st.equipped_support_weight()
 	tip += "\n　加工増量の予約 %d" % st.processing_reserve()
 	if game.total_wasted > 0:
 		tip += "\n　捨てた %d 個" % game.total_wasted

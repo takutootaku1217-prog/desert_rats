@@ -452,12 +452,12 @@ func next_transfer() -> Dictionary:
 
 
 ## 運搬の1回分を始める（仲間が元の置き場に着いたとき）。依頼を減らし、元から取り出して、運ぶ個数を返す（0 なら何もなかった）。
-func begin_transfer_trip(item: int, dir: String) -> int:
+func begin_transfer_trip(item: int, dir: String, worker = null) -> int:
 	var t := _find_transfer(item, dir)
 	if t.is_empty():
 		return 0
 	var src_inv: Inventory = storage.inventory if dir == "to_workshop" else processor.stock
-	var got := src_inv.take_n(item, mini(int(t["n"]), CraftDB.TRANSFER_TRIP))
+	var got := src_inv.take_n(item, mini(int(t["n"]), worker.carry_limit() if is_instance_valid(worker) else CraftDB.TRANSFER_TRIP))
 	t["n"] -= got
 	if got == 0 or int(t["n"]) <= 0:
 		transfer_queue.erase(t)
@@ -770,6 +770,42 @@ func unequip_weapon(w) -> bool:
 	var item: int = w.weapon
 	var inv: Inventory = storage.inventory
 	w.weapon = -1
+	# 装備重量を既に計上しているので、満載でも同じ重量の倉庫へ戻せる。
+	inv.counts[item] = inv.count(item) + 1
+	inv.item_added.emit(item, 1, Inventory.SOURCE_TRANSFER)
+	inv.changed.emit()
+	return true
+
+
+func work_support_change_reason(w, equip: bool) -> String:
+	var reason := _tool_target_reason(w)
+	if not reason.is_empty(): return reason
+	if game_over: return "ゲーム終了中は変更できません。"
+	if w.away: return "遠征中は仕事補助を変更できません。"
+	if w.down: return "戦闘不能の間は仕事補助を保持します。"
+	if equip:
+		if w.work_support >= 0: return "すでに仕事補助を装備しています。"
+		if storage.count_of(GameData.Item.HAUL_FRAME) - _queued_transfer(GameData.Item.HAUL_FRAME, "to_workshop") < 1: return "倉庫に背負いフレームがありません。"
+	elif w.work_support < 0:
+		return "仕事補助を装備していません。"
+	return ""
+
+
+func equip_work_support(w) -> bool:
+	if not work_support_change_reason(w, true).is_empty(): return false
+	var inv: Inventory = storage.inventory
+	# 装備と在庫を同時に移す。重量はその前後で不変。
+	inv.counts[GameData.Item.HAUL_FRAME] = inv.count(GameData.Item.HAUL_FRAME) - 1
+	w.work_support = GameData.Item.HAUL_FRAME
+	inv.changed.emit()
+	return true
+
+
+func unequip_work_support(w) -> bool:
+	if not work_support_change_reason(w, false).is_empty(): return false
+	var item: int = w.work_support
+	var inv: Inventory = storage.inventory
+	w.work_support = -1
 	# 装備重量を既に計上しているので、満載でも同じ重量の倉庫へ戻せる。
 	inv.counts[item] = inv.count(item) + 1
 	inv.item_added.emit(item, 1, Inventory.SOURCE_TRANSFER)

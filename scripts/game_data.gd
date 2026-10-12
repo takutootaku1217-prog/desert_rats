@@ -138,17 +138,21 @@ static func job_list() -> Array:
 # 狩猟・採取・購入・捕獲・探索の持ち帰りは、すべて同じ Item / Inventory に集約する。
 # ------------------------------------------------------------------
 enum Item { MEAT, HIDE, BONE, FAT, WOOD, STONE, IRON_ORE, IRON, FOOD, FUEL, REPAIR_KIT, CARCASS,
-		HAMMER, PICKAXE, ADV_PICK, AXE, IRON_AXE, BED_PACK, STORAGE_BOX, SIMPLE_SPEAR, WORKBENCH_PACK, SUPPLY_CACHE_PACK }        # TOOL_ITEMSだけ積載対象外。武器は装備中も計上。
+		HAMMER, PICKAXE, ADV_PICK, AXE, IRON_AXE, BED_PACK, STORAGE_BOX, SIMPLE_SPEAR, WORKBENCH_PACK, SUPPLY_CACHE_PACK, HAUL_FRAME }        # TOOL_ITEMSだけ積載対象外。武器は装備中も計上。
 const TOOL_ITEMS := [Item.HAMMER, Item.PICKAXE, Item.ADV_PICK, Item.AXE, Item.IRON_AXE]
 const CREATURE_ITEMS := [Item.MEAT, Item.HIDE, Item.BONE, Item.FAT]   # 生物から取れる素材
 const GROUND_ITEMS := [Item.WOOD, Item.STONE, Item.IRON_ORE]          # 地面で採取する基本資源
 const RAW_ITEMS := [Item.MEAT, Item.HIDE, Item.BONE, Item.FAT, Item.WOOD, Item.STONE, Item.IRON_ORE]
+## 荷役の調整用初期値。基本3個を維持し、装備者だけ5個。
+const HAUL_FRAME_LIMIT := 5
+const SUPPORT_ITEMS := [Item.HAUL_FRAME]
 const WEAPON_ITEMS := [Item.SIMPLE_SPEAR]
 # 武器補正は調整用初期値。迎撃時の本人だけに適用。
 const SIMPLE_WEAPON_MULT := 1.2
 const PACKED_ITEMS := [Item.BED_PACK, Item.STORAGE_BOX, Item.WORKBENCH_PACK, Item.SUPPLY_CACHE_PACK]
-const PRODUCT_ITEMS := [Item.IRON, Item.FOOD, Item.FUEL, Item.REPAIR_KIT, Item.BED_PACK, Item.STORAGE_BOX, Item.SIMPLE_SPEAR, Item.WORKBENCH_PACK, Item.SUPPLY_CACHE_PACK]
+const PRODUCT_ITEMS := [Item.IRON, Item.FOOD, Item.FUEL, Item.REPAIR_KIT, Item.BED_PACK, Item.STORAGE_BOX, Item.SIMPLE_SPEAR, Item.WORKBENCH_PACK, Item.SUPPLY_CACHE_PACK, Item.HAUL_FRAME]
 const ITEM_NAMES := {
+	Item.HAUL_FRAME: "背負いフレーム",
 	Item.WORKBENCH_PACK: "ワークベンチ（未設置）", Item.SUPPLY_CACHE_PACK: "物資庫（未設置）",
 	Item.MEAT: "生肉", Item.HIDE: "皮", Item.BONE: "骨", Item.FAT: "脂肪",
 	Item.WOOD: "木材", Item.STONE: "石", Item.IRON_ORE: "鉄鉱石",
@@ -158,6 +162,7 @@ const ITEM_NAMES := {
 	Item.AXE: "簡易の斧", Item.IRON_AXE: "鉄の斧",
 }
 const ITEM_FILES := {
+	Item.HAUL_FRAME: "haul_frame",
 	Item.WORKBENCH_PACK: "storage_box", Item.SUPPLY_CACHE_PACK: "storage_box", # 梱包品は既存の箱アイコンを共用
 	Item.MEAT: "meat", Item.HIDE: "hide", Item.BONE: "bone", Item.FAT: "fat",
 	Item.WOOD: "wood", Item.STONE: "stone", Item.IRON_ORE: "iron_ore",
@@ -176,6 +181,8 @@ const GROUND_WEIGHTS := {Item.WOOD: 4.0, Item.STONE: 3.0, Item.IRON_ORE: 1.5}
 ## 設備の建設もレシピの形で流れる（FacilityDB.recipe_of。"out" が -1、"build" に設備の id）。
 const RECIPES := [
 	{"id": "simple_spear", "name": "簡易槍", "in": {Item.WOOD: 1, Item.IRON: 1}, "out": Item.SIMPLE_SPEAR, "n": 1,
+		"time": 4.0, "tank_fuel": 0.0, "field": Field.DEV, "station": "workbench"},
+	{"id": "haul_frame", "name": "背負いフレーム", "in": {Item.WOOD: 2, Item.HIDE: 1, Item.IRON: 1}, "out": Item.HAUL_FRAME, "n": 1,
 		"time": 4.0, "tank_fuel": 0.0, "field": Field.DEV, "station": "workbench"},
 	{"id": "bed_pack", "name": "寝床の製作", "in": {Item.HIDE: 2, Item.BONE: 1}, "out": Item.BED_PACK, "n": 1,
 		"time": 4.0, "tank_fuel": 0.0, "field": Field.DEV, "station": "workbench"},

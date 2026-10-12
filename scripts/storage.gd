@@ -52,7 +52,7 @@ func current_weight() -> int:
 	var n := 0
 	for bay in CargoDB.BAY_NAMES:
 		n += used_in(bay)
-	return n + equipped_weapon_weight() + workshop_weight() + carried_weight() + expedition_weight()
+	return n + equipped_support_weight() + equipped_weapon_weight() + workshop_weight() + carried_weight() + expedition_weight()
 
 
 func item_weight(item: int, n := 1) -> int:
@@ -129,6 +129,15 @@ func transform_limit(r: Dictionary) -> int:
 func store_owned(item: int, n := 1, source := Inventory.SOURCE_TRANSFER) -> void:
 	if n > 0: inventory.add(item, n, source)
 
+
+
+func equipped_support_weight() -> int:
+	var n := 0
+	if get_parent() is MobileBase:
+		for w in get_parent().game.workers:
+			if is_instance_valid(w) and w.work_support in GameData.SUPPORT_ITEMS:
+				n += CargoDB.size_of(w.work_support)
+	return n
 
 
 func equipped_weapon_weight() -> int:
