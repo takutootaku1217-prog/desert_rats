@@ -69,14 +69,11 @@ func _draw() -> void:
 func _draw_landmark(cam_left: float) -> void:
 	if not game.world.active or game.world.phase!="stopped": return
 	var id:String=game.world.region
+	# 村の上部アイコン・地名は表示しない。地域と移動はWorldTripで維持する。
+	if id == "south_oasis": return
 	var origin:=Vector2(cam_left+870,226)
 	var stone:=Color("806957")
 	match id:
-		"south_oasis":
-			draw_rect(Rect2(origin+Vector2(-36,-18),Vector2(72,26)),stone)
-			draw_rect(Rect2(origin+Vector2(-25,-14),Vector2(50,8)),Color("659da0"))
-			for x in [-30,30]: draw_rect(Rect2(origin+Vector2(x,-68),Vector2(6,55)),Color("796043"))
-			draw_line(origin+Vector2(-36,-68),origin+Vector2(36,-68),stone,8)
 		"east_sands":
 			draw_colored_polygon(PackedVector2Array([origin+Vector2(-70,0),origin+Vector2(-20,-48),origin+Vector2(50,0)]),Color("c6a76d"))
 			draw_rect(Rect2(origin+Vector2(12,-72),Vector2(6,72)),stone)

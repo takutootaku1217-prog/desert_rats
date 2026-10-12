@@ -850,3 +850,10 @@
 - 描画あり実Viewport入力はbatch-window-seeded-final.log / haul-window-seeded-final.log全成功。batch-ui.pngを目視し、操作ボタン・取消・状態表示が枠内に収まることを確認。ハーネス自己検査8件成功（batch-harness-final.log）。Linux/Godot4.6.3で実施。スマホ実機、Windows/Godot4.7.2、OS入力、音声は未検証。
 - 旧全地点生成済みsaveの骨不足、遠方追跡、難度/長時間放置敗北、グローバル乱数列非保存は未解決のまま。施設tier/用途分割/中継サービス/地域や素材追加は行わない。GameDataレシピ・CargoDB容量重量・FacilityDB費用・WorldMapDBは基準HEADから不変。
 - 作業先は既存/workspace/desert_rats main、開始HEAD c40f636ca980d3830f7260343be57750b4e76423。本体/ミラー、CraftDB、AI、processor/storage/save、F UI、ハーネス、batch診断3本、seed初期化診断、既存packing/haul/world_flowの診断共通処理、関連文書を承認済の一式としてcommit・通常pushする。初期/workspace/-はwork / 05370b65d2f243335b22d7d7bb3f31e965e25669のままcleanで未変更。旧失敗ログを削除/成功へ改変していない。
+
+## 2026-10-12 上部のオアシス表示を削除
+
+- 依頼: 通常画面上部のオアシスのアイコン/文字をゲームのコードから削除。既存/workspace/desert_rats main、開始HEAD 5348bd6ee73304082910d46684a459942c04a8ff、origin/main一致・cleanから開始。
+- scripts/world_scroll.gdのWorldScroll._draw_landmarkからsouth_oasisの井戸描画を除去し、この地域では地名も描かない。地図の地域ID/地名/現在地、到着・移動・生活処理、他地域の道標は維持。整備/購買は追加しない。
+- 添付Library画像は指定経路で取得し、許可されたローカル保存先で1回再試行したが両方download failed。添付そのものは未目視。代わりに現行ゲームの実ピクセルで上部の井戸と「オアシスの交易村」を確認し、変更後に両方消えたことを確認した。画像加工はしていない。比較画面: /workspace/desert-rats-checks/oasis-before.png と oasis-after.png。
+- 既存診断import/world_map/world_flow/camera/startupの5/5成功、source_changed_during_run=false。証跡: /workspace/desert-rats-checks/oasis-hud-removal/20261012T135533Z-rtc_981r/results.json。描画あり起動ログoasis-before.log/oasis-after.log、Linux Godot4.6.3。変更は描画と本記録の2ファイルだけ。承認済の通常commit/push対象。PC側同期は別作業で未確認。
