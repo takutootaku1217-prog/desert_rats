@@ -104,7 +104,10 @@ static func recipe(r) -> bool:
 	var canonical: Dictionary
 	if r.has("build"):
 		if not r.build is String or not FacilityDB.has(r.build): return false
-		canonical = FacilityDB.installation_recipe(r.build) if FacilityDB.def(r.build).has("packed_item") else FacilityDB.recipe_of(r.build)
+		canonical = FacilityDB.installation_recipe(r.build) if r["in"]=={FacilityDB.packed_item_of(r.build):1} else FacilityDB.recipe_of(r.build)
+		# 既存v2/v3に記録済みの寝床/箱設置レシピもそのまま再開する。
+		if canonical.time==0.0 and r.get("station","")==FacilityDB.def(r.build)["requires"]:
+			canonical["station"]=r.get("station","")
 	else:
 		canonical = GameData.recipe_by_id(r.id)
 	if canonical.is_empty(): return false
@@ -272,6 +275,7 @@ static func apply(g, d: Dictionary) -> bool:
 	if not validate(d,g):
 		last_error = "保存内容の形式・数量・参照を検証できません。現在の進行は変更しません。"
 		return false
+	g.cancel_facility_pack()
 	put(g.world,d.world,WorldTrip.FIELDS)
 	put(g,d.main,MAIN); put(g.base,d.base,BASE); put(g.processor,d.processor,PROCESSOR)
 	g.storage.inventory.counts = d.inventory.duplicate(true)

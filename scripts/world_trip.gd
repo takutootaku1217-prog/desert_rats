@@ -149,7 +149,8 @@ func _ensure_location() -> void:
   remember(p); locations[key()][p.world_id].anchor=anchor; p.free()
  # 既存の野生生物も有限枠。出入りで新しい獲物を配らない。
  if region!="old_mine" or travelling:
-  var c:=Creature.new(); c.setup(game,"hare")
+  var species:String=("lizard" if road in ["01","04"] else "hump") if travelling else WorldMapDB.REGIONS[region].get("creature","hare")
+  var c:=Creature.new(); c.setup(game,species)
   var anchor:=WorldMapDB.LENGTH*0.5 if travelling else 1170.0
   c.position=Vector2(_x(anchor),680)
   remember(c); locations[key()][c.world_id].anchor=anchor; c.free()

@@ -169,8 +169,8 @@ static func detail_text(e: Dictionary, game) -> String:
 	var stage := ""
 	if e["kind"] == "build":
 		var d := FacilityDB.def(e["id"])
-		if not d.has("packed_item"): return String(d["desc"])
-		item = int(d["packed_item"])
+		if FacilityDB.packed_item_of(e["id"]) < 0: return String(d["desc"])
+		item = FacilityDB.packed_item_of(e["id"])
 		stage = "設置段階：倉庫の製作物を1個使用。無ければ材料から製作して設置します。設置済み%d/%d、倉庫の未設置%d個。\n" % [game.base.facility_count(e["id"]),d["max"],game.storage.count_of(item)]
 	elif item in GameData.PACKED_ITEMS:
 		stage = "製作段階：作業場で未設置品を作り、倉庫へ収納。効果を得るにはBで設置します。\n"

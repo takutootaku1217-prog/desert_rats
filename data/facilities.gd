@@ -42,6 +42,7 @@ const GATHER_BOOST := 3.0
 ##    Main.room_effect が部屋の分とまとめて合計する。CrewStatus は room_effect を呼ぶだけなので変更不要。書いていない設備は []。
 const FACILITIES := {
 	"workbench": {
+		"recovered_item": GameData.Item.WORKBENCH_PACK,
 		"name": "ワークベンチ", "desc": "手作業では作れない道具・設備をつくる作業台",
 		"cost": {GameData.Item.WOOD: 3, GameData.Item.IRON: 1}, "time": 6.0, "field": GameData.Field.DEV,
 		"max": 1, "requires": "", "station": true,
@@ -68,6 +69,7 @@ const FACILITIES := {
 		"capacity_bonus": 60, "effects": [],
 	},
 	"supply_cache": {
+		"recovered_item": GameData.Item.SUPPLY_CACHE_PACK,
 		"name": "物資庫", "desc": "応急修理板を使い、消耗品の蓄えを整える棚。仲間の疲労度が溜まりにくくなる（-8%）",
 		"cost": {GameData.Item.REPAIR_KIT: 3, GameData.Item.WOOD: 2}, "time": 5.0, "field": GameData.Field.DEV,
 		"max": 1, "requires": "workbench", "station": false,
@@ -140,6 +142,12 @@ static func cost_text(id: String) -> String:
 ## 製作済みの設備を材料として設置する。素材の再消費・加工時間の二重加算はしない。
 static func installation_recipe(id: String) -> Dictionary:
 	var r := recipe_of(id)
-	r["in"] = {int(def(id)["packed_item"]): 1}
+	r["in"] = {packed_item_of(id): 1}
+	r["station"] = "" # 完成品の設置は作業台や再製作を必要としない。
 	r["time"] = 0.0
 	return r
+
+
+static func packed_item_of(id: String) -> int:
+	var d:=def(id)
+	return int(d.get("packed_item",d.get("recovered_item",-1)))

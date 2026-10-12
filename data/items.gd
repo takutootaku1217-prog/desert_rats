@@ -13,7 +13,7 @@ const CATEGORY_COLORS := {
 ## インベントリに並べる順（分類の順）
 const ORDER := [
 	GameData.Item.MEAT, GameData.Item.HIDE, GameData.Item.BONE, GameData.Item.FAT, GameData.Item.WOOD, GameData.Item.STONE, GameData.Item.IRON_ORE,
-	GameData.Item.IRON, GameData.Item.REPAIR_KIT, GameData.Item.BED_PACK, GameData.Item.STORAGE_BOX, GameData.Item.FOOD, GameData.Item.FUEL,
+	GameData.Item.IRON, GameData.Item.REPAIR_KIT, GameData.Item.BED_PACK, GameData.Item.STORAGE_BOX, GameData.Item.WORKBENCH_PACK, GameData.Item.SUPPLY_CACHE_PACK, GameData.Item.FOOD, GameData.Item.FUEL,
 	GameData.Item.HAMMER, GameData.Item.PICKAXE, GameData.Item.ADV_PICK, GameData.Item.AXE, GameData.Item.IRON_AXE, GameData.Item.SIMPLE_SPEAR,
 ]
 
@@ -62,7 +62,7 @@ static func uses_of(item: int) -> Array:
 		if r["in"].has(item):
 			l.append({"kind": "recipe", "id": r["id"], "name": r["name"], "out": int(r["out"])})
 	for id in FacilityDB.ids():
-		if FacilityDB.def(id)["cost"].has(item) or int(FacilityDB.def(id).get("packed_item", -1)) == item:
+		if FacilityDB.def(id)["cost"].has(item) or FacilityDB.packed_item_of(id) == item:
 			l.append({"kind": "build", "id": id, "name": "%sの建設" % FacilityDB.name_of(id), "out": -1})
 	return l
 
@@ -79,6 +79,7 @@ static func makers_of(item: int) -> Array:
 ## 入手先の短い言葉のリスト（"採取"・"狩猟"・"加工"）
 static func sources_of(item: int) -> Array:
 	var l: Array = []
+	if item in GameData.PACKED_ITEMS: l.append("設備の撤去（完成品）")
 	if item in GameData.GROUND_ITEMS:
 		l.append("採取")
 	if item in GameData.CREATURE_ITEMS:
@@ -90,6 +91,10 @@ static func sources_of(item: int) -> Array:
 ## 選択詳細用。効果値は実処理と同じ定義から読み、平常HUDには増やさない。
 static func effect_text(item: int) -> String:
 	match item:
+		GameData.Item.WORKBENCH_PACK:
+			return "撤去した完成品。Bで材料・作業台なしで再設置できます。未設置重量%d、設置後は重量対象外。設置枠・加工室は必要です。" % CargoDB.size_of(item)
+		GameData.Item.SUPPLY_CACHE_PACK:
+			return "撤去した完成品。Bで材料・作業台なしで再設置できます。設置時だけ疲労蓄積−8%%。未設置重量%d。応急修理板を別途取り出すことはできません。" % CargoDB.size_of(item)
 		GameData.Item.BED_PACK:
 			return "設置後に1人が眠れます（最大%d台）。基礎回復は疲労−%.1f/秒・HP＋%.1f/秒。簡易休憩はその%d%%。部屋の補正が加わり、拠点HP%d未満では疲労回復が半減します。未設置は重量%d、設置後は重量対象外。" % [FacilityDB.max_of("bed"), CrewStatusDB.FATIGUE_REST_RATE, CrewStatusDB.HP_REST_RATE, roundi(CrewStatusDB.REST_IN_PLACE_RATE*100), GameData.PART_BAD, CargoDB.size_of(item)]
 		GameData.Item.STORAGE_BOX:

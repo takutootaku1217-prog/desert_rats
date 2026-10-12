@@ -6,6 +6,8 @@ extends Node2D
 ##   → 消費（仲間が食べる・移動と炉で燃料・時間と移動と加工で傷む）→ 補給・修理で維持 → 移動
 
 var world := WorldTrip.new()
+var _pack_ticket := {}
+var _pack_nonce := 0
 var map_ui: WorldMapUI
 var quarry := QuarryTrip.new()
 var quarry_ui: QuarryUI
@@ -812,7 +814,7 @@ func build_pending(id: String) -> int:
 
 ## その設備の必要設備がそろっているか（建てられる状態か）
 func facility_unlocked(id: String) -> bool:
-	return has_facility(FacilityDB.def(id)["requires"])
+	return storage.count_of(FacilityDB.packed_item_of(id)) > 0 or has_facility(FacilityDB.def(id)["requires"])
 
 
 ## 建設の依頼を出せない理由（出せるなら ""）
@@ -881,7 +883,7 @@ func packed_in_transit(item: int) -> int:
 
 func build_cost(id: String) -> Dictionary:
 	var d: Dictionary = FacilityDB.def(id)
-	var item: int = d.get("packed_item", -1)
+	var item: int = FacilityDB.packed_item_of(id)
 	if item >= 0 and storage.count_of(item) > 0:
 		return {item: 1}
 	return d["cost"]
@@ -890,17 +892,46 @@ func build_cost(id: String) -> Dictionary:
 func _next_build_recipe() -> Dictionary:
 	for id in build_queue:
 		var d: Dictionary = FacilityDB.def(id)
+		var item: int = FacilityDB.packed_item_of(id)
+		if item >= 0 and storage.count_of(item) > 0:
+			return FacilityDB.installation_recipe(id)
 		if not has_facility(d["requires"]): continue
-		var item: int = d.get("packed_item", -1)
-		if item >= 0:
-			if storage.count_of(item) > 0:
-				return FacilityDB.installation_recipe(id)
-			if packed_in_transit(item) > 0: continue
+		if item >= 0 and packed_in_transit(item) > 0: continue
+		if d.has("pack_recipe"):
 			var r := GameData.recipe_by_id(d["pack_recipe"])
 			if storage.has_set(r["in"]): return r
 		elif storage.has_set(d["cost"]):
 			return FacilityDB.recipe_of(id)
 	return {}
+
+
+func facility_pack_reason(id: String, slot: int) -> String:
+	return FacilityPacking.reason(self,id,slot)
+
+func facility_pack_request(id: String, slot: int) -> Dictionary:
+	_pack_ticket.clear()
+	if facility_pack_reason(id,slot)!="": return {}
+	_pack_nonce+=1
+	_pack_ticket=FacilityPacking.measure(self,id,slot)
+	_pack_ticket["nonce"]=_pack_nonce
+	return _pack_ticket.duplicate(true)
+
+func cancel_facility_pack() -> void:
+	_pack_ticket.clear()
+
+func pack_facility(snapshot: Dictionary) -> bool:
+	if snapshot.is_empty() or snapshot!=_pack_ticket: return false
+	_pack_ticket.clear() # 失敗時も再確認。連打は一度だけ。
+	var expected:=snapshot.duplicate(true); expected.erase("nonce")
+	if facility_pack_reason(snapshot.id,snapshot.slot)!="" or FacilityPacking.measure(self,snapshot.id,snapshot.slot)!=expected: return false
+	base.built[snapshot.id].erase(snapshot.slot)
+	base.built_at.erase("%s:%d" % [snapshot.id,snapshot.slot])
+	if snapshot.id=="bed": base.beds[snapshot.slot]=null
+	storage.capacity_bonus-=int(FacilityDB.def(snapshot.id).get("capacity_bonus",0))
+	storage.store_owned(snapshot.item,1)
+	base.queue_redraw()
+	director.note("%sを撤去し完成品1個を倉庫へ戻した" % FacilityDB.name_of(snapshot.id))
+	return true
 
 
 ## 建設の依頼のために取っておく材料 {Item: 個数}（待ちの依頼と、材料を取りに向かっている依頼のぶん。倉庫にある量まで）。

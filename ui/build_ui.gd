@@ -13,6 +13,13 @@ var _fac_rows := {}          # 設備 id -> {state, costs {Item: Label}, req, bu
 var _station_heads := {}     # 必要設備 id（"" = 手作業）-> 見出しの Label
 var _recipe_rows: Array = [] # {recipe, name, stars}
 var _t := 0.0
+var _pack_dialog: ColorRect
+var _pack_info: Label
+var _pack_slots: OptionButton
+var _pack_yes: Button
+var _pack_no: Button
+var _pack_id := ""
+var _pack_snapshot := {}
 
 const C_OK := Color("7be07b")
 const C_SHORT := Color("ffc266")
@@ -21,6 +28,7 @@ const C_BAD := Color("ff8a70")
 
 func _ready() -> void:
 	layer = 23
+	_build_pack_dialog.call_deferred()
 	# 右のボタンは低い層に置く（ほかの画面を開いたとき、その下に隠れるように）
 	var btn_layer := CanvasLayer.new()
 	btn_layer.layer = 12
@@ -91,6 +99,7 @@ func open() -> void:
 
 
 func close() -> void:
+	_cancel_pack()
 	_overlay.visible = false
 
 
@@ -99,7 +108,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		if event.keycode == KEY_B:
 			toggle()
 		elif event.keycode == KEY_ESCAPE and _overlay.visible:
-			close()
+			if _pack_dialog!=null and _pack_dialog.visible: _cancel_pack()
+			else: close()
 
 
 func _process(delta: float) -> void:
@@ -130,11 +140,13 @@ func _build_left(col: VBoxContainer) -> void:
 		var state := UIKit.lbl("", 14, UIKit.C_DIM)
 		head.add_child(state)
 		head.add_child(UIKit.button("効果・手順", func(): game.craft_ui.open_entry("build:" + id)))
+		var pack:=UIKit.button("撤去…",func(): _ask_pack(id))
+		head.add_child(pack)
 		v.add_child(UIKit.lbl(d["desc"], 12, UIKit.C_DIM))
 		var cost_row := HBoxContainer.new()
 		cost_row.add_theme_constant_override("separation", 12)
 		v.add_child(cost_row)
-		cost_row.add_child(UIKit.lbl("製作材料（製作済みなら不要）" if d.has("packed_item") else "材料", 13, UIKit.C_DIM))
+		cost_row.add_child(UIKit.lbl("新規製作材料（完成品が倉庫なら不要）", 13, UIKit.C_DIM))
 		var costs := {}
 		for it in d["cost"]:
 			var l := UIKit.lbl("", 14)
@@ -157,7 +169,7 @@ func _build_left(col: VBoxContainer) -> void:
 		b_cancel.alignment = HORIZONTAL_ALIGNMENT_CENTER
 		b_cancel.custom_minimum_size = Vector2(130, 28)
 		btns.add_child(b_cancel)
-		_fac_rows[id] = {"state": state, "costs": costs, "req": req, "build": b_build, "cancel": b_cancel}
+		_fac_rows[id] = {"state": state, "costs": costs, "req": req, "build": b_build, "cancel": b_cancel, "pack": pack}
 
 
 # ---------------------------------------------------------------- 右: 製作
@@ -198,6 +210,8 @@ func _refresh() -> void:
 	for id in _fac_rows:
 		var row: Dictionary = _fac_rows[id]
 		var d: Dictionary = FacilityDB.def(id)
+		var packed:int=FacilityDB.packed_item_of(id)
+		row["pack"].disabled=game.base.facility_count(id)==0
 		var built: int = game.base.facility_count(id)
 		var mx: int = int(d["max"])
 		var queued: int = game.build_queue.count(id)
@@ -223,19 +237,20 @@ func _refresh() -> void:
 			var need: int = int(d["cost"][it])
 			var have: int = st.count_of(it)
 			var l: Label = row["costs"][it]
-			l.visible = not d.has("packed_item") or st.count_of(d["packed_item"]) == 0
+			l.visible = st.count_of(packed) == 0
 			l.text = "%s %d/%d%s" % [GameData.ITEM_NAMES[it], have, need, "（枠不足）" if st.quota_of(it) < need else ""]
 			l.add_theme_color_override("font_color", UIKit.C_DIM if (built >= mx or not game.facility_unlocked(id)) else \
 					(C_BAD if st.quota_of(it) < need else (C_OK if have >= need else C_SHORT)))    # 完成済み・まだ建てられない設備の材料は薄く
 		var rq: String = d["requires"]
 		row["req"].text = "必要設備: %s" % ("なし（手作業でできる）" if rq == "" else "%s（%s）" % [FacilityDB.name_of(rq), "ある" if game.has_facility(rq) else "まだない"])
-		if d.has("packed_item"):
-			row["req"].text += " ／ 製作済み%d個・設置に1個" % st.count_of(d["packed_item"])
+		if packed>=0:
+			row["req"].text += " ／ 未設置%d個" % st.count_of(packed)
+			if st.count_of(packed)>0: row["req"].text="完成品の設置：素材・作業台不要 ／ 未設置%d個" % st.count_of(packed)
 		var b: Button = row["build"]
 		b.disabled = reason != ""
 		b.text = "建設を依頼する（仲間が材料を運んで作る）" if reason == "" else reason
-		if d.has("packed_item") and reason == "":
-			b.text = "製作物を設置する" if st.count_of(d["packed_item"]) > 0 else "製作して設置（材料を自動運搬）"
+		if packed>=0 and reason == "":
+			b.text = "完成品を設置する" if st.count_of(packed)>0 else "製作して設置（材料を自動運搬）"
 		row["cancel"].visible = queued > 0
 	for sid in _station_heads:
 		var have_station: bool = game.has_facility(sid)
@@ -253,3 +268,56 @@ func _refresh() -> void:
 		var pr: int = game.recipe_priority.get(r["id"], 0)
 		rr["stars"].text = ("★%d" % pr) if ok else "作れない"
 		rr["stars"].add_theme_color_override("font_color", UIKit.C_ACCENT if ok else C_BAD)
+
+
+func _build_pack_dialog() -> void:
+	_pack_dialog=ColorRect.new(); _pack_dialog.color=Color(0,0,0,0.85)
+	_pack_dialog.set_anchors_preset(Control.PRESET_FULL_RECT); add_child(_pack_dialog)
+	var panel:=PanelContainer.new(); panel.position=Vector2(200,135); panel.custom_minimum_size=Vector2(880,440)
+	panel.add_theme_stylebox_override("panel",UIKit.box(Color("202329"),UIKit.C_ACCENT,4,20)); _pack_dialog.add_child(panel)
+	var box:=VBoxContainer.new(); box.add_theme_constant_override("separation",16); panel.add_child(box)
+	box.add_child(UIKit.lbl("設備を完成品として撤去",23,UIKit.C_ACCENT))
+	_pack_slots=OptionButton.new(); _pack_slots.custom_minimum_size=Vector2(0,38); box.add_child(_pack_slots)
+	_pack_slots.item_selected.connect(func(_index): _select_pack_slot())
+	_pack_info=UIKit.lbl("",17); _pack_info.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; _pack_info.custom_minimum_size=Vector2(830,190); box.add_child(_pack_info)
+	_pack_yes=UIKit.button("確認した1台を撤去して倉庫へ戻す",_execute_pack); box.add_child(_pack_yes)
+	_pack_no=UIKit.button("取り消す（撤去しない）",_cancel_pack); box.add_child(_pack_no)
+	_pack_dialog.hide()
+
+func _ask_pack(id: String) -> void:
+	_pack_id=id; _pack_slots.clear()
+	for slot in game.base.built.get(id,[]): _pack_slots.add_item("%s ／ 設置枠 %d" % [FacilityDB.name_of(id),slot+1],slot)
+	if _pack_slots.item_count==0: return
+	_pack_dialog.show(); _pack_slots.select(0); _select_pack_slot()
+
+func _select_pack_slot() -> void:
+	var slot:=_pack_slots.get_selected_id()
+	_pack_snapshot=game.facility_pack_request(_pack_id,slot)
+	var reason:String=game.facility_pack_reason(_pack_id,slot)
+	_pack_yes.disabled=not reason.is_empty()
+	_pack_info.text="%s・設置枠%dを完成品1個として倉庫へ戻します。原材料は別途返しません。
+再設置はBから、素材・作業台不要です。撤去中はこの1台の効果がなくなります。
+" % [FacilityDB.name_of(_pack_id),slot+1]
+	if reason!="":
+		_pack_info.text+="
+撤去できません："+reason+"
+状況が変わったら開き直してください。"
+	else:
+		var d:Dictionary=_pack_snapshot
+		_pack_info.text+="
+保有重量%d＋予約%d＋返却品%d＝%d
+撤去後容量%d（現在%d）。この1台だけ撤去しますか？" % [d.owned,d.reserved,CargoDB.size_of(d.item),d.owned+d.reserved+CargoDB.size_of(d.item),d.after,d.before]
+
+func _execute_pack() -> void:
+	var snapshot:=_pack_snapshot.duplicate(true); _pack_snapshot.clear()
+	_pack_yes.disabled=true
+	if not game.pack_facility(snapshot):
+		_pack_info.text="使用状況・予約・在庫・容量が変わったため撤去していません。取り消して確認し直してください。"
+		return
+	_pack_info.text="完成品1個を倉庫へ戻しました。再設置は建設画面から依頼できます。"
+	_refresh()
+
+func _cancel_pack() -> void:
+	if _pack_dialog!=null: _pack_dialog.hide()
+	_pack_snapshot.clear()
+	if game!=null: game.cancel_facility_pack()

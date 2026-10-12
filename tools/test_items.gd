@@ -79,7 +79,18 @@ func _test_itemdb() -> void:
 	var ok := true
 	for it in all:
 		ok = ok and ItemDB.name_of(it) != "?" and ItemDB.CATEGORIES.has(ItemDB.category_of(it)) and ItemDB.tex(it) != null
-	check(ok and all.size() == 19, "インベントリに出る19種すべてに、名前・分類・絵がある")
+	check(ok and all.size() == 21, "インベントリに出る21種すべてに、名前・分類・絵がある")
+	var unique := {}
+	for it in all: unique[it]=true
+	check(unique.size()==all.size(), "アイテムIDに重複がない")
+	for pair in [["workbench",GameData.Item.WORKBENCH_PACK,18],["supply_cache",GameData.Item.SUPPLY_CACHE_PACK,20]]:
+		var id:String=pair[0]; var item:int=pair[1]
+		check(item in all and item in GameData.PACKED_ITEMS and item in GameData.PRODUCT_ITEMS and FacilityDB.packed_item_of(id)==item, "撤去品の必須ID・設備との対応: "+id)
+		var material_weight:=0
+		for ingredient in FacilityDB.def(id)["cost"]:
+			material_weight+=CargoDB.size_of(ingredient)*int(FacilityDB.def(id)["cost"][ingredient])
+		check(CargoDB.size_of(item)==pair[2] and CargoDB.size_of(item)==material_weight and CargoDB.bay_of(item)>=0 and item not in GameData.TOOL_ITEMS, "撤去品の重量と材料重量・積載対象が一致: "+id)
+		check(ItemDB.uses_of(item).any(func(e):return e.kind=="build" and e.id==id) and ItemDB.sources_of(item).has("設備の撤去（完成品）"), "撤去品から再設置への用途・入手元: "+id)
 	var covered := true
 	for it in GameData.RAW_ITEMS + GameData.PRODUCT_ITEMS + GameData.TOOL_ITEMS:
 		covered = covered and all.has(it)

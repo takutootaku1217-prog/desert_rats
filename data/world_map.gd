@@ -2,9 +2,9 @@ class_name WorldMapDB
 extends RefCounted
 ## 正本10地域12接続。試作公開は4地域4道路のみ。サービスは未実装。
 const REGIONS := {
- "south_oasis":{"name":"オアシスの交易村","open":true,"pos":Vector2(80,300),"tint":Color("f3ead0"),"points":["tree","rock"],"description":"井戸が目印の村。枯れ木と岩場。サービスは準備中。"},
- "east_sands":{"name":"東部砂原","open":true,"pos":Vector2(440,300),"tint":Color("f4dba8"),"points":["tree","tree","rock"],"description":"砂丘と道標。枯れ木が多めの地域。"},
- "central_trade":{"name":"中央交易都市","open":true,"pos":Vector2(230,110),"tint":Color("e5d7c3"),"points":["tree","rock"],"description":"門と天幕が目印。村・砂原・鉱山をつなぐ分岐。店は準備中。"},
+ "south_oasis":{"name":"オアシスの交易村","creature":"hare","open":true,"pos":Vector2(80,300),"tint":Color("f3ead0"),"points":["tree","rock"],"description":"井戸が目印の村。枯れ木と岩場。サービスは準備中。"},
+ "east_sands":{"name":"東部砂原","creature":"lizard","open":true,"pos":Vector2(440,300),"tint":Color("f4dba8"),"points":["tree","tree","rock"],"description":"砂丘と道標。枯れ木と、皮・骨を得られるトゲトカゲ。"},
+ "central_trade":{"name":"中央交易都市","creature":"hump","open":true,"pos":Vector2(230,110),"tint":Color("e5d7c3"),"points":["tree","rock"],"description":"門と天幕が目印。街道には皮・骨・脂肪を得られるコブ獣。店は準備中。"},
  "old_mine":{"name":"大鉱山入口","open":true,"pos":Vector2(520,110),"tint":Color("cfcbd1"),"points":[],"description":"坑口が目印。採取地点から既存の鉄鉱床へ入れます。"},
  "west_salt":{"name":"白い塩湖","open":false},
  "poison_marsh":{"name":"毒沼と錬金術の廃墟","open":false},
