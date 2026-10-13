@@ -14,7 +14,7 @@ var _exp_box: VBoxContainer
 var _exp_label: Label
 var _exp_btn: Button
 
-const W := 420.0
+const W := 328.0
 const LOG_SHOW_SEC := 40.0       # これより古い記録は消す
 const SLOT_COUNT := 2
 

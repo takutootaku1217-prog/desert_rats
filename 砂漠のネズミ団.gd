@@ -27,6 +27,7 @@ var blueprints := {}              # 入手した設計図（id -> true）。入�
 var ui: WorkPriorityUI
 var detail: CrewDetailUI
 var policy: PolicyUI
+var navigation: NavigationBar
 var status: StatusPanel
 var director: Director            # 旅の出来事（天候・トラブル・好機）。scripts/director.gd
 var event_hud: EventHUD
@@ -247,6 +248,9 @@ func _ready() -> void:
 	map_ui = WorldMapUI.new()
 	map_ui.game = self
 	add_child(map_ui)
+	navigation = NavigationBar.new()
+	navigation.game = self
+	add_child(navigation)
 
 
 func _process(delta: float) -> void:
@@ -1145,7 +1149,7 @@ func build_room(slot: String, rtype: String) -> bool:
 
 ## 別の画面を開くとき、ほかの管理画面を閉じる（重ならないように）。keep はいま開く画面。
 func close_other_panels(keep) -> void:
-	for p in [build_ui, room_ui, policy, detail, expedition_ui, inventory_ui, craft_ui, crew_alerts, quarry_ui, save_ui, map_ui]:
+	for p in [navigation, build_ui, room_ui, policy, detail, expedition_ui, inventory_ui, craft_ui, crew_alerts, quarry_ui, save_ui, map_ui]:
 		if p != null and p != keep and p.has_method("close"):
 			p.close()
 
@@ -1296,7 +1300,7 @@ func _game_over() -> void:
 	bg.color = Color(0, 0, 0, 0.6)
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_over_layer.add_child(bg)
-	var l := GameData.make_label("拠点が動かなくなった…\n走行 %.1f km ・ 撃破 %d ・ 撃退 %d\n\n右の「保存 / 続きから」で再開・ニューゲーム" % [
+	var l := GameData.make_label("拠点が動かなくなった…\n走行 %.1f km ・ 撃破 %d ・ 撃退 %d\n\n画面をクリックして再開・ニューゲーム" % [
 			director.distance / 2500.0, kills, director.stats["repelled"]], 36)
 	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER

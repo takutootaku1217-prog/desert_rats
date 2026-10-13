@@ -4,8 +4,8 @@ extends CanvasLayer
 ##  1段目: 移動の状態（短い1行）と、速度 / 目標（↑↓キー）。
 ##  2段目: アイコンゲージ（アイコンそのものが残量。数字はアイコンの中）
 ##         拠点HP = 現在の拠点シルエット（中に「拠点」と数値）／燃料 = ジェリカン／積載重量 = 重り（ARK方式）。
-##  3段目: 倉庫の中身（アイテムのアイコン＋個数。ui/stock_grid.gd）。
-##  4段目: 累計（小さく）。
+## 倉庫の中身と累計は下部「物資」へ移す（NavigationBar）。
+
 ## 絵は assets/ui/*.png（枠と充填範囲の2枚。tools/art_ui.py が作る仮素材）。差し替えるだけで形を変えられる。表示だけで、ゲームのデータは読むだけ。
 
 var game
@@ -16,6 +16,7 @@ var _weight: IconGauge       # 積載重量（= _gauges["weight"]。診断ツー
 var _stock: StockGrid
 var _repair: Button
 var _totals: Label
+var _capacity: Label
 
 const W := 272.0
 const ICON_UNITS := Vector2i(12, 12)     # アイコン1つの基準の大きさ（ユニット）= 48px（絵のドットが3pxの整数倍）
@@ -70,13 +71,15 @@ func _ready() -> void:
 		gh.add_child(g)
 		_gauges[spec["key"]] = g
 	_weight = _gauges["weight"]
+	_capacity = UIKit.lbl("", 13, UIKit.C_DIM)
+	v.add_child(_capacity)
 	# 3段目: 倉庫の中身
 	_stock = StockGrid.new().setup(STOCK_ROWS)
 	v.add_child(_stock)
 	# 4段目: 累計（小さく）
 	_totals = UIKit.lbl("", 12, UIKit.C_DIM)
 	v.add_child(_totals)
-	_repair = UIKit.button("応急修理板を使う", func(): game.emergency_repair())
+	_repair = UIKit.button("応急修理", func(): game.emergency_repair())
 	_repair.tooltip_text = "最も傷んだ未予約の部位を%d回復（上限100）。燃料・仲間HPは回復しません" % GameData.REPAIR_AMOUNT
 	v.add_child(_repair)
 
@@ -99,7 +102,7 @@ func _process(_d: float) -> void:
 		return
 	var b = game.base
 	_repair.disabled = game.emergency_repair_target() < 0 or game.storage.count_of(GameData.Item.REPAIR_KIT) <= 0
-	_repair.text = "応急修理板を使う（%d）" % game.storage.count_of(GameData.Item.REPAIR_KIT)
+	_repair.text = "応急修理（%d）" % game.storage.count_of(GameData.Item.REPAIR_KIT)
 	# 1段目
 	var move := "停止中"
 	var col := Color("fff7dc")
@@ -125,6 +128,8 @@ func _process(_d: float) -> void:
 	# 積載重量: 重りのアイコンが下から埋まり、増えるほど色が濃くなる。数字は正確な重量（アイコンの中）。
 	# 区画ごとの内訳（素材棚・加工品置き場）と捨てた数は、アイコンにマウスを載せると出る。
 	var st = game.storage
+	_capacity.text = "燃料 %d/%d　積載 %d/%d" % [b.fuel, GameData.FUEL_CAP, st.current_weight(), st.max_weight()]
+	if st.processing_reserve() > 0: _capacity.text += "\n加工増量の予約 %d" % st.processing_reserve()
 	var tip := "積載重量 %d / %d" % [st.current_weight(), st.max_weight()]
 	for bay in CargoDB.BAY_NAMES:
 		tip += "\n　%s %d" % [CargoDB.BAY_NAMES[bay], st.used_in(bay)]

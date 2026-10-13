@@ -857,3 +857,18 @@
 - scripts/world_scroll.gdのWorldScroll._draw_landmarkからsouth_oasisの井戸描画を除去し、この地域では地名も描かない。地図の地域ID/地名/現在地、到着・移動・生活処理、他地域の道標は維持。整備/購買は追加しない。
 - 添付Library画像は指定経路で取得し、許可されたローカル保存先で1回再試行したが両方download failed。添付そのものは未目視。代わりに現行ゲームの実ピクセルで上部の井戸と「オアシスの交易村」を確認し、変更後に両方消えたことを確認した。画像加工はしていない。比較画面: /workspace/desert-rats-checks/oasis-before.png と oasis-after.png。
 - 既存診断import/world_map/world_flow/camera/startupの5/5成功、source_changed_during_run=false。証跡: /workspace/desert-rats-checks/oasis-hud-removal/20261012T135533Z-rtc_981r/results.json。描画あり起動ログoasis-before.log/oasis-after.log、Linux Godot4.6.3。変更は描画と本記録の2ファイルだけ。承認済の通常commit/push対象。PC側同期は別作業で未確認。
+
+## 2026-10-13 承認済み下部操作バーと右上HUD
+
+- 2026-10-13の「いいねこれに変更して」に基づくUI再配置。既存 /workspace/desert_rats main / 37623352b93da9976a8381910ccdce14abd69b63、開始時origin/main一致・cleanを確認。前回の見本のみ/実装停止は今回の配置に限って解除された依頼。NPC整備/購買/依頼報酬は実装していない。
+- 右上は拠点HPシルエット・燃料・積載ゲージ、停車/速度、燃料/積載の現在値と上限、加工増量予約がある場合の予約量、応急修理だけ。ゲージは従来の大きさ、色/危険点滅/ツールチップを保持。従来の資源一覧と累計は下部「物資」に移した。
+- 下部は「地図」「探索」「拠点」「仲間」「物資」「メニュー」の6入口。拠点→建設/部屋/製作/内外装。探索→採取地点/遠征。物資→在庫一覧・累計/倉庫/製作。メニュー→運営の方針/保存・続きから。内外装は外装/内装/戻る。各操作は既存UI/APIへ委譲し、M/G/X/B/R/F/C/Tab/P/O/Iと既存Escを維持。
+- NavigationBarは既存の常設入口のみ非表示にし、モーダル本体/機能を保持。開いたメニューは同じ入口・Esc・外側クリックで閉じる。外側クリックを吸収し、ゲーム側の個体選択へ貫通しない。別画面を開くとメニューを閉じ、モーダル中はバーも隠す。地図/保存の時間停止/復帰は既存方式。ゲーム終了時の案内は旧「右の保存」から既存の画面クリックによる再開へ更新。
+- バーは1280x720の右寄り下端(352,650)に916x62、ボタン144x48、拠点サブメニューはその直上。左下の出来事欄は328px幅としてバーと重ねず、天候/襲撃/遠征通知と対処操作を保持。仲間の危険通知は従来のまま。元のゲームアート・背景・仲間・地域/移動/採取/加工/保存モデルは変更していない。
+- 承認見本 libfile_9ab09b25f1448191bcaf931224ae4341 はLibrary指定取得と再試行がdownload failedで、画像自体はこの環境で目視できなかった。依頼文の明示された配置仕様を使用。生成見本のイラストや説明矢印/未実装ラベルはゲームへ取り込んでいない。
+- 実ゲームの通常/拠点メニュー展開/襲撃通知画面を撮影・目視。描画ありnavigation-window-final.logと拠点HUD hud.log/仲間HUD crew-hud.logは成功。新規の実Viewport入力診断は6入口、連打、Esc、内外装の戻る、モーダル切替、クリック貫通、地図/保存の停止復帰、危険通知とバーの配置を検査する。スマホ実機/タッチ移植/Windows/Godot4.7.2/OS入力/音声は未検証。Linux/Godot4.6.3で検証。
+- Libraryへの通常/展開画像の一括保存は準備用接続のnetworkエラーで失敗し、Library IDは発行されていない。画像はGitHubから閲覧できるようdocs/ui-2026-10-13に実PNGを保存する。PC側の同期・反映は別作業で未確認。
+
+- 集約coreは37件中35成功。失敗world_map/save_uiは旧右側の入口をクリックしていたため。機能の判定条件は維持し、最初の実入力を下部「地図」および「メニュー→保存」へ更新した。再検証import/navigation_bar/world_map/save_ui/startupの5/5成功。ゲーム終了画面クリック→保存/再開の実入力も追加成功。実行コードのSHA256はcore/関連実行時から一致しており、検査入口だけの変更なので無関係な長時間ループは繰り返していない。初回失敗ログは保持する。
+- 証跡: core=/workspace/bottom-ui-evidence/core/20261013T033746Z-2k6534ik/results.json、関連9/9=/workspace/bottom-ui-evidence/related/20261013T033846Z-_ub9lzh8/results.json、再検証5/5=/workspace/bottom-ui-evidence/recheck/20261013T034531Z-5poo63xy/results.json。各run source_changed_during_run=false。関連には保存進行・部屋・建設・仲間情報・鉱床奥・カメラ・内外装・描画倍率を含む。coreの機能コードを変えず再検証で残る2件を解消し、全37対象の確認を完了。
+- 変更ファイル: 新規ui/navigation_bar.gdとuid、mainとルートミラー、StatusPanel、EventHUD、navigation実入力診断とuid、既存地図/保存の入口診断、run_checksの登録、本記録と操作資料・実画像。原画/レシピ/経済/地図進行/仲間AI/SaveGameは不変。初期/workspace/-は未変更。mainへのcommitと通常pushは今回の承認範囲。

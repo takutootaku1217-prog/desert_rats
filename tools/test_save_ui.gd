@@ -11,7 +11,8 @@ func _initialize():
 	for suffix in ["", ".bak", ".damaged"]:
 		if SaveGame.exists(ui.path+suffix): DirAccess.remove_absolute(ui.path+suffix)
 	var initial: int = main.storage.count_of(GameData.Item.WOOD)
-	await click(button_named(ui,"保存 / 続きから"))
+	await click(main.navigation.buttons["メニュー"])
+	await click(button_named(main.navigation,"保存 / 続きから"))
 	check(paused and ui.is_open(),"実入力で保存画面を開き停止")
 	await click(button_named(ui,"手動で保存"))
 	check(ui._confirm.visible and ui._text.text.contains("最初"),"初回保存を明示して確認")

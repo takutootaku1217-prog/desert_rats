@@ -14,7 +14,7 @@ func _initialize():
  check(main.world.active and main.world.region=="south_oasis","新規ゲームは村・地図が既定")
  check(WorldMapDB.REGIONS.size()==10 and WorldMapDB.ROADS.size()==12,"正本10地域12道路")
  check(not main.world.request("old_mine") and not main.world.request("west_salt"),"直通なし・未公開地域を拒否")
- await click(button_named(main.map_ui,"地図 / 行先 (M)"))
+ await click(main.navigation.buttons["地図"])
  check(main.map_ui.is_open() and paused,"画面ボタンで地図・一時停止")
  check(main.map_ui._roads.keys()==["01","03","04","06"],"画面の4道路は正本の公開接続だけ")
  check(main.map_ui._marker.position==WorldMapDB.REGIONS.south_oasis.pos+Vector2(45,-18),"現在地マーカーは村")
