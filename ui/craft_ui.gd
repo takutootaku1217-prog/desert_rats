@@ -372,7 +372,7 @@ func _rebuild_detail() -> void:
 	_detail.add_child(_msg)
 	if not is_build:
 		var s: Dictionary = game.processor.manual_status(e["id"])
-		var status_text := "未投入 %d回 / 投入済・未着手 %d回 / 加工中 %d回（%.1f / %.1f秒）\n完成品未回収 %d個（同じ品目の共有トレイ）。加工中の1回は取消せず完了させます。" % [s.queued,s.loaded,s.active,s.progress,s.time,s.output]
+		var status_text := "加工枠 %d（作業者一人につき1枠）\n" % (2 if game.has_facility("parallel_bench") else 1) + "未投入 %d回 / 投入済・未着手 %d回 / 加工中 %d回（%.1f / %.1f秒）\n完成品未回収 %d個（同じ品目の共有トレイ）。加工中の各枠は取消せず完了させます。" % [s.queued,s.loaded,s.active,s.progress,s.time,s.output]
 		var batch_status := UIKit.lbl(status_text,13,UIKit.C_DIM)
 		batch_status.name = "BatchStatus"
 		batch_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART

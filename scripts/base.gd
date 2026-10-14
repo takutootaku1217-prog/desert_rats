@@ -192,8 +192,13 @@ func add_fuel(item: int) -> void:
 
 
 ## 進んだ距離の分だけ燃料を使う。
+func consume_fuel(amount: float) -> void:
+	var consumed := minf(fuel,maxf(0.0,amount))
+	fuel -= consumed
+	game.operations.fuel_spent += consumed
+
 func burn(distance: float) -> void:
-	fuel = maxf(0.0, fuel - distance * GameData.FUEL_PER_PX * game.director.burn_mult())
+	consume_fuel(distance * GameData.FUEL_PER_PX * game.director.burn_mult())
 
 
 func has_fuel() -> bool:

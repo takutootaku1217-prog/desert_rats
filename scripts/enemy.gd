@@ -5,6 +5,20 @@ extends Node2D
 ## 車体の被害は「防備を固める」で減る。近くで戦っている仲間は疲れる。
 
 var game
+# 新しい地域生物のみ。旧セーブの襲撃は既存動作を保持。
+var ecological := false
+var present := true
+var home_x := 0.0
+var target_index := -1
+var provoked_index := -1
+var lost_for := 0.0
+var search_left := 0.0
+var peaceful_until := 0.0
+const SIGHT := 200.0
+const TERRITORY := 340.0
+const LOSE_SECONDS := 4.0
+const SEARCH_SECONDS := 5.0
+const ECO_FIELDS := ["ecological","present","home_x","target_index","provoked_index","lost_for","search_left","peaceful_until"]
 var world_id := ""
 var kind := "scorpion"
 var max_hp := 40.0
@@ -51,9 +65,12 @@ func display_name() -> String:
 	return EventDB.ENEMIES[kind]["name"]
 
 
-func take_damage(amount: float) -> void:
+func take_damage(amount: float, attacker = null) -> void:
 	if dead:
 		return
+	if ecological and attacker != null:
+		provoked_index = game.workers.find(attacker)
+		target_index = provoked_index
 	hp -= amount
 	_flash = 0.1
 	if hp <= 0.0:
@@ -64,10 +81,14 @@ func take_damage(amount: float) -> void:
 
 
 func is_attacking() -> bool:
+	if ecological: return present and (target_index >= 0 or (behavior()=="hull" and absf(position.x-GameData.RAMP_FOOT.x)<90.0))
 	return position.x <= hold_x + 2.0
 
 
 func _process(delta: float) -> void:
+	if ecological:
+		_tick_ecology(delta)
+		return
 	_t += delta
 	_flash = maxf(0.0, _flash - delta)
 	if position.x > hold_x:
@@ -98,10 +119,64 @@ func _hit_nearby_worker() -> void:
 		CrewStatus.damage(best, CrewStatusDB.RAID_HIT_HP * body_scale, CrewStatusDB.RAID_HIT_STRESS)
 
 
+
+func behavior() -> String:
+	return EventDB.ENEMIES[kind].get("behavior","hull")
+
+func territory() -> float:
+	return 600.0 if behavior()=="hull" else TERRITORY
+
+func threatens(w) -> bool:
+	if dead or is_queued_for_deletion(): return false
+	if not ecological: return true
+	return present and game.director.elapsed >= peaceful_until and (behavior() != "neutral" or provoked_index == game.workers.find(w))
+
+func _visible_worker(w) -> bool:
+	return not w.away and not w.down and w.floor_i==0 and w.position.distance_to(position)<=SIGHT and absf(w.position.x-home_x)<=territory()
+
+func _tick_ecology(delta: float) -> void:
+	visible = present
+	if not present or dead:return
+	_t+=delta;_flash=maxf(0.0,_flash-delta)
+	# 地域内の生物は地域座標。鉱床への接近演出で域外へ流して消さない。
+	if game.world.phase in ["travel","arriving","turning"]:
+		home_x-=game.scroll_speed*delta
+		position.x-=game.scroll_speed*delta
+	var target = game.workers[target_index] if target_index>=0 and target_index<game.workers.size() else null
+	if target!=null:
+		if _visible_worker(target): lost_for=0.0
+		else: lost_for+=delta
+		if lost_for>=LOSE_SECONDS or absf(position.x-home_x)>territory():
+			target_index=-1;target=null;provoked_index=-1;search_left=SEARCH_SECONDS;lost_for=0.0
+	elif search_left>0:
+		search_left=maxf(0.0,search_left-delta)
+		if search_left==0: peaceful_until=game.director.elapsed+8.0
+	elif game.director.elapsed>=peaceful_until:
+		for i in game.workers.size():
+			var w=game.workers[i]
+			if _visible_worker(w) and (behavior()!="neutral" or provoked_index==i):
+				target_index=i;target=w;break
+	var destination:=home_x
+	if target!=null:
+		# 仲間が車内へ入ったらその位置へ潜り込まない。入口で短く探す。
+		destination=target.position.x if target.floor_i==0 else GameData.RAMP_FOOT.x
+	elif behavior()=="hull" and absf(GameData.RAMP_FOOT.x-position.x)<=SIGHT and absf(GameData.RAMP_FOOT.x-home_x)<=territory():
+		destination=GameData.RAMP_FOOT.x
+	elif search_left>0: destination=position.x
+	position.x=move_toward(position.x,destination,run_speed*delta)
+	_atk_timer-=delta
+	if _atk_timer<=0:
+		_atk_timer=1.0
+		if target!=null and target.floor_i==0 and position.distance_to(target.position)<HIT_REACH:
+			CrewStatus.damage(target,CrewStatusDB.RAID_HIT_HP,CrewStatusDB.RAID_HIT_STRESS)
+		elif behavior()=="hull" and absf(position.x-GameData.RAMP_FOOT.x)<65.0:
+			game.base.take_damage(damage*game.director.hull_dmg_mult())
+	queue_redraw()
+
 func _draw() -> void:
 	var body := _body if _flash <= 0.0 else Color("ffffff")
 	var dark := body.darkened(0.35)
-	draw_set_transform(Vector2.ZERO, 0.0, Vector2(body_scale, body_scale))
+	draw_set_transform(Vector2(0,-52.0*body_scale) if ecological else Vector2.ZERO, 0.0, Vector2(body_scale, body_scale))
 	draw_colored_polygon(_ellipse(Vector2(0, 14), 24, 6), Color(0, 0, 0, 0.2))
 	# 脚
 	for i in 4:
@@ -109,6 +184,10 @@ func _draw() -> void:
 		var sw := sin(_t * 14.0 + i * 1.6) * 4.0
 		draw_line(Vector2(x, 6), Vector2(x - 6 + sw, 16), dark, 2.0)
 		draw_line(Vector2(x, 6), Vector2(x + 6 - sw, 16), dark, 2.0)
+	if ecological and behavior()=="hull":
+		draw_rect(Rect2(-18,-12,36,8),dark)
+	if ecological and behavior()=="neutral":
+		draw_circle(Vector2(-32,-9),9,_body);draw_circle(Vector2(-32,11),9,_body)
 	# 体・尾・はさみ
 	draw_colored_polygon(_ellipse(Vector2(0, 2), 20, 11), body)
 	draw_polyline(PackedVector2Array([Vector2(16, 0), Vector2(28, -6), Vector2(30, -20), Vector2(20, -28),
@@ -121,7 +200,7 @@ func _draw() -> void:
 	draw_circle(Vector2(-12, -4), 2, Color.WHITE)
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	# 体力バーと名前
-	var top := -40.0 * body_scale
+	var top := (-92.0 if ecological else -40.0) * body_scale
 	draw_rect(Rect2(-22, top, 44, 6), Color(0, 0, 0, 0.6))
 	draw_rect(Rect2(-22, top, 44.0 * clampf(hp / max_hp, 0.0, 1.0), 6), Color("e0533d"))
 	GameData.draw_text(self, Vector2(0, top - 6), display_name(), 12, Color("ffb4a8"), 90.0)

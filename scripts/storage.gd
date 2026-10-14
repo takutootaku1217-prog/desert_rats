@@ -74,7 +74,7 @@ func workshop_weight() -> int:
 	if g == null or not is_instance_valid(g.processor): return 0
 	var p = g.processor
 	var n: int = set_weight(p.stock.counts) + set_weight(p.committed_inputs())
-	for it in p.output: n += item_weight(it)
+	for it in p.all_output(): n += item_weight(it)
 	return n
 
 
@@ -110,7 +110,7 @@ func processing_reserve() -> int:
 	if g == null or not is_instance_valid(g.processor): return 0
 	var p = g.processor
 	var recipes: Array = p.orders + p.incoming
-	if not p.current.is_empty(): recipes.append(p.current)
+	recipes.append_array(p.active_recipes())
 	var n := 0
 	for r in recipes: n += maxi(0, recipe_growth(r))
 	# 未投入分も受付時から増量を予約。材料はstock側で一度だけ所有。

@@ -14,8 +14,8 @@ const CATEGORY_COLORS := {
 ## インベントリに並べる順（分類の順）
 const ORDER := [
 	GameData.Item.MEAT, GameData.Item.HIDE, GameData.Item.BONE, GameData.Item.FAT, GameData.Item.WOOD, GameData.Item.STONE, GameData.Item.IRON_ORE,
-	GameData.Item.IRON, GameData.Item.REPAIR_KIT, GameData.Item.BED_PACK, GameData.Item.STORAGE_BOX, GameData.Item.WORKBENCH_PACK, GameData.Item.SUPPLY_CACHE_PACK, GameData.Item.FOOD, GameData.Item.FUEL,
-	GameData.Item.WOOD_PICK, GameData.Item.WOOD_AXE, GameData.Item.HAMMER, GameData.Item.PICKAXE, GameData.Item.ADV_PICK, GameData.Item.AXE, GameData.Item.IRON_AXE, GameData.Item.SIMPLE_SPEAR, GameData.Item.HAUL_FRAME,
+	GameData.Item.IRON, GameData.Item.REPAIR_KIT, GameData.Item.BED_PACK, GameData.Item.STORAGE_BOX, GameData.Item.WORKBENCH_PACK, GameData.Item.SUPPLY_CACHE_PACK, GameData.Item.STORAGE_UPGRADE_PACK, GameData.Item.PARALLEL_BENCH_PACK, GameData.Item.FOOD, GameData.Item.FUEL,
+	GameData.Item.WOOD_PICK, GameData.Item.WOOD_AXE, GameData.Item.HAMMER, GameData.Item.PICKAXE, GameData.Item.ADV_PICK, GameData.Item.AXE, GameData.Item.IRON_AXE, GameData.Item.SIMPLE_SPEAR, GameData.Item.HAUL_FRAME, GameData.Item.HANDCART,
 ]
 
 
@@ -99,6 +99,12 @@ static func effect_text(item: int) -> String:
 				parts.append(GatherDB.result_text(kind, item, int(GatherDB.tool_def(item)["need_rank"]), 1.0))
 		return "作業台で製作→Cで装備（自動割当も可）。適性を満たす場合の基準値：" + " ／ ".join(parts) + "。上位道具ほど同じ時間で多く採取。残量・袋・積載の空きまで。"
 	match item:
+		GameData.Item.HANDCART:
+			return "背負いフレームを材料に製作。Cの仕事補助枠へ装備し、一人で採取・運搬を8個まで運びます。重量35は装備中も計上。荷物・予約は保持し次の便から反映。拠点容量は増えません。"
+		GameData.Item.STORAGE_UPGRADE_PACK:
+			return "収納ボックス設置後の一段階補強。Bで建設し容量+120、最大1段階。撤去には返却品と縮小後の空きが必要です。"
+		GameData.Item.PARALLEL_BENCH_PACK:
+			return "Bで増設すると加工枠1→2。一人一作業で、二人いれば同時に別の注文を加工。まとめ注文の直列加工とは別です。"
 		GameData.Item.HAUL_FRAME:
 			return "Cの仕事補助枠で装備。採取袋・倉庫⇄作業場の1便を%d→%d個にします（調整用）。今の荷物・予約は保持し、次の便から反映。拠点容量は増えません。重量%dは装備中も計上。" % [GatherDB.CARRY_MAX, GameData.HAUL_FRAME_LIMIT, CargoDB.size_of(item)]
 		GameData.Item.WORKBENCH_PACK:

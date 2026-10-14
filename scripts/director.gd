@@ -38,7 +38,7 @@ func tick(delta: float, dist: float) -> void:
 		var st := _stance_of(a)
 		var heat: float = st.get("heat", 0.0)
 		if heat > 0.0 and game != null and game.base != null:
-			game.base.fuel = maxf(0.0, game.base.fuel - heat * delta)
+			game.base.consume_fuel(heat * delta)
 		var reason := ""
 		if EventDB.def(a["id"])["kind"] == "attack":
 			reason = _tick_attack(a, st, delta)
@@ -134,7 +134,7 @@ func _alive_enemies() -> Array:
 	if game == null or game.enemies_root == null:
 		return l
 	for e in game.enemies_root.get_children():
-		if not e.dead and not e.is_queued_for_deletion():
+		if not e.dead and not e.ecological and not e.is_queued_for_deletion():
 			l.append(e)
 	return l
 
@@ -272,7 +272,8 @@ func _pick() -> String:
 	var weights: Array = []
 	for id in EventDB.EVENTS:
 		var d: Dictionary = EventDB.EVENTS[id]
-		if d["kind"] == "attack" and game.quarry.sheltered():
+		if game.world.active and d["kind"] == "chance": continue
+		if d["kind"] == "attack" and (game.world.active or game.quarry.sheltered()):
 			continue
 		if EventDB.is_timed(id) and _busy(d["kind"]):
 			continue                          # 天候と襲撃は、それぞれ同時に1つだけ

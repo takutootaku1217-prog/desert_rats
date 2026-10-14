@@ -1,0 +1,15 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+DIAGNOSTIC_SEED 501
+PACKING_FLOW 初期物資・既定出来事・仲間の正規行動で建設→撤去→保存再開→再設置。数量注入なし。
+STAGE 27.8s 建設 workbench
+STAGE 29.2s 使用と運搬完了 workbench
+STAGE 45.2s 再設置 workbench 0
+STAGE 45.2s 使用と運搬完了 workbench
+STAGE 67.6s 再設置 workbench 1
+ACTION 1人の狩猟優先度を5へ
+STAGE 129.4s 地域到着 east_sands
+STAGE 184.0s 地域到着 central_trade
+FAIL 未達: 建設 bed / 中央交易都市に停泊中
+PROGRESSION {"build_queue":["bed"],"capacity":360,"events":{"attack":0,"chance":3,"escaped":0,"kills":0,"repelled":0,"trouble":1,"weather":3},"game_over":false,"inventory":{"0":0,"1":1,"2":1,"3":2,"4":0,"5":0,"8":12,"9":8,"10":3,"12":0,"15":0,"20":0,"23":3,"24":3},"phase":"建設 bed","quarry":"road","report":{},"seconds":784.000000000041,"stages":["建設 workbench","使用と運搬完了 workbench","再設置 workbench 0","使用と運搬完了 workbench","再設置 workbench 1","地域到着 east_sands","地域到着 central_trade"],"weight":60}
+== 結果: 1 件失敗 ==

@@ -13,6 +13,9 @@ static func reason(g,id: String,slot: int) -> String:
  if not FacilityDB.has(id) or slot not in g.base.built.get(id,[]): return "この枠には設備がありません"
  if g.world.recalling() or g.quarry.recalling(): return "出発前の集合が終わるまで待ってください"
  if g.expedition.state=="running": return "遠征隊が持ち帰るまで待ってください"
+ if id=="parallel_bench":
+  var p=g.processor.second
+  if p!=null and (p.worker!=null or not p.current.is_empty() or not p.output.is_empty()): return "増設枠の作業・出力回収が終わるまで待ってください"
  if id=="bed":
   if is_instance_valid(g.base.beds[slot]): return "この寝床は休息・予約中です"
   for w in g.workers:
@@ -27,7 +30,7 @@ static func reason(g,id: String,slot: int) -> String:
  for c in g.craft_queue:
   if GameData.recipe_station(GameData.recipe_by_id(c.id))==id: return "この設備を使う製作依頼を完了または取消してください"
  var recipes:Array=g.processor.orders+g.processor.incoming
- if not g.processor.current.is_empty(): recipes.append(g.processor.current)
+ recipes.append_array(g.processor.active_recipes())
  for r in recipes:
   if depends(r,id): return "設備を使う加工・建設・材料予約が完了するまで待ってください"
  var d:=measure(g,id,slot)

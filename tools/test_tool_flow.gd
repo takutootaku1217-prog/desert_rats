@@ -11,29 +11,28 @@ func prepare_material(item:int,n:int,label:String)->bool:
    if requested>0:print("ACTION 作業場へ確保 ",ItemDB.name_of(item)," x",requested)
   return main.workshop_count(item)>=n
  return await wait_for(label,ready,240)
+func make_item(id: String)->bool:
+ var recipe:=GameData.recipe_by_id(id)
+ for item in recipe["in"]:
+  if not await prepare_material(item,recipe["in"][item],id+" 材料確保 "+ItemDB.name_of(item)):return false
+ if main.request_craft(id,1)!=1:fail("製作拒否 "+id);return false
+ return await wait_for(id+" 製作回収",func():return owns_tool(recipe.out) if recipe.out in GameData.TOOL_ITEMS else main.storage.count_of(recipe.out)>0,240)
 func _initialize():
  main=load("res://scenes/main.tscn").instantiate();main.set_meta("diagnostic_seed",diagnostic_seed());root.add_child(main);await main.ready
  Engine.time_scale=12
- print("TOOL_FLOW 新規開始・通常物資・出来事あり・実AI・定期保存再開。素材/道具/設備の注入なし。seed=",diagnostic_seed())
+ print("TOOL_FLOW 通常開始3人・有限資源・既定出来事・素材/道具/設備注入なし seed=",diagnostic_seed())
  if main.storage.count_of(GameData.Item.IRON)!=0 or GameData.TOOL_ITEMS.any(func(it):return owns_tool(it)):fail("初期支給が進行を迂回");finish();return
- for id in ["tool_pick","tool_iron_axe","tool_adv_pick"]:main.recipe_priority[id]=0
+ for id in ["tool_pick","tool_iron_axe","tool_adv_pick","repair_iron"]:main.recipe_priority[id]=0
  main.request_build("workbench")
- if not await wait_for("木材のみで作業台完成",func():return main.has_facility("workbench"),240):finish();return
- if not await wait_for("木製採掘具を製作・装備",func():return main.workers.any(func(w):return w.tools.get("mine",-1)==GameData.Item.WOOD_PICK),180):finish();return
- if not await go("east_sands"):finish();return
- if not await wait_for("木製斧と石製採掘具を製作",func():return owns_tool(GameData.Item.WOOD_AXE) and owns_tool(GameData.Item.HAMMER),240):finish();return
- if not await wait_for("石の斧を製作",func():return owns_tool(GameData.Item.AXE),180):finish();return
- if not await go("central_trade"):finish();return
- if not await prepare_material(GameData.Item.WOOD,4,"鉱床へ行く前に鉄道具2種の柄用木材4を確保"):finish();return
- if not await go("old_mine"):finish();return
- if not main.quarry.select():fail("鉱床選択拒否");finish();return
- if not await wait_for("鉱床到着",func():return main.quarry.state=="parked",180):finish();return
- if not await wait_for("石製道具で採取した鉄鉱石を精錬",func():return main.storage.count_of(GameData.Item.IRON)>0,240):finish();return
- if not await prepare_material(GameData.Item.IRON,2,"採取した鉄鉱石から鉄2を精錬・運搬"):finish();return
- for id in ["tool_pick","tool_iron_axe"]:
-  if main.request_craft(id,1)!=1:fail("鉄製道具の手動製作拒否 "+id);finish();return
- if not await wait_for("鉄製採掘具・斧の製作と装備",func():return main.workers.any(func(w):return w.tools.get("mine",-1)==GameData.Item.PICKAXE) and main.workers.any(func(w):return w.tools.get("chop",-1)==GameData.Item.IRON_AXE),300):finish();return
+ if not await wait_for("木のみの作業台",func():return main.has_facility("workbench"),240):finish();return
+ if not await wait_for("木製採掘具→石製採掘具",func():return owns_tool(GameData.Item.HAMMER),300):finish();return
+ if not await wait_for("木製斧・石製斧を通常製作",func():return owns_tool(GameData.Item.WOOD_AXE) and owns_tool(GameData.Item.AXE),240):finish();return
+ for id in ["tool_wood_pick","tool_wood_axe","tool_hammer","tool_axe"]:main.recipe_priority[id]=0
+ if not await prepare_material(GameData.Item.WOOD,4,"鉄道具の柄用木4を先に確保"):finish();return
+ if not await make_item("tool_pick"):finish();return
+ if not await wait_for("安全寄りの村で基本鉄採掘具を装備",func():return main.workers.any(func(w):return w.tools.get("mine",-1)==GameData.Item.PICKAXE),120):finish();return
+ if not await make_item("tool_iron_axe"):finish();return
+ if not await wait_for("安全寄りの村で基本鉄斧を装備",func():return main.workers.any(func(w):return w.tools.get("chop",-1)==GameData.Item.IRON_AXE),120):finish();return
  var d:=SaveGame.capture(main)
- if not SaveGame.write(main,"user://tool-flow.json",true) or not SaveGame.apply(main,SaveGame.read("user://tool-flow.json")) or SaveGame.capture(main)!=d:fail("鉄段階の保存再開不一致")
- stages.append("木→石→鉄と装備・保存再開を完了")
+ if not SaveGame.write(main,"user://tool-flow.json",true) or not SaveGame.apply(main,SaveGame.read("user://tool-flow.json")) or SaveGame.capture(main)!=d:fail("鉄装備の保存復元不一致")
  finish()

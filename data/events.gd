@@ -25,6 +25,9 @@ const MAX_ENEMIES := 6
 
 ## 敵の種類。hp・dmg（1秒あたりの車体への被害）・run（近づく速さ）・scale（大きさ）・drops（倒したときの戦利品と確率）
 const ENEMIES := {
+ "sand_stalker":{"name":"赤脚の追跡サソリ","hp":36.0,"dmg":0.0,"run":48.0,"scale":1.0,"color":"b95c32","behavior":"workers","drops":{GameData.Item.MEAT:1.0,GameData.Item.HIDE:1.0}},
+ "hull_breaker":{"name":"灰殻の穿孔サソリ","hp":60.0,"dmg":1.4,"run":38.0,"scale":1.0,"color":"666e86","behavior":"hull","drops":{GameData.Item.MEAT:1.0,GameData.Item.BONE:1.0}},
+ "dust_guard":{"name":"青鋏の砂守り","hp":42.0,"dmg":0.0,"run":40.0,"scale":1.2,"color":"3b9c9a","behavior":"neutral","drops":{GameData.Item.HIDE:1.0,GameData.Item.BONE:1.0}},
 	"scorpion": {"name": "サソリ", "hp": 36.0, "dmg": 1.4, "run": 55.0, "scale": 1.0, "color": "8b2e2e",
 		"drops": {GameData.Item.MEAT: 1.0, GameData.Item.HIDE: 0.4, GameData.Item.IRON_ORE: 0.25}},
 	"big_scorpion": {"name": "大サソリ", "hp": 120.0, "dmg": 3.5, "run": 42.0, "scale": 1.6, "color": "55305f",

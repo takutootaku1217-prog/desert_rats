@@ -439,6 +439,11 @@ func _build_tools(w) -> void:
 		_update_live())
 	work_support_row.add_child(_live["work_support_equip"])
 	work_support_row.add_child(_live["work_support_off"])
+	_live["handcart"] = UIKit.button("手押し車を装備", func():
+		if is_instance_valid(w) and w == _worker: game.equip_work_support(w, GameData.Item.HANDCART)
+		_update_live())
+	_body.add_child(_live["handcart"])
+	_body.add_child(_wrapped_label(ItemDB.effect_text(GameData.Item.HANDCART), 13, UIKit.C_DIM))
 	_live["work_support_reason"] = _wrapped_label("", 13, UIKit.C_DIM)
 	_body.add_child(_live["work_support_reason"])
 	_body.add_child(_wrapped_label(ItemDB.effect_text(GameData.Item.HAUL_FRAME), 13, UIKit.C_DIM))
@@ -631,6 +636,8 @@ func _update_live() -> void:
 		_live["weapon_off"].disabled = not off_reason.is_empty()
 		_live["weapon_reason"].text = off_reason if w.weapon >= 0 else equip_reason
 	if _live.has("work_support"):
+		_live["handcart"].disabled = not game.work_support_change_reason(w,true,GameData.Item.HANDCART).is_empty()
+		_live["handcart"].tooltip_text = game.work_support_change_reason(w,true,GameData.Item.HANDCART)
 		_live["work_support"].text = "仕事補助：%s ／ 倉庫のフレーム %d" % [ItemDB.name_of(w.work_support) if w.work_support >= 0 else "なし", game.storage.count_of(GameData.Item.HAUL_FRAME)]
 		var equip_reason: String = game.work_support_change_reason(w, true)
 		var off_reason: String = game.work_support_change_reason(w, false)

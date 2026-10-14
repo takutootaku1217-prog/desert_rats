@@ -39,6 +39,20 @@ const GATHER_BOOST := 3.0
 ##  - effects: [{kind, value}]（仲間の休憩・消耗に効く。data/rooms.gd の部屋の効果と同じ形・同じ kind（rest_rate / drain_cut）で、
 ##    Main.room_effect が部屋の分とまとめて合計する。CrewStatus は room_effect を呼ぶだけなので変更不要。書いていない設備は []。
 const FACILITIES := {
+ "storage_upgrade": {
+  "recovered_item": GameData.Item.STORAGE_UPGRADE_PACK,
+  "name":"収納補強（1段階）", "desc":"収納ボックス設置後の補強。積載容量+120、最大1段階",
+  "cost":{GameData.Item.WOOD:4,GameData.Item.IRON:2},"time":8.0,"field":GameData.Field.DEV,
+  "max":1,"requires":"cargo_rack","station":false,"room":"storage","dx":[28.0],
+  "sprite":"res://assets/base/cargo_rack_0.png","frame":Vector2i(12,9),"stride":0,"frames":1,"capacity_bonus":120,"effects":[],
+ },
+ "parallel_bench": {
+  "recovered_item": GameData.Item.PARALLEL_BENCH_PACK,
+  "name":"加工台増設（2枠）", "desc":"加工枠1→2。二人が一作業ずつ並列加工。材料・時間の割引なし",
+  "cost":{GameData.Item.WOOD:4,GameData.Item.IRON:2},"time":8.0,"field":GameData.Field.DEV,
+  "max":1,"requires":"workbench","station":false,"room":"workshop","dx":[28.0],
+  "sprite":"res://assets/base/workbench.png","frame":Vector2i(16,9),"stride":18,"frames":3,"effects":[],
+ },
 	"workbench": {
 		"recovered_item": GameData.Item.WORKBENCH_PACK,
 		"name": "ワークベンチ", "desc": "手作業では作れない道具・設備をつくる作業台",

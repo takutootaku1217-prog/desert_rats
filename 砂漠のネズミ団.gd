@@ -27,6 +27,7 @@ var blueprints := {}              # 入手した設計図（id -> true）。入�
 var ui: WorkPriorityUI
 var detail: CrewDetailUI
 var policy: PolicyUI
+var operations := FieldOperations.new()
 var navigation: NavigationBar
 var status: StatusPanel
 var director: Director            # 旅の出来事（天候・トラブル・好機）。scripts/director.gd
@@ -246,6 +247,7 @@ func _ready() -> void:
 	map_ui = WorldMapUI.new()
 	map_ui.game = self
 	add_child(map_ui)
+	operations.setup(self)
 	navigation = NavigationBar.new()
 	navigation.game = self
 	add_child(navigation)
@@ -278,6 +280,7 @@ func _process(delta: float) -> void:
 	base.burn(dist)
 	base.wear_by(delta, dist)
 	director.tick(delta, dist)                 # 出来事の進行（予報・発生・終了）
+	operations.tick()
 	expedition.tick(delta)                     # 調査隊の進行（遺跡の探索）
 	_tool_clock += delta                       # 倉庫の道具を、仲間に持たせ直す（採取の道具）
 	if _tool_clock >= GatherDB.TOOL_CHECK_SECONDS:
@@ -809,7 +812,8 @@ func unequip_weapon(w) -> bool:
 	return true
 
 
-func work_support_change_reason(w, equip: bool) -> String:
+func work_support_change_reason(w, equip: bool, item := GameData.Item.HAUL_FRAME) -> String:
+	if item not in GameData.SUPPORT_ITEMS: return "仕事補助ではありません。"
 	var reason := _tool_target_reason(w)
 	if not reason.is_empty(): return reason
 	if game_over: return "ゲーム終了中は変更できません。"
@@ -817,18 +821,18 @@ func work_support_change_reason(w, equip: bool) -> String:
 	if w.down: return "戦闘不能の間は仕事補助を保持します。"
 	if equip:
 		if w.work_support >= 0: return "すでに仕事補助を装備しています。"
-		if storage.count_of(GameData.Item.HAUL_FRAME) - _queued_transfer(GameData.Item.HAUL_FRAME, "to_workshop") < 1: return "倉庫に背負いフレームがありません。"
+		if storage.count_of(item) - _queued_transfer(item, "to_workshop") < 1: return "倉庫に%sがありません。" % ItemDB.name_of(item)
 	elif w.work_support < 0:
 		return "仕事補助を装備していません。"
 	return ""
 
 
-func equip_work_support(w) -> bool:
-	if not work_support_change_reason(w, true).is_empty(): return false
+func equip_work_support(w, item := GameData.Item.HAUL_FRAME) -> bool:
+	if not work_support_change_reason(w, true, item).is_empty(): return false
 	var inv: Inventory = storage.inventory
 	# 装備と在庫を同時に移す。重量はその前後で不変。
-	inv.counts[GameData.Item.HAUL_FRAME] = inv.count(GameData.Item.HAUL_FRAME) - 1
-	w.work_support = GameData.Item.HAUL_FRAME
+	inv.counts[item] = inv.count(item) - 1
+	w.work_support = item
 	inv.changed.emit()
 	return true
 
@@ -1355,6 +1359,14 @@ func _pick_worker_at(click_world: Vector2):
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.pressed and event.button_index==MOUSE_BUTTON_RIGHT and not game_over:
+		var attack_world: Vector2 = get_canvas_transform().affine_inverse() * event.position
+		if is_instance_valid(follow_target):
+			for e in enemies_root.get_children():
+				if e.visible and (e.position+Vector2(0,-52.0*e.body_scale) if e.ecological else e.position).distance_to(attack_world)<50.0:
+					follow_target.ai.order_attack(e)
+					get_viewport().set_input_as_handled()
+					return
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		var click_world := get_global_mouse_position()    # カメラが動いても正しい世界座標になる（event.position は画面座標のまま）
 		var best = _pick_worker_at(click_world)

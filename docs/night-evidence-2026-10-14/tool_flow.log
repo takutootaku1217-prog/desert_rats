@@ -1,0 +1,21 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+TOOL_FLOW 通常開始3人・有限資源・既定出来事・素材/道具/設備注入なし seed=501
+STAGE 27.8s 木のみの作業台
+STAGE 118.0s 木製採掘具→石製採掘具
+STAGE 177.4s 木製斧・石製斧を通常製作
+ACTION 作業場へ確保 木材 x1
+ACTION 作業場へ確保 木材 x3
+STAGE 198.6s 鉄道具の柄用木4を先に確保
+ACTION 作業場へ確保 鉄 x1
+STAGE 217.4s tool_pick 材料確保 鉄
+STAGE 217.4s tool_pick 材料確保 木材
+STAGE 238.4s tool_pick 製作回収
+STAGE 240.0s 安全寄りの村で基本鉄採掘具を装備
+ACTION 作業場へ確保 鉄 x1
+STAGE 328.8s tool_iron_axe 材料確保 鉄
+STAGE 328.8s tool_iron_axe 材料確保 木材
+STAGE 349.2s tool_iron_axe 製作回収
+STAGE 350.4s 安全寄りの村で基本鉄斧を装備
+PROGRESSION {"build_queue":[],"capacity":360,"events":{"attack":0,"chance":0,"escaped":0,"kills":0,"repelled":0,"trouble":1,"weather":2},"game_over":false,"inventory":{"4":1,"5":1,"6":0,"7":2,"8":8,"9":7,"10":6,"12":0,"13":0,"15":0,"16":0,"23":3,"24":2},"phase":"安全寄りの村で基本鉄斧を装備","quarry":"road","report":{},"seconds":350.399999999989,"stages":["木のみの作業台","木製採掘具→石製採掘具","木製斧・石製斧を通常製作","鉄道具の柄用木4を先に確保","tool_pick 材料確保 鉄","tool_pick 材料確保 木材","tool_pick 製作回収","安全寄りの村で基本鉄採掘具を装備","tool_iron_axe 材料確保 鉄","tool_iron_axe 材料確保 木材","tool_iron_axe 製作回収","安全寄りの村で基本鉄斧を装備"],"weight":86}
+== 結果: すべて成功 ==

@@ -11,8 +11,9 @@ var destination := ""
 var progress := 0.0 # 道路のa端からの座標。復路でも燃料用の走行量は正。
 var direction := 1
 var locations := {} # location -> {entity-id: {type,data,anchor,spent}}
+var ecosystem_epoch := {}
 var next_id := 0
-const FIELDS := ["active","region","phase","road","origin","destination","progress","direction","locations","next_id"]
+const FIELDS := ["active","region","phase","road","origin","destination","progress","direction","locations","next_id","ecosystem_epoch"]
 
 func setup(g) -> void:
  game = g
@@ -64,6 +65,7 @@ func tick(dist: float) -> void:
   locations[key()]={}; sync() # 明示同意した旧街道を村の位置として保持。初期物資を再配布しない。
  if not active: return
  sync()
+ _update_ecosystem()
  if game.quarry.state != "road": return
  if phase == "travel":
   progress = clampf(progress + dist*direction,0.0,WorldMapDB.LENGTH)
@@ -145,6 +147,8 @@ func _ensure_location() -> void:
  for i in count:
   var p:=GatherPoint.new(); p.setup(game,kinds[i%kinds.size()])
   var anchor := i*WorldMapDB.LENGTH/float(count) if travelling else 1070.0+i*90.0
+  if not travelling and region=="south_oasis" and p.kind=="tree": p.max_amount=36;p.remaining=36
+  if not travelling and region=="south_oasis" and p.kind=="vein": p.max_amount=4;p.remaining=4
   p.position=Vector2(_x(anchor),630.0+(i%3)*20.0)
   remember(p); locations[key()][p.world_id].anchor=anchor; p.free()
  # 既存の野生生物も有限枠。出入りで新しい獲物を配らない。
@@ -154,6 +158,36 @@ func _ensure_location() -> void:
   var anchor:=WorldMapDB.LENGTH*0.5 if travelling else 1170.0
   c.position=Vector2(_x(anchor),680)
   remember(c); locations[key()][c.world_id].anchor=anchor; c.free()
+ # 固定個体枠。死亡後は補充しない。120秒ごとに生きている個体の滞在範囲だけ変化。
+ if not travelling:
+  var roster:Array={"south_oasis":[],"east_sands":["dust_guard"],"central_trade":[],"old_mine":["sand_stalker","hull_breaker","dust_guard"]}.get(region,[])
+  for i in roster.size():
+   var e:=Enemy.new();e.setup_kind(game,roster[i]);e.ecological=true
+   e.position=Vector2(350.0+i*160.0,680);e.home_x=e.position.x
+   remember(e);e.free()
+ ecosystem_epoch[key()]=floori(game.director.elapsed/120.0)
+
+func _update_ecosystem() -> void:
+ var epoch:=floori(game.director.elapsed/120.0)
+ if int(ecosystem_epoch.get(key(),epoch))==epoch:return
+ ecosystem_epoch[key()]=epoch
+ var roster_index:=0
+ for id in locations.get(key(),{}):
+  var row:Dictionary=locations[key()][id]
+  if row.type!="enemy" or not row.data.get("ecological",false) or row.spent:continue
+  var index:=roster_index
+  roster_index+=1
+  var live=null
+  for e in game.enemies_root.get_children():
+   if e.world_id==id:live=e;break
+  var at:Vector2=row.data.position if live==null else live.position
+  if game.workers.any(func(w):return not w.away and w.floor_i==0 and w.position.distance_to(at)<260.0):continue
+  if live!=null and (live.target_index>=0 or live.search_left>0):continue
+  var present_now:bool=(epoch+index)%3!=0
+  var home:float=350.0+index*160.0+float((epoch%3)-1)*35.0
+  row.data.present=present_now;row.data.home_x=home;row.data.position.x=home;row.anchor=home
+  if live!=null:live.present=present_now;live.home_x=home;live.position.x=home;live.visible=present_now
+
 func _spawn_visible() -> void:
  var present:={}
  for n in _all_nodes():
@@ -182,7 +216,13 @@ func request_legacy_region() -> bool:
  else: phase="legacy_recall"
  return true
 
+static func normalized(d: Dictionary) -> Dictionary:
+ var result:=d.duplicate(true)
+ if not result.has("ecosystem_epoch"):result.ecosystem_epoch={}
+ return result
 static func valid(d, g) -> bool:
+ if not d is Dictionary:return false
+ d=normalized(d)
  if not SaveGame.shape(d,g.world,FIELDS): return false
  if not WorldMapDB.public_region(d.region) or d.direction not in [-1,1] or d.next_id<0 or d.progress<0 or d.progress>WorldMapDB.LENGTH: return false
  if d.phase not in ["stopped","departing","travel","arriving","turning","legacy_recall"]: return false
@@ -211,7 +251,7 @@ static func valid(d, g) -> bool:
     "creature": node=Creature.new(); names=SaveGame.CREATURE
     "enemy": node=Enemy.new(); names=SaveGame.ENEMY
     _: return false
-   var ok:bool=SaveGame.shape(row.data,node,names) and row.data.get("world_id")==id
+   var ok:bool=SaveGame.shape(SaveGame.enemy_data(row.data) if row.type=="enemy" else row.data,node,names) and row.data.get("world_id")==id
    node.free()
    if not ok: return false
    if row.type=="gather" and (not GatherDB.POINTS.has(row.data.kind) or row.data.remaining<0 or row.data.remaining>row.data.max_amount or row.data.work<0): return false

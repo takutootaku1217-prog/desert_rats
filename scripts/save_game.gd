@@ -8,7 +8,7 @@ static var last_error := ""
 static var disabled := false
 const MAIN := ["target_speed", "scroll_speed", "room_layout", "total_rooms_built", "recipe_priority", "gather_policy", "hunt_policy", "blueprints", "total_gathered", "total_hunted", "total_eaten", "tool_auto", "_tool_clock", "build_queue", "total_built", "total_wasted", "_waste_note_at", "_spawn_dist", "_creature_dist", "wave", "kills", "_wave_timer", "transfer_queue", "craft_queue", "total_transferred", "total_crafted_by_hand", "_feed_clock"]
 const WORKER := ["char_name", "palette", "priorities", "carrying", "carcass_cargo", "carrying_species", "carry_source", "carry_n", "carry_bonus", "weapon", "work_support", "tools", "speed", "target", "position", "slot_offset", "hp", "hunger", "fatigue", "stress", "calm", "mental", "down", "floor_i", "facing", "level", "gender", "ranks", "skills", "dept", "away", "bed_index", "_climb_dest", "_climb_floor", "_climb_kind"]
-const AI := ["state", "timer", "haul_item", "haul_recipe", "repair_part", "gather_ev", "bag_limit", "bag_frac", "eat_wait", "xfer_item", "xfer_dir", "current_job", "life_request"]
+const AI := ["state", "timer", "haul_item", "haul_recipe", "repair_part", "gather_ev", "bag_limit", "bag_frac", "eat_wait", "xfer_item", "xfer_dir", "current_job", "life_request", "process_slot", "safe_after", "retreating", "danger_hold"]
 const BASE := ["built", "max_hp", "hp", "fuel", "parts", "total_refuel", "total_repair"]
 const PROCESSOR := ["orders", "current", "progress", "output", "batch_output", "total_done", "waiting_fuel"]
 const DIRECTOR := ["active", "forecast", "default_stance", "log", "elapsed", "distance", "stats", "enabled", "_next_in"]
@@ -17,7 +17,7 @@ const EXPEDITION := ["state", "site_id", "offer_left", "approach_id", "kit", "st
 const RESOURCE := ["world_id","position", "item", "species", "gather_progress", "age"]
 const GATHER := ["kind", "remaining", "max_amount", "work"]
 const CREATURE := ["world_id","position", "species", "max_hp", "hp", "dead", "capturable", "_flee_speed", "_wander", "_wander_t", "_fleeing", "_facing"]
-const ENEMY := ["world_id","position", "kind", "max_hp", "hp", "dead", "hold_x", "run_speed", "damage", "body_scale", "_body", "_atk_timer"]
+const ENEMY := ["world_id","position", "kind", "max_hp", "hp", "dead", "hold_x", "run_speed", "damage", "body_scale", "_body", "_atk_timer", "ecological", "present", "home_x", "target_index", "provoked_index", "lost_for", "search_left", "peaceful_until"]
 
 static func fields(obj, names: Array) -> Dictionary:
 	var d := {}
@@ -42,6 +42,9 @@ static func capture(g) -> Dictionary:
 		"director": fields(g.director, DIRECTOR), "quarry": fields(g.quarry, QUARRY), "expedition": fields(g.expedition, EXPEDITION),
 		"party": [], "crew": [], "resources": [], "creatures": [], "enemies": [],
 		"camera": g.camera.position, "follow": g.workers.find(g.follow_target), "scroll": 0.0}
+	d["operations"] = fields(g.operations,FieldOperations.FIELDS)
+	d["processor_extra"] = fields(g.processor.second,PROCESSOR)
+	d.processor_extra.orders = [] # 共有キューは主枠で一度だけ保存
 	for node in g.get_children():
 		if node is WorldScroll: d.scroll = node.scroll_x
 	for w in g.expedition.party: d.party.append(g.workers.find(w))
@@ -139,6 +142,29 @@ static func processor_data(row: Dictionary) -> Dictionary:
 	if not result.has("batch_output"): result["batch_output"] = false
 	return result
 
+static func enemy_data(row: Dictionary) -> Dictionary:
+	var result:=row.duplicate(true)
+	var defaults:={"ecological":false,"present":true,"home_x":0.0,"target_index":-1,"provoked_index":-1,"lost_for":0.0,"search_left":0.0,"peaceful_until":0.0}
+	for k in defaults:
+		if not result.has(k):result[k]=defaults[k]
+	return result
+
+static func ai_data(row: Dictionary) -> Dictionary:
+	var result := row.duplicate(true)
+	if not result.has("process_slot"): result.process_slot = 0
+	if not result.has("safe_after"): result.safe_after = 0.0
+	if not result.has("retreating"): result.retreating = false
+	if not result.has("danger_hold"): result.danger_hold = false
+	return result
+
+static func extra_data(d: Dictionary) -> Dictionary:
+	return d.get("processor_extra", {"orders":[],"current":{},"progress":0.0,"output":[],"batch_output":false,"total_done":0,"waiting_fuel":false})
+
+static func operation_totals(row: Dictionary, time_key: String) -> bool:
+	for k in [time_key,"food","fuel","refuel","repair"]:
+		if typeof(row.get(k)) not in [TYPE_INT,TYPE_FLOAT] or row[k]<0: return false
+	return true
+
 static func validate(d, g) -> bool:
 	if not d is Dictionary or not safe(d) or d.get("version") != VERSION: return false
 	if not WorldTrip.valid(d.get("world"),g): return false
@@ -173,6 +199,18 @@ static func validate(d, g) -> bool:
 	if d.base.parts.size() != GameData.Part.size(): return false
 	for k in d.base.parts:
 		if k not in GameData.Part.values() or typeof(d.base.parts[k]) not in [TYPE_FLOAT,TYPE_INT] or d.base.parts[k] < 0 or d.base.parts[k] > 100: return false
+	if d.has("operations"):
+		if not shape(d.operations,g.operations,FieldOperations.FIELDS) or d.operations.stance not in ["normal","alert","recall"] or d.operations.fuel_spent<0: return false
+		if not counts(d.operations.delivered): return false
+		if d.operations.outing and not operation_totals(d.operations.baseline,"time"): return false
+		if not d.operations.last_report.is_empty():
+			if not operation_totals(d.operations.last_report,"seconds") or not counts(d.operations.last_report.get("items")): return false
+	var extra := extra_data(d)
+	if not shape(extra,g.processor.second,PROCESSOR) or not extra.orders.is_empty(): return false
+	if not recipe(extra.current) or extra.progress < 0: return false
+	for it in extra.output:
+		if not it is int or it not in ItemDB.ORDER: return false
+	if (not extra.current.is_empty() or not extra.output.is_empty()) and d.base.built.get("parallel_bench",[]).is_empty(): return false
 	for r in d.processor.orders:
 		if not recipe(r) or r.is_empty(): return false
 	if not recipe(d.processor.current): return false
@@ -199,18 +237,18 @@ static func validate(d, g) -> bool:
 	resource.free(); gather.free(); creature.free(); enemy.free()
 	if not valid or not WorldTrip.live_valid(d): return false
 	var used := {"res":[],"prey":[],"bed":[],"repair":[]}
-	var processor_count := 0
+	var processor_slots := []
 	var transfer_count := 0
 	var fuel_count := 0
 	for i in d.crew.size():
 		var row = d.crew[i]
-		if not row is Dictionary or not row.get("worker") is Dictionary or not shape(worker_data(row.worker),g.workers[i],WORKER) or not shape(row.get("ai"),g.workers[i].ai,AI): return false
+		if not row is Dictionary or not row.get("worker") is Dictionary or not shape(worker_data(row.worker),g.workers[i],WORKER) or not shape(ai_data(row.ai) if row.get("ai") is Dictionary else row.get("ai"),g.workers[i].ai,AI): return false
 		var w: Dictionary = worker_data(row.worker)
-		var a: Dictionary = row.ai
+		var a: Dictionary = ai_data(row.ai)
 		if a.state not in CharacterAI.State.values() or w.floor_i not in [0,1,2] or w._climb_floor not in [0,1,2]: return false
 		if w.hp < 0 or w.hp > 100 or w.hunger < 0 or w.hunger > 100 or w.fatigue < 0 or w.fatigue > 100: return false
 		if w.palette not in ["grey","tan","pink"] or w.weapon not in [-1,GameData.Item.SIMPLE_SPEAR]: return false
-		if w.work_support not in [-1,GameData.Item.HAUL_FRAME]: return false
+		if w.work_support != -1 and w.work_support not in GameData.SUPPORT_ITEMS: return false
 		if w.carrying != -1 and w.carrying not in GameData.Item.values(): return false
 		if w.carry_n < 1 or not counts(w.carry_bonus) or not counts(w.carcass_cargo) or not recipe(a.haul_recipe): return false
 		for key in w.priorities:
@@ -232,7 +270,11 @@ static func validate(d, g) -> bool:
 		if a.state in [CharacterAI.State.REPAIR_TAKE,CharacterAI.State.REPAIR_MOVE,CharacterAI.State.REPAIR]:
 			if a.repair_part not in GameData.Part.values() or a.repair_part in used.repair: return false
 			used.repair.append(a.repair_part)
-		if a.state in [CharacterAI.State.PROCESS,CharacterAI.State.MOVE_TO_MACHINE]: processor_count += 1
+		if a.process_slot not in [0,1]: return false
+		if a.state in [CharacterAI.State.PROCESS,CharacterAI.State.MOVE_TO_MACHINE]:
+			if a.process_slot in processor_slots: return false
+			if a.process_slot == 1 and d.base.built.get("parallel_bench",[]).is_empty(): return false
+			processor_slots.append(a.process_slot)
 		if a.state in [CharacterAI.State.XFER_TAKE,CharacterAI.State.XFER_MOVE]:
 			transfer_count += 1
 			if a.xfer_item not in ItemDB.ORDER or a.xfer_dir not in ["to_workshop","to_storage"]: return false
@@ -244,7 +286,7 @@ static func validate(d, g) -> bool:
 		if not a.gather_ev.is_empty():
 			for key in ["eff","seconds"]:
 				if typeof(a.gather_ev.get(key)) not in [TYPE_FLOAT,TYPE_INT]: return false
-	if processor_count > 1 or transfer_count > 1 or fuel_count > 1: return false
+	if transfer_count > 1 or fuel_count > 1: return false
 	var party_seen := []
 	for i in d.party:
 		if not i is int or i < 0 or i >= d.crew.size() or i in party_seen: return false
@@ -293,7 +335,7 @@ static func _entities_valid(d, resource, gather, creature, enemy) -> bool:
 	for row in d.creatures:
 		if not shape(row,creature,CREATURE) or not GameData.CREATURES.has(row.species): return false
 	for row in d.enemies:
-		if not shape(row,enemy,ENEMY) or not EventDB.ENEMIES.has(row.kind): return false
+		if not shape(enemy_data(row),enemy,ENEMY) or not EventDB.ENEMIES.has(row.kind): return false
 	return true
 
 ## 検査済みsnapshotのみ。予約は空から作り直し、プロセス内のObject参照を使い回さない。
@@ -302,7 +344,8 @@ static func apply(g, d: Dictionary) -> bool:
 		last_error = "保存内容の形式・数量・参照を検証できません。現在の進行は変更しません。"
 		return false
 	g.cancel_facility_pack()
-	put(g.world,d.world,WorldTrip.FIELDS)
+	put(g.world,WorldTrip.normalized(d.world),WorldTrip.FIELDS)
+	put(g.operations,d.get("operations",fields(FieldOperations.new(),FieldOperations.FIELDS)),FieldOperations.FIELDS)
 	put(g,d.main,MAIN); put(g.base,d.base,BASE); put(g.processor,processor_data(d.processor),PROCESSOR)
 	g.storage.inventory.counts = d.inventory.duplicate(true)
 	g.storage.wasted = d.wasted.duplicate(true)
@@ -310,6 +353,9 @@ static func apply(g, d: Dictionary) -> bool:
 	g.storage.capacity_bonus = d.capacity
 	g.processor.stock.counts = d.stock.duplicate(true)
 	g.processor.incoming.clear(); g.processor.worker = null
+	put(g.processor.second,extra_data(d),PROCESSOR)
+	g.processor.second.worker = null
+	g.processor.share_queues()
 	g.processor._out_times.clear(); g.processor._drops.clear()
 	g.base.beds = [null,null,null]; g.base.refuel_reserved = false; g.base.repair_reserved.clear()
 	g.base.apply_layout()
@@ -334,11 +380,11 @@ static func apply(g, d: Dictionary) -> bool:
 		var c := Creature.new(); c.game = g; put(c,row,CREATURE)
 		g.creatures_root.add_child(c); creatures.append(c)
 	for row in d.enemies:
-		var e := Enemy.new(); e.game = g; put(e,row,ENEMY)
+		var e := Enemy.new(); e.game = g; put(e,enemy_data(row),ENEMY)
 		g.enemies_root.add_child(e); enemies.append(e)
 	for i in d.crew.size():
 		var w = g.workers[i]; var row: Dictionary = d.crew[i]
-		put(w,worker_data(row.worker),WORKER); put(w.ai,row.ai,AI)
+		put(w,worker_data(row.worker),WORKER); put(w.ai,ai_data(row.ai),AI)
 		w._sheet = GameData.tex("res://assets/characters/mouse_%s.png" % w.palette)
 		w.visible = not w.away; w.set_process(not w.away)
 		w.sleeping = false; w.resting = false
@@ -353,7 +399,7 @@ static func apply(g, d: Dictionary) -> bool:
 		if (a.state in [S.NOTICE,S.MOVE_TO_RESOURCE,S.GATHER] and a.res == null) or (a.state in [S.HUNT_MOVE,S.HUNT_ATTACK] and a.prey == null) or (a.state in [S.COMBAT_MOVE,S.COMBAT] and a.enemy == null):
 			a.state = S.MOVE_TO_STORAGE if w.carrying >= 0 else S.SEARCH
 		if a.state in [S.HAUL_TAKE,S.HAUL_MOVE]: g.processor.incoming.append(a.haul_recipe)
-		if a.state in [S.MOVE_TO_MACHINE,S.PROCESS]: g.processor.worker = w
+		if a.state in [S.MOVE_TO_MACHINE,S.PROCESS]: g.processor.lane(a.process_slot).worker = w
 		if a.state in [S.REST_MOVE,S.REST]: g.base.beds[w.bed_index] = w
 		if a.state in [S.REFUEL_TAKE,S.REFUEL_MOVE,S.REFUEL]: g.base.refuel_reserved = true
 		if a.state in [S.REPAIR_TAKE,S.REPAIR_MOVE,S.REPAIR]: g.base.repair_reserved[a.repair_part] = w
@@ -381,6 +427,8 @@ static func saved_weight(d: Dictionary) -> int:
 	var n := mass(d.inventory) + mass(d.stock)
 	for r in d.processor.orders + [d.processor.current]: n += mass(r.get("in",{}))
 	for it in d.processor.output: n += item_mass(it)
+	n += mass(extra_data(d).current.get("in",{}))
+	for it in extra_data(d).output: n += item_mass(it)
 	for row in d.crew:
 		var w: Dictionary = worker_data(row.worker)
 		if row.ai.state == CharacterAI.State.HAUL_MOVE:

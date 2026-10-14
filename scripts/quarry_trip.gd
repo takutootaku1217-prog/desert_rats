@@ -33,7 +33,7 @@ func hostile() -> bool:
 	if game.director._busy("attack"):
 		return true
 	for e in game.enemies_root.get_children():
-		if not e.dead:
+		if not e.dead and not e.ecological:
 			return true
 	return false
 
@@ -153,7 +153,7 @@ func _arrive() -> void:
 		p.set_meta("quarry_group", d["group"])
 		game.resources_root.add_child(p)
 		points.append(p)
-	game.director.note("%sに停車。襲撃なし、食料・天候・車体消耗には注意" % QuarryDB.NAME)
+	game.director.note("%sに停車。周囲の生物を目視し、危険なら呼戻し。食料・天候・車体消耗にも注意" % QuarryDB.NAME)
 
 func allowed_resource(r) -> bool:
 	return not r.has_meta("quarry_id") or not near_only or r.get_meta("quarry_group") == "近場"

@@ -21,7 +21,13 @@ func _initialize():
    # 寝床の既存材料（皮/骨）を未訪問地域の既存生物から確保する。
    if not await go("east_sands"): finish(); return
    if not await go("central_trade"): finish(); return
+   if not await wait_for("都市のコブ獣から皮を回収",func():return main.has_facility("bed") or main.storage.count_of(GameData.Item.HIDE)>=1,300):finish();return
+   if not main.world.request("south_oasis"):fail("未走行街道への出発拒否");finish();return
+   main.target_speed=60
+   if not await wait_for("街道のコブ獣も狩り寝床完成",func():return main.has_facility("bed"),600):finish();return
+   if not await wait_for("村到着",func():return main.world.phase=="stopped",300):finish();return
   if id=="cargo_rack":
+   if not await go("central_trade"):finish();return
    if not await go("old_mine"): finish(); return
    if not main.quarry.select(): fail("鉱床選択拒否"); finish(); return
    if not await wait_for("鉱床到着",func():return main.quarry.state=="parked",300): finish(); return
@@ -32,7 +38,7 @@ func _initialize():
    else: main.quarry.discard_and_leave(main.quarry.loose.duplicate())
    if not await wait_for("鉱山入口へ復帰",func():return main.quarry.state=="road",300): finish(); return
   if id=="supply_cache":
-   # 鉱山入口は木材がないため、未走行の都市→村の街道で補充する。
+   # 鉱山入口は木材がないため、都市→村の街道に残った有限木材を回収する。
    if not await go("central_trade"): finish(); return
    if not main.world.request("south_oasis"): fail("村への行先拒否"); finish(); return
    if not await wait_for("木材採取のため街道中ほどへ",func():return main.world.phase=="travel" and main.world.progress<WorldMapDB.LENGTH*0.55,300): finish(); return

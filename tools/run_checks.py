@@ -38,7 +38,7 @@ def diagnostic(name: str, marker: str = "== 結果: すべて成功 ==") -> Chec
 
 CHECKS = {c.id: c for c in [
     Check("import", ("--editor", "--import", "--quit"), timeout=120),
-    *(diagnostic(n) for n in ("quarry", "gather", "cargo", "items", "crew_status", "life_actions", "tool_management", "rooms", "view", "camera", "artscale", "packed_equipment", "equipment_ui", "weapon", "weapon_ui", "cargo_accounting", "cargo_escape_ui", "progression", "clarity_ui", "inventory_discard", "save_game", "save_ui", "save_progression", "world_map", "world_flow", "world_boundaries", "world_fauna", "seed_initialization", "tool_progression", "tool_flow", "navigation_bar", "batch_crafting", "batch_ui", "batch_flow", "haul_support", "haul_ui", "haul_flow", "facility_packing", "packing_flow", "crew_detail", "build")),
+    *(diagnostic(n) for n in ("quarry", "gather", "cargo", "items", "crew_status", "life_actions", "tool_management", "rooms", "view", "camera", "artscale", "packed_equipment", "equipment_ui", "weapon", "weapon_ui", "cargo_accounting", "cargo_escape_ui", "progression", "clarity_ui", "inventory_discard", "save_game", "save_ui", "save_progression", "world_map", "world_flow", "world_boundaries", "world_fauna", "seed_initialization", "tool_progression", "tool_flow", "first_cycle", "field_operations", "field_ui", "ecosystem", "first_cycle_flow", "navigation_bar", "batch_crafting", "batch_ui", "batch_flow", "haul_support", "haul_ui", "haul_flow", "facility_packing", "packing_flow", "crew_detail", "build")),
     *(diagnostic(n, "== 結果: 0 件失敗 ==") for n in ("cargo_reservations", "consumption_loop")),
     Check("loop_vanilla", ("-s", "res://tools/test_loop.gd", "--", "32", "2", "12", "500", "0", "vanilla"),
           "== 結果: 問題なし ==", 300, 32, 2),
@@ -54,7 +54,7 @@ CHECKS = {c.id: c for c in [
     Check("startup", ("--quit-after", "300")),
 ]}
 SUITES = {
-    "core": ["tool_progression", "tool_flow", "navigation_bar", "batch_crafting", "batch_ui", "batch_flow", "haul_support", "haul_ui", "haul_flow", "facility_packing", "packing_flow", "world_map", "world_flow", "world_boundaries", "world_fauna", "save_game", "save_ui", "inventory_discard", "clarity_ui", "cargo_accounting", "cargo_escape_ui", "progression", "weapon", "weapon_ui", "equipment_ui", "packed_equipment", "quarry", "gather", "cargo", "items", "crew_status", "life_actions", "tool_management",
+    "core": ["tool_progression", "tool_flow", "first_cycle", "field_operations", "field_ui", "ecosystem", "first_cycle_flow", "navigation_bar", "batch_crafting", "batch_ui", "batch_flow", "haul_support", "haul_ui", "haul_flow", "facility_packing", "packing_flow", "world_map", "world_flow", "world_boundaries", "world_fauna", "save_game", "save_ui", "inventory_discard", "clarity_ui", "cargo_accounting", "cargo_escape_ui", "progression", "weapon", "weapon_ui", "equipment_ui", "packed_equipment", "quarry", "gather", "cargo", "items", "crew_status", "life_actions", "tool_management",
              "cargo_reservations", "consumption_loop", "loop_vanilla", "loop_normal", "startup"],
     "extra": ["loop_manual", "loop_events"],
     "layout": ["rooms", "view", "camera", "artscale", "quarry", "quarry_rear", "consumption_loop"],
@@ -213,11 +213,11 @@ def main() -> int:
                 "runner_command": [sys.executable, *sys.argv], "root": str(ROOT), "git_before": git_state(ROOT),
                 "godot_version": capture([args.godot, "--version"], ROOT), "suite": None if args.check else args.suite,
                 "unverified": ["Windows / Godot 4.7.2", "OS-level input", "Audio"],
-                "scope_note": "tool_progression/tool_flow, world_*, batch_*, haul_*, facility_packing, packing_flow and startup use the default map; other gameplay checks explicitly use legacy-world-test fixtures. Only selected checks; core does not cover extra or all gameplay conditions."}
+                "scope_note": "first_cycle_flow/ecosystem, tool_progression/tool_flow, world_*, batch_*, haul_*, facility_packing, packing_flow and startup use the default map; other gameplay checks explicitly use legacy-world-test fixtures. Only selected checks; core does not cover extra or all gameplay conditions."}
     checks = []
     for name in selected:
         argv = [args.godot, "--headless", "--path", str(ROOT), "--fixed-fps", "60", *CHECKS[name].args]
-        if name not in ("import", "startup", "seed_initialization", "tool_progression", "tool_flow", "navigation_bar", "batch_crafting", "batch_ui", "batch_flow", "haul_support", "haul_ui", "haul_flow", "facility_packing", "packing_flow") and not name.startswith("world_"):
+        if name not in ("import", "startup", "seed_initialization", "tool_progression", "tool_flow", "ecosystem", "first_cycle_flow", "navigation_bar", "batch_crafting", "batch_ui", "batch_flow", "haul_support", "haul_ui", "haul_flow", "facility_packing", "packing_flow") and not name.startswith("world_"):
             if "--" not in argv: argv.append("--")
             argv.append("legacy-world-test")  # Existing-loop fixtures; world_* exercise the new default map.
         checks.append((CHECKS[name], argv))

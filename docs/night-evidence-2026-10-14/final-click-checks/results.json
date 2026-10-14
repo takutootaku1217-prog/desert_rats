@@ -1,0 +1,630 @@
+{
+  "schema_version": 1,
+  "run_directory": "/workspace/night-evidence/final-click-checks/20261014T190806Z-hy_xyde9",
+  "started_utc": "2026-10-14T19:08:06.874664+00:00",
+  "metadata": {
+    "platform": "Linux-6.18.44-x86_64-with-glibc2.41",
+    "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+    "python_executable": "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+    "runner_command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+      "tools/run_checks.py",
+      "--check",
+      "field_ui",
+      "--check",
+      "navigation_bar",
+      "--check",
+      "field_operations",
+      "--check",
+      "save_game",
+      "--check",
+      "first_cycle_flow",
+      "--check",
+      "first_cycle",
+      "--output-dir",
+      "/workspace/night-evidence/final-click-checks"
+    ],
+    "root": "/workspace/desert_rats",
+    "git_before": {
+      "head": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "rev-parse",
+          "HEAD"
+        ],
+        "returncode": 0,
+        "output": "0000b9110c82944ea674a82c70e8b765811fd559"
+      },
+      "branch": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "branch",
+          "--show-current"
+        ],
+        "returncode": 0,
+        "output": "main"
+      },
+      "status": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "status",
+          "--porcelain=v1",
+          "--untracked-files=all"
+        ],
+        "returncode": 0,
+        "output": "M data/cargo.gd\n M data/events.gd\n M data/facilities.gd\n M data/items.gd\n M data/world_map.gd\n M scripts/base.gd\n M scripts/character.gd\n M scripts/character_ai.gd\n M scripts/director.gd\n M scripts/enemy.gd\n M scripts/facility_packing.gd\n M scripts/game_data.gd\n M scripts/main.gd\n M scripts/processor.gd\n M scripts/quarry_trip.gd\n M scripts/save_game.gd\n M scripts/storage.gd\n M scripts/world_trip.gd\n M tools/run_checks.py\n M tools/test_facility_packing.gd\n M tools/test_items.gd\n M tools/test_packing_flow.gd\n M tools/test_tool_flow.gd\n M ui/craft_ui.gd\n M ui/crew_detail_ui.gd\n M ui/navigation_bar.gd\n M \"\\347\\240\\202\\346\\274\\240\\343\\201\\256\\343\\203\\215\\343\\202\\272\\343\\203\\237\\345\\233\\243.gd\"\n?? assets/resources/item_handcart.png\n?? assets/resources/item_handcart.png.import\n?? scripts/field_operations.gd\n?? scripts/field_operations.gd.uid\n?? tools/test_ecosystem.gd\n?? tools/test_ecosystem.gd.uid\n?? tools/test_field_operations.gd\n?? tools/test_field_operations.gd.uid\n?? tools/test_field_ui.gd\n?? tools/test_field_ui.gd.uid\n?? tools/test_first_cycle.gd\n?? tools/test_first_cycle.gd.uid\n?? tools/test_first_cycle_flow.gd\n?? tools/test_first_cycle_flow.gd.uid"
+      },
+      "changed_files": [
+        {
+          "path": "assets/resources/item_handcart.png",
+          "sha256": "de1aa3b601a60e344533cd3008e420dfd56ed1140234ff46fb26fba5abfca61c"
+        },
+        {
+          "path": "assets/resources/item_handcart.png.import",
+          "sha256": "fba624815b4f058407d2714e0b0ad4deaa5b3809ff92c756cd4dce09ac553943"
+        },
+        {
+          "path": "data/cargo.gd",
+          "sha256": "19d21cde44cfbb73967597e05c961984318459c785365b9276dfec54646e2c1f"
+        },
+        {
+          "path": "data/events.gd",
+          "sha256": "03ae4b8f6b2925c7d35d8d841d22f3899a28f2f5ec36ade56dee1e3a189c9161"
+        },
+        {
+          "path": "data/facilities.gd",
+          "sha256": "42c4853d59c508a538385e14f9be8728dc603b3fac5b874e1aff41d4f61d2652"
+        },
+        {
+          "path": "data/items.gd",
+          "sha256": "1eff5bbbf524e0ff04695963325184074e679cfb4e0ef03f1f89cf3787511b94"
+        },
+        {
+          "path": "data/world_map.gd",
+          "sha256": "d3c0b3a3d983ef8402dcee22b8b5fd3cf132c5270f2682f50e37419c4ea96f8d"
+        },
+        {
+          "path": "scripts/base.gd",
+          "sha256": "40c886aeb0be451f60c946eee60c3b3da3ce113979f29321833216f3add68a17"
+        },
+        {
+          "path": "scripts/character.gd",
+          "sha256": "060233a0983f293eb27d0cb30f4712e2104a91b4f0048eea1a2317373132e148"
+        },
+        {
+          "path": "scripts/character_ai.gd",
+          "sha256": "c6cbad78f550b5c7afe23709e58c6e0e18da13b39b97deb868a1a3901f4923a9"
+        },
+        {
+          "path": "scripts/director.gd",
+          "sha256": "dac5769ed2ec2bac455196f22eea2472810e75ef6afd8e0335a3baf40900f19c"
+        },
+        {
+          "path": "scripts/enemy.gd",
+          "sha256": "82b27d27fae69568d86bdca88f25ee7a268e0eede41425a99b8fa12b8c38ad29"
+        },
+        {
+          "path": "scripts/facility_packing.gd",
+          "sha256": "d346593fa41367186ff1e9d4d9f78a26249f65f896a00cd6f418ab4408951aad"
+        },
+        {
+          "path": "scripts/field_operations.gd",
+          "sha256": "57602aa5383d3c9181fa74c8fb2f926ce9c689207b0e2c418a59bc94f355e3f8"
+        },
+        {
+          "path": "scripts/field_operations.gd.uid",
+          "sha256": "779a65b0bb35206b684bbb15b0d6bca230bfef46061f230c709ad3b1322eb067"
+        },
+        {
+          "path": "scripts/game_data.gd",
+          "sha256": "713aca9d81b80643332f0de03eda899b003ee8887a85223bbd75927cf828b713"
+        },
+        {
+          "path": "scripts/main.gd",
+          "sha256": "c44b39736238bc0ff44bd0e0e86689c02c9429498b75d14682edf17d1f097f98"
+        },
+        {
+          "path": "scripts/processor.gd",
+          "sha256": "cac8aed05d2d0b1720eec3adc827538cda91be71b44b135c2270e4f93d5dbe4a"
+        },
+        {
+          "path": "scripts/quarry_trip.gd",
+          "sha256": "9aecf2873a39db6b0721809cc3fc3b6c59c850989a75c8da1eaf9d09472512d2"
+        },
+        {
+          "path": "scripts/save_game.gd",
+          "sha256": "6d14a2964b5bb464570e8959419cb8f1f83ccf7acb38f145d0edc32e59ec1033"
+        },
+        {
+          "path": "scripts/storage.gd",
+          "sha256": "bd3d4f4a3e2333edd62d84504f587de5591645beddf8e25a39d4f96a775f98a8"
+        },
+        {
+          "path": "scripts/world_trip.gd",
+          "sha256": "ef61a7926b57bf25d5e67cf1c601303b89a651b002849d297ea4ff1fa96b7cd3"
+        },
+        {
+          "path": "tools/run_checks.py",
+          "sha256": "76d5aad1483a0d91cc50ea960f5e21b488db1b1a250b78fc68061fd5a23324a4"
+        },
+        {
+          "path": "tools/test_ecosystem.gd",
+          "sha256": "b4df5f7bb61e142a1224a2c7bd4ead4bb14c538b8c8b57350fe8e0c7fb483407"
+        },
+        {
+          "path": "tools/test_ecosystem.gd.uid",
+          "sha256": "67fa32dbea63279b374771c2561c9163ab1b41603b59a1eb13ca454e0443f06a"
+        },
+        {
+          "path": "tools/test_facility_packing.gd",
+          "sha256": "9227be048efe2533ecba7534277f55af80a7167aa6e353e3ca09986583dc0e28"
+        },
+        {
+          "path": "tools/test_field_operations.gd",
+          "sha256": "eceafdecd6fc62ee56c14aee482013e0b96479d3069315ed0c1ce0c3d9318caa"
+        },
+        {
+          "path": "tools/test_field_operations.gd.uid",
+          "sha256": "8ad36f74b747eff19bc9108031145d42f3e669b14e6fd54ef788d609e78b6286"
+        },
+        {
+          "path": "tools/test_field_ui.gd",
+          "sha256": "fe9638f6a16ee70e6bcd174f7d94c2b741aa3c95b04103675454340a831bc191"
+        },
+        {
+          "path": "tools/test_field_ui.gd.uid",
+          "sha256": "56c3e843f1e991b300d6766ea0af87feb9335e73a7130b7dd01bf0ffa909d0e4"
+        },
+        {
+          "path": "tools/test_first_cycle.gd",
+          "sha256": "b39272f50781f1e9d335568f9d69bf730a023a939819284190e3399a37a23a29"
+        },
+        {
+          "path": "tools/test_first_cycle.gd.uid",
+          "sha256": "aa0ef9e35a966ab74582b86e721b2cf87b18f1aafa24f3109320b9e3972d31dd"
+        },
+        {
+          "path": "tools/test_first_cycle_flow.gd",
+          "sha256": "f0dc550baea8c45c1caf3336ec8c5ca520b47f15e47f64f170c701afbd560878"
+        },
+        {
+          "path": "tools/test_first_cycle_flow.gd.uid",
+          "sha256": "bb44fe468bf21dc0bf2a5578342ae740cb9b56e0a128e329516b363f14b3df6d"
+        },
+        {
+          "path": "tools/test_items.gd",
+          "sha256": "10c22d81a21525263b4a2d40d519c2ed5ef3af66fe7f860487527cc4f982efaa"
+        },
+        {
+          "path": "tools/test_packing_flow.gd",
+          "sha256": "5f84eac08a6211fcc2b8e32fc19d25050c606aa4f375938a09790b9d48745adb"
+        },
+        {
+          "path": "tools/test_tool_flow.gd",
+          "sha256": "6fc0bc9be979446e59ecff95d095458e5d3d535aca8ac294fd541ae14667efc0"
+        },
+        {
+          "path": "ui/craft_ui.gd",
+          "sha256": "f3a419a8dc14dda1ed5c36c873b8b5e4cdac98fec0eb30bc1f953d58538a5b88"
+        },
+        {
+          "path": "ui/crew_detail_ui.gd",
+          "sha256": "978752a231da8bc60a141229c1173b9031be5e1975752910f8806a25fed7875c"
+        },
+        {
+          "path": "ui/navigation_bar.gd",
+          "sha256": "424a6b315225b12cbd171dc333c377074986da766e6d12597757033bf014d2d5"
+        },
+        {
+          "path": "砂漠のネズミ団.gd",
+          "sha256": "c44b39736238bc0ff44bd0e0e86689c02c9429498b75d14682edf17d1f097f98"
+        }
+      ],
+      "dirty": true
+    },
+    "godot_version": {
+      "command": [
+        "/usr/local/bin/godot",
+        "--version"
+      ],
+      "returncode": 0,
+      "output": "Fontconfig error: No writable cache directories\n4.6.3.stable.official.7d41c59c4"
+    },
+    "suite": null,
+    "unverified": [
+      "Windows / Godot 4.7.2",
+      "OS-level input",
+      "Audio"
+    ],
+    "scope_note": "first_cycle_flow/ecosystem, tool_progression/tool_flow, world_*, batch_*, haul_*, facility_packing, packing_flow and startup use the default map; other gameplay checks explicitly use legacy-world-test fixtures. Only selected checks; core does not cover extra or all gameplay conditions.",
+    "git_after": {
+      "head": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "rev-parse",
+          "HEAD"
+        ],
+        "returncode": 0,
+        "output": "0000b9110c82944ea674a82c70e8b765811fd559"
+      },
+      "branch": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "branch",
+          "--show-current"
+        ],
+        "returncode": 0,
+        "output": "main"
+      },
+      "status": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "status",
+          "--porcelain=v1",
+          "--untracked-files=all"
+        ],
+        "returncode": 0,
+        "output": "M data/cargo.gd\n M data/events.gd\n M data/facilities.gd\n M data/items.gd\n M data/world_map.gd\n M scripts/base.gd\n M scripts/character.gd\n M scripts/character_ai.gd\n M scripts/director.gd\n M scripts/enemy.gd\n M scripts/facility_packing.gd\n M scripts/game_data.gd\n M scripts/main.gd\n M scripts/processor.gd\n M scripts/quarry_trip.gd\n M scripts/save_game.gd\n M scripts/storage.gd\n M scripts/world_trip.gd\n M tools/run_checks.py\n M tools/test_facility_packing.gd\n M tools/test_items.gd\n M tools/test_packing_flow.gd\n M tools/test_tool_flow.gd\n M ui/craft_ui.gd\n M ui/crew_detail_ui.gd\n M ui/navigation_bar.gd\n M \"\\347\\240\\202\\346\\274\\240\\343\\201\\256\\343\\203\\215\\343\\202\\272\\343\\203\\237\\345\\233\\243.gd\"\n?? assets/resources/item_handcart.png\n?? assets/resources/item_handcart.png.import\n?? scripts/field_operations.gd\n?? scripts/field_operations.gd.uid\n?? tools/test_ecosystem.gd\n?? tools/test_ecosystem.gd.uid\n?? tools/test_field_operations.gd\n?? tools/test_field_operations.gd.uid\n?? tools/test_field_ui.gd\n?? tools/test_field_ui.gd.uid\n?? tools/test_first_cycle.gd\n?? tools/test_first_cycle.gd.uid\n?? tools/test_first_cycle_flow.gd\n?? tools/test_first_cycle_flow.gd.uid"
+      },
+      "changed_files": [
+        {
+          "path": "assets/resources/item_handcart.png",
+          "sha256": "de1aa3b601a60e344533cd3008e420dfd56ed1140234ff46fb26fba5abfca61c"
+        },
+        {
+          "path": "assets/resources/item_handcart.png.import",
+          "sha256": "fba624815b4f058407d2714e0b0ad4deaa5b3809ff92c756cd4dce09ac553943"
+        },
+        {
+          "path": "data/cargo.gd",
+          "sha256": "19d21cde44cfbb73967597e05c961984318459c785365b9276dfec54646e2c1f"
+        },
+        {
+          "path": "data/events.gd",
+          "sha256": "03ae4b8f6b2925c7d35d8d841d22f3899a28f2f5ec36ade56dee1e3a189c9161"
+        },
+        {
+          "path": "data/facilities.gd",
+          "sha256": "42c4853d59c508a538385e14f9be8728dc603b3fac5b874e1aff41d4f61d2652"
+        },
+        {
+          "path": "data/items.gd",
+          "sha256": "1eff5bbbf524e0ff04695963325184074e679cfb4e0ef03f1f89cf3787511b94"
+        },
+        {
+          "path": "data/world_map.gd",
+          "sha256": "d3c0b3a3d983ef8402dcee22b8b5fd3cf132c5270f2682f50e37419c4ea96f8d"
+        },
+        {
+          "path": "scripts/base.gd",
+          "sha256": "40c886aeb0be451f60c946eee60c3b3da3ce113979f29321833216f3add68a17"
+        },
+        {
+          "path": "scripts/character.gd",
+          "sha256": "060233a0983f293eb27d0cb30f4712e2104a91b4f0048eea1a2317373132e148"
+        },
+        {
+          "path": "scripts/character_ai.gd",
+          "sha256": "c6cbad78f550b5c7afe23709e58c6e0e18da13b39b97deb868a1a3901f4923a9"
+        },
+        {
+          "path": "scripts/director.gd",
+          "sha256": "dac5769ed2ec2bac455196f22eea2472810e75ef6afd8e0335a3baf40900f19c"
+        },
+        {
+          "path": "scripts/enemy.gd",
+          "sha256": "82b27d27fae69568d86bdca88f25ee7a268e0eede41425a99b8fa12b8c38ad29"
+        },
+        {
+          "path": "scripts/facility_packing.gd",
+          "sha256": "d346593fa41367186ff1e9d4d9f78a26249f65f896a00cd6f418ab4408951aad"
+        },
+        {
+          "path": "scripts/field_operations.gd",
+          "sha256": "57602aa5383d3c9181fa74c8fb2f926ce9c689207b0e2c418a59bc94f355e3f8"
+        },
+        {
+          "path": "scripts/field_operations.gd.uid",
+          "sha256": "779a65b0bb35206b684bbb15b0d6bca230bfef46061f230c709ad3b1322eb067"
+        },
+        {
+          "path": "scripts/game_data.gd",
+          "sha256": "713aca9d81b80643332f0de03eda899b003ee8887a85223bbd75927cf828b713"
+        },
+        {
+          "path": "scripts/main.gd",
+          "sha256": "c44b39736238bc0ff44bd0e0e86689c02c9429498b75d14682edf17d1f097f98"
+        },
+        {
+          "path": "scripts/processor.gd",
+          "sha256": "cac8aed05d2d0b1720eec3adc827538cda91be71b44b135c2270e4f93d5dbe4a"
+        },
+        {
+          "path": "scripts/quarry_trip.gd",
+          "sha256": "9aecf2873a39db6b0721809cc3fc3b6c59c850989a75c8da1eaf9d09472512d2"
+        },
+        {
+          "path": "scripts/save_game.gd",
+          "sha256": "6d14a2964b5bb464570e8959419cb8f1f83ccf7acb38f145d0edc32e59ec1033"
+        },
+        {
+          "path": "scripts/storage.gd",
+          "sha256": "bd3d4f4a3e2333edd62d84504f587de5591645beddf8e25a39d4f96a775f98a8"
+        },
+        {
+          "path": "scripts/world_trip.gd",
+          "sha256": "ef61a7926b57bf25d5e67cf1c601303b89a651b002849d297ea4ff1fa96b7cd3"
+        },
+        {
+          "path": "tools/run_checks.py",
+          "sha256": "76d5aad1483a0d91cc50ea960f5e21b488db1b1a250b78fc68061fd5a23324a4"
+        },
+        {
+          "path": "tools/test_ecosystem.gd",
+          "sha256": "b4df5f7bb61e142a1224a2c7bd4ead4bb14c538b8c8b57350fe8e0c7fb483407"
+        },
+        {
+          "path": "tools/test_ecosystem.gd.uid",
+          "sha256": "67fa32dbea63279b374771c2561c9163ab1b41603b59a1eb13ca454e0443f06a"
+        },
+        {
+          "path": "tools/test_facility_packing.gd",
+          "sha256": "9227be048efe2533ecba7534277f55af80a7167aa6e353e3ca09986583dc0e28"
+        },
+        {
+          "path": "tools/test_field_operations.gd",
+          "sha256": "eceafdecd6fc62ee56c14aee482013e0b96479d3069315ed0c1ce0c3d9318caa"
+        },
+        {
+          "path": "tools/test_field_operations.gd.uid",
+          "sha256": "8ad36f74b747eff19bc9108031145d42f3e669b14e6fd54ef788d609e78b6286"
+        },
+        {
+          "path": "tools/test_field_ui.gd",
+          "sha256": "fe9638f6a16ee70e6bcd174f7d94c2b741aa3c95b04103675454340a831bc191"
+        },
+        {
+          "path": "tools/test_field_ui.gd.uid",
+          "sha256": "56c3e843f1e991b300d6766ea0af87feb9335e73a7130b7dd01bf0ffa909d0e4"
+        },
+        {
+          "path": "tools/test_first_cycle.gd",
+          "sha256": "b39272f50781f1e9d335568f9d69bf730a023a939819284190e3399a37a23a29"
+        },
+        {
+          "path": "tools/test_first_cycle.gd.uid",
+          "sha256": "aa0ef9e35a966ab74582b86e721b2cf87b18f1aafa24f3109320b9e3972d31dd"
+        },
+        {
+          "path": "tools/test_first_cycle_flow.gd",
+          "sha256": "f0dc550baea8c45c1caf3336ec8c5ca520b47f15e47f64f170c701afbd560878"
+        },
+        {
+          "path": "tools/test_first_cycle_flow.gd.uid",
+          "sha256": "bb44fe468bf21dc0bf2a5578342ae740cb9b56e0a128e329516b363f14b3df6d"
+        },
+        {
+          "path": "tools/test_items.gd",
+          "sha256": "10c22d81a21525263b4a2d40d519c2ed5ef3af66fe7f860487527cc4f982efaa"
+        },
+        {
+          "path": "tools/test_packing_flow.gd",
+          "sha256": "5f84eac08a6211fcc2b8e32fc19d25050c606aa4f375938a09790b9d48745adb"
+        },
+        {
+          "path": "tools/test_tool_flow.gd",
+          "sha256": "6fc0bc9be979446e59ecff95d095458e5d3d535aca8ac294fd541ae14667efc0"
+        },
+        {
+          "path": "ui/craft_ui.gd",
+          "sha256": "f3a419a8dc14dda1ed5c36c873b8b5e4cdac98fec0eb30bc1f953d58538a5b88"
+        },
+        {
+          "path": "ui/crew_detail_ui.gd",
+          "sha256": "978752a231da8bc60a141229c1173b9031be5e1975752910f8806a25fed7875c"
+        },
+        {
+          "path": "ui/navigation_bar.gd",
+          "sha256": "424a6b315225b12cbd171dc333c377074986da766e6d12597757033bf014d2d5"
+        },
+        {
+          "path": "砂漠のネズミ団.gd",
+          "sha256": "c44b39736238bc0ff44bd0e0e86689c02c9429498b75d14682edf17d1f097f98"
+        }
+      ],
+      "dirty": true
+    }
+  },
+  "scope": [
+    "import",
+    "field_ui",
+    "navigation_bar",
+    "field_operations",
+    "save_game",
+    "first_cycle_flow",
+    "first_cycle"
+  ],
+  "status": "passed",
+  "first_failure": null,
+  "checks": [
+    {
+      "id": "import",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "--editor",
+        "--import",
+        "--quit"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/night-evidence/final-click-checks/20261014T190806Z-hy_xyde9/import.log",
+      "timeout_seconds": 120,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 11.068,
+      "diagnostic_error_lines": [],
+      "success_marker_found": null
+    },
+    {
+      "id": "field_ui",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_field_ui.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/night-evidence/final-click-checks/20261014T190806Z-hy_xyde9/field_ui.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 4.201,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "navigation_bar",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_navigation_bar.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/night-evidence/final-click-checks/20261014T190806Z-hy_xyde9/navigation_bar.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 12.336,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "field_operations",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_field_operations.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/night-evidence/final-click-checks/20261014T190806Z-hy_xyde9/field_operations.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 2.131,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "save_game",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_save_game.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/night-evidence/final-click-checks/20261014T190806Z-hy_xyde9/save_game.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 5.453,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "first_cycle_flow",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_first_cycle_flow.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/night-evidence/final-click-checks/20261014T190806Z-hy_xyde9/first_cycle_flow.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 27.951,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "first_cycle",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_first_cycle.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/night-evidence/final-click-checks/20261014T190806Z-hy_xyde9/first_cycle.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 7.834,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    }
+  ],
+  "elapsed_wall_seconds": 70.993,
+  "finished_utc": "2026-10-14T19:09:17.871029+00:00",
+  "source_changed_during_run": false
+}

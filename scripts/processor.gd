@@ -21,6 +21,9 @@ const STOCK_SLOTS := 3                     # 並べる種類の数（それ以�
 const DROP_SECONDS := 0.4                  # 材料が投入口へ落ちるアニメの長さ
 const POP_SECONDS := 0.35                  # 完成品がトレイに弾んで現れる長さ
 
+# 共有キューに対し作業中の材料・進捗・出力・担当者は枠ごとに独立。
+var primary: BaseProcessor = null
+var second: BaseProcessor = null
 var orders: Array = []       # 加工待ちのレシピ（Dictionary）
 var incoming: Array = []     # 運搬中のレシピ（予約）
 var current := {}            # 加工中のレシピ（空 = なし）
@@ -45,10 +48,47 @@ func _init() -> void:
 
 
 func _ready() -> void:
+	if primary == null:
+		second = BaseProcessor.new()
+		second.primary = self
+		get_parent().add_child.call_deferred(second)
+		second.hide()
+		share_queues()
 	_steam = FxSprite.spawn(self, "proc_steam", VENT)
 	if _steam != null:
 		_steam.set_playing(false)
 
+
+
+func share_queues() -> void:
+	if second != null:
+		second.orders = orders
+		second.incoming = incoming
+		second.stock = stock
+
+func lanes() -> Array:
+	var p: BaseProcessor = primary if primary != null else self
+	return [p, p.second] if p.second != null else [p]
+
+func lane(index: int) -> BaseProcessor:
+	return lanes()[clampi(index,0,lanes().size()-1)]
+
+func free_lane() -> int:
+	for i in lanes().size():
+		if i == 1 and not base().game.has_facility("parallel_bench"): continue
+		if lane(i).has_work_for_worker(): return i
+	return -1
+
+func active_recipes() -> Array:
+	var result := []
+	for p in lanes():
+		if not p.current.is_empty(): result.append(p.current)
+	return result
+
+func all_output() -> Array:
+	var result := []
+	for p in lanes(): result.append_array(p.output)
+	return result
 
 func base():
 	return get_parent()
@@ -106,8 +146,7 @@ func _accept(recipe: Dictionary) -> void:
 func committed_inputs() -> Dictionary:
 	var d := {}
 	var all: Array = orders.duplicate()
-	if not current.is_empty():
-		all.append(current)
+	all.append_array(active_recipes())
 	for r in all:
 		for it in r["in"]:
 			d[it] = int(d.get(it, 0)) + int(r["in"][it])
@@ -120,9 +159,9 @@ func pending_of(item: int) -> int:
 	for r in orders + incoming:
 		if r["out"] == item:
 			n += r["n"]
-	if not current.is_empty() and current["out"] == item:
-		n += current["n"]
-	for o in output:
+	for r in active_recipes():
+		if r["out"] == item: n += r["n"]
+	for o in all_output():
 		if o == item:
 			n += 1
 	return n
@@ -134,21 +173,21 @@ func pending_build(id: String) -> int:
 	for r in orders + incoming:
 		if r.get("build", "") == id:
 			n += 1
-	if current.get("build", "") == id:
-		n += 1
+	for r in active_recipes():
+		if r.get("build", "") == id: n += 1
 	return n
 
 
 ## 設備 station で作業する場所（足元）。"" は加工設備。
 func station_point(recipe: Dictionary) -> Vector2:
 	var st: String = recipe.get("station", "")
-	return global_position if st == "" else base().facility_point(st)
+	return base().facility_point("parallel_bench") if primary != null else (global_position if st == "" else base().facility_point(st))
 
 
 ## 作業者がいま向かう場所（作業中のレシピ、なければ次に始まるレシピの設備）
 func work_point() -> Vector2:
 	var r: Dictionary = current if not current.is_empty() else _peek_next()
-	return station_point(r) if not r.is_empty() else global_position
+	return station_point(r)
 
 
 func packed_output_blocked() -> bool:
@@ -204,10 +243,11 @@ func manual_status(id: String) -> Dictionary:
 		if q["id"] == id: d.queued += int(q["n"])
 	for r in orders:
 		if r.get("manual",false) and r["id"] == id: d.loaded += 1
-	if current.get("manual",false) and current.get("id","") == id:
-		d.active = 1; d.progress = progress; d.time = current["time"]
+	for p in lanes():
+		if p.current.get("manual",false) and p.current.get("id","") == id:
+			d.active += 1; d.progress += p.progress; d.time += p.current["time"]
 	var recipe := GameData.recipe_by_id(id)
-	for it in output:
+	for it in all_output():
 		if it == recipe.get("out",-1): d.output += 1
 	return d
 
@@ -241,7 +281,8 @@ func work(delta: float, speed_of: Callable) -> void:
 				FxSprite.spawn(self, "proc_done", CHUTE + Vector2(0.0, -6.0))
 			else:
 				FxSprite.spawn(self, "proc_done", to_local(station_point(done)) + Vector2(0.0, -30.0))
-		total_done += 1
+		if primary != null: primary.total_done += 1
+		else: total_done += 1
 		if done.get("manual", false):
 			b.game.total_crafted_by_hand += 1
 		current = {}
@@ -265,7 +306,7 @@ func _start_next() -> void:
 			waiting_fuel = true
 			continue
 		if r["tank_fuel"] > 0.0:
-			base().fuel -= r["tank_fuel"]
+			base().consume_fuel(r["tank_fuel"])
 		current = r
 		progress = 0.0
 		orders.remove_at(i)

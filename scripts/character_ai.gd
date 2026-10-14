@@ -78,6 +78,10 @@ var eat_wait := 0.0      # 食料が取れなかったあと、食べに行き�
 var xfer_item := -1      # 運搬の依頼で運んでいるアイテムと向き（Main.request_transfer）
 var xfer_dir := ""
 var _eat_claimed := false   # 食料の在庫を1つ取り置いている（食べに向かっている間）
+var safe_after := 0.0
+var retreating := false
+var danger_hold := false
+var process_slot := 0
 var current_job := -1
 var life_request: String = ""   # プレイヤーの促し（rest / eat）。安全な区切りで1回だけ評価する。受理時は物資・ベッドを予約しない
 
@@ -169,6 +173,18 @@ func _interrupt_for_life_need() -> bool:
 func tick(delta: float) -> void:
 	if ch.away:
 		return
+	if ch.floor_i == 0 and not ch.down:
+		for e in game.enemies_root.get_children():
+			if e.ecological and not e.dead and e.threatens(ch) and ch.position.distance_to(e.position) < FieldOperations.NOTICE_DISTANCE:
+				retreating = true
+				danger_hold = true
+				safe_after = game.director.elapsed + FieldOperations.RETRY_SECONDS
+				break
+	if retreating and ch.floor_i != 0 and ch._climb_dest == null: retreating = false
+	if (retreating or game.operations.stance == "recall") and (ch.floor_i == 0 or ch._climb_dest != null or state in [State.NOTICE,State.MOVE_TO_RESOURCE,State.GATHER,State.HUNT_MOVE,State.HUNT_ATTACK,State.COMBAT_MOVE,State.COMBAT]):
+		if _recall_tick(delta): return
+	if state == State.RETURN_BASE and not game.world.recalling() and not game.quarry.recalling() and ch.floor_i != 0:
+		_set_state(State.SEARCH)
 	if eat_wait > 0.0:
 		eat_wait -= delta
 	if (game.quarry.recalling() or game.world.recalling()) and _recall_tick(delta):
@@ -339,11 +355,11 @@ func tick(delta: float) -> void:
 
 		# ---- 加工 ----
 		State.MOVE_TO_MACHINE:
-			ch.target = game.processor.work_point() + ch.slot_offset      # 次に作る物の設備（加工設備／ワークベンチ）へ
+			ch.target = game.processor.lane(process_slot).work_point() + ch.slot_offset      # 次に作る物の設備（加工設備／ワークベンチ）へ
 			if ch.move_to_target(delta):
 				_set_state(State.PROCESS)
 		State.PROCESS:
-			var p: BaseProcessor = game.processor
+			var p: BaseProcessor = game.processor.lane(process_slot)
 			if not p.output.is_empty() and not p.continue_batch(ch.carry_limit()):
 				if p.packed_output_blocked():
 					p.worker = null
@@ -467,7 +483,7 @@ func tick(delta: float) -> void:
 			ch.target = enemy.position + Vector2(-30, 0)
 			ch.move_to_target(delta)
 			ch.attacking = true
-			enemy.take_damage(ATTACK_DPS * ch.skill_mult(GameData.Job.COMBAT) * ch.weapon_mult() * delta)
+			enemy.take_damage(ATTACK_DPS * ch.skill_mult(GameData.Job.COMBAT) * ch.weapon_mult() * delta, ch)
 			ch.fatigue = minf(CrewStatusDB.MAX_FATIGUE, ch.fatigue + CrewStatusDB.FATIGUE_COMBAT_GAIN * delta)
 
 		# ---- 休憩 ----
@@ -592,7 +608,15 @@ func _prey_target() -> Vector2:
 	return p
 
 
+func order_attack(target) -> bool:
+	if not is_instance_valid(target) or target.dead or not target.present or ch.carrying>=0 or ch.away or ch.down or game.operations.stance=="recall" or ch.hp<FieldOperations.RECOVER_HP:return false
+	if ch.position.distance_to(target.position)>FieldOperations.NOTICE_DISTANCE:return false
+	_release_task();enemy=target
+	_set_state(State.COMBAT_MOVE)
+	return true
+
 func _enemy_valid() -> bool:
+	if is_instance_valid(enemy) and enemy.ecological and (not enemy.present or ch.position.distance_to(enemy.position)>FieldOperations.NOTICE_DISTANCE+40.0 or absf(ch.position.x-enemy.home_x)>enemy.territory()): return false
 	return enemy != null and is_instance_valid(enemy) and not enemy.dead
 
 
@@ -648,6 +672,10 @@ func _search() -> void:
 
 ## 生活の必要（CrewStatus.life_needs の順）のうち、いま実際に行けるものを始める。始めたら true
 func _try_life_need() -> bool:
+	if danger_hold and ch.hp < FieldOperations.RECOVER_HP and ch.floor_i != 0:
+		if _wants_to_eat() and _try_start_eat(): return true
+		_start_rest(true)
+		return true
 	for need in CrewStatus.life_needs(ch):
 		if need == "eat":
 			if _try_start_eat():
@@ -758,6 +786,7 @@ func _try_start(job: int) -> bool:
 			var best = null
 			var best_d := INF
 			for c in game.creatures_root.get_children():
+				if not game.operations.can_depart(ch,c.position): continue
 				if c.dead or c.hunted_by != null or c.position.x < 60.0 or c.position.x > 1180.0:
 					continue
 				if not game.hunt_allowed(c.species) or not game.hunt_has_room(c.species):
@@ -768,6 +797,7 @@ func _try_start(job: int) -> bool:
 					best = c
 			if best == null:
 				return false
+			game.operations.start_outing()
 			prey = best
 			prey.hunted_by = ch
 			_set_state(State.HUNT_MOVE)
@@ -780,6 +810,7 @@ func _try_start(job: int) -> bool:
 			var best_score := 0.0
 			var inflight: Dictionary = game.gather_room()
 			for r in game.resources_root.get_children():
+				if not game.operations.can_depart(ch,r.position): continue
 				if not game.quarry.allowed_resource(r):
 					continue
 				if r.claimed_by != null or r.position.x < 60.0 or r.position.x > 1250.0:
@@ -806,6 +837,7 @@ func _try_start(job: int) -> bool:
 					best = r
 			if best == null:
 				return false
+			game.operations.start_outing()
 			res = best
 			res.claimed_by = ch
 			if res is GatherPoint:
@@ -847,9 +879,10 @@ func _try_start(job: int) -> bool:
 			_set_state(State.HAUL_TAKE)
 			return true
 		GameData.Job.PROCESS:
-			var p: BaseProcessor = game.processor
-			if p.has_work_for_worker():
-				p.worker = ch
+			var available: int = game.processor.free_lane()
+			if available >= 0:
+				process_slot = available
+				game.processor.lane(process_slot).worker = ch
 				_set_state(State.MOVE_TO_MACHINE)
 				return true
 			return false
@@ -869,6 +902,8 @@ func _try_start(job: int) -> bool:
 			var best = null
 			var best_d := INF
 			for e in game.enemies_root.get_children():
+				if game.operations.stance == "recall" or retreating or danger_hold: continue
+				if e.ecological and (ch.hp < FieldOperations.RECOVER_HP or not e.threatens(ch) or ch.position.distance_to(e.position)>FieldOperations.NOTICE_DISTANCE): continue
 				if e.dead or e.position.x > 1270.0:
 					continue
 				var d: float = e.position.distance_to(ch.position)
@@ -887,7 +922,6 @@ func _try_start(job: int) -> bool:
 func _release_task() -> void:
 	if res != null and is_instance_valid(res) and res.claimed_by == ch:
 		res.claimed_by = null
-		res.gather_progress = 0.0
 		res.reserved = 1
 	res = null
 	gather_ev = {}
@@ -909,8 +943,8 @@ func _release_task() -> void:
 	if state == State.REPAIR_TAKE and repair_part >= 0:
 		game.base.repair_reserved.erase(repair_part)
 		repair_part = -1
-	if game.processor.worker == ch:
-		game.processor.worker = null
+	for p in game.processor.lanes():
+		if p.worker == ch: p.worker = null
 
 
 ## 寝室が別の区画へ移ったとき（部屋の変更）。眠っていた仲間は、新しいベッドの位置へ歩き直す。

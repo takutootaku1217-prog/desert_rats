@@ -1,0 +1,16 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+TOOL_FLOW 新規開始・通常物資・出来事あり・実AI・定期保存再開。素材/道具/設備の注入なし。seed=501
+STAGE 27.8s 木材のみで作業台完成
+STAGE 44.8s 木製採掘具を製作・装備
+STAGE 92.2s 地域到着 east_sands
+STAGE 176.4s 木製斧と石製採掘具を製作
+STAGE 190.6s 石の斧を製作
+STAGE 261.6s 地域到着 central_trade
+ACTION 作業場へ確保 木材 x4
+STAGE 292.4s 鉱床へ行く前に鉄道具2種の柄用木材4を確保
+STAGE 340.2s 地域到着 old_mine
+STAGE 360.2s 鉱床到着
+FAIL 未達: 石製道具で採取した鉄鉱石を精錬 / 大鉱山入口に停泊中
+PROGRESSION {"build_queue":[],"capacity":360,"events":{"attack":0,"chance":1,"escaped":0,"kills":0,"repelled":0,"trouble":1,"weather":4},"game_over":false,"inventory":{"0":1,"1":0,"2":0,"3":1,"4":0,"5":6,"6":9,"8":12,"9":9,"10":3,"12":0,"15":1,"23":4,"24":3},"phase":"石製道具で採取した鉄鉱石を精錬","quarry":"parked","report":{},"seconds":600.199999999999,"stages":["木材のみで作業台完成","木製採掘具を製作・装備","地域到着 east_sands","木製斧と石製採掘具を製作","石の斧を製作","地域到着 central_trade","鉱床へ行く前に鉄道具2種の柄用木材4を確保","地域到着 old_mine","鉱床到着"],"weight":211}
+== 結果: 1 件失敗 ==

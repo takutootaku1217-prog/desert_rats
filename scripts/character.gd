@@ -160,7 +160,7 @@ func arrive(new_fatigue: float) -> void:
 
 ## 便の開始時だけ参照。積込み済みの個数や採取予約を縮めない。
 func carry_limit() -> int:
-	return GameData.HAUL_FRAME_LIMIT if work_support == GameData.Item.HAUL_FRAME else GatherDB.CARRY_MAX
+	return GameData.HANDCART_LIMIT if work_support == GameData.Item.HANDCART else (GameData.HAUL_FRAME_LIMIT if work_support == GameData.Item.HAUL_FRAME else GatherDB.CARRY_MAX)
 
 
 ## 迎撃時の本人の攻撃補正。採取と狩猟には適用しない。
@@ -330,6 +330,8 @@ func _draw() -> void:
 		draw_rect(Rect2(snap + Vector2(-28, 0), Vector2(56, 4)), c)
 		draw_rect(Rect2(snap + Vector2(-20, 4), Vector2(40, 4)), c)
 	draw_set_transform(snap + lift, 0.0, Vector2(facing, 1.0))
+	if work_support == GameData.Item.HANDCART and not sleeping and not down:
+		draw_texture_rect(GameData.item_tex(work_support), Rect2(12, -42, 48, 48), false)
 	if work_support == GameData.Item.HAUL_FRAME and not sleeping and not down:
 		draw_texture_rect(GameData.item_tex(work_support), Rect2(-30, -51, 20, 36), false)
 		if carrying >= 0:

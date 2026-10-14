@@ -26,6 +26,7 @@ const CAPACITY := 360
 ## 鉄鉱石4・鉄3・燃料2・修理資材2）を、整数のまま扱うため**2倍**にした（食料=1 を基準の重さとする）。
 ## 書いていない物は 1（旧来の「全部1」の名残。今は主要な素材はすべてここに書いてある）。
 const SIZES := {
+	GameData.Item.HANDCART: 35, GameData.Item.STORAGE_UPGRADE_PACK: 28, GameData.Item.PARALLEL_BENCH_PACK: 28,
 	GameData.Item.HAUL_FRAME: 15, # 木2+皮1+鉄1と同重量。装備中も計上。
 	GameData.Item.WORKBENCH_PACK: 18, GameData.Item.SUPPLY_CACHE_PACK: 20, # 既存セーブの重量検証を保つ固定重量。木だけの新作業台も撤去品は18。
 	GameData.Item.SIMPLE_SPEAR: 10, # 材料と同重量。装備中も積載に含む。

@@ -39,10 +39,10 @@ func _initialize():
   check(not main.request_build(id) or id in ["bed","cargo_rack"],"1台上限を維持 "+id)
   main.build_queue.clear()
  # 倉庫満載・加工予約・採取予約・確認後変化。
- main.storage.inventory.counts={GameData.Item.BONE:360}
+ main.storage.inventory.counts={GameData.Item.BONE:main.storage.max_weight()-60}
  check(main.facility_pack_reason("cargo_rack",0).contains("容量不足"),"容量減60＋箱重量42で満載撤去を拒否")
- main.storage.inventory.counts={GameData.Item.BONE:318}
- check(main.facility_pack_reason("cargo_rack",0)=="","容量ぴったり318+42=360は許可")
+ main.storage.inventory.counts={GameData.Item.BONE:main.storage.max_weight()-60-42}
+ check(main.facility_pack_reason("cargo_rack",0)=="","縮小後容量ぴったりは許可")
  var node:=ResourceNode.new(); node.game=main; node.item=GameData.Item.BONE; node.claimed_by=main.workers[0]; node.reserved=1; main.resources_root.add_child(node)
  check(main.facility_pack_reason("cargo_rack",0).contains("予約1"),"未取得の採取予約も容量へ算入")
  node.claimed_by=null; main.resources_root.remove_child(node); node.queue_free()
