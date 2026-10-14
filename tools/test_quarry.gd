@@ -223,6 +223,8 @@ func hauling() -> void:
 func stay() -> void:
 	print("-- 設備あり・初期備蓄で20ゲーム内分の滞在（出来事なし）")
 	await fresh(true)
+	# 採掘準備後の長期滞在fixture。新規開始は道具なしなので、ここでは明示して装備。
+	main.workers[0].tools = {"mine": GameData.Item.HAMMER}
 	park_fixture()
 	main.quarry.near_only = false
 	for i in main.workers.size():

@@ -69,9 +69,10 @@ func finite_yield():
 	w.ai.res = pt
 	pt.claimed_by = w
 	w.ai.bag_limit = 3
-	w.ai.gather_ev = {"eff":0.3,"seconds":1.0,"bonus":{}}
+	w.tools = {"mine":GameData.Item.HAMMER}
+	w.ai.gather_ev = w.gather_eval(pt.kind)
 	w.ai._set_state(CharacterAI.State.GATHER)
-	w.ai._work_point(1.0)
+	w.ai._work_point(0.3 * float(w.ai.gather_ev.seconds) / float(w.ai.gather_ev.eff))
 	check(pt.remaining == 6 and is_equal_approx(pt.work,0.3), "弱い道具の未完作業は資源を消さない")
 	w.ai._release_task()
 	check(is_equal_approx(pt.work,0.3), "取消でも地点の端数を保持")
@@ -79,7 +80,7 @@ func finite_yield():
 		w.ai.res = pt
 		pt.claimed_by = w
 		w.ai.bag_limit = 3
-		w.ai.gather_ev = {"eff":0.3,"seconds":1.0,"bonus":{}}
+		w.ai.gather_ev = w.gather_eval(pt.kind)
 		w.ai._set_state(CharacterAI.State.GATHER)
 		for tick in 60:
 			if w.ai.state != CharacterAI.State.GATHER: break
@@ -90,13 +91,15 @@ func finite_yield():
 	pt.remaining = 1
 	pt.work = 0.25
 	w.ai.res = pt
-	w.ai.gather_ev = {"eff":0.0,"seconds":1.0,"bonus":{}}
+	w.tools.clear()
+	w.ai.gather_ev = w.gather_eval(pt.kind)
 	w.ai._set_state(CharacterAI.State.GATHER)
 	w.ai._work_point(100)
 	check(pt.remaining == 1 and is_equal_approx(pt.work,0.25), "効率0は生成も資源消費も進捗増加もない")
 	main.storage.capacity_bonus = main.storage.current_weight() - CargoDB.CAPACITY
 	w.ai.res = pt
-	w.ai.gather_ev = {"eff":1.0,"seconds":1.0,"bonus":{}}
+	w.tools = {"mine":GameData.Item.HAMMER}
+	w.ai.gather_ev = w.gather_eval(pt.kind)
 	w.ai._set_state(CharacterAI.State.GATHER)
 	w.ai._work_point(100)
 	check(pt.remaining == 1 and is_equal_approx(pt.work,0.25), "満載中は無料の作業進捗を貯めない")
@@ -133,7 +136,7 @@ func bonus_conservation():
 	var expected := 0
 	seed(1120)
 	for i in 12:
-		if randf() < 0.4: expected += 1
+		if randf() < 0.5: expected += 1
 	seed(1120)
 	var pt = main.quarry.points[0]
 	pt.remaining = 12
@@ -141,7 +144,8 @@ func bonus_conservation():
 	w.ai.res = pt
 	pt.claimed_by = w
 	w.ai.bag_limit = 12
-	w.ai.gather_ev = {"eff":1.5,"seconds":1.0,"bonus":{GameData.Item.STONE:0.4}}
+	w.tools = {"mine":GameData.Item.ADV_PICK}
+	w.ai.gather_ev = w.gather_eval(pt.kind)
 	w.ai._set_state(CharacterAI.State.GATHER)
 	for i in 50:
 		if w.ai.state != CharacterAI.State.GATHER: break
@@ -157,7 +161,15 @@ func bonus_conservation():
 	w.ai.res = pt
 	pt.claimed_by = w
 	w.ai.bag_limit = 1
-	w.ai.gather_ev = {"eff":1.0,"seconds":1.0,"bonus":{GameData.Item.STONE:1.0}}
+	w.tools = {"mine":GameData.Item.ADV_PICK}
+	w.ai.gather_ev = w.gather_eval(pt.kind)
+	# 実道具の副産物確率0.5が当たるseedを固定（性能キャッシュの注入なし）。
+	var bonus_seed := 1
+	seed(bonus_seed)
+	while randf() >= 0.5:
+		bonus_seed += 1
+		seed(bonus_seed)
+	seed(bonus_seed)
 	w.ai._set_state(CharacterAI.State.GATHER)
 	w.ai._work_point(1.0)
 	check(main.storage.current_weight() == 360 and pt.remaining == 0 and main.quarry.loose.get(GameData.Item.STONE,0) == 1, "主素材で満載になった副産物は残置へ保存")

@@ -655,11 +655,7 @@ func _update_live() -> void:
 		for kind in GatherDB.POINTS:
 			if GatherDB.POINTS[kind]["slot"] != slot:
 				continue
-			var ev: Dictionary = w.gather_eval(kind)
-			if float(ev["eff"]) < GatherDB.MIN_EFF:
-				parts.append("%s：採取対象外" % GatherDB.POINTS[kind]["name"])
-			else:
-				parts.append("%s：回収率 %.1f%%" % [GatherDB.POINTS[kind]["name"], float(ev["eff"]) * 100.0])
+			parts.append(GatherDB.result_text(kind, cur, w.ranks.get(GameData.Field.GATHERER, 0), w.field_mult(GameData.Field.GATHERER)))
 		_live["yield_%s" % slot].text = " ／ ".join(PackedStringArray(parts))
 	for job in GameData.job_list():
 		if job != GameData.Job.REST and _live.has("eff_%d" % job):

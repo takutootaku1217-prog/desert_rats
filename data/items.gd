@@ -15,7 +15,7 @@ const CATEGORY_COLORS := {
 const ORDER := [
 	GameData.Item.MEAT, GameData.Item.HIDE, GameData.Item.BONE, GameData.Item.FAT, GameData.Item.WOOD, GameData.Item.STONE, GameData.Item.IRON_ORE,
 	GameData.Item.IRON, GameData.Item.REPAIR_KIT, GameData.Item.BED_PACK, GameData.Item.STORAGE_BOX, GameData.Item.WORKBENCH_PACK, GameData.Item.SUPPLY_CACHE_PACK, GameData.Item.FOOD, GameData.Item.FUEL,
-	GameData.Item.HAMMER, GameData.Item.PICKAXE, GameData.Item.ADV_PICK, GameData.Item.AXE, GameData.Item.IRON_AXE, GameData.Item.SIMPLE_SPEAR, GameData.Item.HAUL_FRAME,
+	GameData.Item.WOOD_PICK, GameData.Item.WOOD_AXE, GameData.Item.HAMMER, GameData.Item.PICKAXE, GameData.Item.ADV_PICK, GameData.Item.AXE, GameData.Item.IRON_AXE, GameData.Item.SIMPLE_SPEAR, GameData.Item.HAUL_FRAME,
 ]
 
 
@@ -92,6 +92,12 @@ static func sources_of(item: int) -> Array:
 
 ## 選択詳細用。効果値は実処理と同じ定義から読み、平常HUDには増やさない。
 static func effect_text(item: int) -> String:
+	if GatherDB.is_tool_item(item):
+		var parts: Array[String] = []
+		for kind in GatherDB.POINTS:
+			if GatherDB.slot_of_point(kind) == GatherDB.slot_of_tool(item):
+				parts.append(GatherDB.result_text(kind, item, int(GatherDB.tool_def(item)["need_rank"]), 1.0))
+		return "作業台で製作→Cで装備（自動割当も可）。適性を満たす場合の基準値：" + " ／ ".join(parts) + "。上位道具ほど同じ時間で多く採取。残量・袋・積載の空きまで。"
 	match item:
 		GameData.Item.HAUL_FRAME:
 			return "Cの仕事補助枠で装備。採取袋・倉庫⇄作業場の1便を%d→%d個にします（調整用）。今の荷物・予約は保持し、次の便から反映。拠点容量は増えません。重量%dは装備中も計上。" % [GatherDB.CARRY_MAX, GameData.HAUL_FRAME_LIMIT, CargoDB.size_of(item)]

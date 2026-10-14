@@ -27,7 +27,7 @@ const CAPACITY := 360
 ## 書いていない物は 1（旧来の「全部1」の名残。今は主要な素材はすべてここに書いてある）。
 const SIZES := {
 	GameData.Item.HAUL_FRAME: 15, # 木2+皮1+鉄1と同重量。装備中も計上。
-	GameData.Item.WORKBENCH_PACK: 18, GameData.Item.SUPPLY_CACHE_PACK: 20, # 元の建設材料と同重量。返却は完成品のみ。
+	GameData.Item.WORKBENCH_PACK: 18, GameData.Item.SUPPLY_CACHE_PACK: 20, # 既存セーブの重量検証を保つ固定重量。木だけの新作業台も撤去品は18。
 	GameData.Item.SIMPLE_SPEAR: 10, # 材料と同重量。装備中も積載に含む。
 	GameData.Item.FOOD: 1, GameData.Item.HIDE: 1, GameData.Item.BONE: 1, GameData.Item.FAT: 1,
 	GameData.Item.MEAT: 2,

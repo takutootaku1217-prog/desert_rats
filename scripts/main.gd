@@ -143,9 +143,7 @@ func _ready() -> void:
 	storage.add_item(GameData.Item.FOOD, 8)
 	storage.add_item(GameData.Item.FUEL, 2)
 	storage.add_item(GameData.Item.REPAIR_KIT, 2)
-	storage.add_item(GameData.Item.HAMMER, 1)      # 採取の道具の初期セット（あとは加工で作る）
-	storage.add_item(GameData.Item.AXE, 1)
-	if not FacilityDB.start_all:                   # 設備なしで始めるとき: 最初のワークベンチに要る鉄（data/facilities.gd）
+	if not FacilityDB.start_all:                   # 新規開始分のみ（ロード時は保存された資産を復元）
 		for it in FacilityDB.START_STOCK:
 			storage.add_item(it, FacilityDB.START_STOCK[it])
 
@@ -1023,9 +1021,26 @@ func reserved_for_builds() -> Dictionary:
 	return res
 
 
+## 鉄を使う建設の取り置きで、その鉄を採る最初の道具まで塞がない。
+## 既に誰かが採れる、または有効な道具が倉庫/加工中にあれば例外は終わる。
+func build_needs_gather_tool(item: int) -> bool:
+	if item not in [GameData.Item.WOOD_PICK, GameData.Item.HAMMER] or not _builds_need_iron(): return false
+	var kind := "rock" if item == GameData.Item.WOOD_PICK else "vein"
+	for w in workers:
+		if not _uses_tools(w): continue
+		if float(w.gather_eval(kind)["eff"]) >= GatherDB.MIN_EFF: return false
+		for tool in GameData.TOOL_ITEMS:
+			if GatherDB.slot_of_tool(tool) != GatherDB.slot_of_point(kind): continue
+			if storage.count_of(tool) + processor.pending_of(tool) <= 0: continue
+			if float(GatherDB.evaluate(kind,tool,w.ranks.get(GameData.Field.GATHERER,0),w.field_mult(GameData.Field.GATHERER))["eff"]) >= GatherDB.MIN_EFF: return false
+	return true
+
+
 ## 建設の取り置きを避けて、レシピ r の材料が取れるか。燃料の在庫が0でタンクも尽きかけているときだけは、
 ## 拠点が止まらないよう、取り置きに構わず燃料を作る（薪＝木材は建設の材料と重なるため）。
 func _spares_for(r: Dictionary, reserved: Dictionary) -> bool:
+	if build_needs_gather_tool(int(r["out"])):
+		return true
 	if reserved.is_empty():
 		return true
 	if r["out"] == GameData.Item.FUEL and storage.count_of(GameData.Item.FUEL) == 0 and base.fuel < 30.0:

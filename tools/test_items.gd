@@ -79,7 +79,7 @@ func _test_itemdb() -> void:
 	var ok := true
 	for it in all:
 		ok = ok and ItemDB.name_of(it) != "?" and ItemDB.CATEGORIES.has(ItemDB.category_of(it)) and ItemDB.tex(it) != null
-	check(ok and all.size() == 22, "インベントリに出る22種すべてに、名前・分類・絵がある")
+	check(ok and all.size() == 24, "インベントリに出る24種すべてに、名前・分類・絵がある")
 	var unique := {}
 	for it in all: unique[it]=true
 	check(unique.size()==all.size(), "アイテムIDに重複がない")
@@ -89,7 +89,7 @@ func _test_itemdb() -> void:
 		var material_weight:=0
 		for ingredient in FacilityDB.def(id)["cost"]:
 			material_weight+=CargoDB.size_of(ingredient)*int(FacilityDB.def(id)["cost"][ingredient])
-		check(CargoDB.size_of(item)==pair[2] and CargoDB.size_of(item)==material_weight and CargoDB.bay_of(item)>=0 and item not in GameData.TOOL_ITEMS, "撤去品の重量と材料重量・積載対象が一致: "+id)
+		check(CargoDB.size_of(item)==pair[2] and (material_weight==12 if id=="workbench" else CargoDB.size_of(item)==material_weight) and CargoDB.bay_of(item)>=0 and item not in GameData.TOOL_ITEMS, "撤去品の旧保存重量を維持、建設材料と積載対象を確認: "+id)
 		check(ItemDB.uses_of(item).any(func(e):return e.kind=="build" and e.id==id) and ItemDB.sources_of(item).has("設備の撤去（完成品）"), "撤去品から再設置への用途・入手元: "+id)
 	var covered := true
 	for it in GameData.RAW_ITEMS + GameData.PRODUCT_ITEMS + GameData.TOOL_ITEMS:
@@ -172,7 +172,9 @@ func _test_craftdb() -> void:
 	check(known, "どのエントリも、分類の表にある分類に入っている（分類は増減できる）")
 	# 材料は作業場で数える
 	_set_storage({GameData.Item.STONE: 50, GameData.Item.WOOD: 50})
-	var hammer := CraftDB.entry_of("tool_hammer")               # 石2＋木材1（手作業）
+	var hammer := CraftDB.entry_of("tool_hammer")               # 石2＋木材1（作業台）
+	check(CraftDB.evaluate(hammer, main, 1)["state"] == "locked", "石製道具も作業台が必要")
+	main.base.add_facility("workbench", true)
 	var ev: Dictionary = CraftDB.evaluate(hammer, main, 1)
 	check(ev["state"] == "short" and ev["source"] == "作業場", "倉庫に石も木材も50個あっても、作業場に無ければ「材料不足」（倉庫の分は使えない）")
 	check(ev["can_transfer"] and ev["missing"].size() == 2, "足りない分が倉庫にあるので、「運べば作れる」と分かる")
@@ -188,6 +190,7 @@ func _test_craftdb() -> void:
 	check(ev["max_qty"] == 5, "石10・木材5なら、最大 5 回（材料の少ないほうで決まる）")
 	ev = CraftDB.evaluate(hammer, main, 6)
 	check(ev["state"] == "short" and ev["can_transfer"] and ev["missing"][GameData.Item.STONE] == 2, "6回分は足りない（石12・木材6が要る。足りない分は倉庫にある）")
+	main.base.built.erase("workbench") # 次は未設置fixtureで解放待ちを検査
 	# 必要設備がない（解放待ち）
 	var pick := CraftDB.entry_of("tool_pick")                    # ワークベンチが必要
 	ev = CraftDB.evaluate(pick, main, 1)
@@ -427,7 +430,7 @@ func _test_ui() -> void:
 	check(craft.is_open() and not inv.is_open(), "インベントリの［制作］で、制作の画面が開く（インベントリは閉じる）")
 	inv._unhandled_input(_key(KEY_ESCAPE))
 	# ---- 制作
-	check(craft._cat == "道具" and craft._list.get_child_count() == 5, "制作の画面: 分類「道具」に5つ（簡易ハンマー・簡易の斧・鉄製ピッケル・鉄の斧・高性能ピッケル）")
+	check(craft._cat == "道具" and craft._list.get_child_count() == 7, "制作の画面: 分類「道具」に木製2・石製2・鉄製2・高性能の7つ")
 	check(_find_button(craft, "道具") != null and _find_button(craft, "建設") != null and _find_button(craft, "料理") != null and _find_button(craft, "加工") != null and _find_button(craft, "装備") != null, "分類の切り替え（道具・建設・料理・加工・装備。エントリのない分類は出ない）")
 	craft.open_entry("tool_hammer")
 	main.processor.stock.counts.clear()

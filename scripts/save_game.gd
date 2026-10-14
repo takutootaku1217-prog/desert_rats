@@ -47,6 +47,12 @@ static func capture(g) -> Dictionary:
 	for w in g.expedition.party: d.party.append(g.workers.find(w))
 	for w in g.workers:
 		d.crew.append({"worker": fields(w, WORKER), "ai": fields(w.ai, AI), "res": resources.find(w.ai.res), "prey": creatures.find(w.ai.prey), "enemy": enemies.find(w.ai.enemy)})
+		# 対象がこのフレームで消えた直後の状態は、ロード時と同じ再開状態に正規化。
+		# ライブのAI/荷物には触れず、失効参照を保存して復元時だけ値が変わるのを防ぐ。
+		var row: Dictionary = d.crew.back()
+		var S = CharacterAI.State
+		if (row.ai.state in [S.NOTICE,S.MOVE_TO_RESOURCE,S.GATHER] and row.res < 0) or (row.ai.state in [S.HUNT_MOVE,S.HUNT_ATTACK] and row.prey < 0) or (row.ai.state in [S.COMBAT_MOVE,S.COMBAT] and row.enemy < 0):
+			row.ai.state = S.MOVE_TO_STORAGE if row.worker.carrying >= 0 else S.SEARCH
 	for r in resources:
 		var row := {"resource": fields(r, RESOURCE), "gather": {}, "quarry_id": "", "quarry_group": ""}
 		if r is GatherPoint: row.gather = fields(r, GATHER)
@@ -112,6 +118,12 @@ static func recipe(r) -> bool:
 	else:
 		canonical = GameData.recipe_by_id(r.id)
 	if canonical.is_empty(): return false
+	# この変更以前に投入した材料と進捗を保持する。新規注文は現行レシピのみ。
+	canonical = canonical.duplicate(true)
+	if r.id == "build:workbench" and r["in"] == {GameData.Item.WOOD:3, GameData.Item.IRON:1}:
+		canonical["in"] = r["in"].duplicate()
+	if r.id in ["tool_hammer", "tool_axe"] and r.get("station", "") == "":
+		canonical.erase("station")
 	for k in ["in", "out", "n", "time", "field", "tank_fuel", "station"]:
 		if r.get(k, "" if k == "station" else null) != canonical.get(k, "" if k == "station" else null): return false
 	return true

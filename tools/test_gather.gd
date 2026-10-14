@@ -112,11 +112,11 @@ func _run() -> void:
 	var e_ham := GatherDB.evaluate("vein", GameData.Item.HAMMER, 5, 1.0)
 	var e_pk := GatherDB.evaluate("vein", GameData.Item.PICKAXE, 5, 1.0)
 	var e_adv := GatherDB.evaluate("vein", GameData.Item.ADV_PICK, 5, 1.0)
-	print("       鉱床10単位: 素手%.1f 簡易ハンマー%.1f 鉄製ピッケル%.1f 高性能%.1f 個" % [e_h["eff"] * 10.0, e_ham["eff"] * 10.0, e_pk["eff"] * 10.0, e_adv["eff"] * 10.0])
-	check(e_h["eff"] < e_ham["eff"] and e_ham["eff"] < e_pk["eff"] and e_pk["eff"] < e_adv["eff"], "道具が良いほど取れる割合が高い（素手 < ハンマー < ピッケル < 高性能）")
-	check(absf(e_ham["eff"] * 10.0 - 3.0) < 0.6 and absf(e_pk["eff"] * 10.0 - 7.0) < 0.6 and absf(e_adv["eff"] * 10.0 - 10.0) < 0.6,
-			"鉱10個 → ハンマー約3個・ピッケル約7個・高性能10個（ユーザーの例）")
-	check(e_h["seconds"] > e_ham["seconds"] and e_ham["seconds"] > e_pk["seconds"] and e_pk["seconds"] > e_adv["seconds"], "道具が良いほど速く掘れる")
+	print("       基準時間10回分: 素手%.1f 石ハンマー%.1f 鉄製ピッケル%.1f 高性能%.1f 個" % [e_h["eff"] * 10.0, e_ham["eff"] * 10.0, e_pk["eff"] * 10.0, e_adv["eff"] * 10.0])
+	check(e_h["eff"] < e_ham["eff"] and e_ham["eff"] < e_pk["eff"] and e_pk["eff"] < e_adv["eff"], "道具が良いほど同時間の採取量が増える（素手 < ハンマー < ピッケル < 高性能）")
+	check(is_equal_approx(e_ham["eff"], 3.0 * GatherDB.BASE_YIELD_RATE) and is_equal_approx(e_pk["eff"], 4.0 * GatherDB.BASE_YIELD_RATE) and is_equal_approx(e_adv["eff"], 5.0 * GatherDB.BASE_YIELD_RATE),
+			"旧素手の基準速度を守り、同時間の量比は石3・鉄4・高性能5（残量から1対1）")
+	check(e_h["seconds"] == e_ham["seconds"] and e_ham["seconds"] == e_pk["seconds"] and e_pk["seconds"] == e_adv["seconds"], "道具の基準時間は共通、量倍率で差をつける")
 	check(e_adv["bonus"].has(GameData.Item.STONE) and e_pk["bonus"].is_empty(), "高性能ピッケルだけ副産物がある")
 	var lo := GatherDB.evaluate("vein", GameData.Item.ADV_PICK, 0, 1.0)      # 回収E
 	var hi := GatherDB.evaluate("vein", GameData.Item.ADV_PICK, 4, 1.0)      # 回収A
@@ -127,7 +127,7 @@ func _run() -> void:
 	check(GatherDB.evaluate("vein", -1, 3, 1.0)["eff"] < GatherDB.MIN_EFF, "素手では鉱床はほとんど取れない（採らない判断の基準 %.2f 未満）" % GatherDB.MIN_EFF)
 	# 3つの要素がそれぞれ結果を変える
 	var base_ev := GatherDB.evaluate("rock", GameData.Item.HAMMER, 2, 1.0)
-	check(GatherDB.evaluate("vein", GameData.Item.HAMMER, 2, 1.0)["eff"] != base_ev["eff"]
+	check(GatherDB.evaluate("vein", GameData.Item.HAMMER, 2, 1.0)["seconds"] != base_ev["seconds"]
 			and GatherDB.evaluate("rock", GameData.Item.PICKAXE, 2, 1.0)["eff"] != base_ev["eff"]
 			and GatherDB.evaluate("rock", GameData.Item.HAMMER, 2, 1.4)["eff"] != base_ev["eff"], "採取ポイント・道具・仲間の能力のどれを変えても結果が変わる")
 	# 低ランクには扱いやすい道具のほうが良いことがある（適性）
@@ -193,6 +193,7 @@ func _run() -> void:
 
 	print("== 回収AIの判断 ==")
 	_reset()
+	for worker in W: worker.tools["mine"] = GameData.Item.WOOD_PICK
 	var rock := _point("rock", 620.0, 10)
 	check(W[0].ai._try_start(GameData.Job.GATHER) and W[0].ai.res == rock and rock.claimed_by == W[0], "空きがあれば、岩場へ採りに行く")
 	check(W[0].ai.bag_limit == GatherDB.CARRY_MAX and rock.reserved == GatherDB.CARRY_MAX, "袋は %d 個まで（倉庫の空き枠も予約する）" % GatherDB.CARRY_MAX)
@@ -229,7 +230,7 @@ func _run() -> void:
 	main.gather_policy[GameData.Item.STONE] = 3
 	main.gather_policy[GameData.Item.IRON_ORE] = 3
 	W[0].ai._try_start(GameData.Job.GATHER)
-	check(W[0].ai.res == r2, "道具の相性がよい採取ポイントを優先する（岩場 70% > 鉱床 30%）")
+	check(W[0].ai.res == r2, "同条件なら候補順で岩場を選び、資源を二重予約しない")
 	W[0].ai._release_task()
 	W[0].ai._set_state(CharacterAI.State.SEARCH)
 	# 回収の方針の★0は採らない
@@ -258,8 +259,8 @@ func _run() -> void:
 	check(ai.state == CharacterAI.State.MOVE_TO_STORAGE and W[0].carrying == GameData.Item.STONE and W[0].carry_n == GatherDB.CARRY_MAX,
 			"袋がいっぱいになったら倉庫へ運ぶ（石%d個）" % W[0].carry_n)
 	var used: int = pr.max_amount - pr.remaining
-	print("       掘り出した量 %d 単位 → 石 %d 個（取れる割合の設定 %.0f%%）・掘った時間 約%.1f秒" % [used, W[0].carry_n, ev["eff"] * 100.0, guard * 0.05])
-	check(absf(float(W[0].carry_n) / float(maxi(1, used)) - ev["eff"]) < 0.25, "掘り出した量と手に入った個数の比が、取れる割合に近い")
+	print("       掘り出した量 %d 単位 → 石 %d 個（採取量倍率 %.0f%%）・掘った時間 約%.1f秒" % [used, W[0].carry_n, ev["eff"] * 100.0, guard * 0.05])
+	check(W[0].carry_n == used, "掘り出した残量と主素材の取得数は厳密に一致")
 	check(pr.claimed_by == null and pr.remaining > 0 and pr.remaining < 10, "採取ポイントは残量が減り、次の人が採れる状態に戻る（残り%d）" % pr.remaining)
 	check(main.total_gathered == W[0].carry_n, "回収の累計に、袋の個数が入る")
 	# 倉庫に運ぶ

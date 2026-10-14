@@ -487,8 +487,8 @@ func tick(delta: float) -> void:
 ## 袋がいっぱい・残量が尽きたら倉庫へ運ぶ。1単位を掘る基準時間・速度倍率は 採取ポイント × 道具 × 自分の能力（data/gathering.gd）。
 func _work_point(delta: float) -> void:
 	var pt: GatherPoint = res
-	if gather_ev.is_empty():
-		gather_ev = ch.gather_eval(pt.kind)
+	# 保存された旧性能キャッシュで採取条件を迂回しない。荷物・地点の途中進捗は維持。
+	gather_ev = ch.gather_eval(pt.kind)
 	var efficiency: float = float(gather_ev["eff"])
 	if efficiency <= 0.0:
 		if _bag_n() > 0: _finish_trip()

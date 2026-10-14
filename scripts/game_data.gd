@@ -138,8 +138,8 @@ static func job_list() -> Array:
 # 狩猟・採取・購入・捕獲・探索の持ち帰りは、すべて同じ Item / Inventory に集約する。
 # ------------------------------------------------------------------
 enum Item { MEAT, HIDE, BONE, FAT, WOOD, STONE, IRON_ORE, IRON, FOOD, FUEL, REPAIR_KIT, CARCASS,
-		HAMMER, PICKAXE, ADV_PICK, AXE, IRON_AXE, BED_PACK, STORAGE_BOX, SIMPLE_SPEAR, WORKBENCH_PACK, SUPPLY_CACHE_PACK, HAUL_FRAME }        # TOOL_ITEMSだけ積載対象外。武器は装備中も計上。
-const TOOL_ITEMS := [Item.HAMMER, Item.PICKAXE, Item.ADV_PICK, Item.AXE, Item.IRON_AXE]
+		HAMMER, PICKAXE, ADV_PICK, AXE, IRON_AXE, BED_PACK, STORAGE_BOX, SIMPLE_SPEAR, WORKBENCH_PACK, SUPPLY_CACHE_PACK, HAUL_FRAME, WOOD_PICK, WOOD_AXE }        # TOOL_ITEMSだけ積載対象外。武器は装備中も計上。
+const TOOL_ITEMS := [Item.WOOD_PICK, Item.WOOD_AXE, Item.HAMMER, Item.PICKAXE, Item.ADV_PICK, Item.AXE, Item.IRON_AXE]
 const CREATURE_ITEMS := [Item.MEAT, Item.HIDE, Item.BONE, Item.FAT]   # 生物から取れる素材
 const GROUND_ITEMS := [Item.WOOD, Item.STONE, Item.IRON_ORE]          # 地面で採取する基本資源
 const RAW_ITEMS := [Item.MEAT, Item.HIDE, Item.BONE, Item.FAT, Item.WOOD, Item.STONE, Item.IRON_ORE]
@@ -152,16 +152,18 @@ const SIMPLE_WEAPON_MULT := 1.2
 const PACKED_ITEMS := [Item.BED_PACK, Item.STORAGE_BOX, Item.WORKBENCH_PACK, Item.SUPPLY_CACHE_PACK]
 const PRODUCT_ITEMS := [Item.IRON, Item.FOOD, Item.FUEL, Item.REPAIR_KIT, Item.BED_PACK, Item.STORAGE_BOX, Item.SIMPLE_SPEAR, Item.WORKBENCH_PACK, Item.SUPPLY_CACHE_PACK, Item.HAUL_FRAME]
 const ITEM_NAMES := {
+	Item.WOOD_PICK: "木製採掘具", Item.WOOD_AXE: "木製の斧",
 	Item.HAUL_FRAME: "背負いフレーム",
 	Item.WORKBENCH_PACK: "ワークベンチ（未設置）", Item.SUPPLY_CACHE_PACK: "物資庫（未設置）",
 	Item.MEAT: "生肉", Item.HIDE: "皮", Item.BONE: "骨", Item.FAT: "脂肪",
 	Item.WOOD: "木材", Item.STONE: "石", Item.IRON_ORE: "鉄鉱石",
 	Item.IRON: "鉄", Item.FOOD: "食料", Item.FUEL: "燃料", Item.REPAIR_KIT: "応急修理板", Item.BED_PACK: "寝床", Item.STORAGE_BOX: "収納ボックス",
 	Item.CARCASS: "獲物", Item.SIMPLE_SPEAR: "簡易槍",
-	Item.HAMMER: "簡易ハンマー", Item.PICKAXE: "鉄製ピッケル", Item.ADV_PICK: "高性能ピッケル",
-	Item.AXE: "簡易の斧", Item.IRON_AXE: "鉄の斧",
+	Item.HAMMER: "石のハンマー", Item.PICKAXE: "鉄製ピッケル", Item.ADV_PICK: "高性能ピッケル",
+	Item.AXE: "石の斧", Item.IRON_AXE: "鉄の斧",
 }
 const ITEM_FILES := {
+	Item.WOOD_PICK: "hammer", Item.WOOD_AXE: "axe", # 木製は既存アイコンを暫定共用
 	Item.HAUL_FRAME: "haul_frame",
 	Item.WORKBENCH_PACK: "storage_box", Item.SUPPLY_CACHE_PACK: "storage_box", # 梱包品は既存の箱アイコンを共用
 	Item.MEAT: "meat", Item.HIDE: "hide", Item.BONE: "bone", Item.FAT: "fat",
@@ -202,11 +204,16 @@ const RECIPES := [
 		"time": 3.0, "tank_fuel": 0.0, "field": Field.DEV},
 	{"id": "repair_hide", "name": "応急修理板（皮＋骨）", "in": {Item.HIDE: 1, Item.BONE: 1}, "out": Item.REPAIR_KIT, "n": 1,
 		"time": 3.0, "tank_fuel": 0.0, "field": Field.DEV},
+	# 木製段階の暫定値: 木2、3秒。既存IDは保存互換のため維持する。
+	{"id": "tool_wood_pick", "name": "木製採掘具", "in": {Item.WOOD: 2}, "out": Item.WOOD_PICK, "n": 1,
+		"time": 3.0, "tank_fuel": 0.0, "field": Field.DEV, "station": "workbench"},
+	{"id": "tool_wood_axe", "name": "木製の斧", "in": {Item.WOOD: 2}, "out": Item.WOOD_AXE, "n": 1,
+		"time": 3.0, "tank_fuel": 0.0, "field": Field.DEV, "station": "workbench"},
 	# ---- 採取の道具（data/gathering.gd）。誰かの道具の更新になるときだけ作る（Main.tool_wanted）----
-	{"id": "tool_hammer", "name": "簡易ハンマー", "in": {Item.STONE: 2, Item.WOOD: 1}, "out": Item.HAMMER, "n": 1,
-		"time": 3.0, "tank_fuel": 0.0, "field": Field.DEV},
-	{"id": "tool_axe", "name": "簡易の斧", "in": {Item.STONE: 1, Item.WOOD: 2}, "out": Item.AXE, "n": 1,
-		"time": 3.0, "tank_fuel": 0.0, "field": Field.DEV},
+	{"id": "tool_hammer", "name": "石のハンマー", "in": {Item.STONE: 2, Item.WOOD: 1}, "out": Item.HAMMER, "n": 1,
+		"time": 3.0, "tank_fuel": 0.0, "field": Field.DEV, "station": "workbench"},
+	{"id": "tool_axe", "name": "石の斧", "in": {Item.STONE: 1, Item.WOOD: 2}, "out": Item.AXE, "n": 1,
+		"time": 3.0, "tank_fuel": 0.0, "field": Field.DEV, "station": "workbench"},
 	# 鉄は修理部品（鉄＋木材）にもすぐ使われて溜まらないので、道具に要る鉄は1個にしてある（修理資材や木材で高価さを出す）
 	{"id": "tool_pick", "name": "鉄製ピッケル", "in": {Item.IRON: 1, Item.WOOD: 2}, "out": Item.PICKAXE, "n": 1,
 		"time": 4.0, "tank_fuel": 0.0, "field": Field.DEV, "station": "workbench"},
@@ -218,12 +225,13 @@ const RECIPES := [
 ## 道具に使う鉄を精錬で優先するのは、倉庫の食料がこの個数以上あるときだけ（調理を後回しにして空腹にならないように）
 const TOOL_IRON_FOOD_MIN := 4
 ## 加工品をどこまで作り置きするか（これ以上あれば、そのレシピは作らない）
-const STOCK_TARGET := {Item.FOOD: 12, Item.FUEL: 8, Item.REPAIR_KIT: 6, Item.IRON: 4,
+const STOCK_TARGET := {Item.WOOD_PICK: 1, Item.WOOD_AXE: 1, Item.FOOD: 12, Item.FUEL: 8, Item.REPAIR_KIT: 6, Item.IRON: 4,
 	Item.HAMMER: 1, Item.PICKAXE: 1, Item.ADV_PICK: 1, Item.AXE: 1, Item.IRON_AXE: 1}
 ## 最初の加工方針（★0〜5。0 = 作らない）。道具は、誰かの更新になるときだけ作られる（Main.tool_wanted）ので、
 ## 食料・燃料・修理と同じ★3にしてある（同点なら、在庫の少ない物＝道具のほうが先になるが、食料が0のときなど、同点で先に並んでいる物が勝つ）。
 ## 高性能ピッケルは、修理資材を3個使うので★2。
 const DEFAULT_RECIPE_PRIORITY := {
+	"tool_wood_pick": 3, "tool_wood_axe": 3,
 	"cook": 3, "tallow": 3, "firewood": 3, "smelt": 2, "repair_iron": 3, "repair_stone": 3, "repair_hide": 3,
 	"tool_hammer": 3, "tool_axe": 3, "tool_pick": 3, "tool_iron_axe": 3, "tool_adv_pick": 2,
 }

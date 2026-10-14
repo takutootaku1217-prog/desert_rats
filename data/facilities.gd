@@ -17,10 +17,8 @@ extends RefCounted
 static var start_all := false
 
 const BASE_STATION_NAME := "手作業（加工設備）"
-## 設備なしで始めるとき、最初の蓄えに足す物。最初のワークベンチ（木材＋鉄）を確実に建てられるようにする。
-## 鉄鉱石は鉱床（岩場より後回し）から採り、精錬もしなければ鉄にならず、ベッドがないと元気が約2.5分で尽きて
-## 加工が回らなくなるため、鉄がなくてワークベンチが建たない悪循環になる（自己診断 test_build.gd の通しで確認）。
-const START_STOCK := {GameData.Item.IRON: 1}
+## 初期作業台は木材のみ。旧セーブの鉄・設備は保存データからそのまま復元。
+const START_STOCK := {}
 
 ## 建設の依頼に足りない材料（木材・石・鉄鉱石）は、回収の優先度をこの倍率で上げる（プレイヤーが★0にした素材は除く）。
 ## 上げないと、鉄鉱石のように得点の低い素材（鉱床は岩場より後回し）は、材料が集まらず建設が進まない。
@@ -44,7 +42,7 @@ const FACILITIES := {
 	"workbench": {
 		"recovered_item": GameData.Item.WORKBENCH_PACK,
 		"name": "ワークベンチ", "desc": "手作業では作れない道具・設備をつくる作業台",
-		"cost": {GameData.Item.WOOD: 3, GameData.Item.IRON: 1}, "time": 6.0, "field": GameData.Field.DEV,
+		"cost": {GameData.Item.WOOD: 3}, "time": 6.0, "field": GameData.Field.DEV,
 		"max": 1, "requires": "", "station": true,
 		"room": "workshop", "dx": [9.0],
 		"sprite": "res://assets/base/workbench.png", "frame": Vector2i(16, 9), "stride": 18, "frames": 3,

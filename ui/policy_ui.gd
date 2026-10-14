@@ -238,7 +238,7 @@ func _build_tools_page() -> void:
 	cols.add_child(right)
 
 	# ---- 左: 仲間ごとの道具と、結果の目安 ----
-	left.add_child(UIKit.lbl("── 仲間の道具（掘り出し10単位あたりの取れる個数の目安） ──", 14, UIKit.C_DIM))
+	left.add_child(UIKit.lbl("── 仲間の道具（採取量/秒の目安） ──", 14, UIKit.C_DIM))
 	for w in game.workers:
 		var rank: int = w.ranks.get(GameData.Field.GATHERER, 0)
 		var ab: float = w.field_mult(GameData.Field.GATHERER)
@@ -260,22 +260,19 @@ func _build_tools_page() -> void:
 			for k in GatherDB.POINTS:
 				if GatherDB.POINTS[k]["slot"] != s:
 					continue
-				var ev: Dictionary = w.gather_eval(k)
-				parts.append("%s %.1f個" % [GatherDB.POINTS[k]["name"], float(ev["eff"]) * 10.0])
+				parts.append(GatherDB.result_text(k, cur, w.ranks.get(GameData.Field.GATHERER, 0), w.field_mult(GameData.Field.GATHERER)))
 			left.add_child(UIKit.lbl("　　　" + "　".join(PackedStringArray(parts)), 13, UIKit.C_DIM))
 
 	# ---- 右: 道具の性能・在庫・作り方 ----
-	right.add_child(UIKit.lbl("── 道具の性能（取れる割合＝掘り出した量のうち手に入る割合） ──", 14, UIKit.C_DIM))
-	right.add_child(UIKit.lbl("素手　　　　岩場%d%% 鉱床%d%% 枯れ木%d%%　速さ×%.1f" % [
-			int(GatherDB.HANDS["eff"]["rock"] * 100.0), int(GatherDB.HANDS["eff"]["vein"] * 100.0),
-			int(GatherDB.HANDS["eff"]["tree"] * 100.0), GatherDB.HANDS["speed"]], 13, UIKit.C_DIM))
+	right.add_child(UIKit.lbl("── 道具の性能（基準時間あたりの採取量倍率） ──", 14, UIKit.C_DIM))
+	right.add_child(UIKit.lbl("素手は木のみ。木製採掘具→石、石のハンマー→鉄鉱石。作業台は木3個。", 13, UIKit.C_DIM))
 	for it in GameData.TOOL_ITEMS:
 		var item: int = it
 		var t: Dictionary = GatherDB.TOOLS[item]
 		var effs: Array = []
 		for k in GatherDB.POINTS:
 			if t["eff"].has(k):
-				effs.append("%s%d%%" % [GatherDB.POINTS[k]["name"], int(float(t["eff"][k]) * 100.0)])
+				effs.append("%s×%.1f" % [GatherDB.POINTS[k]["name"], float(t["eff"][k])])
 		var bonus := ""
 		for k in t["bonus"]:
 			for bi in t["bonus"][k]:
