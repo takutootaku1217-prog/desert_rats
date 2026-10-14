@@ -1,0 +1,21 @@
+{
+  "baseline": "0000b9110c82944ea674a82c70e8b765811fd559",
+  "verified_commit": "f6754fd762e323bd738090c450c969b3533bd430",
+  "comparison": [
+    {
+      "path": "data/gathering.gd",
+      "identical": true,
+      "sha256": "defbbf0c559560a5d260f0dc24df8fb68810ff9665e530b4b9fd7facfff980ce"
+    },
+    {
+      "path": "scripts/gather_point.gd",
+      "identical": true,
+      "sha256": "88823ba7ae805accd9b332ef3b4bcb3f59e5dcd1d9c322ddcef123aa99f69a0c"
+    },
+    {
+      "path": "scripts/character_ai.gd::_work_point",
+      "identical": true,
+      "sha256": "0895b3891f4aff88d93b1750d40a39231c46d16e2479a487d72ae4c1475965db"
+    }
+  ]
+}

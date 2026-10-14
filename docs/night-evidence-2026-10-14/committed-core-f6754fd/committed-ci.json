@@ -1,0 +1,21 @@
+{
+  "checked_at_utc": "2026-10-14T19:12:50.597694+00:00",
+  "commit": "f6754fd762e323bd738090c450c969b3533bd430",
+  "via": "GitHub connector: github.fetch GET; combined status tool",
+  "actions": {
+    "total_count": 0,
+    "workflow_runs": []
+  },
+  "checks": {
+    "total_count": 0,
+    "check_runs": []
+  },
+  "statuses": [],
+  "repository_workflows_at_commit": [],
+  "note": "Shell gh/urllib could not reach the API (403); authenticated connector reads succeeded. Actions query did not filter to PR events.",
+  "urls": {
+    "actions": "https://api.github.com/repos/takutootaku1217-prog/desert_rats/actions/runs?head_sha=f6754fd762e323bd738090c450c969b3533bd430&per_page=100",
+    "checks": "https://api.github.com/repos/takutootaku1217-prog/desert_rats/commits/f6754fd762e323bd738090c450c969b3533bd430/check-runs?per_page=100",
+    "status": "https://api.github.com/repos/takutootaku1217-prog/desert_rats/commits/f6754fd762e323bd738090c450c969b3533bd430/status"
+  }
+}
