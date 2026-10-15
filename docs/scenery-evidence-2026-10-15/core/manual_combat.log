@@ -1,0 +1,107 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+  ok 仲間0 normal sand_stalker 明示攻撃受理
+  ok 仲間0 normal sand_stalker 初撃後も継続
+  ok 仲間0 normal hull_breaker 明示攻撃受理
+  ok 仲間0 normal hull_breaker 初撃後も継続
+  ok 仲間0 normal dust_guard 明示攻撃受理
+  ok 仲間0 normal dust_guard 初撃後も継続
+  ok 中立の反撃は指示した本人へ
+  ok 仲間0 normal paraceratherium 明示攻撃受理
+  ok 仲間0 normal paraceratherium 初撃後も継続
+  ok 中立の反撃は指示した本人へ
+  ok 仲間0 normal dune_horn 明示攻撃受理
+  ok 仲間0 normal dune_horn 初撃後も継続
+  ok 中立の反撃は指示した本人へ
+  ok 仲間0 alert sand_stalker 明示攻撃受理
+  ok 仲間0 alert sand_stalker 初撃後も継続
+  ok 仲間0 alert hull_breaker 明示攻撃受理
+  ok 仲間0 alert hull_breaker 初撃後も継続
+  ok 仲間0 alert dust_guard 明示攻撃受理
+  ok 仲間0 alert dust_guard 初撃後も継続
+  ok 中立の反撃は指示した本人へ
+  ok 仲間0 alert paraceratherium 明示攻撃受理
+  ok 仲間0 alert paraceratherium 初撃後も継続
+  ok 中立の反撃は指示した本人へ
+  ok 仲間0 alert dune_horn 明示攻撃受理
+  ok 仲間0 alert dune_horn 初撃後も継続
+  ok 中立の反撃は指示した本人へ
+  ok 仲間1 normal sand_stalker 明示攻撃受理
+  ok 仲間1 normal sand_stalker 初撃後も継続
+  ok 仲間1 normal hull_breaker 明示攻撃受理
+  ok 仲間1 normal hull_breaker 初撃後も継続
+  ok 仲間1 normal dust_guard 明示攻撃受理
+  ok 仲間1 normal dust_guard 初撃後も継続
+  ok 中立の反撃は指示した本人へ
+  ok 仲間1 normal paraceratherium 明示攻撃受理
+  ok 仲間1 normal paraceratherium 初撃後も継続
+  ok 中立の反撃は指示した本人へ
+  ok 仲間1 normal dune_horn 明示攻撃受理
+  ok 仲間1 normal dune_horn 初撃後も継続
+  ok 中立の反撃は指示した本人へ
+  ok 仲間1 alert sand_stalker 明示攻撃受理
+  ok 仲間1 alert sand_stalker 初撃後も継続
+  ok 仲間1 alert hull_breaker 明示攻撃受理
+  ok 仲間1 alert hull_breaker 初撃後も継続
+  ok 仲間1 alert dust_guard 明示攻撃受理
+  ok 仲間1 alert dust_guard 初撃後も継続
+  ok 中立の反撃は指示した本人へ
+  ok 仲間1 alert paraceratherium 明示攻撃受理
+  ok 仲間1 alert paraceratherium 初撃後も継続
+  ok 中立の反撃は指示した本人へ
+  ok 仲間1 alert dune_horn 明示攻撃受理
+  ok 仲間1 alert dune_horn 初撃後も継続
+  ok 中立の反撃は指示した本人へ
+  ok 仲間2 normal sand_stalker 明示攻撃受理
+  ok 仲間2 normal sand_stalker 初撃後も継続
+  ok 仲間2 normal hull_breaker 明示攻撃受理
+  ok 仲間2 normal hull_breaker 初撃後も継続
+  ok 仲間2 normal dust_guard 明示攻撃受理
+  ok 仲間2 normal dust_guard 初撃後も継続
+  ok 中立の反撃は指示した本人へ
+  ok 仲間2 normal paraceratherium 明示攻撃受理
+  ok 仲間2 normal paraceratherium 初撃後も継続
+  ok 中立の反撃は指示した本人へ
+  ok 仲間2 normal dune_horn 明示攻撃受理
+  ok 仲間2 normal dune_horn 初撃後も継続
+  ok 中立の反撃は指示した本人へ
+  ok 仲間2 alert sand_stalker 明示攻撃受理
+  ok 仲間2 alert sand_stalker 初撃後も継続
+  ok 仲間2 alert hull_breaker 明示攻撃受理
+  ok 仲間2 alert hull_breaker 初撃後も継続
+  ok 仲間2 alert dust_guard 明示攻撃受理
+  ok 仲間2 alert dust_guard 初撃後も継続
+  ok 中立の反撃は指示した本人へ
+  ok 仲間2 alert paraceratherium 明示攻撃受理
+  ok 仲間2 alert paraceratherium 初撃後も継続
+  ok 中立の反撃は指示した本人へ
+  ok 仲間2 alert dune_horn 明示攻撃受理
+  ok 仲間2 alert dune_horn 初撃後も継続
+  ok 中立の反撃は指示した本人へ
+  ok 同じ命令の連打を受理
+  ok 同じ命令の連打を受理
+  ok 同じ命令の連打を受理
+  ok 同じ命令の連打を受理
+  ok 同じ命令の連打を受理
+  ok 別の危険敵がいても明示対象を維持
+  ok 明示対象を変更
+  ok 攻撃中の命令・対象を保存復元
+  ok 読込後も明示攻撃が継続
+  ok 後退命令直後は攻撃連打で帰還を取消さない
+  ok 後退命令で帰還して危険待機
+  ok 屋内帰還後は敵の追跡を打切る
+  ok 帰還後の通常再開で待機解除
+  ok recall で攻撃中断・拠点帰還
+  ok injury で攻撃中断・拠点帰還
+  ok HP75未満では再攻撃を拒否
+  ok hunger で攻撃中断・拠点帰還
+  ok 未挑発中立へ自発攻撃しない
+  ok 呼戻し態勢は明示攻撃を拒否
+  ok 旧保存の省略命令は自動戦闘として互換復元
+  ok sand_stalker Viewport右クリックで描画範囲を指定
+  ok sand_stalker 右クリック受理後に実ダメージ・継続
+  ok paraceratherium Viewport右クリックで描画範囲を指定
+  ok paraceratherium 右クリック受理後に実ダメージ・継続
+  ok dune_horn Viewport右クリックで描画範囲を指定
+  ok dune_horn 右クリック受理後に実ダメージ・継続
+== 結果: すべて成功 ==

@@ -1,0 +1,22 @@
+{
+  "assets/resources/item_handcart.png": {
+    "unchanged_from_5e69714": true,
+    "sha256": "de1aa3b601a60e344533cd3008e420dfd56ed1140234ff46fb26fba5abfca61c"
+  },
+  "data/art_spec.gd": {
+    "unchanged_from_5e69714": true,
+    "sha256": "ef1590fcfcce5dcb6fbc1775297ece5a03f6c664c694af5dd2a03d2c008f2325"
+  },
+  "tools/test_artscale.gd": {
+    "unchanged_from_5e69714": true,
+    "sha256": "a184f92b6a42f994a0b3e8b5044f43aaedf255466d964ea4d08ca464847d95d2"
+  },
+  "scripts/game_data.gd": {
+    "unchanged_from_5e69714": true,
+    "sha256": "713aca9d81b80643332f0de03eda899b003ee8887a85223bbd75927cf828b713"
+  },
+  "png_dimensions": [
+    24,
+    24
+  ]
+}

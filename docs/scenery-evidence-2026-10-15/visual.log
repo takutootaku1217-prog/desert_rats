@@ -1,0 +1,46 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 25.0.7-2+deb13u1 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 19.1.7, 256 bits)
+
+OK south_oasis 停車時は現在地域の背景
+OK 停車保存で全状態を保持 south_oasis
+OK ロード後の背景 south_oasis
+SCREENSHOT south_oasis region=south_oasis phase=stopped progress=0.0 seconds=0.6
+OK 地図の正規行先を選択
+OK 出発準備中は出発地の背景
+STAGE 3.2s 村から走り出す
+OK 出発地が徐々に遠ざかる
+OK 移動中ロードでも背景進捗一致
+STAGE 19.2s 街道中ほど
+OK 街道中ほどは街並みのない既存砂漠
+SCREENSHOT travelling region=south_oasis phase=travel progress=1092.0 seconds=19.2
+STAGE 47.2s 砂原に停車
+OK east_sands 停車時は現在地域の背景
+OK 停車保存で全状態を保持 east_sands
+OK ロード後の背景 east_sands
+SCREENSHOT east_sands region=east_sands phase=stopped progress=2400.0 seconds=47.2000000000001
+STAGE 94.8s 地域到着 central_trade
+OK central_trade 停車時は現在地域の背景
+OK 停車保存で全状態を保持 central_trade
+OK ロード後の背景 central_trade
+SCREENSHOT central_trade region=central_trade phase=stopped progress=2400.0 seconds=94.8000000000008
+STAGE 162.6s 地域到着 old_mine
+OK old_mine 停車時は現在地域の背景
+OK 停車保存で全状態を保持 old_mine
+OK ロード後の背景 old_mine
+SCREENSHOT old_mine region=old_mine phase=stopped progress=2400.0 seconds=162.599999999999
+STAGE 166.2s 鉱山から帰路
+OK 逆向き移動でも鉱山から遠ざかる
+STAGE 213.0s 都市に再停車
+OK central_trade 停車時は現在地域の背景
+OK 停車保存で全状態を保持 central_trade
+OK ロード後の背景 central_trade
+SCREENSHOT central_trade region=central_trade phase=stopped progress=0.0 seconds=212.999999999996
+OK 地図上の名前を保持 south_oasis
+OK 地図上の名前を保持 east_sands
+OK 地図上の名前を保持 central_trade
+OK 地図上の名前を保持 old_mine
+SCREENSHOT map region=central_trade phase=stopped progress=0.0 seconds=212.999999999996
+PROGRESSION {"build_queue":[],"capacity":360,"events":{"attack":0,"chance":0,"escaped":0,"kills":0,"repelled":0,"site":1,"trouble":0,"weather":1},"game_over":false,"inventory":{"0":0,"1":0,"2":0,"3":2,"4":17,"8":12,"9":8,"10":3},"phase":"都市に再停車","quarry":"road","report":{},"seconds":212.999999999996,"stages":["村から走り出す","街道中ほど","砂原に停車","地域到着 central_trade","地域到着 old_mine","鉱山から帰路","都市に再停車"],"weight":126}
+== 結果: すべて成功 ==

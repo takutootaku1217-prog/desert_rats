@@ -1,0 +1,16 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+MAP_FLOW 通常初期物資・既定出来事。作業台、地図4地域往復、鉱床12、保存再開。満載時のみ既存の選択廃棄を利用。
+STAGE 27.8s 村で作業台完成
+STAGE 77.2s 地域到着 east_sands
+STAGE 145.6s 地域到着 central_trade
+STAGE 202.0s 地域到着 old_mine
+STAGE 222.0s 鉱床へ到着
+STAGE 276.0s 近場12単位を採取
+STAGE 282.0s 全員帰還
+STAGE 302.4s 鉱山入口へ復帰
+STAGE 366.8s 地域到着 central_trade
+STAGE 411.0s 地域到着 south_oasis
+MAP_FINAL south_oasis roads=["region:south_oasis", "road:01", "region:east_sands", "road:04", "region:central_trade", "road:06", "region:old_mine", "road:03"] distance=14400.0000000002
+PROGRESSION {"build_queue":[],"capacity":360,"events":{"attack":0,"chance":0,"escaped":0,"kills":0,"repelled":0,"site":2,"trouble":0,"weather":2},"game_over":false,"inventory":{"0":2,"1":0,"2":0,"3":0,"4":3,"5":7,"6":10,"7":4,"8":12,"9":2,"10":1,"12":0,"14":0,"15":0,"23":3,"24":0},"phase":"地域到着 south_oasis","quarry":"road","report":{"discarded":{},"food":0,"generated":{"6":12},"nearby":{}},"seconds":410.999999999985,"stages":["村で作業台完成","地域到着 east_sands","地域到着 central_trade","地域到着 old_mine","鉱床へ到着","近場12単位を採取","全員帰還","鉱山入口へ復帰","地域到着 central_trade","地域到着 south_oasis"],"weight":190}
+== 結果: すべて成功 ==

@@ -1,0 +1,75 @@
+{
+  "source": "Godot game viewport; no compositing or external annotations",
+  "script": "tools/test_world_scenery.gd",
+  "platform": "Linux Godot 4.6.3 OpenGL compatibility; audio Dummy",
+  "fixed_fps": 60,
+  "time_scale": 12,
+  "images": [
+    {
+      "file": "south_oasis.png",
+      "region": "south_oasis",
+      "state": "stopped",
+      "game_seconds": 0.6,
+      "pixels": [
+        1280,
+        720
+      ],
+      "sha256": "d9e4dd4df70a77e653d70ea7cf0808f7794328840a738311ade8ff01aff5a830"
+    },
+    {
+      "file": "east_sands.png",
+      "region": "east_sands",
+      "state": "stopped",
+      "game_seconds": 47.2,
+      "pixels": [
+        1280,
+        720
+      ],
+      "sha256": "522c2b87df9b4478eb242bb211afe8dcda978d078c5ba0cb17687acc4c3ccfa6"
+    },
+    {
+      "file": "central_trade.png",
+      "region": "central_trade",
+      "state": "stopped/revisited",
+      "game_seconds": 213,
+      "pixels": [
+        1280,
+        720
+      ],
+      "sha256": "07ea7e9e923f3f1c5c53eb120358c81ffec6c61b81dfc9c38d45a8395b33179c"
+    },
+    {
+      "file": "old_mine.png",
+      "region": "old_mine",
+      "state": "stopped",
+      "game_seconds": 162.6,
+      "pixels": [
+        1280,
+        720
+      ],
+      "sha256": "3970c153d3812f182deaea8249176ed18451250092bce7bf60712d5a63b817dc"
+    },
+    {
+      "file": "travelling.png",
+      "region": "road:01",
+      "state": "travel",
+      "game_seconds": 19.2,
+      "pixels": [
+        1280,
+        720
+      ],
+      "sha256": "3d27e8dcc612ce04044d622a3b2fce8e5d4f3eb2c1e255e057a461c7f4e88fb7"
+    },
+    {
+      "file": "map.png",
+      "region": "central_trade",
+      "state": "map open",
+      "game_seconds": 213,
+      "pixels": [
+        1280,
+        720
+      ],
+      "sha256": "ef714de2028c0ff1710a0cbcdfb5b260a8c4444069bbd737883dca9a4544991e"
+    }
+  ]
+}

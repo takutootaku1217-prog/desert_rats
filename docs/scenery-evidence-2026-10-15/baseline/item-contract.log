@@ -1,0 +1,13 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+-- 絵の細かさが揃っている（背景を生成しない既存画像の契約検査）
+  ok   characters: 3 枚が、基準の大きさの 1 倍
+  ok   creatures: 3 枚が、基準の大きさの 1 倍
+  FAIL items: 21 枚が、基準の大きさの 1 倍 item_handcart.png（2.00）
+  ok   gather: 3 枚が、基準の大きさの 1 倍
+  ok   environment: 7 枚が、基準の大きさの 1 倍
+  ok   ui: 2 枚が、基準の大きさの 1 倍
+  ok   rooms: 42 枚が、基準の大きさの 1 倍
+  ok   exterior: 5 枚が、基準の大きさの 1 倍
+  ok   base: 14 枚が、基準の大きさの 1 倍
+ASSET_ONLY_FAILURES=1
