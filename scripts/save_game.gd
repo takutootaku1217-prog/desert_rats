@@ -8,7 +8,7 @@ static var last_error := ""
 static var disabled := false
 const MAIN := ["target_speed", "scroll_speed", "room_layout", "total_rooms_built", "recipe_priority", "gather_policy", "hunt_policy", "blueprints", "total_gathered", "total_hunted", "total_eaten", "tool_auto", "_tool_clock", "build_queue", "total_built", "total_wasted", "_waste_note_at", "_spawn_dist", "_creature_dist", "wave", "kills", "_wave_timer", "transfer_queue", "craft_queue", "total_transferred", "total_crafted_by_hand", "_feed_clock"]
 const WORKER := ["char_name", "palette", "priorities", "carrying", "carcass_cargo", "carrying_species", "carry_source", "carry_n", "carry_bonus", "weapon", "work_support", "tools", "speed", "target", "position", "slot_offset", "hp", "hunger", "fatigue", "stress", "calm", "mental", "down", "floor_i", "facing", "level", "gender", "ranks", "skills", "dept", "away", "bed_index", "_climb_dest", "_climb_floor", "_climb_kind"]
-const AI := ["state", "timer", "haul_item", "haul_recipe", "repair_part", "gather_ev", "bag_limit", "bag_frac", "eat_wait", "xfer_item", "xfer_dir", "current_job", "life_request", "process_slot", "safe_after", "retreating", "danger_hold"]
+const AI := ["state", "timer", "haul_item", "haul_recipe", "repair_part", "gather_ev", "bag_limit", "bag_frac", "eat_wait", "xfer_item", "xfer_dir", "current_job", "life_request", "process_slot", "safe_after", "retreating", "danger_hold", "manual_attack"]
 const BASE := ["built", "max_hp", "hp", "fuel", "parts", "total_refuel", "total_repair"]
 const PROCESSOR := ["orders", "current", "progress", "output", "batch_output", "total_done", "waiting_fuel"]
 const DIRECTOR := ["active", "forecast", "default_stance", "log", "elapsed", "distance", "stats", "enabled", "_next_in"]
@@ -56,6 +56,7 @@ static func capture(g) -> Dictionary:
 		var S = CharacterAI.State
 		if (row.ai.state in [S.NOTICE,S.MOVE_TO_RESOURCE,S.GATHER] and row.res < 0) or (row.ai.state in [S.HUNT_MOVE,S.HUNT_ATTACK] and row.prey < 0) or (row.ai.state in [S.COMBAT_MOVE,S.COMBAT] and row.enemy < 0):
 			row.ai.state = S.MOVE_TO_STORAGE if row.worker.carrying >= 0 else S.SEARCH
+			row.ai.manual_attack = false
 	for r in resources:
 		var row := {"resource": fields(r, RESOURCE), "gather": {}, "quarry_id": "", "quarry_group": ""}
 		if r is GatherPoint: row.gather = fields(r, GATHER)
@@ -155,6 +156,7 @@ static func ai_data(row: Dictionary) -> Dictionary:
 	if not result.has("safe_after"): result.safe_after = 0.0
 	if not result.has("retreating"): result.retreating = false
 	if not result.has("danger_hold"): result.danger_hold = false
+	if not result.has("manual_attack"): result.manual_attack = false
 	return result
 
 static func extra_data(d: Dictionary) -> Dictionary:
@@ -398,6 +400,7 @@ static func apply(g, d: Dictionary) -> bool:
 		# 消滅済み対象だけ再選択。保有品を瞬間移動させず、現在位置から倉庫へ運ぶ。
 		if (a.state in [S.NOTICE,S.MOVE_TO_RESOURCE,S.GATHER] and a.res == null) or (a.state in [S.HUNT_MOVE,S.HUNT_ATTACK] and a.prey == null) or (a.state in [S.COMBAT_MOVE,S.COMBAT] and a.enemy == null):
 			a.state = S.MOVE_TO_STORAGE if w.carrying >= 0 else S.SEARCH
+			a.manual_attack = false
 		if a.state in [S.HAUL_TAKE,S.HAUL_MOVE]: g.processor.incoming.append(a.haul_recipe)
 		if a.state in [S.MOVE_TO_MACHINE,S.PROCESS]: g.processor.lane(a.process_slot).worker = w
 		if a.state in [S.REST_MOVE,S.REST]: g.base.beds[w.bed_index] = w

@@ -1,0 +1,8 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+NATURAL_RETALIATE hp=74.5 enemy_hp=91.222 retreat=true manual=false
+  ok 反撃の実ダメージで既存負傷基準に達し帰還
+  ok 負傷帰還途中の保存復元
+  ok 負傷した仲間が拠点に戻る
+  ok 中立大型は帰還後に追跡解除
+== 結果: すべて成功 ==

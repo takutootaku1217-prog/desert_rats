@@ -79,7 +79,7 @@ func _process(delta: float) -> void:
 	if position.x > game.camera_left() + 1340.0 or position.x < game.camera_left() - 80.0:
 		if hunted_by != null and is_instance_valid(hunted_by):
 			hunted_by = null
-		game.world.remember(self)
+		game.world.shelter_creature(self)
 		queue_free()
 		return
 	queue_redraw()

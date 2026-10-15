@@ -12,6 +12,7 @@ var progress := 0.0 # 道路のa端からの座標。復路でも燃料用の走
 var direction := 1
 var locations := {} # location -> {entity-id: {type,data,anchor,spent}}
 var ecosystem_epoch := {}
+const FAUNA_RETURN_SECONDS := 120.0
 var next_id := 0
 const FIELDS := ["active","region","phase","road","origin","destination","progress","direction","locations","next_id","ecosystem_epoch"]
 
@@ -120,7 +121,33 @@ func remember(n,spent := false) -> void:
  var old: Dictionary=locations[key()].get(n.world_id,{})
  row["anchor"]=old.get("anchor",_anchor(n.position.x)) if n is ResourceNode and game.quarry.state=="road" else _anchor(n.position.x)
  row["spent"]=spent
+ if n is Creature:
+  row["home_anchor"]=old.get("home_anchor",WorldMapDB.LENGTH*0.5 if key().begins_with("road:") else 1170.0)
+  if old.has("return_at"): row["return_at"]=old.return_at
  locations[key()][n.world_id]=row
+# 画面外でも同じ有限個体。時間は保存するので再訪連打では帰らない。
+func shelter_creature(n) -> void:
+ remember(n)
+ if active and locations.get(key(),{}).has(n.world_id):
+  locations[key()][n.world_id]["return_at"]=game.director.elapsed+FAUNA_RETURN_SECONDS
+
+func _return_fauna(present: Dictionary) -> void:
+ for id in locations.get(key(),{}):
+  var row:Dictionary=locations[key()][id]
+  if row.type!="creature" or row.spent or row.data.dead or row.data.hp<=0 or present.has(id):continue
+  if not row.has("return_at"):
+   # 旧保存の画面外生存個体にも同じ待機を一度だけ設定。
+   var x:=_x(row.anchor)
+   if x>=game.camera_left()-50 and x<=game.camera_left()+1330:continue
+   row["return_at"]=game.director.elapsed+FAUNA_RETURN_SECONDS
+  if game.director.elapsed<float(row.return_at):continue
+  row.anchor=row.get("home_anchor",WorldMapDB.LENGTH*0.5 if key().begins_with("road:") else 1170.0)
+  row.data.position.x=_x(row.anchor)
+  row.data._fleeing=false
+  row.data._wander=0.0
+  row.data._wander_t=1.0
+  row.erase("return_at")
+
 func sync() -> void:
  if not active: return
  for n in _all_nodes():
@@ -160,10 +187,10 @@ func _ensure_location() -> void:
   remember(c); locations[key()][c.world_id].anchor=anchor; c.free()
  # 固定個体枠。死亡後は補充しない。120秒ごとに生きている個体の滞在範囲だけ変化。
  if not travelling:
-  var roster:Array={"south_oasis":[],"east_sands":["dust_guard"],"central_trade":[],"old_mine":["sand_stalker","hull_breaker","dust_guard"]}.get(region,[])
+  var roster:Array={"south_oasis":[],"east_sands":["dust_guard","dune_horn"],"central_trade":["paraceratherium"],"old_mine":["sand_stalker","hull_breaker","dust_guard"]}.get(region,[])
   for i in roster.size():
    var e:=Enemy.new();e.setup_kind(game,roster[i]);e.ecological=true
-   e.position=Vector2(350.0+i*160.0,680);e.home_x=e.position.x
+   e.position=Vector2(1080.0 if e.herbivore() else 350.0+i*160.0,680);e.home_x=e.position.x
    remember(e);e.free()
  ecosystem_epoch[key()]=floori(game.director.elapsed/120.0)
 
@@ -175,6 +202,7 @@ func _update_ecosystem() -> void:
  for id in locations.get(key(),{}):
   var row:Dictionary=locations[key()][id]
   if row.type!="enemy" or not row.data.get("ecological",false) or row.spent:continue
+  if EventDB.ENEMIES[row.data.kind].get("herbivore",false):continue
   var index:=roster_index
   roster_index+=1
   var live=null
@@ -192,6 +220,7 @@ func _spawn_visible() -> void:
  var present:={}
  for n in _all_nodes():
   if not n.is_queued_for_deletion(): present[n.world_id]=true
+ _return_fauna(present)
  for id in locations.get(key(),{}):
   var row:Dictionary=locations[key()][id]
   if row.spent or present.has(id): continue
@@ -243,6 +272,9 @@ static func valid(d, g) -> bool:
    ids[id]=true
    var row=d.locations[location][id]
    if not id is String or not row is Dictionary or not row.get("data") is Dictionary or not row.get("spent") is bool or typeof(row.get("anchor")) not in [TYPE_FLOAT,TYPE_INT]: return false
+   for field in ["return_at","home_anchor"]:
+    if row.has(field) and (typeof(row[field]) not in [TYPE_FLOAT,TYPE_INT] or not is_finite(float(row[field]))):return false
+   if row.has("return_at") and row.return_at<0:return false
    var node
    var names:Array
    match row.get("type"):

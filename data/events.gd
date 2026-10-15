@@ -25,6 +25,8 @@ const MAX_ENEMIES := 6
 
 ## 敵の種類。hp・dmg（1秒あたりの車体への被害）・run（近づく速さ）・scale（大きさ）・drops（倒したときの戦利品と確率）
 const ENEMIES := {
+ "paraceratherium":{"name":"パラケラテリウム","hp":100.0,"dmg":0.0,"run":32.0,"scale":1.0,"color":"b6a58c","behavior":"neutral","herbivore":true,"hit_reach":100.0,"drops":{GameData.Item.MEAT:2.0,GameData.Item.HIDE:1.0,GameData.Item.BONE:1.0}},
+ "dune_horn":{"name":"砂襟角獣（仮）","hp":65.0,"dmg":0.0,"run":40.0,"scale":1.0,"color":"9c9870","behavior":"neutral","herbivore":true,"hit_reach":90.0,"drops":{GameData.Item.MEAT:1.0,GameData.Item.HIDE:1.0,GameData.Item.BONE:1.0}},
  "sand_stalker":{"name":"赤脚の追跡サソリ","hp":36.0,"dmg":0.0,"run":48.0,"scale":1.0,"color":"b95c32","behavior":"workers","drops":{GameData.Item.MEAT:1.0,GameData.Item.HIDE:1.0}},
  "hull_breaker":{"name":"灰殻の穿孔サソリ","hp":60.0,"dmg":1.4,"run":38.0,"scale":1.0,"color":"666e86","behavior":"hull","drops":{GameData.Item.MEAT:1.0,GameData.Item.BONE:1.0}},
  "dust_guard":{"name":"青鋏の砂守り","hp":42.0,"dmg":0.0,"run":40.0,"scale":1.2,"color":"3b9c9a","behavior":"neutral","drops":{GameData.Item.HIDE:1.0,GameData.Item.BONE:1.0}},

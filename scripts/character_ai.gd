@@ -81,6 +81,7 @@ var _eat_claimed := false   # 食料の在庫を1つ取り置いている（食�
 var safe_after := 0.0
 var retreating := false
 var danger_hold := false
+var manual_attack := false # 明示対象のみ。自動仕事の戦闘と区別して保存する。
 var process_slot := 0
 var current_job := -1
 var life_request: String = ""   # プレイヤーの促し（rest / eat）。安全な区切りで1回だけ評価する。受理時は物資・ベッドを予約しない
@@ -173,7 +174,9 @@ func _interrupt_for_life_need() -> bool:
 func tick(delta: float) -> void:
 	if ch.away:
 		return
-	if ch.floor_i == 0 and not ch.down:
+	if manual_attack and (state not in [State.COMBAT_MOVE,State.COMBAT] or not _enemy_valid()):manual_attack=false
+	if manual_attack and (ch.hp<FieldOperations.RECOVER_HP or _urgent_life_need()):begin_retreat()
+	if ch.floor_i == 0 and not ch.down and not manual_attack:
 		for e in game.enemies_root.get_children():
 			if e.ecological and not e.dead and e.threatens(ch) and ch.position.distance_to(e.position) < FieldOperations.NOTICE_DISTANCE:
 				retreating = true
@@ -608,10 +611,16 @@ func _prey_target() -> Vector2:
 	return p
 
 
+func begin_retreat() -> void:
+	manual_attack=false
+	retreating=true
+	danger_hold=true
+	safe_after=game.director.elapsed+FieldOperations.RETRY_SECONDS
+
 func order_attack(target) -> bool:
-	if not is_instance_valid(target) or target.dead or not target.present or ch.carrying>=0 or ch.away or ch.down or game.operations.stance=="recall" or ch.hp<FieldOperations.RECOVER_HP:return false
+	if not is_instance_valid(target) or target.dead or not target.present or ch.carrying>=0 or ch.away or ch.down or retreating or _urgent_life_need() or game.operations.stance=="recall" or ch.hp<FieldOperations.RECOVER_HP:return false
 	if ch.position.distance_to(target.position)>FieldOperations.NOTICE_DISTANCE:return false
-	_release_task();enemy=target
+	_release_task();enemy=target;manual_attack=true;danger_hold=false
 	_set_state(State.COMBAT_MOVE)
 	return true
 
@@ -920,6 +929,7 @@ func _try_start(job: int) -> bool:
 
 ## 途中の仕事を破棄して予約を解放する（荷物を持っていない時のみ呼ぶ）。
 func _release_task() -> void:
+	manual_attack=false
 	if res != null and is_instance_valid(res) and res.claimed_by == ch:
 		res.claimed_by = null
 		res.reserved = 1
@@ -974,12 +984,12 @@ func _recall_tick(delta: float) -> bool:
 		return false
 	if state != State.RETURN_BASE:
 		_release_task()
-		if _try_life_need():
+		if not (retreating and ch.floor_i==0) and _try_life_need():
 			return true
 		current_job = -1
 		_set_state(State.RETURN_BASE)
 	# 待機が長引いたときも空腹や疲労を無視しない。
-	if _try_life_need():
+	if not (retreating and ch.floor_i==0) and _try_life_need():
 		return true
 	ch.target = game.storage.access_point() + ch.slot_offset
 	ch.move_to_target(delta)

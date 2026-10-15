@@ -51,7 +51,7 @@ func setup_kind(g, k: String) -> void:
 	run_speed = d["run"]
 	body_scale = d["scale"]
 	_body = Color(d["color"])
-	hold_x = randf_range(560.0, 860.0)
+	hold_x = 700.0 if d.get("herbivore",false) else randf_range(560.0, 860.0) # 中立の固定個体は旧襲撃用の乱数を消費しない
 
 
 ## 旧来の呼び出し（体力だけ指定）。サソリとして扱う。
@@ -66,11 +66,12 @@ func display_name() -> String:
 
 
 func take_damage(amount: float, attacker = null) -> void:
-	if dead:
+	if dead or amount<=0:
 		return
 	if ecological and attacker != null:
 		provoked_index = game.workers.find(attacker)
 		target_index = provoked_index
+		peaceful_until = 0.0
 	hp -= amount
 	_flash = 0.1
 	if hp <= 0.0:
@@ -167,13 +168,61 @@ func _tick_ecology(delta: float) -> void:
 	_atk_timer-=delta
 	if _atk_timer<=0:
 		_atk_timer=1.0
-		if target!=null and target.floor_i==0 and position.distance_to(target.position)<HIT_REACH:
+		if target!=null and target.floor_i==0 and position.distance_to(target.position)<float(EventDB.ENEMIES[kind].get("hit_reach",HIT_REACH)):
 			CrewStatus.damage(target,CrewStatusDB.RAID_HIT_HP,CrewStatusDB.RAID_HIT_STRESS)
 		elif behavior()=="hull" and absf(position.x-GameData.RAMP_FOOT.x)<65.0:
 			game.base.take_damage(damage*game.director.hull_dmg_mult())
 	queue_redraw()
 
+func herbivore() -> bool:
+	return EventDB.ENEMIES[kind].get("herbivore",false)
+
+func body_rect() -> Rect2:
+	if kind=="paraceratherium":return Rect2(-105,-218,180,218)
+	if kind=="dune_horn":return Rect2(-100,-112,172,112)
+	return Rect2(Vector2(-50,-52.0*body_scale-50.0),Vector2(100,100))
+
+func hit_test(world_position: Vector2) -> bool:
+	if herbivore():return body_rect().has_point(to_local(world_position))
+	return (position+Vector2(0,-52.0*body_scale) if ecological else position).distance_to(world_position)<50.0
+
+func _draw_herbivore() -> void:
+	var body:=_body if _flash<=0 else Color.WHITE
+	var dark:=body.darkened(0.25)
+	var large:=kind=="paraceratherium"
+	var top:float=-218.0 if large else -112.0
+	draw_colored_polygon(_ellipse(Vector2(0,-3),75,10),Color(0,0,0,0.2))
+	# 四肢は足元を接地。大型は長い首と柱状の脚、中型は襟と角。
+	for i in 4:
+		var x:float=-42.0+i*28.0
+		var sway:float=sin(_t*5+i*1.8)*3 if target_index>=0 else 0.0
+		draw_line(Vector2(x,-100 if large else -45),Vector2(x+sway,-6),dark if i%2==0 else body,14 if large else 12)
+		draw_rect(Rect2(x+sway-8,-9,17,8),dark.darkened(0.3))
+	draw_colored_polygon(_ellipse(Vector2(0,-117 if large else -62),65,43 if large else 31),body)
+	draw_line(Vector2(59,-120 if large else -66),Vector2(72,-75 if large else -35),dark,5)
+	if large:
+		draw_colored_polygon(PackedVector2Array([Vector2(-55,-115),Vector2(-35,-126),Vector2(-55,-198),Vector2(-75,-204),Vector2(-72,-147)]),body)
+		draw_colored_polygon(_ellipse(Vector2(-77,-202),26,14),body)
+		draw_colored_polygon(PackedVector2Array([Vector2(-65,-209),Vector2(-60,-218),Vector2(-55,-207)]),dark)
+		draw_circle(Vector2(-86,-204),3,Color("292b25"))
+		draw_line(Vector2(-100,-197),Vector2(-91,-196),dark,2)
+	else:
+		draw_colored_polygon(_ellipse(Vector2(-43,-76),24,35),dark)
+		draw_colored_polygon(_ellipse(Vector2(-65,-57),28,20),body)
+		for at in [Vector2(-65,-70),Vector2(-52,-74)]:
+			draw_colored_polygon(PackedVector2Array([at,at+Vector2(-17,-26),at+Vector2(9,-3)]),Color("eee0b8"))
+		draw_colored_polygon(PackedVector2Array([Vector2(-88,-59),Vector2(-100,-72),Vector2(-80,-63)]),Color("eee0b8"))
+		draw_circle(Vector2(-75,-61),3,Color("292b25"))
+	if hp<max_hp:
+		draw_rect(Rect2(-28,top-14,56,5),Color(0,0,0,0.7))
+		draw_rect(Rect2(-28,top-14,56*clampf(hp/max_hp,0,1),5),Color("7be07b"))
+	GameData.draw_text(self,Vector2(-10,top-23),display_name(),13,Color("e8f5d0"),210)
+	GameData.draw_text(self,Vector2(-10,top-7),"反撃中" if target_index>=0 else "中立・攻撃すると反撃",11,Color("dfcfaa"),210)
+
 func _draw() -> void:
+	if herbivore():
+		_draw_herbivore()
+		return
 	var body := _body if _flash <= 0.0 else Color("ffffff")
 	var dark := body.darkened(0.35)
 	draw_set_transform(Vector2(0,-52.0*body_scale) if ecological else Vector2.ZERO, 0.0, Vector2(body_scale, body_scale))

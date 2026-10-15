@@ -1363,7 +1363,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		var attack_world: Vector2 = get_canvas_transform().affine_inverse() * event.position
 		if is_instance_valid(follow_target):
 			for e in enemies_root.get_children():
-				if e.visible and (e.position+Vector2(0,-52.0*e.body_scale) if e.ecological else e.position).distance_to(attack_world)<50.0:
+				if e.visible and e.hit_test(attack_world):
 					follow_target.ai.order_attack(e)
 					get_viewport().set_input_as_handled()
 					return

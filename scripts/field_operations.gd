@@ -21,6 +21,7 @@ func set_stance(value: String) -> bool:
  if value not in ["normal","alert","recall"] or game.game_over: return false
  stance=value
  for w in game.workers:
+  if value in ["alert","recall"] and w.ai.state in [CharacterAI.State.COMBAT_MOVE,CharacterAI.State.COMBAT]:w.ai.begin_retreat()
   if value=="normal" and w.hp>=RECOVER_HP:w.ai.danger_hold=false
   if w.ai.state==CharacterAI.State.RETURN_BASE and w.floor_i!=0: w.ai._set_state(CharacterAI.State.SEARCH)
  return true

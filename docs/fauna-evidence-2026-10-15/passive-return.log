@@ -1,0 +1,11 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+IDLE seed=501 gone_at=264.0 spent=false anchor=-163.0 live=0
+REVISIT spawn_count=0 same_anchor=-163.0
+RETURN seed=501 same_id=true hp_preserved=true total_ids=4
+IDLE seed=502 gone_at=6.4 spent=false anchor=1265.0 live=0
+REVISIT spawn_count=0 same_anchor=1265.0
+RETURN seed=502 same_id=true hp_preserved=true total_ids=4
+IDLE seed=503 gone_at=128.2 spent=false anchor=1261.0 live=0
+REVISIT spawn_count=0 same_anchor=1261.0
+RETURN seed=503 same_id=true hp_preserved=true total_ids=4

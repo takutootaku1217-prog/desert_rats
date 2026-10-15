@@ -1,0 +1,1396 @@
+{
+  "schema_version": 1,
+  "run_directory": "/workspace/fauna-fix-evidence/release-core/20261015T021812Z-x2mj6_1w",
+  "started_utc": "2026-10-15T02:18:12.443667+00:00",
+  "metadata": {
+    "platform": "Linux-6.18.44-x86_64-with-glibc2.41",
+    "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+    "python_executable": "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+    "runner_command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+      "/workspace/desert_rats/tools/run_checks.py",
+      "--suite",
+      "core",
+      "--output-dir",
+      "/workspace/fauna-fix-evidence/release-core"
+    ],
+    "root": "/workspace/desert_rats",
+    "git_before": {
+      "head": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "rev-parse",
+          "HEAD"
+        ],
+        "returncode": 0,
+        "output": "fab6f728f690282e509d42051a5e2defdaba6d68"
+      },
+      "branch": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "branch",
+          "--show-current"
+        ],
+        "returncode": 0,
+        "output": "main"
+      },
+      "status": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "status",
+          "--porcelain=v1",
+          "--untracked-files=all"
+        ],
+        "returncode": 0,
+        "output": "M data/events.gd\n M scripts/character_ai.gd\n M scripts/creature.gd\n M scripts/enemy.gd\n M scripts/field_operations.gd\n M scripts/main.gd\n M scripts/save_game.gd\n M scripts/world_trip.gd\n M tools/run_checks.py\n M \"\\347\\240\\202\\346\\274\\240\\343\\201\\256\\343\\203\\215\\343\\202\\272\\343\\203\\237\\345\\233\\243.gd\"\n?? tools/test_manual_combat.gd\n?? tools/test_manual_combat.gd.uid\n?? tools/test_world_reencounter.gd\n?? tools/test_world_reencounter.gd.uid"
+      },
+      "changed_files": [
+        {
+          "path": "data/events.gd",
+          "sha256": "fc95536eb0f10846cfda890f697045abcb0e34912938d2342d146e4bcd3e7c7a"
+        },
+        {
+          "path": "scripts/character_ai.gd",
+          "sha256": "9cc063f13b0406882b043a27c2ebf1ae887d69b19681c4c2dec8307a407a4ba7"
+        },
+        {
+          "path": "scripts/creature.gd",
+          "sha256": "696051988039a1c571c4c3520ae34be00e2d63ddb1bb31317cd4565a171357ae"
+        },
+        {
+          "path": "scripts/enemy.gd",
+          "sha256": "3c178b2c21d9663bd582c629d660410d5b0bdcc8a1e44397423349bee62d022a"
+        },
+        {
+          "path": "scripts/field_operations.gd",
+          "sha256": "885bb06c958af905e980a9bb1ad59355b9c04c80642b496b9719966cf2fe5453"
+        },
+        {
+          "path": "scripts/main.gd",
+          "sha256": "e5e9c59e0cefa71a151ac9a1f551bf27fd4b984e83974c7779df27861b2d427d"
+        },
+        {
+          "path": "scripts/save_game.gd",
+          "sha256": "dd156ad8137d851174dd6c6bade037907f572033c513cdb36904b7983c11bfef"
+        },
+        {
+          "path": "scripts/world_trip.gd",
+          "sha256": "9e39462ff90976c6a6749d9550f2407251185dda0834e6ef0de3e4dc3b2e48ea"
+        },
+        {
+          "path": "tools/run_checks.py",
+          "sha256": "05378b479a2eb169ca74bf153bf15b890fb133c6c2fcbd8ee56e1ef1b4ba7443"
+        },
+        {
+          "path": "tools/test_manual_combat.gd",
+          "sha256": "fdc3c422736c6a515cb30565515e28d3a5102eeb11a7a3b90fe149293a709c95"
+        },
+        {
+          "path": "tools/test_manual_combat.gd.uid",
+          "sha256": "285aa31fb75b53296b5a26e001fdeb80f22c8e46ce02a2ebc630022932fb022f"
+        },
+        {
+          "path": "tools/test_world_reencounter.gd",
+          "sha256": "4cd9bc7d8b4c739aeb27fb75f3d2783ca928f50f1eda67add2dd4c3445efd349"
+        },
+        {
+          "path": "tools/test_world_reencounter.gd.uid",
+          "sha256": "4f3608db77819d61066648052681bbc970c8105ba738fea749c1634362ad360c"
+        },
+        {
+          "path": "砂漠のネズミ団.gd",
+          "sha256": "e5e9c59e0cefa71a151ac9a1f551bf27fd4b984e83974c7779df27861b2d427d"
+        }
+      ],
+      "dirty": true
+    },
+    "godot_version": {
+      "command": [
+        "/usr/local/bin/godot",
+        "--version"
+      ],
+      "returncode": 0,
+      "output": "4.6.3.stable.official.7d41c59c4"
+    },
+    "suite": "core",
+    "unverified": [
+      "Windows / Godot 4.7.2",
+      "OS-level input",
+      "Audio"
+    ],
+    "scope_note": "first_cycle_flow/ecosystem, tool_progression/tool_flow, world_*, batch_*, haul_*, facility_packing, packing_flow and startup use the default map; other gameplay checks explicitly use legacy-world-test fixtures. Only selected checks; core does not cover extra or all gameplay conditions.",
+    "git_after": {
+      "head": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "rev-parse",
+          "HEAD"
+        ],
+        "returncode": 0,
+        "output": "fab6f728f690282e509d42051a5e2defdaba6d68"
+      },
+      "branch": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "branch",
+          "--show-current"
+        ],
+        "returncode": 0,
+        "output": "main"
+      },
+      "status": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "status",
+          "--porcelain=v1",
+          "--untracked-files=all"
+        ],
+        "returncode": 0,
+        "output": "M data/events.gd\n M scripts/character_ai.gd\n M scripts/creature.gd\n M scripts/enemy.gd\n M scripts/field_operations.gd\n M scripts/main.gd\n M scripts/save_game.gd\n M scripts/world_trip.gd\n M tools/run_checks.py\n M \"\\347\\240\\202\\346\\274\\240\\343\\201\\256\\343\\203\\215\\343\\202\\272\\343\\203\\237\\345\\233\\243.gd\"\n?? tools/test_manual_combat.gd\n?? tools/test_manual_combat.gd.uid\n?? tools/test_world_reencounter.gd\n?? tools/test_world_reencounter.gd.uid"
+      },
+      "changed_files": [
+        {
+          "path": "data/events.gd",
+          "sha256": "fc95536eb0f10846cfda890f697045abcb0e34912938d2342d146e4bcd3e7c7a"
+        },
+        {
+          "path": "scripts/character_ai.gd",
+          "sha256": "9cc063f13b0406882b043a27c2ebf1ae887d69b19681c4c2dec8307a407a4ba7"
+        },
+        {
+          "path": "scripts/creature.gd",
+          "sha256": "696051988039a1c571c4c3520ae34be00e2d63ddb1bb31317cd4565a171357ae"
+        },
+        {
+          "path": "scripts/enemy.gd",
+          "sha256": "3c178b2c21d9663bd582c629d660410d5b0bdcc8a1e44397423349bee62d022a"
+        },
+        {
+          "path": "scripts/field_operations.gd",
+          "sha256": "885bb06c958af905e980a9bb1ad59355b9c04c80642b496b9719966cf2fe5453"
+        },
+        {
+          "path": "scripts/main.gd",
+          "sha256": "e5e9c59e0cefa71a151ac9a1f551bf27fd4b984e83974c7779df27861b2d427d"
+        },
+        {
+          "path": "scripts/save_game.gd",
+          "sha256": "dd156ad8137d851174dd6c6bade037907f572033c513cdb36904b7983c11bfef"
+        },
+        {
+          "path": "scripts/world_trip.gd",
+          "sha256": "9e39462ff90976c6a6749d9550f2407251185dda0834e6ef0de3e4dc3b2e48ea"
+        },
+        {
+          "path": "tools/run_checks.py",
+          "sha256": "05378b479a2eb169ca74bf153bf15b890fb133c6c2fcbd8ee56e1ef1b4ba7443"
+        },
+        {
+          "path": "tools/test_manual_combat.gd",
+          "sha256": "fdc3c422736c6a515cb30565515e28d3a5102eeb11a7a3b90fe149293a709c95"
+        },
+        {
+          "path": "tools/test_manual_combat.gd.uid",
+          "sha256": "285aa31fb75b53296b5a26e001fdeb80f22c8e46ce02a2ebc630022932fb022f"
+        },
+        {
+          "path": "tools/test_world_reencounter.gd",
+          "sha256": "4cd9bc7d8b4c739aeb27fb75f3d2783ca928f50f1eda67add2dd4c3445efd349"
+        },
+        {
+          "path": "tools/test_world_reencounter.gd.uid",
+          "sha256": "4f3608db77819d61066648052681bbc970c8105ba738fea749c1634362ad360c"
+        },
+        {
+          "path": "砂漠のネズミ団.gd",
+          "sha256": "e5e9c59e0cefa71a151ac9a1f551bf27fd4b984e83974c7779df27861b2d427d"
+        }
+      ],
+      "dirty": true
+    }
+  },
+  "scope": [
+    "import",
+    "tool_progression",
+    "tool_flow",
+    "first_cycle",
+    "field_operations",
+    "manual_combat",
+    "field_ui",
+    "ecosystem",
+    "first_cycle_flow",
+    "navigation_bar",
+    "batch_crafting",
+    "batch_ui",
+    "batch_flow",
+    "haul_support",
+    "haul_ui",
+    "haul_flow",
+    "facility_packing",
+    "packing_flow",
+    "world_map",
+    "world_flow",
+    "world_boundaries",
+    "world_fauna",
+    "world_reencounter",
+    "save_game",
+    "save_ui",
+    "inventory_discard",
+    "clarity_ui",
+    "cargo_accounting",
+    "cargo_escape_ui",
+    "progression",
+    "weapon",
+    "weapon_ui",
+    "equipment_ui",
+    "packed_equipment",
+    "quarry",
+    "gather",
+    "cargo",
+    "items",
+    "crew_status",
+    "life_actions",
+    "tool_management",
+    "cargo_reservations",
+    "consumption_loop",
+    "loop_vanilla",
+    "loop_normal",
+    "startup"
+  ],
+  "status": "passed",
+  "first_failure": null,
+  "checks": [
+    {
+      "id": "import",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "--editor",
+        "--import",
+        "--quit"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/fauna-fix-evidence/release-core/20261015T021812Z-x2mj6_1w/import.log",
+      "timeout_seconds": 120,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 6.238,
+      "diagnostic_error_lines": [],
+      "success_marker_found": null
+    },
+    {
+      "id": "tool_progression",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_tool_progression.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/fauna-fix-evidence/release-core/20261015T021812Z-x2mj6_1w/tool_progression.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 2.725,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "tool_flow",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_tool_flow.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/fauna-fix-evidence/release-core/20261015T021812Z-x2mj6_1w/tool_flow.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 6.036,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "first_cycle",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_first_cycle.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/fauna-fix-evidence/release-core/20261015T021812Z-x2mj6_1w/first_cycle.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 5.233,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "field_operations",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_field_operations.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/fauna-fix-evidence/release-core/20261015T021812Z-x2mj6_1w/field_operations.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 1.569,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "manual_combat",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_manual_combat.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/fauna-fix-evidence/release-core/20261015T021812Z-x2mj6_1w/manual_combat.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 1.57,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "field_ui",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_field_ui.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/fauna-fix-evidence/release-core/20261015T021812Z-x2mj6_1w/field_ui.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 2.323,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "ecosystem",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_ecosystem.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/fauna-fix-evidence/release-core/20261015T021812Z-x2mj6_1w/ecosystem.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 1.568,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "first_cycle_flow",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_first_cycle_flow.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/fauna-fix-evidence/release-core/20261015T021812Z-x2mj6_1w/first_cycle_flow.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 14.316,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "navigation_bar",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_navigation_bar.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/fauna-fix-evidence/release-core/20261015T021812Z-x2mj6_1w/navigation_bar.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 4.581,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "batch_crafting",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_batch_crafting.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/fauna-fix-evidence/release-core/20261015T021812Z-x2mj6_1w/batch_crafting.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 5.886,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "batch_ui",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_batch_ui.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/fauna-fix-evidence/release-core/20261015T021812Z-x2mj6_1w/batch_ui.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 3.927,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "batch_flow",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_batch_flow.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/fauna-fix-evidence/release-core/20261015T021812Z-x2mj6_1w/batch_flow.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 4.026,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "haul_support",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_haul_support.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/fauna-fix-evidence/release-core/20261015T021812Z-x2mj6_1w/haul_support.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 5.138,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "haul_ui",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_haul_ui.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/fauna-fix-evidence/release-core/20261015T021812Z-x2mj6_1w/haul_ui.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 4.108,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "haul_flow",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_haul_flow.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/fauna-fix-evidence/release-core/20261015T021812Z-x2mj6_1w/haul_flow.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 8.498,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "facility_packing",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_facility_packing.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/fauna-fix-evidence/release-core/20261015T021812Z-x2mj6_1w/facility_packing.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 1.869,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "packing_flow",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_packing_flow.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/fauna-fix-evidence/release-core/20261015T021812Z-x2mj6_1w/packing_flow.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 18.333,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "world_map",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_world_map.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/fauna-fix-evidence/release-core/20261015T021812Z-x2mj6_1w/world_map.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 3.273,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "world_flow",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_world_flow.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/fauna-fix-evidence/release-core/20261015T021812Z-x2mj6_1w/world_flow.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 7.336,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "world_boundaries",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_world_boundaries.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/fauna-fix-evidence/release-core/20261015T021812Z-x2mj6_1w/world_boundaries.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 1.769,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "world_fauna",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_world_fauna.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/fauna-fix-evidence/release-core/20261015T021812Z-x2mj6_1w/world_fauna.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 1.568,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "world_reencounter",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_world_reencounter.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/fauna-fix-evidence/release-core/20261015T021812Z-x2mj6_1w/world_reencounter.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 1.568,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "save_game",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_save_game.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/fauna-fix-evidence/release-core/20261015T021812Z-x2mj6_1w/save_game.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 3.273,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "save_ui",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_save_ui.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/fauna-fix-evidence/release-core/20261015T021812Z-x2mj6_1w/save_ui.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 2.221,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "inventory_discard",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_inventory_discard.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/fauna-fix-evidence/release-core/20261015T021812Z-x2mj6_1w/inventory_discard.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 3.176,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "clarity_ui",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_clarity_ui.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/fauna-fix-evidence/release-core/20261015T021812Z-x2mj6_1w/clarity_ui.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 3.079,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "cargo_accounting",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_cargo_accounting.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/fauna-fix-evidence/release-core/20261015T021812Z-x2mj6_1w/cargo_accounting.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 5.028,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "cargo_escape_ui",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_cargo_escape_ui.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/fauna-fix-evidence/release-core/20261015T021812Z-x2mj6_1w/cargo_escape_ui.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 1.769,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "progression",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_progression.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/fauna-fix-evidence/release-core/20261015T021812Z-x2mj6_1w/progression.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 15.159,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "weapon",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_weapon.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/fauna-fix-evidence/release-core/20261015T021812Z-x2mj6_1w/weapon.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 1.569,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "weapon_ui",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_weapon_ui.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/fauna-fix-evidence/release-core/20261015T021812Z-x2mj6_1w/weapon_ui.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 3.379,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "equipment_ui",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_equipment_ui.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/fauna-fix-evidence/release-core/20261015T021812Z-x2mj6_1w/equipment_ui.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 2.783,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "packed_equipment",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_packed_equipment.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/fauna-fix-evidence/release-core/20261015T021812Z-x2mj6_1w/packed_equipment.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 5.134,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "quarry",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_quarry.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/fauna-fix-evidence/release-core/20261015T021812Z-x2mj6_1w/quarry.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 9.558,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "gather",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_gather.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/fauna-fix-evidence/release-core/20261015T021812Z-x2mj6_1w/gather.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 49.695,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "cargo",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_cargo.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/fauna-fix-evidence/release-core/20261015T021812Z-x2mj6_1w/cargo.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 63.354,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "items",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_items.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/fauna-fix-evidence/release-core/20261015T021812Z-x2mj6_1w/items.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 10.054,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "crew_status",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_crew_status.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/fauna-fix-evidence/release-core/20261015T021812Z-x2mj6_1w/crew_status.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 11.85,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "life_actions",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_life_actions.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/fauna-fix-evidence/release-core/20261015T021812Z-x2mj6_1w/life_actions.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 12.403,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "tool_management",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_tool_management.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/fauna-fix-evidence/release-core/20261015T021812Z-x2mj6_1w/tool_management.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 3.924,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "cargo_reservations",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_cargo_reservations.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/fauna-fix-evidence/release-core/20261015T021812Z-x2mj6_1w/cargo_reservations.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 1.976,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "consumption_loop",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_consumption_loop.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/fauna-fix-evidence/release-core/20261015T021812Z-x2mj6_1w/consumption_loop.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 2.471,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "loop_vanilla",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_loop.gd",
+        "--",
+        "32",
+        "2",
+        "12",
+        "500",
+        "0",
+        "vanilla",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/fauna-fix-evidence/release-core/20261015T021812Z-x2mj6_1w/loop_vanilla.log",
+      "timeout_seconds": 300,
+      "requested_game_minutes_per_run": 32,
+      "requested_repetitions": 2,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 55.297,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "loop_normal",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_loop.gd",
+        "--",
+        "28",
+        "2",
+        "12",
+        "500",
+        "0",
+        "normal",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/fauna-fix-evidence/release-core/20261015T021812Z-x2mj6_1w/loop_normal.log",
+      "timeout_seconds": 300,
+      "requested_game_minutes_per_run": 28,
+      "requested_repetitions": 2,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 53.551,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "startup",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "--quit-after",
+        "300"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/fauna-fix-evidence/release-core/20261015T021812Z-x2mj6_1w/startup.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 3.075,
+      "diagnostic_error_lines": [],
+      "success_marker_found": null
+    }
+  ],
+  "elapsed_wall_seconds": 437.304,
+  "finished_utc": "2026-10-15T02:25:29.749135+00:00",
+  "source_changed_during_run": false
+}
