@@ -1,0 +1,234 @@
+{
+  "schema_version": 1,
+  "run_directory": "/workspace/art-contract-evidence/art-layout/20261015T034243Z-qwl3tezp",
+  "started_utc": "2026-10-15T03:42:43.881106+00:00",
+  "metadata": {
+    "platform": "Linux-6.18.44-x86_64-with-glibc2.41",
+    "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+    "python_executable": "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+    "runner_command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+      "tools/run_checks.py",
+      "--check",
+      "rooms",
+      "--check",
+      "view",
+      "--output-dir",
+      "/workspace/art-contract-evidence/art-layout"
+    ],
+    "root": "/workspace/desert_rats",
+    "git_before": {
+      "head": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "rev-parse",
+          "HEAD"
+        ],
+        "returncode": 0,
+        "output": "7b977c5a415ee5b9d561aad970c5c70f6450beaa"
+      },
+      "branch": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "branch",
+          "--show-current"
+        ],
+        "returncode": 0,
+        "output": "main"
+      },
+      "status": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "status",
+          "--porcelain=v1",
+          "--untracked-files=all"
+        ],
+        "returncode": 0,
+        "output": "M data/art_spec.gd\n M tools/run_checks.py\n M tools/test_artscale.gd\n?? tools/test_handcart_pixels.gd\n?? tools/test_handcart_pixels.gd.uid"
+      },
+      "changed_files": [
+        {
+          "path": "data/art_spec.gd",
+          "sha256": "b19257d7c3aa438d18057dc74fb99fa4f0823f40060a7b03e9cef4c3abfa363d"
+        },
+        {
+          "path": "tools/run_checks.py",
+          "sha256": "3bd840a7ea46aac02e673eb48ce726a485be6b5f4f282464abc9bc624702c5cc"
+        },
+        {
+          "path": "tools/test_artscale.gd",
+          "sha256": "816bb05afad00cf780f8dd09e1f2c0c40c5e50ee04679e8b92ebd3869b8c7a99"
+        },
+        {
+          "path": "tools/test_handcart_pixels.gd",
+          "sha256": "be80b8ebb03a712ffde1679fec083563191f734cf60358aa519aff77432d776b"
+        },
+        {
+          "path": "tools/test_handcart_pixels.gd.uid",
+          "sha256": "71865634efb15347122c81848f94986a809790ba6f657ce60b48267c020470e1"
+        }
+      ],
+      "dirty": true
+    },
+    "godot_version": {
+      "command": [
+        "/usr/local/bin/godot",
+        "--version"
+      ],
+      "returncode": 0,
+      "output": "4.6.3.stable.official.7d41c59c4"
+    },
+    "suite": null,
+    "unverified": [
+      "Windows / Godot 4.7.2",
+      "OS-level input",
+      "Audio"
+    ],
+    "scope_note": "first_cycle_flow/ecosystem, tool_progression/tool_flow, world_*, batch_*, haul_*, facility_packing, packing_flow and startup use the default map; other gameplay checks explicitly use legacy-world-test fixtures. Only selected checks; core does not cover extra or all gameplay conditions.",
+    "git_after": {
+      "head": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "rev-parse",
+          "HEAD"
+        ],
+        "returncode": 0,
+        "output": "7b977c5a415ee5b9d561aad970c5c70f6450beaa"
+      },
+      "branch": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "branch",
+          "--show-current"
+        ],
+        "returncode": 0,
+        "output": "main"
+      },
+      "status": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "status",
+          "--porcelain=v1",
+          "--untracked-files=all"
+        ],
+        "returncode": 0,
+        "output": "M data/art_spec.gd\n M tools/run_checks.py\n M tools/test_artscale.gd\n?? tools/test_handcart_pixels.gd\n?? tools/test_handcart_pixels.gd.uid"
+      },
+      "changed_files": [
+        {
+          "path": "data/art_spec.gd",
+          "sha256": "b19257d7c3aa438d18057dc74fb99fa4f0823f40060a7b03e9cef4c3abfa363d"
+        },
+        {
+          "path": "tools/run_checks.py",
+          "sha256": "3bd840a7ea46aac02e673eb48ce726a485be6b5f4f282464abc9bc624702c5cc"
+        },
+        {
+          "path": "tools/test_artscale.gd",
+          "sha256": "816bb05afad00cf780f8dd09e1f2c0c40c5e50ee04679e8b92ebd3869b8c7a99"
+        },
+        {
+          "path": "tools/test_handcart_pixels.gd",
+          "sha256": "be80b8ebb03a712ffde1679fec083563191f734cf60358aa519aff77432d776b"
+        },
+        {
+          "path": "tools/test_handcart_pixels.gd.uid",
+          "sha256": "71865634efb15347122c81848f94986a809790ba6f657ce60b48267c020470e1"
+        }
+      ],
+      "dirty": true
+    }
+  },
+  "scope": [
+    "import",
+    "rooms",
+    "view"
+  ],
+  "status": "passed",
+  "first_failure": null,
+  "checks": [
+    {
+      "id": "import",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "--editor",
+        "--import",
+        "--quit"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/art-contract-evidence/art-layout/20261015T034243Z-qwl3tezp/import.log",
+      "timeout_seconds": 120,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 6.744,
+      "diagnostic_error_lines": [],
+      "success_marker_found": null
+    },
+    {
+      "id": "rooms",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_rooms.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/art-contract-evidence/art-layout/20261015T034243Z-qwl3tezp/rooms.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 32.834,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "view",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_view.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/art-contract-evidence/art-layout/20261015T034243Z-qwl3tezp/view.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 17.005,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    }
+  ],
+  "elapsed_wall_seconds": 56.591,
+  "finished_utc": "2026-10-15T03:43:40.473084+00:00",
+  "source_changed_during_run": false
+}

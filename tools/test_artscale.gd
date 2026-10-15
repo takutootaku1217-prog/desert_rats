@@ -1,7 +1,7 @@
 extends SceneTree
 ## 絵の細かさ（1ユニットのドット数）に依存しない構造（data/art_spec.gd）の自己診断。実行:
 ##   Godot --headless --path . -s res://tools/test_artscale.gd
-## 確かめる流れ: 決まり（ユニット・細かさ・切り出し・格子）→ 今の絵が、基準の大きさの整数倍（今は1倍）になっている →
+## 確かめる流れ: 決まり（ユニット・細かさ・切り出し・格子）→ 今の絵が、画像ごとに定めた原寸密度（通常1、手押し車2）になっている →
 ##   絵を2倍の細かさに差し替えても（実行中に、最近傍で拡大した絵を作って差し替える）、ゲーム側の座標・大きさ・置き場所が変わらない →
 ##   絵ごとに細かさが違っても動く（車体だけ先に高精細にする、など）→ 描画のコードが、絵のドット数を決め打ちしていない（ソースの検査）→
 ##   部屋の論理データ（区画の大きさ・入口・決まった位置）。
@@ -11,6 +11,9 @@ var fails := 0
 var main
 
 const ENV_HEIGHTS := {"sky": 100, "clouds": 40, "mesa_far": 46, "mesa_mid": 42, "dunes": 30, "ground": 46, "props": 26}   # 背景の基準の高さ（ユニット）
+# 画像ごとの既知の原寸密度。描画サイズはArtSpecの論理ユニットで固定。
+# 実測値を期待値に流用しない。原寸を変更するときはこの契約の明示更新が必要。
+const NATIVE_DPU := {"res://assets/resources/item_handcart.png":2.0}
 const GROUPS := ["characters", "creatures", "items", "gather", "environment", "ui", "rooms", "exterior", "base"]
 
 
@@ -33,7 +36,8 @@ func _initialize() -> void:
 
 func _run() -> void:
 	_test_functions()
-	_test_contracts({}, 1.0, "今の絵（1ユニット=1ドット）")
+	_test_native_density()
+	_test_contracts({}, 1.0, "今の絵（手押し車は密度2、ほかは1）")
 	_test_rooms_logic()
 	_test_source_scan()
 	await _test_swap(2, GROUPS, "全部を2倍の細かさに差し替える")
@@ -70,6 +74,23 @@ func _test_functions() -> void:
 
 # ---------------------------------------------------------------- 絵が基準の大きさの整数倍になっているか
 ## 絵 path が、基準の大きさ（units_w × units_h ユニット）の何倍か（縦横で同じ整数）を返す。違えば -1。
+func _expected_dpu(path:String, multiplier:float) -> float:
+	return float(NATIVE_DPU.get(path,1.0))*multiplier
+
+func _test_native_density() -> void:
+	var path:="res://assets/resources/item_handcart.png"
+	check(_dpu_of(path,12,12)==2.0 and GameData.item_tex(GameData.Item.HANDCART).get_size()==Vector2(24,24),"原寸手押し車は24x24・12ユニット・密度2")
+	check(ArtSpec.px_size(ArtSpec.ITEM)==Vector2(48,48),"手押し車を含む通常アイコンの論理表示サイズは48x48")
+	var dir:="user://invalid_cart_density"
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(dir+"/resources"))
+	for size in [Vector2i(12,12),Vector2i(24,12),Vector2i(25,25),Vector2i(36,36),Vector2i(48,48)]:
+		var img:=Image.create(size.x,size.y,false,Image.FORMAT_RGBA8)
+		img.save_png(ProjectSettings.globalize_path(dir+"/resources/item_handcart.png"))
+		ArtSpec.set_root_override(dir)
+		check(_dpu_of(path,12,12)!=_expected_dpu(path,1.0),"誤った手押し車寸法を拒否 %s"%size)
+	ArtSpec.set_root_override("")
+	check(_dpu_of(path,12,12)==2.0,"負例検査後も原画像は変更なし")
+
 func _dpu_of(path: String, units_w: float, units_h: float) -> float:
 	var t := GameData.tex(path)
 	var dx := float(t.get_width()) / units_w
@@ -79,17 +100,17 @@ func _dpu_of(path: String, units_w: float, units_h: float) -> float:
 	return dx
 
 
-## 全ての絵について、細かさ（dpu）を測る。expect = {グループ: 期待する細かさ}（書いていないグループは default）。
+## 原寸密度×差し替え倍率を厳密に検査。expect={グループ: 原寸からの倍率}。
 func _test_contracts(expect: Dictionary, default: float, label: String) -> void:
-	print("-- 絵の細かさが揃っている（%s）" % label)
+	print("-- 絵ごとの原寸密度と差し替え倍率（%s）" % label)
 	var bad := {}
 	var count := {}
 	var check_one := func(group: String, path: String, uw: float, uh: float) -> void:
-		var want: float = float(expect.get(group, default))
+		var want: float = _expected_dpu(path,float(expect.get(group, default)))
 		var got := _dpu_of(path, uw, uh)
 		count[group] = int(count.get(group, 0)) + 1
 		if got != want:
-			bad[group] = String(bad.get(group, "")) + " %s（%.2f）" % [path.get_file(), got]
+			bad[group] = String(bad.get(group, "")) + " %s（期待%.2f・実測%.2f）" % [path.get_file(), want, got]
 	for pal in ["grey", "tan", "pink"]:
 		check_one.call("characters", "res://assets/characters/mouse_%s.png" % pal, ArtSpec.sheet_units_w(ArtSpec.WORKER), float(ArtSpec.WORKER["cell"].y))
 	for sp in GameData.CREATURES:
@@ -133,7 +154,7 @@ func _test_contracts(expect: Dictionary, default: float, label: String) -> void:
 		var u: Array = g["sheets"][sh]["units"]
 		check_one.call("exterior", ExteriorDB.dir() + String(g["sheets"][sh]["file"]), float(u[0]), float(u[1]))
 	for group in GROUPS:
-		check(not bad.has(group) and int(count.get(group, 0)) > 0, "%s: %d 枚が、基準の大きさの %.0f 倍%s" % [group, int(count.get(group, 0)),
+		check(not bad.has(group) and int(count.get(group, 0)) > 0, "%s: %d 枚が、各原寸密度の %.0f 倍%s" % [group, int(count.get(group, 0)),
 				float(expect.get(group, default)), String(bad.get(group, ""))])
 
 

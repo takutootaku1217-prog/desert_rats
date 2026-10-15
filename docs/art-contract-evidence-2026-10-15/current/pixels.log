@@ -1,0 +1,12 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 25.0.7-2+deb13u1 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 19.1.7, 256 bits)
+
+  ok   実際の仲間と装備を空でない画面へ描画
+  ok   実際の差し替え画像を使用 x2
+  ok   アイコン・充填・仲間の装備の全ピクセル一致 x2
+  ok   実際の差し替え画像を使用 x3
+  ok   アイコン・充填・仲間の装備の全ピクセル一致 x3
+  ok   原画像へ戻しても全ピクセル一致
+== 結果: すべて成功 ==

@@ -1,0 +1,41 @@
+{
+  "commit": "5e69714167f1d85bb9c2d76422e7c4981f6c68a9",
+  "archive_path": "/tmp/desert-art-baseline-4duswiun",
+  "method": "git archive: diagnostic only; no branch/checkout changes",
+  "baseline_exit_code": 1,
+  "failures": 4,
+  "expected_dpu": [
+    1,
+    2,
+    1,
+    3
+  ],
+  "actual_dpu": [
+    2,
+    4,
+    2,
+    6
+  ],
+  "files": {
+    "tools/test_artscale.gd": {
+      "archive_matches_commit": true,
+      "sha256": "a184f92b6a42f994a0b3e8b5044f43aaedf255466d964ea4d08ca464847d95d2"
+    },
+    "assets/resources/item_handcart.png": {
+      "archive_matches_commit": true,
+      "sha256": "de1aa3b601a60e344533cd3008e420dfd56ed1140234ff46fb26fba5abfca61c"
+    },
+    "scripts/game_data.gd": {
+      "archive_matches_commit": true,
+      "sha256": "713aca9d81b80643332f0de03eda899b003ee8887a85223bbd75927cf828b713"
+    },
+    "scripts/character.gd": {
+      "archive_matches_commit": true,
+      "sha256": "060233a0983f293eb27d0cb30f4712e2104a91b4f0048eea1a2317373132e148"
+    },
+    "data/art_spec.gd": {
+      "archive_matches_commit": true,
+      "sha256": "ef1590fcfcce5dcb6fbc1775297ece5a03f6c664c694af5dd2a03d2c008f2325"
+    }
+  }
+}

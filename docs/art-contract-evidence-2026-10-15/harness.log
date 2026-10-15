@@ -1,0 +1,27 @@
+..START no_marker (timeout 180s)
+FAILED no_marker wall=0.032s
+START engine_error (timeout 180s)
+FAILED engine_error wall=0.033s
+.START first (timeout 180s)
+FAILED first wall=0.033s
+START second (timeout 180s)
+FAILED second wall=0.016s
+START last (timeout 180s)
+PASSED last wall=0.016s
+.START import (timeout 180s)
+MISSING_EXECUTABLE import wall=0.001s
+.START sample (timeout 180s)
+FAILED sample wall=0.032s
+START sample (timeout 180s)
+PASSED sample wall=0.032s
+.START success (timeout 180s)
+PASSED success wall=0.064s
+.START slow (timeout 0.3s)
+TIMEOUT slow wall=0.301s
+START after (timeout 180s)
+PASSED after wall=0.032s
+.
+----------------------------------------------------------------------
+Ran 8 tests in 0.604s
+
+OK

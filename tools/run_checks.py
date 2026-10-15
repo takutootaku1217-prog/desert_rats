@@ -54,7 +54,7 @@ CHECKS = {c.id: c for c in [
     Check("startup", ("--quit-after", "300")),
 ]}
 SUITES = {
-    "core": ["tool_progression", "tool_flow", "first_cycle", "field_operations", "manual_combat", "field_ui", "ecosystem", "first_cycle_flow", "navigation_bar", "batch_crafting", "batch_ui", "batch_flow", "haul_support", "haul_ui", "haul_flow", "facility_packing", "packing_flow", "world_map", "world_flow", "world_boundaries", "world_fauna", "world_scenery", "world_reencounter", "save_game", "save_ui", "inventory_discard", "clarity_ui", "cargo_accounting", "cargo_escape_ui", "progression", "weapon", "weapon_ui", "equipment_ui", "packed_equipment", "quarry", "gather", "cargo", "items", "crew_status", "life_actions", "tool_management",
+    "core": ["artscale", "tool_progression", "tool_flow", "first_cycle", "field_operations", "manual_combat", "field_ui", "ecosystem", "first_cycle_flow", "navigation_bar", "batch_crafting", "batch_ui", "batch_flow", "haul_support", "haul_ui", "haul_flow", "facility_packing", "packing_flow", "world_map", "world_flow", "world_boundaries", "world_fauna", "world_scenery", "world_reencounter", "save_game", "save_ui", "inventory_discard", "clarity_ui", "cargo_accounting", "cargo_escape_ui", "progression", "weapon", "weapon_ui", "equipment_ui", "packed_equipment", "quarry", "gather", "cargo", "items", "crew_status", "life_actions", "tool_management",
              "cargo_reservations", "consumption_loop", "loop_vanilla", "loop_normal", "startup"],
     "extra": ["loop_manual", "loop_events"],
     "layout": ["rooms", "view", "camera", "artscale", "quarry", "quarry_rear", "consumption_loop"],

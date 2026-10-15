@@ -1,0 +1,7 @@
+{
+  "data/art_spec.gd": "b19257d7c3aa438d18057dc74fb99fa4f0823f40060a7b03e9cef4c3abfa363d",
+  "tools/test_artscale.gd": "816bb05afad00cf780f8dd09e1f2c0c40c5e50ee04679e8b92ebd3869b8c7a99",
+  "tools/run_checks.py": "3bd840a7ea46aac02e673eb48ce726a485be6b5f4f282464abc9bc624702c5cc",
+  "tools/test_handcart_pixels.gd": "be80b8ebb03a712ffde1679fec083563191f734cf60358aa519aff77432d776b",
+  "tools/test_handcart_pixels.gd.uid": "71865634efb15347122c81848f94986a809790ba6f657ce60b48267c020470e1"
+}
