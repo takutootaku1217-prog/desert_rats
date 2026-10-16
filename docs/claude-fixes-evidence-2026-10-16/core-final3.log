@@ -1,0 +1,106 @@
+START import (timeout 120s)
+PASSED import wall=11.486s
+START hunt_bounds (timeout 180s)
+PASSED hunt_bounds wall=2.340s
+START auto_craft_guard (timeout 180s)
+PASSED auto_craft_guard wall=4.308s
+START developer_mode (timeout 180s)
+PASSED developer_mode wall=5.495s
+START developer_enabled (timeout 180s)
+PASSED developer_enabled wall=4.178s
+START artscale (timeout 180s)
+PASSED artscale wall=20.983s
+START tool_progression (timeout 180s)
+FAILED tool_progression wall=5.616s
+START tool_flow (timeout 180s)
+PASSED tool_flow wall=12.107s
+START first_cycle (timeout 180s)
+PASSED first_cycle wall=10.446s
+START field_operations (timeout 180s)
+PASSED field_operations wall=3.321s
+START manual_combat (timeout 180s)
+PASSED manual_combat wall=2.871s
+START field_ui (timeout 180s)
+PASSED field_ui wall=4.930s
+START ecosystem (timeout 180s)
+PASSED ecosystem wall=3.626s
+START first_cycle_flow (timeout 180s)
+PASSED first_cycle_flow wall=24.589s
+START navigation_bar (timeout 180s)
+PASSED navigation_bar wall=6.035s
+START batch_crafting (timeout 180s)
+PASSED batch_crafting wall=9.504s
+START batch_ui (timeout 180s)
+PASSED batch_ui wall=4.956s
+START batch_flow (timeout 180s)
+PASSED batch_flow wall=4.944s
+START haul_support (timeout 180s)
+PASSED haul_support wall=4.693s
+START haul_ui (timeout 180s)
+PASSED haul_ui wall=7.397s
+START haul_flow (timeout 180s)
+PASSED haul_flow wall=22.447s
+START facility_packing (timeout 180s)
+PASSED facility_packing wall=4.152s
+START packing_flow (timeout 180s)
+PASSED packing_flow wall=50.212s
+START world_map (timeout 180s)
+PASSED world_map wall=9.496s
+START world_flow (timeout 180s)
+PASSED world_flow wall=18.155s
+START world_boundaries (timeout 180s)
+PASSED world_boundaries wall=3.043s
+START world_fauna (timeout 180s)
+PASSED world_fauna wall=2.570s
+START world_scenery (timeout 180s)
+PASSED world_scenery wall=7.234s
+START world_reencounter (timeout 180s)
+PASSED world_reencounter wall=2.672s
+START save_game (timeout 180s)
+PASSED save_game wall=5.532s
+START save_ui (timeout 180s)
+PASSED save_ui wall=3.914s
+START inventory_discard (timeout 180s)
+PASSED inventory_discard wall=6.140s
+START clarity_ui (timeout 180s)
+PASSED clarity_ui wall=5.701s
+START cargo_accounting (timeout 180s)
+PASSED cargo_accounting wall=8.891s
+START cargo_escape_ui (timeout 180s)
+PASSED cargo_escape_ui wall=3.024s
+START progression (timeout 180s)
+PASSED progression wall=29.284s
+START weapon (timeout 180s)
+PASSED weapon wall=1.719s
+START weapon_ui (timeout 180s)
+PASSED weapon_ui wall=5.834s
+START equipment_ui (timeout 180s)
+PASSED equipment_ui wall=2.822s
+START packed_equipment (timeout 180s)
+PASSED packed_equipment wall=4.281s
+START quarry (timeout 180s)
+PASSED quarry wall=12.047s
+START gather (timeout 180s)
+PASSED gather wall=62.446s
+START cargo (timeout 180s)
+PASSED cargo wall=17.969s
+START items (timeout 180s)
+PASSED items wall=8.983s
+START crew_status (timeout 180s)
+PASSED crew_status wall=9.795s
+START life_actions (timeout 180s)
+PASSED life_actions wall=9.598s
+START tool_management (timeout 180s)
+PASSED tool_management wall=3.728s
+START cargo_reservations (timeout 180s)
+PASSED cargo_reservations wall=1.571s
+START consumption_loop (timeout 180s)
+PASSED consumption_loop wall=1.820s
+START loop_vanilla (timeout 300s)
+PASSED loop_vanilla wall=43.470s
+START loop_normal (timeout 300s)
+PASSED loop_normal wall=70.942s
+START startup (timeout 180s)
+PASSED startup wall=2.171s
+Selected checks: failed. Results: /workspace/claude-fixes-20261016/core-final3/20261016T121121Z-rzesjlz3/results.json
+判定は選択した診断のみです。通常セットの成功は追加セット・全条件の成功を意味しません。

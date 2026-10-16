@@ -1,0 +1,5 @@
+START import (timeout 120s)
+PASSED import wall=13.329s
+START world_endurance_502_stay (timeout 900s)
+PASSED world_endurance_502_stay wall=53.288s
+START world_endurance_502_route (timeout 900s)

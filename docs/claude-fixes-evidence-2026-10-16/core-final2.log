@@ -1,0 +1,17 @@
+START import (timeout 120s)
+PASSED import wall=9.142s
+START hunt_bounds (timeout 180s)
+PASSED hunt_bounds wall=2.850s
+START auto_craft_guard (timeout 180s)
+PASSED auto_craft_guard wall=3.475s
+START developer_mode (timeout 180s)
+PASSED developer_mode wall=2.114s
+START developer_enabled (timeout 180s)
+PASSED developer_enabled wall=1.971s
+START artscale (timeout 180s)
+PASSED artscale wall=12.237s
+START tool_progression (timeout 180s)
+FAILED tool_progression wall=3.441s
+START tool_flow (timeout 180s)
+PASSED tool_flow wall=8.938s
+START first_cycle (timeout 180s)

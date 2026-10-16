@@ -1027,7 +1027,7 @@ func reserved_for_builds() -> Dictionary:
 
 ## 鉄を使う建設の取り置きで、その鉄を採る最初の道具まで塞がない。
 ## 既に誰かが採れる、または有効な道具が倉庫/加工中にあれば例外は終わる。
-func build_needs_gather_tool(item: int) -> bool:
+func build_needs_gather_tool(item: int, own_incoming: Dictionary = {}) -> bool:
 	if item not in [GameData.Item.WOOD_PICK, GameData.Item.HAMMER] or not _builds_need_iron(): return false
 	var kind := "rock" if item == GameData.Item.WOOD_PICK else "vein"
 	for w in workers:
@@ -1035,7 +1035,10 @@ func build_needs_gather_tool(item: int) -> bool:
 		if float(w.gather_eval(kind)["eff"]) >= GatherDB.MIN_EFF: return false
 		for tool in GameData.TOOL_ITEMS:
 			if GatherDB.slot_of_tool(tool) != GatherDB.slot_of_point(kind): continue
-			if storage.count_of(tool) + processor.pending_of(tool) <= 0: continue
+			var pending: int = processor.pending_of(tool)
+			# 搬出直前の再確認では、自分の未搬出予約を完成予定の別道具と数えない。
+			if own_incoming.get("out",-1) == tool and processor.incoming.has(own_incoming): pending -= int(own_incoming.get("n",1))
+			if storage.count_of(tool) + pending <= 0: continue
 			if float(GatherDB.evaluate(kind,tool,w.ranks.get(GameData.Field.GATHERER,0),w.field_mult(GameData.Field.GATHERER))["eff"]) >= GatherDB.MIN_EFF: return false
 	return true
 
@@ -1204,7 +1207,7 @@ func choose_recipe() -> Dictionary:
 			continue                                                        # 必要設備（ワークベンチなど）がまだない
 		if smelt_boost and r["id"] == "smelt":
 			pr = maxi(pr, 4)
-		if not storage.has_set(r["in"]) or not _spares_for(r, reserved):
+		if not storage.has_set(r["in"]) or not _spares_for(r, reserved) or not AutoCraftGuard.allows(self,r):
 			continue                                                        # 材料がない、または建設のために取ってある
 		# 炉を使うレシピは、タンクの燃料に余裕があるときだけ（移動用の燃料を守る）
 		if r["tank_fuel"] > 0.0 and base.fuel < 25.0:
@@ -1218,7 +1221,8 @@ func choose_recipe() -> Dictionary:
 		var key: float = pr * 10.0 + (1.0 - float(have) / float(target))
 		if key > best_key:
 			best_key = key
-			best = r
+			best = r.duplicate(true)
+			best["automatic"] = true
 	return best
 
 
@@ -1280,8 +1284,19 @@ func on_creature_killed(c) -> void:
 
 
 ## テスト用の購入（ショップや経済は第1段階では作らない）。獲物を倉庫で解体したのと同じ扱い。
+func developer_mode() -> bool:
+	return OS.get_cmdline_user_args().has("--developer-mode")
+
+
 func test_purchase(species: String) -> void:
-	storage.butcher(species, Inventory.SOURCE_PURCHASE)
+	if developer_mode() and GameData.CREATURES.has(species):
+		storage.butcher(species, Inventory.SOURCE_PURCHASE)
+
+
+func test_add_tool(item: int) -> void:
+	if developer_mode() and item in GameData.TOOL_ITEMS:
+		storage.add_item(item, 1, Inventory.SOURCE_PURCHASE)
+		manage_tools()
 
 
 # ---------------------------------------------------------------- 戦闘（現段階では未使用）

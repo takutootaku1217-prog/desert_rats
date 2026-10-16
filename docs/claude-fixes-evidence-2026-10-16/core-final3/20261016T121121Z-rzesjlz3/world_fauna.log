@@ -1,0 +1,18 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+OK 地点ごとの生物数を増やさない region:south_oasis
+OK 地点ごとの生物数を増やさない region:east_sands
+OK 地点ごとの生物数を増やさない region:central_trade
+OK 地点ごとの生物数を増やさない region:old_mine
+OK 地点ごとの生物数を増やさない road:01
+OK 地点ごとの生物数を増やさない road:03
+OK 地点ごとの生物数を増やさない road:04
+OK 地点ごとの生物数を増やさない road:06
+OK 初回生物7枠のうち6枠だけを既存の骨供給種へ変更
+OK 村を変えず初期の村→砂原経路に骨の供給源
+OK 変更箇所は2地域・4道路の計6枠
+OK 全域生成済みの旧生物配置も保存復元可能
+OK 全地点を再訪しても旧生物・採取残量の台帳を一切変更しない
+OK 旧版で全域生成済み・骨なしの場合は供給行き止まりが残る（無断補填なし）
+OK 未生成地域だけに補修後の配置を適用し既存地域は保持
+== 結果: すべて成功 ==

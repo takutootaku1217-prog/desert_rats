@@ -1,0 +1,23 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+FIRST_CYCLE_FLOW 通常開始3人・有限資源・既定出来事・素材/道具/設備注入なし seed=501
+STAGE 27.8s 木のみの作業台
+STAGE 113.4s 木製採掘具→石製採掘具
+ACTION 作業場へ確保 木材 x4
+STAGE 136.2s 鉄道具の柄用木4を先に確保
+ACTION 作業場へ確保 鉄 x1
+STAGE 217.0s tool_pick 材料確保 鉄
+STAGE 217.0s tool_pick 材料確保 木材
+STAGE 244.2s tool_pick 製作回収
+STAGE 244.8s 安全寄りの村で基本鉄採掘具を装備
+ACTION 作業場へ確保 鉄 x1
+STAGE 251.2s tool_iron_axe 材料確保 鉄
+STAGE 251.2s tool_iron_axe 材料確保 木材
+STAGE 287.4s tool_iron_axe 製作回収
+STAGE 288.0s 安全寄りの村で基本鉄斧を装備
+STAGE 352.2s 地域到着 east_sands
+ACTION 作業場へ確保 木材 x2
+STAGE 359.0s haul_frame 材料確保 木材
+FAIL 未達: haul_frame 材料確保 皮 / 中央交易都市に停泊中
+PROGRESSION {"build_queue":[],"capacity":360,"events":{"attack":0,"chance":0,"escaped":0,"kills":0,"repelled":0,"trouble":1,"weather":5},"game_over":false,"inventory":{"4":39,"5":1,"6":10,"7":5,"8":8,"9":8,"10":5,"12":0,"13":0,"16":0,"23":3,"24":0},"phase":"haul_frame 材料確保 皮","quarry":"road","report":{},"seconds":598.999999999999,"stages":["木のみの作業台","木製採掘具→石製採掘具","鉄道具の柄用木4を先に確保","tool_pick 材料確保 鉄","tool_pick 材料確保 木材","tool_pick 製作回収","安全寄りの村で基本鉄採掘具を装備","tool_iron_axe 材料確保 鉄","tool_iron_axe 材料確保 木材","tool_iron_axe 製作回収","安全寄りの村で基本鉄斧を装備","地域到着 east_sands","haul_frame 材料確保 木材"],"weight":354}
+== 結果: 1 件失敗 ==

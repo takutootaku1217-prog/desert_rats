@@ -1,0 +1,10 @@
+START import (timeout 120s)
+PASSED import wall=9.392s
+START tool_progression (timeout 180s)
+PASSED tool_progression wall=2.420s
+START auto_craft_guard (timeout 180s)
+PASSED auto_craft_guard wall=2.474s
+START first_cycle_flow (timeout 180s)
+PASSED first_cycle_flow wall=15.367s
+Selected checks: passed. Results: /workspace/claude-fixes-20261016/bootstrap-fix/20261016T122159Z-vruyo28o/results.json
+判定は選択した診断のみです。通常セットの成功は追加セット・全条件の成功を意味しません。

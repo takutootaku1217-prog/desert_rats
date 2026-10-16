@@ -1,0 +1,27 @@
+START import (timeout 120s)
+PASSED import wall=14.115s
+START auto_craft_guard (timeout 180s)
+PASSED auto_craft_guard wall=4.309s
+START developer_mode (timeout 180s)
+PASSED developer_mode wall=5.031s
+START developer_enabled (timeout 180s)
+PASSED developer_enabled wall=8.795s
+START artscale (timeout 180s)
+PASSED artscale wall=32.778s
+START tool_progression (timeout 180s)
+FAILED tool_progression wall=5.713s
+START tool_flow (timeout 180s)
+PASSED tool_flow wall=15.547s
+START first_cycle (timeout 180s)
+PASSED first_cycle wall=11.691s
+START field_operations (timeout 180s)
+PASSED field_operations wall=5.320s
+START manual_combat (timeout 180s)
+PASSED manual_combat wall=3.025s
+START field_ui (timeout 180s)
+PASSED field_ui wall=5.444s
+START ecosystem (timeout 180s)
+PASSED ecosystem wall=4.098s
+START first_cycle_flow (timeout 180s)
+FAILED first_cycle_flow wall=27.355s
+START navigation_bar (timeout 180s)

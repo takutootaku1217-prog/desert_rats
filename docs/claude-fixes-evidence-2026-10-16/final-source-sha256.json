@@ -1,0 +1,19 @@
+{
+  "scripts/character_ai.gd": "616c3a283808e9c1e707fbbd01fd6013e81ed3ba971bbbd166ab31f6420b6fbb",
+  "scripts/main.gd": "668fee1c237b59aba2739f86a510b6aceaf590e81c2a785473c10b4a190ebef5",
+  "scripts/save_game.gd": "9b9a012d6af6bc6115792e55298a1886b0019ec30816d7425b54625007a7f95b",
+  "tools/run_checks.py": "385c7aa5a68d6297b02d649703a07ca31f4d54775e477d253cac8c7028dbe684",
+  "tools/test_progression.gd": "a421f28654eed95283030450fd79e6384eb5abeac9c70a2e6755c168b0fe6134",
+  "ui/policy_ui.gd": "1cbe35d044cc0f0a2e838f83cd2abef19910c4ba0581143826fb964c9f86f491",
+  "砂漠のネズミ団.gd": "668fee1c237b59aba2739f86a510b6aceaf590e81c2a785473c10b4a190ebef5",
+  "scripts/auto_craft_guard.gd": "cbbbc04411339bca87c5008c4af14c34a519169aa209d2594a313316f4e3e162",
+  "scripts/auto_craft_guard.gd.uid": "07a78582d01c361d97d6b4470554c3c37f4c6f8b8c74fb8336023659654a9f53",
+  "tools/probe_default_map.gd": "b79419a28fd8eb959d3a7712462a30e2d76e21ac4141e4e011fcb7efc2289d85",
+  "tools/probe_default_map.gd.uid": "af7e9569e58f3b177cef743e069df87633cc9a80c4b48a78d6d7df59dd3ad69f",
+  "tools/test_auto_craft_guard.gd": "cce966a3a79dbaafa3b00b08f347eab4b426f24680cf02e57a81809a2859cacb",
+  "tools/test_auto_craft_guard.gd.uid": "c4f7af8765f0276a0f49df5ee729daec0cf9443520fbea2e19d75df6e6ea0421",
+  "tools/test_developer_mode.gd": "c350ea9679367547098fe66e33fd32da1ade330475a62797fd7999561fbf88cc",
+  "tools/test_developer_mode.gd.uid": "4e344a8e67c5eb370cb396c1c29754b79f6d89bd31d93a7ada43437a82330dcd",
+  "tools/test_hunt_bounds.gd": "2b3176846cb7b385eee2518367e62eeff9a122e3a2dbe74f0553ffa145adee68",
+  "tools/test_hunt_bounds.gd.uid": "c6435976b03725872ab489ad86ca9014281c5eb0e7510fed5725697fb4b07987"
+}

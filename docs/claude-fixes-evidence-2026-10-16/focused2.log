@@ -1,0 +1,10 @@
+START import (timeout 120s)
+PASSED import wall=6.441s
+START first_cycle_flow (timeout 180s)
+PASSED first_cycle_flow wall=14.503s
+START progression (timeout 180s)
+FAILED progression wall=21.609s
+START tool_flow (timeout 180s)
+PASSED tool_flow wall=6.736s
+Selected checks: failed. Results: /workspace/claude-fixes-20261016/focused2/20261016T120229Z-fcgknf2r/results.json
+判定は選択した診断のみです。通常セットの成功は追加セット・全条件の成功を意味しません。

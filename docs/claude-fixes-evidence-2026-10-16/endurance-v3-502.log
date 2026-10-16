@@ -1,0 +1,8 @@
+START import (timeout 120s)
+PASSED import wall=12.310s
+START world_endurance_502_stay (timeout 900s)
+PASSED world_endurance_502_stay wall=44.102s
+START world_endurance_502_route (timeout 900s)
+PASSED world_endurance_502_route wall=349.543s
+Selected checks: passed. Results: /workspace/claude-fixes-20261016/endurance-v3-502/20261016T121122Z-r2_bg0z6/results.json
+判定は選択した診断のみです。通常セットの成功は追加セット・全条件の成功を意味しません。

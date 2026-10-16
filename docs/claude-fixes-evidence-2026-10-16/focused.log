@@ -1,0 +1,16 @@
+START import (timeout 120s)
+PASSED import wall=9.364s
+START auto_craft_guard (timeout 180s)
+PASSED auto_craft_guard wall=2.422s
+START developer_mode (timeout 180s)
+PASSED developer_mode wall=1.972s
+START developer_enabled (timeout 180s)
+PASSED developer_enabled wall=2.884s
+START cargo_reservations (timeout 180s)
+PASSED cargo_reservations wall=1.620s
+START first_cycle_flow (timeout 180s)
+FAILED first_cycle_flow wall=18.095s
+START progression (timeout 180s)
+PASSED progression wall=19.276s
+Selected checks: failed. Results: /workspace/claude-fixes-20261016/focused/20261016T120126Z-yax1apxs/results.json
+判定は選択した診断のみです。通常セットの成功は追加セット・全条件の成功を意味しません。

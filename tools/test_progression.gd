@@ -31,9 +31,9 @@ func finish():
 func _initialize():
 	FacilityDB.start_all=false
 	main=load("res://scenes/main.tscn").instantiate()
+	main.set_meta("diagnostic_seed",501)
 	root.add_child(main)
 	if not main.is_node_ready(): await main.ready
-	seed(501)
 	Engine.time_scale=12
 	print("操作方針: Bで作業台→寝床/箱を製作設置、Gで近場を採取し帰還。残置は数量確認して放棄。Fで槍を製作、Cで本人へ装備、Bで2個目の箱。出来事・各優先度は既定。")
 	if not main.director.enabled: fail("出来事が無効"); finish(); return

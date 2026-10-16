@@ -1,0 +1,405 @@
+{
+  "schema_version": 1,
+  "run_directory": "/workspace/claude-fixes-20261016/focused4/20261016T120625Z-wxlmemjt",
+  "started_utc": "2026-10-16T12:06:25.536518+00:00",
+  "metadata": {
+    "platform": "Linux-6.18.44-x86_64-with-glibc2.41",
+    "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+    "python_executable": "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+    "runner_command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+      "tools/run_checks.py",
+      "--check",
+      "hunt_bounds",
+      "--check",
+      "first_cycle_flow",
+      "--check",
+      "progression",
+      "--check",
+      "tool_flow",
+      "--output-dir",
+      "/workspace/claude-fixes-20261016/focused4"
+    ],
+    "root": "/workspace/desert_rats",
+    "git_before": {
+      "head": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "rev-parse",
+          "HEAD"
+        ],
+        "returncode": 0,
+        "output": "1d24d20562bc2aefcdb0345796967a67e3c28862"
+      },
+      "branch": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "branch",
+          "--show-current"
+        ],
+        "returncode": 0,
+        "output": "main"
+      },
+      "status": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "status",
+          "--porcelain=v1",
+          "--untracked-files=all"
+        ],
+        "returncode": 0,
+        "output": "M scripts/character_ai.gd\n M scripts/main.gd\n M scripts/save_game.gd\n M tools/run_checks.py\n M tools/test_progression.gd\n M ui/policy_ui.gd\n M \"\\347\\240\\202\\346\\274\\240\\343\\201\\256\\343\\203\\215\\343\\202\\272\\343\\203\\237\\345\\233\\243.gd\"\n?? scripts/auto_craft_guard.gd\n?? scripts/auto_craft_guard.gd.uid\n?? tools/probe_default_map.gd\n?? tools/probe_default_map.gd.uid\n?? tools/test_auto_craft_guard.gd\n?? tools/test_auto_craft_guard.gd.uid\n?? tools/test_developer_mode.gd\n?? tools/test_developer_mode.gd.uid\n?? tools/test_hunt_bounds.gd"
+      },
+      "changed_files": [
+        {
+          "path": "scripts/auto_craft_guard.gd",
+          "sha256": "252c0a1750a60b0357ec993d2011b5c8525270ddf1a3425cf5ccd5ef974ca7f6"
+        },
+        {
+          "path": "scripts/auto_craft_guard.gd.uid",
+          "sha256": "07a78582d01c361d97d6b4470554c3c37f4c6f8b8c74fb8336023659654a9f53"
+        },
+        {
+          "path": "scripts/character_ai.gd",
+          "sha256": "b15bcffd405210782867e917da56611b91e124540dcef3186c40eaf89dea07ac"
+        },
+        {
+          "path": "scripts/main.gd",
+          "sha256": "0c0c1d4dd0689e523730e20505d946991b2783acaa2b307fa7229a8ee09d70c5"
+        },
+        {
+          "path": "scripts/save_game.gd",
+          "sha256": "9b9a012d6af6bc6115792e55298a1886b0019ec30816d7425b54625007a7f95b"
+        },
+        {
+          "path": "tools/probe_default_map.gd",
+          "sha256": "b79419a28fd8eb959d3a7712462a30e2d76e21ac4141e4e011fcb7efc2289d85"
+        },
+        {
+          "path": "tools/probe_default_map.gd.uid",
+          "sha256": "af7e9569e58f3b177cef743e069df87633cc9a80c4b48a78d6d7df59dd3ad69f"
+        },
+        {
+          "path": "tools/run_checks.py",
+          "sha256": "385c7aa5a68d6297b02d649703a07ca31f4d54775e477d253cac8c7028dbe684"
+        },
+        {
+          "path": "tools/test_auto_craft_guard.gd",
+          "sha256": "cce966a3a79dbaafa3b00b08f347eab4b426f24680cf02e57a81809a2859cacb"
+        },
+        {
+          "path": "tools/test_auto_craft_guard.gd.uid",
+          "sha256": "c4f7af8765f0276a0f49df5ee729daec0cf9443520fbea2e19d75df6e6ea0421"
+        },
+        {
+          "path": "tools/test_developer_mode.gd",
+          "sha256": "c350ea9679367547098fe66e33fd32da1ade330475a62797fd7999561fbf88cc"
+        },
+        {
+          "path": "tools/test_developer_mode.gd.uid",
+          "sha256": "4e344a8e67c5eb370cb396c1c29754b79f6d89bd31d93a7ada43437a82330dcd"
+        },
+        {
+          "path": "tools/test_hunt_bounds.gd",
+          "sha256": "5c18ecea821fed7333d2212e5fd651c80b72367e2583552859e31838739f5172"
+        },
+        {
+          "path": "tools/test_progression.gd",
+          "sha256": "2d11fe1e7ea9b3b46fab2f38de00efa8440c0fc687c6c8860bad39f516fa3f60"
+        },
+        {
+          "path": "ui/policy_ui.gd",
+          "sha256": "1cbe35d044cc0f0a2e838f83cd2abef19910c4ba0581143826fb964c9f86f491"
+        },
+        {
+          "path": "砂漠のネズミ団.gd",
+          "sha256": "0c0c1d4dd0689e523730e20505d946991b2783acaa2b307fa7229a8ee09d70c5"
+        }
+      ],
+      "dirty": true
+    },
+    "godot_version": {
+      "command": [
+        "/usr/local/bin/godot",
+        "--version"
+      ],
+      "returncode": 0,
+      "output": "4.6.3.stable.official.7d41c59c4"
+    },
+    "suite": null,
+    "unverified": [
+      "Windows / Godot 4.7.2",
+      "OS-level input",
+      "Audio"
+    ],
+    "scope_note": "first_cycle_flow/ecosystem, tool_progression/tool_flow, world_*, batch_*, haul_*, facility_packing, packing_flow and startup use the default map; other gameplay checks explicitly use legacy-world-test fixtures. world_endurance runs up to 60 game minutes with defaults, workbench request and optional 5-minute map trips; passed means observation integrity, not survival. Only selected checks; core does not cover extra/endurance or all gameplay conditions.",
+    "git_after": {
+      "head": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "rev-parse",
+          "HEAD"
+        ],
+        "returncode": 0,
+        "output": "1d24d20562bc2aefcdb0345796967a67e3c28862"
+      },
+      "branch": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "branch",
+          "--show-current"
+        ],
+        "returncode": 0,
+        "output": "main"
+      },
+      "status": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "status",
+          "--porcelain=v1",
+          "--untracked-files=all"
+        ],
+        "returncode": 0,
+        "output": "M scripts/character_ai.gd\n M scripts/main.gd\n M scripts/save_game.gd\n M tools/run_checks.py\n M tools/test_progression.gd\n M ui/policy_ui.gd\n M \"\\347\\240\\202\\346\\274\\240\\343\\201\\256\\343\\203\\215\\343\\202\\272\\343\\203\\237\\345\\233\\243.gd\"\n?? scripts/auto_craft_guard.gd\n?? scripts/auto_craft_guard.gd.uid\n?? tools/probe_default_map.gd\n?? tools/probe_default_map.gd.uid\n?? tools/test_auto_craft_guard.gd\n?? tools/test_auto_craft_guard.gd.uid\n?? tools/test_developer_mode.gd\n?? tools/test_developer_mode.gd.uid\n?? tools/test_hunt_bounds.gd\n?? tools/test_hunt_bounds.gd.uid"
+      },
+      "changed_files": [
+        {
+          "path": "scripts/auto_craft_guard.gd",
+          "sha256": "252c0a1750a60b0357ec993d2011b5c8525270ddf1a3425cf5ccd5ef974ca7f6"
+        },
+        {
+          "path": "scripts/auto_craft_guard.gd.uid",
+          "sha256": "07a78582d01c361d97d6b4470554c3c37f4c6f8b8c74fb8336023659654a9f53"
+        },
+        {
+          "path": "scripts/character_ai.gd",
+          "sha256": "a9583d3fb090d56d50b9e1a92d5708d990f125b3a5dc5949a9b64d7ac6ede2a9"
+        },
+        {
+          "path": "scripts/main.gd",
+          "sha256": "0c0c1d4dd0689e523730e20505d946991b2783acaa2b307fa7229a8ee09d70c5"
+        },
+        {
+          "path": "scripts/save_game.gd",
+          "sha256": "9b9a012d6af6bc6115792e55298a1886b0019ec30816d7425b54625007a7f95b"
+        },
+        {
+          "path": "tools/probe_default_map.gd",
+          "sha256": "b79419a28fd8eb959d3a7712462a30e2d76e21ac4141e4e011fcb7efc2289d85"
+        },
+        {
+          "path": "tools/probe_default_map.gd.uid",
+          "sha256": "af7e9569e58f3b177cef743e069df87633cc9a80c4b48a78d6d7df59dd3ad69f"
+        },
+        {
+          "path": "tools/run_checks.py",
+          "sha256": "385c7aa5a68d6297b02d649703a07ca31f4d54775e477d253cac8c7028dbe684"
+        },
+        {
+          "path": "tools/test_auto_craft_guard.gd",
+          "sha256": "cce966a3a79dbaafa3b00b08f347eab4b426f24680cf02e57a81809a2859cacb"
+        },
+        {
+          "path": "tools/test_auto_craft_guard.gd.uid",
+          "sha256": "c4f7af8765f0276a0f49df5ee729daec0cf9443520fbea2e19d75df6e6ea0421"
+        },
+        {
+          "path": "tools/test_developer_mode.gd",
+          "sha256": "c350ea9679367547098fe66e33fd32da1ade330475a62797fd7999561fbf88cc"
+        },
+        {
+          "path": "tools/test_developer_mode.gd.uid",
+          "sha256": "4e344a8e67c5eb370cb396c1c29754b79f6d89bd31d93a7ada43437a82330dcd"
+        },
+        {
+          "path": "tools/test_hunt_bounds.gd",
+          "sha256": "1facf9f77ddf5ff57577cf77512a80e737c3b20827bf7815ffcb0f52552b0540"
+        },
+        {
+          "path": "tools/test_hunt_bounds.gd.uid",
+          "sha256": "c6435976b03725872ab489ad86ca9014281c5eb0e7510fed5725697fb4b07987"
+        },
+        {
+          "path": "tools/test_progression.gd",
+          "sha256": "2d11fe1e7ea9b3b46fab2f38de00efa8440c0fc687c6c8860bad39f516fa3f60"
+        },
+        {
+          "path": "ui/policy_ui.gd",
+          "sha256": "1cbe35d044cc0f0a2e838f83cd2abef19910c4ba0581143826fb964c9f86f491"
+        },
+        {
+          "path": "砂漠のネズミ団.gd",
+          "sha256": "0c0c1d4dd0689e523730e20505d946991b2783acaa2b307fa7229a8ee09d70c5"
+        }
+      ],
+      "dirty": true
+    }
+  },
+  "scope": [
+    "import",
+    "hunt_bounds",
+    "first_cycle_flow",
+    "progression",
+    "tool_flow"
+  ],
+  "status": "failed",
+  "first_failure": {
+    "id": "first_cycle_flow",
+    "command": [
+      "/usr/local/bin/godot",
+      "--headless",
+      "--path",
+      "/workspace/desert_rats",
+      "--fixed-fps",
+      "60",
+      "-s",
+      "res://tools/test_first_cycle_flow.gd"
+    ],
+    "cwd": "/workspace/desert_rats",
+    "log": "/workspace/claude-fixes-20261016/focused4/20261016T120625Z-wxlmemjt/first_cycle_flow.log",
+    "timeout_seconds": 180.0,
+    "requested_game_minutes_per_run": null,
+    "requested_repetitions": null,
+    "status": "failed",
+    "returncode": 1,
+    "elapsed_wall_seconds": 23.683,
+    "diagnostic_error_lines": [
+      "FAIL 未達: haul_frame 材料確保 皮 / 中央交易都市に停泊中"
+    ],
+    "success_marker_found": false
+  },
+  "checks": [
+    {
+      "id": "import",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "--editor",
+        "--import",
+        "--quit"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/claude-fixes-20261016/focused4/20261016T120625Z-wxlmemjt/import.log",
+      "timeout_seconds": 120,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 16.58,
+      "diagnostic_error_lines": [],
+      "success_marker_found": null
+    },
+    {
+      "id": "hunt_bounds",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_hunt_bounds.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/claude-fixes-20261016/focused4/20261016T120625Z-wxlmemjt/hunt_bounds.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 4.776,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "first_cycle_flow",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_first_cycle_flow.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/claude-fixes-20261016/focused4/20261016T120625Z-wxlmemjt/first_cycle_flow.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "failed",
+      "returncode": 1,
+      "elapsed_wall_seconds": 23.683,
+      "diagnostic_error_lines": [
+        "FAIL 未達: haul_frame 材料確保 皮 / 中央交易都市に停泊中"
+      ],
+      "success_marker_found": false
+    },
+    {
+      "id": "progression",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_progression.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/claude-fixes-20261016/focused4/20261016T120625Z-wxlmemjt/progression.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 15.077,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "tool_flow",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_tool_flow.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/claude-fixes-20261016/focused4/20261016T120625Z-wxlmemjt/tool_flow.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 7.741,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    }
+  ],
+  "elapsed_wall_seconds": 67.864,
+  "finished_utc": "2026-10-16T12:07:33.401655+00:00",
+  "source_changed_during_run": true,
+  "verification_error": "Source changed during run or Git/Godot metadata could not be verified"
+}

@@ -107,6 +107,7 @@ static func counts(d) -> bool:
 
 static func recipe(r) -> bool:
 	if not r is Dictionary: return false
+	if r.has("automatic") and not r.automatic is bool: return false
 	if r.is_empty(): return true
 	if r.has("batch") and (not r.batch is bool or r.has("build")): return false
 	for k in ["id", "in", "out", "n", "time", "field", "tank_fuel"]:

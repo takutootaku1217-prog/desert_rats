@@ -1,0 +1,990 @@
+[
+  {
+    "accepted_trips": 11,
+    "game_over": false,
+    "kind": "result",
+    "reached_60_minutes": true,
+    "requested_seconds": 3600.0,
+    "scenario": "route",
+    "seed": 501,
+    "time": 3600.2,
+    "violations": [],
+    "log": "endurance-v4-501/20261016T122242Z-8xpga9ml/world_endurance_501_route.log",
+    "hull": 79.1367961599022,
+    "parts": {
+      "0": 79.1367961599022,
+      "1": 97.0848961849431,
+      "2": 87.5031837555566
+    },
+    "food": 4,
+    "repair_kits": 6,
+    "wood": 28,
+    "repair_actions": 28,
+    "hunted": 4,
+    "receipts": {
+      "environment:木材": 99,
+      "environment:皮": 1,
+      "environment:石": 56,
+      "environment:脂肪": 1,
+      "environment:鉄鉱石": 11,
+      "environment:骨": 1,
+      "hunt:生肉": 7,
+      "hunt:皮": 1,
+      "hunt:脂肪": 3,
+      "hunt:骨": 1,
+      "processing:応急修理板": 35,
+      "processing:木製の斧": 3,
+      "processing:木製採掘具": 3,
+      "processing:燃料": 16,
+      "processing:石のハンマー": 3,
+      "processing:石の斧": 2,
+      "processing:鉄": 11,
+      "processing:鉄の斧": 2,
+      "processing:鉄製ピッケル": 2,
+      "processing:食料": 14,
+      "processing:高性能ピッケル": 1,
+      "transfer:木製の斧": 4,
+      "transfer:木製採掘具": 3,
+      "transfer:石のハンマー": 3,
+      "transfer:石の斧": 2,
+      "transfer:鉄製ピッケル": 1
+    },
+    "resources_left": {
+      "region:central_trade": {
+        "rock": 0.0,
+        "tree": 0.0
+      },
+      "region:east_sands": {
+        "rock": 0.0,
+        "tree": 0.0
+      },
+      "region:old_mine": {},
+      "region:south_oasis": {
+        "rock": 0.0,
+        "tree": 0.0,
+        "vein": 0.0
+      },
+      "road:01": {
+        "rock": 17.0,
+        "tree": 28.0,
+        "vein": 16.0
+      },
+      "road:03": {
+        "rock": 25.0,
+        "tree": 38.0,
+        "vein": 18.0
+      },
+      "road:04": {
+        "rock": 20.0,
+        "tree": 32.0,
+        "vein": 14.0
+      },
+      "road:06": {
+        "rock": 42.0,
+        "tree": 7.0,
+        "vein": 11.0
+      }
+    },
+    "weight": 332,
+    "capacity": 360,
+    "last_events": [
+      {
+        "at": 3352.59999999914,
+        "text": "東部砂原に到着。地図で次の行先を選べます"
+      },
+      {
+        "at": 3363.99999999913,
+        "text": "酷暑が始まった！"
+      },
+      {
+        "at": 3418.59999999908,
+        "text": "遺跡を見つけた！（崩れた見張り台）調査隊を出せる"
+      },
+      {
+        "at": 3430.79999999907,
+        "text": "暑さが和らいだ"
+      },
+      {
+        "at": 3539.99999999897,
+        "text": "車体の外板が裂けた！車体が損傷（-36）"
+      },
+      {
+        "at": 3568.39999999895,
+        "text": "遺跡は遠ざかってしまった"
+      }
+    ],
+    "workers": [
+      {
+        "hp": 100.0,
+        "name": "ネズ吉",
+        "priorities": {
+          "0": 5,
+          "1": 3,
+          "2": 1,
+          "3": 3,
+          "4": 3,
+          "5": 2,
+          "6": 3
+        },
+        "recipe": "",
+        "satiety": 35.4426666666401,
+        "state": "SEARCH",
+        "tools": {
+          "chop": 16,
+          "mine": 14
+        }
+      },
+      {
+        "hp": 100.0,
+        "name": "チュー太",
+        "priorities": {
+          "0": 3,
+          "1": 4,
+          "2": 2,
+          "3": 3,
+          "4": 5,
+          "5": 2,
+          "6": 5
+        },
+        "recipe": "",
+        "satiety": 35.4426666666406,
+        "state": "IDLE",
+        "tools": {
+          "chop": 16,
+          "mine": 13
+        }
+      },
+      {
+        "hp": 100.0,
+        "name": "モモ",
+        "priorities": {
+          "0": 1,
+          "1": 3,
+          "2": 5,
+          "3": 3,
+          "4": 2,
+          "5": 4,
+          "6": 1
+        },
+        "recipe": "",
+        "satiety": 35.4426666666401,
+        "state": "REST_HERE",
+        "tools": {
+          "chop": 15,
+          "mine": 13
+        }
+      }
+    ],
+    "advanced_recipe_consumption": [
+      {
+        "time": 659.0,
+        "delta": {
+          "応急修理板": -3,
+          "鉄": -1
+        },
+        "recipes": [
+          "",
+          "smelt",
+          "tool_adv_pick"
+        ]
+      }
+    ]
+  },
+  {
+    "accepted_trips": 0,
+    "game_over": true,
+    "kind": "result",
+    "reached_60_minutes": false,
+    "requested_seconds": 3600.0,
+    "scenario": "stay",
+    "seed": 501,
+    "time": 1827.0,
+    "violations": [],
+    "log": "endurance-v4-501/20261016T122242Z-8xpga9ml/world_endurance_501_stay.log",
+    "hull": 0.0,
+    "parts": {
+      "0": 0.0,
+      "1": 75.1739977259048,
+      "2": 75.6888857746706
+    },
+    "food": 2,
+    "repair_kits": 0,
+    "wood": 0,
+    "repair_actions": 5,
+    "hunted": 0,
+    "receipts": {
+      "environment:木材": 36,
+      "environment:石": 11,
+      "environment:鉄鉱石": 4,
+      "processing:応急修理板": 3,
+      "processing:木製の斧": 3,
+      "processing:木製採掘具": 3,
+      "processing:燃料": 5,
+      "processing:石のハンマー": 3,
+      "processing:石の斧": 2,
+      "processing:鉄": 4,
+      "processing:鉄の斧": 1,
+      "processing:鉄製ピッケル": 2,
+      "transfer:木製の斧": 4,
+      "transfer:木製採掘具": 3,
+      "transfer:石のハンマー": 2,
+      "transfer:石の斧": 3,
+      "transfer:鉄の斧": 2
+    },
+    "resources_left": {
+      "region:south_oasis": {
+        "rock": 0.0,
+        "tree": 0.0,
+        "vein": 0.0
+      }
+    },
+    "weight": 28,
+    "capacity": 360,
+    "last_events": [
+      {
+        "at": 1662.20000000024,
+        "text": "砂嵐が近づいている…"
+      },
+      {
+        "at": 1687.40000000025,
+        "text": "砂嵐が来た！"
+      },
+      {
+        "at": 1755.20000000026,
+        "text": "砂嵐が過ぎ去った"
+      },
+      {
+        "at": 1755.80000000026,
+        "text": "急に冷え込んできた…"
+      },
+      {
+        "at": 1786.00000000027,
+        "text": "寒波が来た！"
+      },
+      {
+        "at": 1827.00000000028,
+        "text": "車体の外板が裂けた！車体が損傷（-31）"
+      }
+    ],
+    "workers": [
+      {
+        "hp": 100.0,
+        "name": "ネズ吉",
+        "priorities": {
+          "0": 5,
+          "1": 3,
+          "2": 1,
+          "3": 3,
+          "4": 3,
+          "5": 2,
+          "6": 3
+        },
+        "recipe": "",
+        "satiety": 33.4053333333182,
+        "state": "IDLE",
+        "tools": {
+          "chop": 16,
+          "mine": 13
+        }
+      },
+      {
+        "hp": 100.0,
+        "name": "チュー太",
+        "priorities": {
+          "0": 3,
+          "1": 4,
+          "2": 2,
+          "3": 3,
+          "4": 5,
+          "5": 2,
+          "6": 5
+        },
+        "recipe": "",
+        "satiety": 33.4053333333172,
+        "state": "IDLE",
+        "tools": {
+          "chop": 15,
+          "mine": 13
+        }
+      },
+      {
+        "hp": 100.0,
+        "name": "モモ",
+        "priorities": {
+          "0": 1,
+          "1": 3,
+          "2": 5,
+          "3": 3,
+          "4": 2,
+          "5": 4,
+          "6": 1
+        },
+        "recipe": "",
+        "satiety": 33.4053333333172,
+        "state": "IDLE",
+        "tools": {
+          "chop": 15,
+          "mine": 12
+        }
+      }
+    ],
+    "advanced_recipe_consumption": []
+  },
+  {
+    "accepted_trips": 11,
+    "game_over": false,
+    "kind": "result",
+    "reached_60_minutes": true,
+    "requested_seconds": 3600.0,
+    "scenario": "route",
+    "seed": 502,
+    "time": 3600.2,
+    "violations": [],
+    "log": "endurance-v4-502/20261016T122242Z-wj7_9gvq/world_endurance_502_route.log",
+    "hull": 77.1408239554843,
+    "parts": {
+      "0": 77.1408239554843,
+      "1": 96.5268077666149,
+      "2": 75.2462750551658
+    },
+    "food": 0,
+    "repair_kits": 6,
+    "wood": 23,
+    "repair_actions": 33,
+    "hunted": 2,
+    "receipts": {
+      "environment:木材": 99,
+      "environment:石": 63,
+      "environment:鉄鉱石": 12,
+      "hunt:生肉": 2,
+      "hunt:皮": 1,
+      "hunt:脂肪": 2,
+      "hunt:骨": 1,
+      "processing:応急修理板": 40,
+      "processing:木製の斧": 2,
+      "processing:木製採掘具": 3,
+      "processing:燃料": 15,
+      "processing:石のハンマー": 3,
+      "processing:石の斧": 3,
+      "processing:鉄": 12,
+      "processing:鉄の斧": 2,
+      "processing:鉄製ピッケル": 2,
+      "processing:食料": 4,
+      "processing:高性能ピッケル": 1,
+      "transfer:木製の斧": 3,
+      "transfer:木製採掘具": 3,
+      "transfer:石のハンマー": 3,
+      "transfer:石の斧": 2,
+      "transfer:鉄製ピッケル": 1
+    },
+    "resources_left": {
+      "region:central_trade": {
+        "rock": 0.0,
+        "tree": 0.0
+      },
+      "region:east_sands": {
+        "rock": 0.0,
+        "tree": 0.0
+      },
+      "region:old_mine": {},
+      "region:south_oasis": {
+        "rock": 0.0,
+        "tree": 0.0,
+        "vein": 0.0
+      },
+      "road:01": {
+        "rock": 10.0,
+        "tree": 29.0,
+        "vein": 13.0
+      },
+      "road:03": {
+        "rock": 23.0,
+        "tree": 44.0,
+        "vein": 10.0
+      },
+      "road:04": {
+        "rock": 20.0,
+        "tree": 30.0,
+        "vein": 13.0
+      },
+      "road:06": {
+        "rock": 41.0,
+        "tree": 12.0,
+        "vein": 14.0
+      }
+    },
+    "weight": 319,
+    "capacity": 360,
+    "last_events": [
+      {
+        "at": 3351.39999999914,
+        "text": "東部砂原に到着。地図で次の行先を選べます"
+      },
+      {
+        "at": 3363.99999999913,
+        "text": "車軸に亀裂が入った！走行装置が損傷（-33）"
+      },
+      {
+        "at": 3441.59999999906,
+        "text": "気温が上がってきた…"
+      },
+      {
+        "at": 3471.79999999903,
+        "text": "酷暑が始まった！"
+      },
+      {
+        "at": 3537.59999999897,
+        "text": "暑さが和らいだ"
+      },
+      {
+        "at": 3565.59999999895,
+        "text": "遺跡を見つけた！（崩れた見張り台）調査隊を出せる"
+      }
+    ],
+    "workers": [
+      {
+        "hp": 100.0,
+        "name": "ネズ吉",
+        "priorities": {
+          "0": 5,
+          "1": 3,
+          "2": 1,
+          "3": 3,
+          "4": 3,
+          "5": 2,
+          "6": 3
+        },
+        "recipe": "",
+        "satiety": 0.0,
+        "state": "IDLE",
+        "tools": {
+          "chop": 16,
+          "mine": 14
+        }
+      },
+      {
+        "hp": 100.0,
+        "name": "チュー太",
+        "priorities": {
+          "0": 3,
+          "1": 4,
+          "2": 2,
+          "3": 3,
+          "4": 5,
+          "5": 2,
+          "6": 5
+        },
+        "recipe": "",
+        "satiety": 0.0,
+        "state": "IDLE",
+        "tools": {
+          "chop": 16,
+          "mine": 13
+        }
+      },
+      {
+        "hp": 100.0,
+        "name": "モモ",
+        "priorities": {
+          "0": 1,
+          "1": 3,
+          "2": 5,
+          "3": 3,
+          "4": 2,
+          "5": 4,
+          "6": 1
+        },
+        "recipe": "",
+        "satiety": 0.0,
+        "state": "IDLE",
+        "tools": {
+          "chop": 15,
+          "mine": 13
+        }
+      }
+    ],
+    "advanced_recipe_consumption": [
+      {
+        "time": 708.2,
+        "delta": {
+          "応急修理板": -3,
+          "鉄": -1
+        },
+        "recipes": [
+          "",
+          "",
+          "tool_adv_pick"
+        ]
+      }
+    ]
+  },
+  {
+    "accepted_trips": 0,
+    "game_over": true,
+    "kind": "result",
+    "reached_60_minutes": false,
+    "requested_seconds": 3600.0,
+    "scenario": "stay",
+    "seed": 502,
+    "time": 1283.0,
+    "violations": [],
+    "log": "endurance-v4-502/20261016T122242Z-wj7_9gvq/world_endurance_502_stay.log",
+    "hull": 0.0,
+    "parts": {
+      "0": 0.0,
+      "1": 72.5132704278501,
+      "2": 56.5574192205693
+    },
+    "food": 5,
+    "repair_kits": 0,
+    "wood": 0,
+    "repair_actions": 4,
+    "hunted": 0,
+    "receipts": {
+      "environment:木材": 36,
+      "environment:石": 13,
+      "environment:鉄鉱石": 4,
+      "processing:応急修理板": 2,
+      "processing:木製の斧": 2,
+      "processing:木製採掘具": 3,
+      "processing:燃料": 4,
+      "processing:石のハンマー": 3,
+      "processing:石の斧": 3,
+      "processing:鉄": 4,
+      "processing:鉄の斧": 2,
+      "processing:鉄製ピッケル": 2,
+      "transfer:木製の斧": 3,
+      "transfer:木製採掘具": 3,
+      "transfer:石のハンマー": 2,
+      "transfer:石の斧": 2
+    },
+    "resources_left": {
+      "region:south_oasis": {
+        "rock": 0.0,
+        "tree": 0.0,
+        "vein": 0.0
+      }
+    },
+    "weight": 33,
+    "capacity": 360,
+    "last_events": [
+      {
+        "at": 1016.60000000009,
+        "text": "急に冷え込んできた…"
+      },
+      {
+        "at": 1046.8000000001,
+        "text": "寒波が来た！"
+      },
+      {
+        "at": 1116.20000000012,
+        "text": "車軸に亀裂が入った！走行装置が損傷（-27）"
+      },
+      {
+        "at": 1120.80000000012,
+        "text": "寒さが和らいだ"
+      },
+      {
+        "at": 1211.20000000014,
+        "text": "気温が上がってきた…"
+      },
+      {
+        "at": 1241.40000000015,
+        "text": "酷暑が始まった！"
+      }
+    ],
+    "workers": [
+      {
+        "hp": 100.0,
+        "name": "ネズ吉",
+        "priorities": {
+          "0": 5,
+          "1": 3,
+          "2": 1,
+          "3": 3,
+          "4": 3,
+          "5": 2,
+          "6": 3
+        },
+        "recipe": "",
+        "satiety": 38.0133333333253,
+        "state": "IDLE",
+        "tools": {
+          "chop": 16,
+          "mine": 13
+        }
+      },
+      {
+        "hp": 100.0,
+        "name": "チュー太",
+        "priorities": {
+          "0": 3,
+          "1": 4,
+          "2": 2,
+          "3": 3,
+          "4": 5,
+          "5": 2,
+          "6": 5
+        },
+        "recipe": "",
+        "satiety": 38.013333333326,
+        "state": "IDLE",
+        "tools": {
+          "chop": 16,
+          "mine": 13
+        }
+      },
+      {
+        "hp": 100.0,
+        "name": "モモ",
+        "priorities": {
+          "0": 1,
+          "1": 3,
+          "2": 5,
+          "3": 3,
+          "4": 2,
+          "5": 4,
+          "6": 1
+        },
+        "recipe": "",
+        "satiety": 38.0133333333253,
+        "state": "SEARCH",
+        "tools": {
+          "chop": 15,
+          "mine": 12
+        }
+      }
+    ],
+    "advanced_recipe_consumption": []
+  },
+  {
+    "accepted_trips": 11,
+    "game_over": false,
+    "kind": "result",
+    "reached_60_minutes": true,
+    "requested_seconds": 3600.0,
+    "scenario": "route",
+    "seed": 503,
+    "time": 3600.2,
+    "violations": [],
+    "log": "endurance-v4-503/20261016T122242Z-lcbdlshr/world_endurance_503_route.log",
+    "hull": 80.6510000026486,
+    "parts": {
+      "0": 80.6510000026486,
+      "1": 88.661135443148,
+      "2": 84.7823470113725
+    },
+    "food": 0,
+    "repair_kits": 7,
+    "wood": 14,
+    "repair_actions": 32,
+    "hunted": 4,
+    "receipts": {
+      "environment:木材": 90,
+      "environment:生肉": 1,
+      "environment:石": 62,
+      "environment:鉄鉱石": 15,
+      "hunt:生肉": 4,
+      "hunt:皮": 3,
+      "hunt:脂肪": 5,
+      "hunt:骨": 2,
+      "processing:応急修理板": 40,
+      "processing:木製の斧": 3,
+      "processing:木製採掘具": 3,
+      "processing:燃料": 20,
+      "processing:石のハンマー": 3,
+      "processing:石の斧": 3,
+      "processing:鉄": 15,
+      "processing:鉄の斧": 2,
+      "processing:鉄製ピッケル": 2,
+      "processing:食料": 10,
+      "processing:高性能ピッケル": 1,
+      "transfer:木製の斧": 4,
+      "transfer:木製採掘具": 3,
+      "transfer:石のハンマー": 3,
+      "transfer:石の斧": 3,
+      "transfer:鉄製ピッケル": 1
+    },
+    "resources_left": {
+      "region:central_trade": {
+        "rock": 0.0,
+        "tree": 0.0
+      },
+      "region:east_sands": {
+        "rock": 0.0,
+        "tree": 0.0
+      },
+      "region:old_mine": {},
+      "region:south_oasis": {
+        "rock": 0.0,
+        "tree": 0.0,
+        "vein": 0.0
+      },
+      "road:01": {
+        "rock": 23.0,
+        "tree": 34.0,
+        "vein": 15.0
+      },
+      "road:03": {
+        "rock": 23.0,
+        "tree": 35.0,
+        "vein": 12.0
+      },
+      "road:04": {
+        "rock": 20.0,
+        "tree": 29.0,
+        "vein": 13.0
+      },
+      "road:06": {
+        "rock": 29.0,
+        "tree": 15.0,
+        "vein": 7.0
+      }
+    },
+    "weight": 325,
+    "capacity": 360,
+    "last_events": [
+      {
+        "at": 3318.99999999917,
+        "text": "急に冷え込んできた…"
+      },
+      {
+        "at": 3340.99999999915,
+        "text": "東部砂原に到着。地図で次の行先を選べます"
+      },
+      {
+        "at": 3349.19999999914,
+        "text": "寒波が来た！"
+      },
+      {
+        "at": 3417.19999999908,
+        "text": "寒さが和らいだ"
+      },
+      {
+        "at": 3438.79999999906,
+        "text": "車体の外板が裂けた！車体が損傷（-34）"
+      },
+      {
+        "at": 3523.39999999899,
+        "text": "加工設備から火花が出た！加工設備が損傷（-35）"
+      }
+    ],
+    "workers": [
+      {
+        "hp": 100.0,
+        "name": "ネズ吉",
+        "priorities": {
+          "0": 5,
+          "1": 3,
+          "2": 1,
+          "3": 3,
+          "4": 3,
+          "5": 2,
+          "6": 3
+        },
+        "recipe": "",
+        "satiety": 23.8319999999819,
+        "state": "IDLE",
+        "tools": {
+          "chop": 16,
+          "mine": 14
+        }
+      },
+      {
+        "hp": 100.0,
+        "name": "チュー太",
+        "priorities": {
+          "0": 3,
+          "1": 4,
+          "2": 2,
+          "3": 3,
+          "4": 5,
+          "5": 2,
+          "6": 5
+        },
+        "recipe": "",
+        "satiety": 23.831999999983,
+        "state": "IDLE",
+        "tools": {
+          "chop": 16,
+          "mine": 13
+        }
+      },
+      {
+        "hp": 100.0,
+        "name": "モモ",
+        "priorities": {
+          "0": 1,
+          "1": 3,
+          "2": 5,
+          "3": 3,
+          "4": 2,
+          "5": 4,
+          "6": 1
+        },
+        "recipe": "",
+        "satiety": 23.8319999999826,
+        "state": "IDLE",
+        "tools": {
+          "chop": 15,
+          "mine": 13
+        }
+      }
+    ],
+    "advanced_recipe_consumption": [
+      {
+        "time": 959.8,
+        "delta": {
+          "応急修理板": -3,
+          "鉄": -1
+        },
+        "recipes": [
+          "",
+          "tool_adv_pick",
+          ""
+        ]
+      }
+    ]
+  },
+  {
+    "accepted_trips": 0,
+    "game_over": true,
+    "kind": "result",
+    "reached_60_minutes": false,
+    "requested_seconds": 3600.0,
+    "scenario": "stay",
+    "seed": 503,
+    "time": 2097.8,
+    "violations": [],
+    "log": "endurance-v4-503/20261016T122242Z-lcbdlshr/world_endurance_503_stay.log",
+    "hull": 0.0,
+    "parts": {
+      "0": 0.0,
+      "1": 12.6358682541968,
+      "2": 26.2774001671949
+    },
+    "food": 0,
+    "repair_kits": 0,
+    "wood": 0,
+    "repair_actions": 8,
+    "hunted": 0,
+    "receipts": {
+      "environment:木材": 36,
+      "environment:石": 13,
+      "environment:鉄鉱石": 4,
+      "processing:応急修理板": 6,
+      "processing:木製の斧": 3,
+      "processing:木製採掘具": 3,
+      "processing:燃料": 4,
+      "processing:石のハンマー": 3,
+      "processing:石の斧": 3,
+      "processing:鉄": 4,
+      "processing:鉄の斧": 1,
+      "processing:鉄製ピッケル": 1,
+      "transfer:木製の斧": 4,
+      "transfer:木製採掘具": 3,
+      "transfer:石のハンマー": 2,
+      "transfer:石の斧": 5,
+      "transfer:鉄の斧": 3,
+      "transfer:鉄製ピッケル": 1
+    },
+    "resources_left": {
+      "region:south_oasis": {
+        "rock": 0.0,
+        "tree": 0.0,
+        "vein": 0.0
+      }
+    },
+    "weight": 20,
+    "capacity": 360,
+    "last_events": [
+      {
+        "at": 1828.80000000028,
+        "text": "寒波が来た！"
+      },
+      {
+        "at": 1900.8000000003,
+        "text": "加工設備から火花が出た！加工設備が損傷（-27）"
+      },
+      {
+        "at": 1914.2000000003,
+        "text": "寒さが和らいだ"
+      },
+      {
+        "at": 1999.60000000032,
+        "text": "急に冷え込んできた…"
+      },
+      {
+        "at": 2029.80000000032,
+        "text": "寒波が来た！"
+      },
+      {
+        "at": 2097.80000000028,
+        "text": "車体の外板が裂けた！車体が損傷（-28）"
+      }
+    ],
+    "workers": [
+      {
+        "hp": 100.0,
+        "name": "ネズ吉",
+        "priorities": {
+          "0": 5,
+          "1": 3,
+          "2": 1,
+          "3": 3,
+          "4": 3,
+          "5": 2,
+          "6": 3
+        },
+        "recipe": "",
+        "satiety": 7.91733333332231,
+        "state": "IDLE",
+        "tools": {
+          "chop": 15,
+          "mine": 12
+        }
+      },
+      {
+        "hp": 100.0,
+        "name": "チュー太",
+        "priorities": {
+          "0": 3,
+          "1": 4,
+          "2": 2,
+          "3": 3,
+          "4": 5,
+          "5": 2,
+          "6": 5
+        },
+        "recipe": "",
+        "satiety": 37.9173333333199,
+        "state": "IDLE",
+        "tools": {
+          "chop": 16,
+          "mine": 13
+        }
+      },
+      {
+        "hp": 100.0,
+        "name": "モモ",
+        "priorities": {
+          "0": 1,
+          "1": 3,
+          "2": 5,
+          "3": 3,
+          "4": 2,
+          "5": 4,
+          "6": 1
+        },
+        "recipe": "",
+        "satiety": 37.9173333333199,
+        "state": "SEARCH",
+        "tools": {
+          "chop": 15,
+          "mine": 12
+        }
+      }
+    ],
+    "advanced_recipe_consumption": []
+  }
+]

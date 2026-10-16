@@ -1,0 +1,6 @@
+START import (timeout 120s)
+PASSED import wall=5.439s
+START progression (timeout 180s)
+PASSED progression wall=21.799s
+Selected checks: passed. Results: /workspace/claude-fixes-20261016/progression-fixed-seed/20261016T121024Z-4ogdhj43/results.json
+判定は選択した診断のみです。通常セットの成功は追加セット・全条件の成功を意味しません。

@@ -1,0 +1,74 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+OK 初期状態 schema
+OK 初期状態 write 
+OK 初期状態 apply 
+OK 初期状態 全持続値・在庫・重量・進捗が一致
+OK 未確認上書きを拒否
+OK 加工・運搬・採取・就寝・装備・部屋 schema
+OK 加工・運搬・採取・就寝・装備・部屋 write 
+OK 加工・運搬・採取・就寝・装備・部屋 apply 
+OK 加工・運搬・採取・就寝・装備・部屋 全持続値・在庫・重量・進捗が一致
+OK 参照と予約を再構築
+OK 繰返し保存 0 schema
+OK 繰返し保存 0 write 
+OK 繰返し保存 0 apply 
+OK 繰返し保存 0 全持続値・在庫・重量・進捗が一致
+OK 繰返し保存 1 schema
+OK 繰返し保存 1 write 
+OK 繰返し保存 1 apply 
+OK 繰返し保存 1 全持続値・在庫・重量・進捗が一致
+OK 繰返し保存 2 schema
+OK 繰返し保存 2 write 
+OK 繰返し保存 2 apply 
+OK 繰返し保存 2 全持続値・在庫・重量・進捗が一致
+OK 繰返しで加工・採取・回復が進まない
+OK 帰還中 schema
+OK 帰還中 write 
+OK 帰還中 apply 
+OK 帰還中 全持続値・在庫・重量・進捗が一致
+OK 復元後に通常の休憩が進行
+OK 容量を超える既存所有物も欠損なく保持 schema
+OK 容量を超える既存所有物も欠損なく保持 write 
+OK 容量を超える既存所有物も欠損なく保持 apply 
+OK 容量を超える既存所有物も欠損なく保持 全持続値・在庫・重量・進捗が一致
+OK 食事・修理運搬 schema
+OK 食事・修理運搬 write 
+OK 食事・修理運搬 apply 
+OK 食事・修理運搬 全持続値・在庫・重量・進捗が一致
+OK 修理予約復元
+OK 補給中 schema
+OK 補給中 write 
+OK 補給中 apply 
+OK 補給中 全持続値・在庫・重量・進捗が一致
+OK 補給予約復元
+OK 地面の単品予約・1単位を超える蓄積進捗 schema
+OK 地面の単品予約・1単位を超える蓄積進捗 write 
+OK 地面の単品予約・1単位を超える蓄積進捗 apply 
+OK 地面の単品予約・1単位を超える蓄積進捗 全持続値・在庫・重量・進捗が一致
+OK 単品は1個だけ予約・採取進捗維持
+OK 遠征fixtureを正規APIで出発
+OK 遠征中 schema
+OK 遠征中 write 
+OK 遠征中 apply 
+OK 遠征中 全持続値・在庫・重量・進捗が一致
+OK 遠征参加者の参照復元
+OK 負の在庫は適用前に拒否
+OK 不正な参照を適用前に拒否
+OK 重量不一致を拒否
+OK 書込先不存在を拒否
+OK バックアップ書込失敗でも主保存維持
+OK 内容ハッシュ不一致を拒否
+OK 破損時はバックアップ読込可能
+OK 旧形式を推測で変換しない
+OK 旧形式を別保全して新保存・有効バックアップ維持
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+OK 別プロセスから続き再開
+OK プロセス再起動後の全持続値一致
+OK 再起動後も遠征残り時間から継続
+== 結果: すべて成功 ==
+
+OK 別プロセス終了コード成功
+OK snapshotは復元先と共有されない
+== 結果: すべて成功 ==

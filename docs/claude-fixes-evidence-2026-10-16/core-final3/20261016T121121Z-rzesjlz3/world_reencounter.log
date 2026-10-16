@@ -1,0 +1,29 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+OK 生存退避は同一ID・傷を保存
+OK 再訪連打で待機短縮や再抽選なし
+OK 退避期限とHPをディスク保存復元
+OK 120秒未満は非表示
+OK 120秒後に同一個体が逃走を解除して再遭遇
+OK 再遭遇後も既存小型は接近した狩人から逃げる
+OK 討伐済みは時間経過・再訪でも復活しない
+OK 画面外生存個体の旧保存を読込
+OK 別地域で待機後の通常再訪でも旧個体ID・HPを保持
+OK 生成済み地域への草食獣の追加・補充なし
+OK paraceratherium 未挑発は中立・自動標的にならない
+OK paraceratherium 大小の描画範囲でクリック判定
+OK paraceratherium 反撃中の対象とHPを保存復元
+OK paraceratherium 攻撃者だけ反撃・他の仲間に転嫁なし
+OK paraceratherium 車内へ追わず追跡終了・車体無傷
+OK paraceratherium 個体ID・HP・反撃状態を保存復元
+OK paraceratherium 同一個体
+OK paraceratherium 死亡後補充なし
+OK dune_horn 未挑発は中立・自動標的にならない
+OK dune_horn 大小の描画範囲でクリック判定
+OK dune_horn 反撃中の対象とHPを保存復元
+OK dune_horn 攻撃者だけ反撃・他の仲間に転嫁なし
+OK dune_horn 車内へ追わず追跡終了・車体無傷
+OK dune_horn 個体ID・HP・反撃状態を保存復元
+OK dune_horn 同一個体
+OK dune_horn 死亡後補充なし
+== 結果: すべて成功 ==

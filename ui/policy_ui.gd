@@ -89,6 +89,8 @@ func _rebuild() -> void:
 	right.add_theme_constant_override("separation", 3)
 	cols.add_child(right)
 
+	left.add_child(UIKit.lbl("自動製作は修理板3個・修理用の木1個・次の鉄道具用の木2個を保護。", 12, UIKit.C_DIM))
+	left.add_child(UIKit.lbl("不足時は待機し、補充後に再開。Fの手動製作は保護対象外。緊急修理・燃料は優先。", 12, UIKit.C_DIM))
 	# 加工の優先
 	left.add_child(UIKit.lbl("── 加工の優先（材料が揃い、作り置きが足りない物を作る） ──", 14, UIKit.C_DIM))
 	for r in GameData.RECIPES:
@@ -141,7 +143,8 @@ func _rebuild() -> void:
 		row.add_child(b)
 		row.add_child(UIKit.lbl(GameData.drops_text(species), 13, UIKit.C_DIM))
 
-	# テスト用の購入
+	if not game.developer_mode(): return
+	# テスト用の購入（明示的な開発者モードのみ）
 	var sp2 := Control.new()
 	sp2.custom_minimum_size = Vector2(0, 8)
 	right.add_child(sp2)
@@ -284,6 +287,7 @@ func _build_tools_page() -> void:
 			if r["out"] == item:
 				right.add_child(UIKit.lbl("　作り方: " + GameData.recipe_text(r), 12, UIKit.C_DIM))
 	right.add_child(UIKit.lbl("回収ランクが「必要ランク」に届かないと、取れる割合が下がります。", 12, UIKit.C_DIM))
+	if not game.developer_mode(): return
 	# テスト用（生物の購入と同じ扱い）: 道具を倉庫に入れて、性能の違いをすぐ試せる
 	var sp := Control.new()
 	sp.custom_minimum_size = Vector2(0, 6)
@@ -297,8 +301,7 @@ func _build_tools_page() -> void:
 	for it in GameData.TOOL_ITEMS:
 		var item: int = it
 		var b := UIKit.button(GameData.ITEM_NAMES[item], func():
-			st.add_item(item, 1, Inventory.SOURCE_PURCHASE)
-			game.manage_tools()
+			game.test_add_tool(item)
 			_rebuild())
 		b.alignment = HORIZONTAL_ALIGNMENT_CENTER
 		b.custom_minimum_size = Vector2(124, 28)

@@ -1,0 +1,1132 @@
+{
+  "schema_version": 1,
+  "run_directory": "/workspace/claude-fixes-20261016/core-final2/20261016T120934Z-xe9rq_tm",
+  "started_utc": "2026-10-16T12:09:34.960948+00:00",
+  "metadata": {
+    "platform": "Linux-6.18.44-x86_64-with-glibc2.41",
+    "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+    "python_executable": "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+    "runner_command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+      "tools/run_checks.py",
+      "--suite",
+      "core",
+      "--output-dir",
+      "/workspace/claude-fixes-20261016/core-final2"
+    ],
+    "root": "/workspace/desert_rats",
+    "git_before": {
+      "head": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "rev-parse",
+          "HEAD"
+        ],
+        "returncode": 0,
+        "output": "1d24d20562bc2aefcdb0345796967a67e3c28862"
+      },
+      "branch": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "branch",
+          "--show-current"
+        ],
+        "returncode": 0,
+        "output": "main"
+      },
+      "status": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "status",
+          "--porcelain=v1",
+          "--untracked-files=all"
+        ],
+        "returncode": 0,
+        "output": "M scripts/character_ai.gd\n M scripts/main.gd\n M scripts/save_game.gd\n M tools/run_checks.py\n M tools/test_progression.gd\n M ui/policy_ui.gd\n M \"\\347\\240\\202\\346\\274\\240\\343\\201\\256\\343\\203\\215\\343\\202\\272\\343\\203\\237\\345\\233\\243.gd\"\n?? scripts/auto_craft_guard.gd\n?? scripts/auto_craft_guard.gd.uid\n?? tools/probe_default_map.gd\n?? tools/probe_default_map.gd.uid\n?? tools/test_auto_craft_guard.gd\n?? tools/test_auto_craft_guard.gd.uid\n?? tools/test_developer_mode.gd\n?? tools/test_developer_mode.gd.uid\n?? tools/test_hunt_bounds.gd\n?? tools/test_hunt_bounds.gd.uid"
+      },
+      "changed_files": [
+        {
+          "path": "scripts/auto_craft_guard.gd",
+          "sha256": "252c0a1750a60b0357ec993d2011b5c8525270ddf1a3425cf5ccd5ef974ca7f6"
+        },
+        {
+          "path": "scripts/auto_craft_guard.gd.uid",
+          "sha256": "07a78582d01c361d97d6b4470554c3c37f4c6f8b8c74fb8336023659654a9f53"
+        },
+        {
+          "path": "scripts/character_ai.gd",
+          "sha256": "616c3a283808e9c1e707fbbd01fd6013e81ed3ba971bbbd166ab31f6420b6fbb"
+        },
+        {
+          "path": "scripts/main.gd",
+          "sha256": "0c0c1d4dd0689e523730e20505d946991b2783acaa2b307fa7229a8ee09d70c5"
+        },
+        {
+          "path": "scripts/save_game.gd",
+          "sha256": "9b9a012d6af6bc6115792e55298a1886b0019ec30816d7425b54625007a7f95b"
+        },
+        {
+          "path": "tools/probe_default_map.gd",
+          "sha256": "b79419a28fd8eb959d3a7712462a30e2d76e21ac4141e4e011fcb7efc2289d85"
+        },
+        {
+          "path": "tools/probe_default_map.gd.uid",
+          "sha256": "af7e9569e58f3b177cef743e069df87633cc9a80c4b48a78d6d7df59dd3ad69f"
+        },
+        {
+          "path": "tools/run_checks.py",
+          "sha256": "385c7aa5a68d6297b02d649703a07ca31f4d54775e477d253cac8c7028dbe684"
+        },
+        {
+          "path": "tools/test_auto_craft_guard.gd",
+          "sha256": "cce966a3a79dbaafa3b00b08f347eab4b426f24680cf02e57a81809a2859cacb"
+        },
+        {
+          "path": "tools/test_auto_craft_guard.gd.uid",
+          "sha256": "c4f7af8765f0276a0f49df5ee729daec0cf9443520fbea2e19d75df6e6ea0421"
+        },
+        {
+          "path": "tools/test_developer_mode.gd",
+          "sha256": "c350ea9679367547098fe66e33fd32da1ade330475a62797fd7999561fbf88cc"
+        },
+        {
+          "path": "tools/test_developer_mode.gd.uid",
+          "sha256": "4e344a8e67c5eb370cb396c1c29754b79f6d89bd31d93a7ada43437a82330dcd"
+        },
+        {
+          "path": "tools/test_hunt_bounds.gd",
+          "sha256": "2b3176846cb7b385eee2518367e62eeff9a122e3a2dbe74f0553ffa145adee68"
+        },
+        {
+          "path": "tools/test_hunt_bounds.gd.uid",
+          "sha256": "c6435976b03725872ab489ad86ca9014281c5eb0e7510fed5725697fb4b07987"
+        },
+        {
+          "path": "tools/test_progression.gd",
+          "sha256": "2d11fe1e7ea9b3b46fab2f38de00efa8440c0fc687c6c8860bad39f516fa3f60"
+        },
+        {
+          "path": "ui/policy_ui.gd",
+          "sha256": "1cbe35d044cc0f0a2e838f83cd2abef19910c4ba0581143826fb964c9f86f491"
+        },
+        {
+          "path": "砂漠のネズミ団.gd",
+          "sha256": "0c0c1d4dd0689e523730e20505d946991b2783acaa2b307fa7229a8ee09d70c5"
+        }
+      ],
+      "dirty": true
+    },
+    "godot_version": {
+      "command": [
+        "/usr/local/bin/godot",
+        "--version"
+      ],
+      "returncode": 0,
+      "output": "4.6.3.stable.official.7d41c59c4"
+    },
+    "suite": "core",
+    "unverified": [
+      "Windows / Godot 4.7.2",
+      "OS-level input",
+      "Audio"
+    ],
+    "scope_note": "first_cycle_flow/ecosystem, tool_progression/tool_flow, world_*, batch_*, haul_*, facility_packing, packing_flow and startup use the default map; other gameplay checks explicitly use legacy-world-test fixtures. world_endurance runs up to 60 game minutes with defaults, workbench request and optional 5-minute map trips; passed means observation integrity, not survival. Only selected checks; core does not cover extra/endurance or all gameplay conditions."
+  },
+  "scope": [
+    "import",
+    "hunt_bounds",
+    "auto_craft_guard",
+    "developer_mode",
+    "developer_enabled",
+    "artscale",
+    "tool_progression",
+    "tool_flow",
+    "first_cycle",
+    "field_operations",
+    "manual_combat",
+    "field_ui",
+    "ecosystem",
+    "first_cycle_flow",
+    "navigation_bar",
+    "batch_crafting",
+    "batch_ui",
+    "batch_flow",
+    "haul_support",
+    "haul_ui",
+    "haul_flow",
+    "facility_packing",
+    "packing_flow",
+    "world_map",
+    "world_flow",
+    "world_boundaries",
+    "world_fauna",
+    "world_scenery",
+    "world_reencounter",
+    "save_game",
+    "save_ui",
+    "inventory_discard",
+    "clarity_ui",
+    "cargo_accounting",
+    "cargo_escape_ui",
+    "progression",
+    "weapon",
+    "weapon_ui",
+    "equipment_ui",
+    "packed_equipment",
+    "quarry",
+    "gather",
+    "cargo",
+    "items",
+    "crew_status",
+    "life_actions",
+    "tool_management",
+    "cargo_reservations",
+    "consumption_loop",
+    "loop_vanilla",
+    "loop_normal",
+    "startup"
+  ],
+  "status": "running",
+  "first_failure": {
+    "id": "tool_progression",
+    "command": [
+      "/usr/local/bin/godot",
+      "--headless",
+      "--path",
+      "/workspace/desert_rats",
+      "--fixed-fps",
+      "60",
+      "-s",
+      "res://tools/test_tool_progression.gd"
+    ],
+    "cwd": "/workspace/desert_rats",
+    "log": "/workspace/claude-fixes-20261016/core-final2/20261016T120934Z-xe9rq_tm/tool_progression.log",
+    "timeout_seconds": 180.0,
+    "requested_game_minutes_per_run": null,
+    "requested_repetitions": null,
+    "status": "failed",
+    "returncode": 1,
+    "elapsed_wall_seconds": 3.441,
+    "diagnostic_error_lines": [
+      "  FAIL tool_wood_pickの材料木材を一度だけ消費",
+      "  FAIL tool_wood_pickの加工／出力運搬を完了",
+      "  FAIL tool_wood_pickの出力が指定数だけ倉庫に届く",
+      "  FAIL tool_wood_pickの加工1回、予約・出力の取り残しなし",
+      "  FAIL 箱の取り置きから最初の木製採掘具だけを製作、建設依頼は維持",
+      "  FAIL 倉庫に採取可能な道具があれば重複する前提製作は不要",
+      "  FAIL 前提の木製採掘具を装備",
+      "  FAIL rockを採取→運搬→収納",
+      "  FAIL tool_hammerが既存の自動加工候補になる",
+      "  FAIL tool_hammerの材料を加工設備へ運ぶ",
+      "  FAIL tool_hammerの材料石を一度だけ消費",
+      "  FAIL tool_hammerの材料木材を一度だけ消費",
+      "  FAIL tool_hammerの加工／出力運搬を完了",
+      "  FAIL tool_hammerの出力が指定数だけ倉庫に届く",
+      "  FAIL tool_hammerの加工1回、予約・出力の取り残しなし",
+      "  FAIL 箱の木材取り置きを保ったまま最初の石採掘具へ進む",
+      "  FAIL 一人が鉱石を採れるようになれば例外を終了",
+      "  FAIL 2本目の石道具は箱の予約材料を消費しない"
+    ],
+    "success_marker_found": false
+  },
+  "checks": [
+    {
+      "id": "import",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "--editor",
+        "--import",
+        "--quit"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/claude-fixes-20261016/core-final2/20261016T120934Z-xe9rq_tm/import.log",
+      "timeout_seconds": 120,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 9.142,
+      "diagnostic_error_lines": [],
+      "success_marker_found": null
+    },
+    {
+      "id": "hunt_bounds",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_hunt_bounds.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/claude-fixes-20261016/core-final2/20261016T120934Z-xe9rq_tm/hunt_bounds.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 2.85,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "auto_craft_guard",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_auto_craft_guard.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/claude-fixes-20261016/core-final2/20261016T120934Z-xe9rq_tm/auto_craft_guard.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 3.475,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "developer_mode",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_developer_mode.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/claude-fixes-20261016/core-final2/20261016T120934Z-xe9rq_tm/developer_mode.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 2.114,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "developer_enabled",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_developer_mode.gd",
+        "--",
+        "--developer-mode",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/claude-fixes-20261016/core-final2/20261016T120934Z-xe9rq_tm/developer_enabled.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 1.971,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "artscale",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_artscale.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/claude-fixes-20261016/core-final2/20261016T120934Z-xe9rq_tm/artscale.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 12.237,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "tool_progression",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_tool_progression.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/claude-fixes-20261016/core-final2/20261016T120934Z-xe9rq_tm/tool_progression.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "failed",
+      "returncode": 1,
+      "elapsed_wall_seconds": 3.441,
+      "diagnostic_error_lines": [
+        "  FAIL tool_wood_pickの材料木材を一度だけ消費",
+        "  FAIL tool_wood_pickの加工／出力運搬を完了",
+        "  FAIL tool_wood_pickの出力が指定数だけ倉庫に届く",
+        "  FAIL tool_wood_pickの加工1回、予約・出力の取り残しなし",
+        "  FAIL 箱の取り置きから最初の木製採掘具だけを製作、建設依頼は維持",
+        "  FAIL 倉庫に採取可能な道具があれば重複する前提製作は不要",
+        "  FAIL 前提の木製採掘具を装備",
+        "  FAIL rockを採取→運搬→収納",
+        "  FAIL tool_hammerが既存の自動加工候補になる",
+        "  FAIL tool_hammerの材料を加工設備へ運ぶ",
+        "  FAIL tool_hammerの材料石を一度だけ消費",
+        "  FAIL tool_hammerの材料木材を一度だけ消費",
+        "  FAIL tool_hammerの加工／出力運搬を完了",
+        "  FAIL tool_hammerの出力が指定数だけ倉庫に届く",
+        "  FAIL tool_hammerの加工1回、予約・出力の取り残しなし",
+        "  FAIL 箱の木材取り置きを保ったまま最初の石採掘具へ進む",
+        "  FAIL 一人が鉱石を採れるようになれば例外を終了",
+        "  FAIL 2本目の石道具は箱の予約材料を消費しない"
+      ],
+      "success_marker_found": false
+    },
+    {
+      "id": "tool_flow",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_tool_flow.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/claude-fixes-20261016/core-final2/20261016T120934Z-xe9rq_tm/tool_flow.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 8.938,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "first_cycle",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_first_cycle.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "field_operations",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_field_operations.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "manual_combat",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_manual_combat.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "field_ui",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_field_ui.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "ecosystem",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_ecosystem.gd"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "first_cycle_flow",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_first_cycle_flow.gd"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "navigation_bar",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_navigation_bar.gd"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "batch_crafting",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_batch_crafting.gd"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "batch_ui",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_batch_ui.gd"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "batch_flow",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_batch_flow.gd"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "haul_support",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_haul_support.gd"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "haul_ui",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_haul_ui.gd"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "haul_flow",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_haul_flow.gd"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "facility_packing",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_facility_packing.gd"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "packing_flow",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_packing_flow.gd"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "world_map",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_world_map.gd"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "world_flow",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_world_flow.gd"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "world_boundaries",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_world_boundaries.gd"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "world_fauna",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_world_fauna.gd"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "world_scenery",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_world_scenery.gd"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "world_reencounter",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_world_reencounter.gd"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "save_game",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_save_game.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "save_ui",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_save_ui.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "inventory_discard",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_inventory_discard.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "clarity_ui",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_clarity_ui.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "cargo_accounting",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_cargo_accounting.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "cargo_escape_ui",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_cargo_escape_ui.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "progression",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_progression.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "weapon",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_weapon.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "weapon_ui",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_weapon_ui.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "equipment_ui",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_equipment_ui.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "packed_equipment",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_packed_equipment.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "quarry",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_quarry.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "gather",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_gather.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "cargo",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_cargo.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "items",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_items.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "crew_status",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_crew_status.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "life_actions",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_life_actions.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "tool_management",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_tool_management.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "cargo_reservations",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_cargo_reservations.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "consumption_loop",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_consumption_loop.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "loop_vanilla",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_loop.gd",
+        "--",
+        "32",
+        "2",
+        "12",
+        "500",
+        "0",
+        "vanilla",
+        "legacy-world-test"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "loop_normal",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_loop.gd",
+        "--",
+        "28",
+        "2",
+        "12",
+        "500",
+        "0",
+        "normal",
+        "legacy-world-test"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "startup",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "--quit-after",
+        "300"
+      ],
+      "status": "not_run"
+    }
+  ]
+}

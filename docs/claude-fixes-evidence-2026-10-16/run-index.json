@@ -1,0 +1,122 @@
+[
+  {
+    "run": "bootstrap-fix/20261016T122159Z-vruyo28o",
+    "reported_status": "passed",
+    "role": "intermediate; not final acceptance"
+  },
+  {
+    "run": "core-final/20261016T120432Z-qexftb67",
+    "reported_status": "running",
+    "role": "intermediate; not final acceptance"
+  },
+  {
+    "run": "core-final2/20261016T120934Z-xe9rq_tm",
+    "reported_status": "running",
+    "role": "intermediate; not final acceptance"
+  },
+  {
+    "run": "core-final3/20261016T121121Z-rzesjlz3",
+    "reported_status": "failed",
+    "role": "intermediate; not final acceptance"
+  },
+  {
+    "run": "core-v4/20261016T122241Z-t8ez0luc",
+    "reported_status": "passed",
+    "role": "final"
+  },
+  {
+    "run": "endurance-501/20261016T120433Z-mceseyk5",
+    "reported_status": "running",
+    "role": "intermediate; not final acceptance"
+  },
+  {
+    "run": "endurance-502/20261016T120433Z-vke2htp0",
+    "reported_status": "running",
+    "role": "intermediate; not final acceptance"
+  },
+  {
+    "run": "endurance-503/20261016T120433Z-8wm1poxo",
+    "reported_status": "running",
+    "role": "intermediate; not final acceptance"
+  },
+  {
+    "run": "endurance-final-501/20261016T120936Z-b4g0f1gm",
+    "reported_status": "running",
+    "role": "intermediate; not final acceptance"
+  },
+  {
+    "run": "endurance-final-502/20261016T120936Z-epfdvim8",
+    "reported_status": "running",
+    "role": "intermediate; not final acceptance"
+  },
+  {
+    "run": "endurance-final-503/20261016T120936Z-ho_errgk",
+    "reported_status": "running",
+    "role": "intermediate; not final acceptance"
+  },
+  {
+    "run": "endurance-v3-501/20261016T121122Z-ddqct3f7",
+    "reported_status": "passed",
+    "role": "intermediate; not final acceptance"
+  },
+  {
+    "run": "endurance-v3-502/20261016T121122Z-r2_bg0z6",
+    "reported_status": "passed",
+    "role": "intermediate; not final acceptance"
+  },
+  {
+    "run": "endurance-v3-503/20261016T121122Z-8dbcklna",
+    "reported_status": "passed",
+    "role": "intermediate; not final acceptance"
+  },
+  {
+    "run": "endurance-v4-501/20261016T122242Z-8xpga9ml",
+    "reported_status": "passed",
+    "role": "final"
+  },
+  {
+    "run": "endurance-v4-502/20261016T122242Z-wj7_9gvq",
+    "reported_status": "passed",
+    "role": "final"
+  },
+  {
+    "run": "endurance-v4-503/20261016T122242Z-lcbdlshr",
+    "reported_status": "passed",
+    "role": "final"
+  },
+  {
+    "run": "focused/20261016T120126Z-yax1apxs",
+    "reported_status": "failed",
+    "role": "intermediate; not final acceptance"
+  },
+  {
+    "run": "focused2/20261016T120229Z-fcgknf2r",
+    "reported_status": "failed",
+    "role": "intermediate; not final acceptance"
+  },
+  {
+    "run": "focused3/20261016T120341Z-703v81rb",
+    "reported_status": "passed",
+    "role": "intermediate; not final acceptance"
+  },
+  {
+    "run": "focused4/20261016T120625Z-wxlmemjt",
+    "reported_status": "failed",
+    "role": "intermediate; not final acceptance"
+  },
+  {
+    "run": "focused5/20261016T120733Z-9nt79d4x",
+    "reported_status": "failed",
+    "role": "intermediate; not final acceptance"
+  },
+  {
+    "run": "focused6/20261016T120837Z-fybqn5g4",
+    "reported_status": "failed",
+    "role": "intermediate; not final acceptance"
+  },
+  {
+    "run": "progression-fixed-seed/20261016T121024Z-4ogdhj43",
+    "reported_status": "passed",
+    "role": "intermediate; not final acceptance"
+  }
+]

@@ -315,7 +315,7 @@ func tick(delta: float) -> void:
 		State.HAUL_TAKE:
 			ch.target = game.storage.access_point() + ch.slot_offset
 			if ch.move_to_target(delta):
-				if game.storage.take_set(haul_recipe["in"]):
+				if (not haul_recipe.get("automatic",false) or AutoCraftGuard.allows(game,haul_recipe,ch)) and game.storage.take_set(haul_recipe["in"]):
 					ch.carrying = haul_recipe["in"].keys()[0]
 					ch.carry_source = Inventory.SOURCE_TRANSFER
 					_set_state(State.HAUL_MOVE)
@@ -630,7 +630,14 @@ func _enemy_valid() -> bool:
 
 
 func _prey_valid() -> bool:
-	return prey != null and is_instance_valid(prey) and not prey.dead and not game.director.outdoor_blocked()
+	if prey == null or not is_instance_valid(prey) or prey.dead or game.director.outdoor_blocked():
+		return false
+	# 逃走相手との距離が縮まらないなら追跡をやめる。移動中は地面の流れも考慮。
+	# 既に攻撃が届く場合と、追いつける遅い個体の狩猟は維持する。
+	if prey._fleeing and prey.position.x > ch.position.x and ch.position.distance_to(prey.position) > HUNT_REACH + 16.0 \
+			and prey._flee_speed - game.scroll_speed >= ch.current_speed():
+		return false
+	return true
 
 
 func _go_storage() -> void:

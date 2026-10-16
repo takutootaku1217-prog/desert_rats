@@ -1,0 +1,28 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+FIRST_CYCLE_FLOW 通常開始3人・有限資源・既定出来事・素材/道具/設備注入なし seed=501
+STAGE 27.8s 木のみの作業台
+STAGE 136.4s 木製採掘具→石製採掘具
+ACTION 作業場へ確保 木材 x4
+STAGE 162.0s 鉄道具の柄用木4を先に確保
+ACTION 作業場へ確保 鉄 x1
+STAGE 306.0s tool_pick 材料確保 鉄
+STAGE 306.0s tool_pick 材料確保 木材
+STAGE 326.4s tool_pick 製作回収
+STAGE 328.0s 安全寄りの村で基本鉄採掘具を装備
+ACTION 作業場へ確保 鉄 x1
+STAGE 344.6s tool_iron_axe 材料確保 鉄
+STAGE 344.6s tool_iron_axe 材料確保 木材
+STAGE 362.4s tool_iron_axe 製作回収
+STAGE 363.2s 安全寄りの村で基本鉄斧を装備
+STAGE 423.6s 地域到着 east_sands
+ACTION 作業場へ確保 木材 x2
+STAGE 428.8s haul_frame 材料確保 木材
+ACTION 作業場へ確保 皮 x1
+STAGE 585.0s haul_frame 材料確保 皮
+ACTION 作業場へ確保 鉄 x1
+STAGE 601.0s haul_frame 材料確保 鉄
+STAGE 611.6s haul_frame 製作回収
+FAIL 未達: 収納箱を製作設置 / 中央交易都市に停泊中
+PROGRESSION {"build_queue":["cargo_rack"],"capacity":360,"events":{"attack":0,"chance":0,"escaped":0,"kills":0,"repelled":0,"site":1,"trouble":5,"weather":6},"game_over":false,"inventory":{"0":0,"1":0,"2":1,"3":2,"4":43,"5":0,"6":0,"7":1,"8":11,"9":8,"10":1,"12":0,"13":0,"15":0,"16":0,"22":0,"23":2,"24":3},"phase":"収納箱を製作設置","quarry":"road","report":{},"seconds":1211.60000000014,"stages":["木のみの作業台","木製採掘具→石製採掘具","鉄道具の柄用木4を先に確保","tool_pick 材料確保 鉄","tool_pick 材料確保 木材","tool_pick 製作回収","安全寄りの村で基本鉄採掘具を装備","tool_iron_axe 材料確保 鉄","tool_iron_axe 材料確保 木材","tool_iron_axe 製作回収","安全寄りの村で基本鉄斧を装備","地域到着 east_sands","haul_frame 材料確保 木材","haul_frame 材料確保 皮","haul_frame 材料確保 鉄","haul_frame 製作回収"],"weight":247}
+== 結果: 1 件失敗 ==

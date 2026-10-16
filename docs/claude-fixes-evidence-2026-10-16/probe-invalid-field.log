@@ -1,0 +1,663 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+{"events_enabled":true,"kind":"start","map_active":true,"recipe_priority":{"cook":3,"firewood":3,"repair_hide":3,"repair_iron":3,"repair_stone":3,"smelt":2,"tallow":3,"tool_adv_pick":2,"tool_axe":3,"tool_hammer":3,"tool_iron_axe":3,"tool_pick":3,"tool_wood_axe":3,"tool_wood_pick":3},"requested_seconds":3600.0,"scenario":"stay","seed":501,"time":0.0}
+{"accepted":true,"kind":"action","request":"workbench","time":0.0}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] snapshot (res://tools/probe_default_map.gd:33)
+              [2] _initialize (res://tools/probe_default_map.gd:46)
+{"capacity":360,"creatures":[],"events":[],"fuel":100.0,"hunted":0,"kind":"snapshot","parts":{"0":100.0,"1":100.0,"2":100.0},"phase":"stopped","region":"south_oasis","repair":0,"scenario":"stay","stock":{"8":8,"9":2,"10":2},"time":0.0,"weight":24,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] inventory_changed (res://tools/probe_default_map.gd:25)
+              [2] add (res://scripts/inventory.gd:25)
+              [3] store_owned (res://scripts/storage.gd:133)
+              [4] unload_owned (res://scripts/character.gd:132)
+              [5] tick (res://scripts/character_ai.gd:274)
+              [6] _process (res://scripts/character.gd:289)
+{"delta":{"木材":3},"kind":"inventory","stack":["inventory_changed:24","add:25","store_owned:133","unload_owned:132","tick:274","_process:289"],"time":16.6,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] inventory_changed (res://tools/probe_default_map.gd:25)
+              [2] take_set (res://scripts/inventory.gd:63)
+              [3] take_set (res://scripts/storage.gd:216)
+              [4] tick (res://scripts/character_ai.gd:318)
+              [5] _process (res://scripts/character.gd:289)
+{"delta":{"木材":-3},"kind":"inventory","stack":["inventory_changed:24","take_set:63","take_set:216","tick:318","_process:289"],"time":17.0,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] inventory_changed (res://tools/probe_default_map.gd:25)
+              [2] add (res://scripts/inventory.gd:25)
+              [3] store_owned (res://scripts/storage.gd:133)
+              [4] unload_owned (res://scripts/character.gd:132)
+              [5] tick (res://scripts/character_ai.gd:274)
+              [6] _process (res://scripts/character.gd:289)
+{"delta":{"木材":3},"kind":"inventory","stack":["inventory_changed:24","add:25","store_owned:133","unload_owned:132","tick:274","_process:289"],"time":29.8,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] inventory_changed (res://tools/probe_default_map.gd:25)
+              [2] take_set (res://scripts/inventory.gd:63)
+              [3] take_set (res://scripts/storage.gd:216)
+              [4] tick (res://scripts/character_ai.gd:318)
+              [5] _process (res://scripts/character.gd:289)
+{"delta":{"木材":-2},"kind":"inventory","stack":["inventory_changed:24","take_set:63","take_set:216","tick:318","_process:289"],"time":30.2,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] snapshot (res://tools/probe_default_map.gd:33)
+              [2] _initialize (res://tools/probe_default_map.gd:46)
+{"capacity":360,"creatures":[],"events":[{"at":27.7999999999999,"text":"ワークベンチができた"}],"fuel":100.0,"hunted":0,"kind":"snapshot","parts":{"0":97.8860000000006,"1":100.0,"2":97.8300000000002},"phase":"stopped","region":"south_oasis","repair":0,"scenario":"stay","stock":{"4":1,"8":8,"9":2,"10":2},"time":30.2,"weight":36,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] inventory_changed (res://tools/probe_default_map.gd:25)
+              [2] take_set (res://scripts/inventory.gd:63)
+              [3] take_set (res://scripts/storage.gd:216)
+              [4] tick (res://scripts/character_ai.gd:318)
+              [5] _process (res://scripts/character.gd:289)
+{"delta":{"木材":-1},"kind":"inventory","stack":["inventory_changed:24","take_set:63","take_set:216","tick:318","_process:289"],"time":32.8,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] inventory_changed (res://tools/probe_default_map.gd:25)
+              [2] add (res://scripts/inventory.gd:25)
+              [3] store_owned (res://scripts/storage.gd:133)
+              [4] unload_owned (res://scripts/character.gd:132)
+              [5] tick (res://scripts/character_ai.gd:274)
+              [6] _process (res://scripts/character.gd:289)
+{"delta":{"木材":3},"kind":"inventory","stack":["inventory_changed:24","add:25","store_owned:133","unload_owned:132","tick:274","_process:289"],"time":41.8,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] inventory_changed (res://tools/probe_default_map.gd:25)
+              [2] take_set (res://scripts/inventory.gd:63)
+              [3] take_set (res://scripts/storage.gd:216)
+              [4] tick (res://scripts/character_ai.gd:318)
+              [5] _process (res://scripts/character.gd:289)
+{"delta":{"木材":-2},"kind":"inventory","stack":["inventory_changed:24","take_set:63","take_set:216","tick:318","_process:289"],"time":42.2,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] inventory_changed (res://tools/probe_default_map.gd:25)
+              [2] take_set (res://scripts/inventory.gd:63)
+              [3] take_set (res://scripts/storage.gd:216)
+              [4] tick (res://scripts/character_ai.gd:318)
+              [5] _process (res://scripts/character.gd:289)
+{"delta":{"木材":-1},"kind":"inventory","stack":["inventory_changed:24","take_set:63","take_set:216","tick:318","_process:289"],"time":52.4,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] inventory_changed (res://tools/probe_default_map.gd:25)
+              [2] add (res://scripts/inventory.gd:25)
+              [3] store_owned (res://scripts/storage.gd:133)
+              [4] unload_owned (res://scripts/character.gd:132)
+              [5] tick (res://scripts/character_ai.gd:274)
+              [6] _process (res://scripts/character.gd:289)
+{"delta":{"木材":3},"kind":"inventory","stack":["inventory_changed:24","add:25","store_owned:133","unload_owned:132","tick:274","_process:289"],"time":57.0,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] snapshot (res://tools/probe_default_map.gd:33)
+              [2] _initialize (res://tools/probe_default_map.gd:46)
+{"capacity":360,"creatures":[],"events":[{"at":27.7999999999999,"text":"ワークベンチができた"}],"fuel":100.0,"hunted":0,"kind":"snapshot","parts":{"0":95.8000000000013,"1":100.0,"2":96.2900000000004},"phase":"stopped","region":"south_oasis","repair":0,"scenario":"stay","stock":{"4":3,"8":8,"9":3,"10":2,"23":0},"time":60.0,"weight":52,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] inventory_changed (res://tools/probe_default_map.gd:25)
+              [2] add (res://scripts/inventory.gd:25)
+              [3] store_owned (res://scripts/storage.gd:133)
+              [4] unload_owned (res://scripts/character.gd:132)
+              [5] tick (res://scripts/character_ai.gd:274)
+              [6] _process (res://scripts/character.gd:289)
+{"delta":{"木材":3},"kind":"inventory","stack":["inventory_changed:24","add:25","store_owned:133","unload_owned:132","tick:274","_process:289"],"time":76.2,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] inventory_changed (res://tools/probe_default_map.gd:25)
+              [2] take_set (res://scripts/inventory.gd:63)
+              [3] take_set (res://scripts/storage.gd:216)
+              [4] tick (res://scripts/character_ai.gd:318)
+              [5] _process (res://scripts/character.gd:289)
+{"delta":{"木材":-2},"kind":"inventory","stack":["inventory_changed:24","take_set:63","take_set:216","tick:318","_process:289"],"time":76.6,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] inventory_changed (res://tools/probe_default_map.gd:25)
+              [2] take_set (res://scripts/inventory.gd:63)
+              [3] take_set (res://scripts/storage.gd:216)
+              [4] tick (res://scripts/character_ai.gd:318)
+              [5] _process (res://scripts/character.gd:289)
+{"delta":{"木材":-2},"kind":"inventory","stack":["inventory_changed:24","take_set:63","take_set:216","tick:318","_process:289"],"time":78.8,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] inventory_changed (res://tools/probe_default_map.gd:25)
+              [2] take_set (res://scripts/inventory.gd:63)
+              [3] take_set (res://scripts/storage.gd:216)
+              [4] tick (res://scripts/character_ai.gd:318)
+              [5] _process (res://scripts/character.gd:289)
+{"delta":{"木材":-1},"kind":"inventory","stack":["inventory_changed:24","take_set:63","take_set:216","tick:318","_process:289"],"time":86.8,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] snapshot (res://tools/probe_default_map.gd:33)
+              [2] _initialize (res://tools/probe_default_map.gd:46)
+{"capacity":360,"creatures":[],"events":[{"at":27.7999999999999,"text":"ワークベンチができた"},{"at":75.0000000000005,"text":"急に冷え込んできた…"}],"fuel":100.0,"hunted":0,"kind":"snapshot","parts":{"0":93.7000000000019,"1":100.0,"2":94.2600000000006},"phase":"stopped","region":"south_oasis","repair":0,"scenario":"stay","stock":{"4":1,"5":4,"8":8,"9":4,"10":2,"23":0},"time":90.0,"weight":84,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] inventory_changed (res://tools/probe_default_map.gd:25)
+              [2] take_set (res://scripts/inventory.gd:63)
+              [3] take_set (res://scripts/storage.gd:216)
+              [4] tick (res://scripts/character_ai.gd:318)
+              [5] _process (res://scripts/character.gd:289)
+{"delta":{"木材":-1},"kind":"inventory","stack":["inventory_changed:24","take_set:63","take_set:216","tick:318","_process:289"],"time":97.0,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] snapshot (res://tools/probe_default_map.gd:33)
+              [2] _initialize (res://tools/probe_default_map.gd:46)
+{"capacity":360,"creatures":[],"events":[{"at":27.7999999999999,"text":"ワークベンチができた"},{"at":75.0000000000005,"text":"急に冷え込んできた…"},{"at":105.200000000001,"text":"寒波が来た！"}],"fuel":96.7000000000002,"hunted":0,"kind":"snapshot","parts":{"0":91.6000000000025,"1":100.0,"2":92.2300000000008},"phase":"stopped","region":"south_oasis","repair":0,"scenario":"stay","stock":{"4":0,"5":8,"8":8,"9":4,"10":2,"12":0,"23":1,"24":0},"time":120.0,"weight":102,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] inventory_changed (res://tools/probe_default_map.gd:25)
+              [2] add (res://scripts/inventory.gd:25)
+              [3] store_owned (res://scripts/storage.gd:133)
+              [4] unload_owned (res://scripts/character.gd:132)
+              [5] tick (res://scripts/character_ai.gd:274)
+              [6] _process (res://scripts/character.gd:289)
+{"delta":{"木材":3},"kind":"inventory","stack":["inventory_changed:24","add:25","store_owned:133","unload_owned:132","tick:274","_process:289"],"time":120.8,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] inventory_changed (res://tools/probe_default_map.gd:25)
+              [2] take_set (res://scripts/inventory.gd:63)
+              [3] take_set (res://scripts/storage.gd:216)
+              [4] tick (res://scripts/character_ai.gd:318)
+              [5] _process (res://scripts/character.gd:289)
+{"delta":{"木材":-2},"kind":"inventory","stack":["inventory_changed:24","take_set:63","take_set:216","tick:318","_process:289"],"time":121.2,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] inventory_changed (res://tools/probe_default_map.gd:25)
+              [2] add (res://scripts/inventory.gd:25)
+              [3] store_owned (res://scripts/storage.gd:133)
+              [4] unload_owned (res://scripts/character.gd:132)
+              [5] tick (res://scripts/character_ai.gd:274)
+              [6] _process (res://scripts/character.gd:289)
+{"delta":{"応急修理板":1},"kind":"inventory","stack":["inventory_changed:24","add:25","store_owned:133","unload_owned:132","tick:274","_process:289"],"time":126.4,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] inventory_changed (res://tools/probe_default_map.gd:25)
+              [2] take_set (res://scripts/inventory.gd:63)
+              [3] take_set (res://scripts/storage.gd:216)
+              [4] tick (res://scripts/character_ai.gd:318)
+              [5] _process (res://scripts/character.gd:289)
+{"delta":{"木材":-1},"kind":"inventory","stack":["inventory_changed:24","take_set:63","take_set:216","tick:318","_process:289"],"time":131.4,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] inventory_changed (res://tools/probe_default_map.gd:25)
+              [2] add (res://scripts/inventory.gd:25)
+              [3] store_owned (res://scripts/storage.gd:133)
+              [4] unload_owned (res://scripts/character.gd:132)
+              [5] tick (res://scripts/character_ai.gd:274)
+              [6] _process (res://scripts/character.gd:289)
+{"delta":{"木材":3},"kind":"inventory","stack":["inventory_changed:24","add:25","store_owned:133","unload_owned:132","tick:274","_process:289"],"time":134.8,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] inventory_changed (res://tools/probe_default_map.gd:25)
+              [2] take_set (res://scripts/inventory.gd:63)
+              [3] take_set (res://scripts/storage.gd:216)
+              [4] tick (res://scripts/character_ai.gd:318)
+              [5] _process (res://scripts/character.gd:289)
+{"delta":{"木材":-2},"kind":"inventory","stack":["inventory_changed:24","take_set:63","take_set:216","tick:318","_process:289"],"time":141.6,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] snapshot (res://tools/probe_default_map.gd:33)
+              [2] _initialize (res://tools/probe_default_map.gd:46)
+{"capacity":360,"creatures":[],"events":[{"at":27.7999999999999,"text":"ワークベンチができた"},{"at":75.0000000000005,"text":"急に冷え込んできた…"},{"at":105.200000000001,"text":"寒波が来た！"}],"fuel":90.1000000000007,"hunted":0,"kind":"snapshot","parts":{"0":89.5000000000032,"1":100.0,"2":90.7600000000009},"phase":"stopped","region":"south_oasis","repair":0,"scenario":"stay","stock":{"4":1,"5":5,"6":3,"8":8,"9":4,"10":3,"12":0,"23":1,"24":1},"time":150.0,"weight":124,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] inventory_changed (res://tools/probe_default_map.gd:25)
+              [2] take_set (res://scripts/inventory.gd:63)
+              [3] take_set (res://scripts/storage.gd:216)
+              [4] tick (res://scripts/character_ai.gd:318)
+              [5] _process (res://scripts/character.gd:289)
+{"delta":{"木材":-1},"kind":"inventory","stack":["inventory_changed:24","take_set:63","take_set:216","tick:318","_process:289"],"time":162.0,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] inventory_changed (res://tools/probe_default_map.gd:25)
+              [2] add (res://scripts/inventory.gd:25)
+              [3] store_owned (res://scripts/storage.gd:133)
+              [4] unload_owned (res://scripts/character.gd:132)
+              [5] tick (res://scripts/character_ai.gd:274)
+              [6] _process (res://scripts/character.gd:289)
+{"delta":{"木材":3},"kind":"inventory","stack":["inventory_changed:24","add:25","store_owned:133","unload_owned:132","tick:274","_process:289"],"time":170.0,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] inventory_changed (res://tools/probe_default_map.gd:25)
+              [2] take_set (res://scripts/inventory.gd:63)
+              [3] take_set (res://scripts/storage.gd:216)
+              [4] tick (res://scripts/character_ai.gd:318)
+              [5] _process (res://scripts/character.gd:289)
+{"delta":{"木材":-2},"kind":"inventory","stack":["inventory_changed:24","take_set:63","take_set:216","tick:318","_process:289"],"time":170.4,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] snapshot (res://tools/probe_default_map.gd:33)
+              [2] _initialize (res://tools/probe_default_map.gd:46)
+{"capacity":360,"creatures":[],"events":[{"at":27.7999999999999,"text":"ワークベンチができた"},{"at":75.0000000000005,"text":"急に冷え込んできた…"},{"at":105.200000000001,"text":"寒波が来た！"},{"at":168.599999999999,"text":"車軸に亀裂が入った！走行装置が損傷（-37）"},{"at":173.199999999999,"text":"寒さが和らいだ"}],"fuel":84.996000000001,"hunted":0,"kind":"snapshot","parts":{"0":87.3860000000038,"1":62.3075738353705,"2":88.9400000000011},"phase":"stopped","region":"south_oasis","repair":0,"scenario":"stay","stock":{"4":1,"5":5,"6":3,"8":8,"9":4,"10":3,"12":0,"15":0,"23":2,"24":0},"time":180.2,"weight":126,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] inventory_changed (res://tools/probe_default_map.gd:25)
+              [2] take (res://scripts/inventory.gd:32)
+              [3] take_item (res://scripts/storage.gd:212)
+              [4] tick (res://scripts/character_ai.gd:391)
+              [5] _process (res://scripts/character.gd:289)
+{"delta":{"応急修理板":-1},"kind":"inventory","stack":["inventory_changed:24","take:32","take_item:212","tick:391","_process:289"],"time":181.8,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] inventory_changed (res://tools/probe_default_map.gd:25)
+              [2] add (res://scripts/inventory.gd:25)
+              [3] store_owned (res://scripts/storage.gd:133)
+              [4] unload_owned (res://scripts/character.gd:132)
+              [5] tick (res://scripts/character_ai.gd:274)
+              [6] _process (res://scripts/character.gd:289)
+{"delta":{"木材":3},"kind":"inventory","stack":["inventory_changed:24","add:25","store_owned:133","unload_owned:132","tick:274","_process:289"],"time":184.2,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] inventory_changed (res://tools/probe_default_map.gd:25)
+              [2] take_set (res://scripts/inventory.gd:63)
+              [3] take_set (res://scripts/storage.gd:216)
+              [4] tick (res://scripts/character_ai.gd:318)
+              [5] _process (res://scripts/character.gd:289)
+{"delta":{"木材":-1},"kind":"inventory","stack":["inventory_changed:24","take_set:63","take_set:216","tick:318","_process:289"],"time":184.6,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] inventory_changed (res://tools/probe_default_map.gd:25)
+              [2] add (res://scripts/inventory.gd:25)
+              [3] store_owned (res://scripts/storage.gd:133)
+              [4] unload_owned (res://scripts/character.gd:132)
+              [5] tick (res://scripts/character_ai.gd:274)
+              [6] _process (res://scripts/character.gd:289)
+{"delta":{"鉄":1},"kind":"inventory","stack":["inventory_changed:24","add:25","store_owned:133","unload_owned:132","tick:274","_process:289"],"time":190.4,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] inventory_changed (res://tools/probe_default_map.gd:25)
+              [2] add (res://scripts/inventory.gd:25)
+              [3] store_owned (res://scripts/storage.gd:133)
+              [4] unload_owned (res://scripts/character.gd:132)
+              [5] tick (res://scripts/character_ai.gd:274)
+              [6] _process (res://scripts/character.gd:289)
+{"delta":{"木材":3},"kind":"inventory","stack":["inventory_changed:24","add:25","store_owned:133","unload_owned:132","tick:274","_process:289"],"time":195.4,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] inventory_changed (res://tools/probe_default_map.gd:25)
+              [2] take_set (res://scripts/inventory.gd:63)
+              [3] take_set (res://scripts/storage.gd:216)
+              [4] tick (res://scripts/character_ai.gd:318)
+              [5] _process (res://scripts/character.gd:289)
+{"delta":{"木材":-2},"kind":"inventory","stack":["inventory_changed:24","take_set:63","take_set:216","tick:318","_process:289"],"time":195.8,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] inventory_changed (res://tools/probe_default_map.gd:25)
+              [2] add (res://scripts/inventory.gd:25)
+              [3] store_owned (res://scripts/storage.gd:133)
+              [4] unload_owned (res://scripts/character.gd:132)
+              [5] tick (res://scripts/character_ai.gd:274)
+              [6] _process (res://scripts/character.gd:289)
+{"delta":{"木材":3},"kind":"inventory","stack":["inventory_changed:24","add:25","store_owned:133","unload_owned:132","tick:274","_process:289"],"time":204.2,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] inventory_changed (res://tools/probe_default_map.gd:25)
+              [2] take_set (res://scripts/inventory.gd:63)
+              [3] take_set (res://scripts/storage.gd:216)
+              [4] tick (res://scripts/character_ai.gd:318)
+              [5] _process (res://scripts/character.gd:289)
+{"delta":{"木材":-2,"鉄":-1},"kind":"inventory","stack":["inventory_changed:24","take_set:63","take_set:216","tick:318","_process:289"],"time":204.6,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] snapshot (res://tools/probe_default_map.gd:33)
+              [2] _initialize (res://tools/probe_default_map.gd:46)
+{"capacity":360,"creatures":[],"events":[{"at":27.7999999999999,"text":"ワークベンチができた"},{"at":75.0000000000005,"text":"急に冷え込んできた…"},{"at":105.200000000001,"text":"寒波が来た！"},{"at":168.599999999999,"text":"車軸に亀裂が入った！走行装置が損傷（-37）"},{"at":173.199999999999,"text":"寒さが和らいだ"}],"fuel":81.996000000001,"hunted":0,"kind":"snapshot","parts":{"0":85.2860000000044,"1":87.3075738353705,"2":85.9300000000014},"phase":"stopped","region":"south_oasis","repair":1,"scenario":"stay","stock":{"4":5,"5":2,"6":3,"7":0,"8":8,"9":5,"10":2,"12":0,"15":0,"23":2,"24":0},"time":210.2,"weight":136,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] inventory_changed (res://tools/probe_default_map.gd:25)
+              [2] add (res://scripts/inventory.gd:25)
+              [3] store_owned (res://scripts/storage.gd:133)
+              [4] unload_owned (res://scripts/character.gd:132)
+              [5] tick (res://scripts/character_ai.gd:274)
+              [6] _process (res://scripts/character.gd:289)
+{"delta":{"木材":3},"kind":"inventory","stack":["inventory_changed:24","add:25","store_owned:133","unload_owned:132","tick:274","_process:289"],"time":219.2,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] inventory_changed (res://tools/probe_default_map.gd:25)
+              [2] take_set (res://scripts/inventory.gd:63)
+              [3] take_set (res://scripts/storage.gd:216)
+              [4] tick (res://scripts/character_ai.gd:318)
+              [5] _process (res://scripts/character.gd:289)
+{"delta":{"木材":-1},"kind":"inventory","stack":["inventory_changed:24","take_set:63","take_set:216","tick:318","_process:289"],"time":220.6,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] inventory_changed (res://tools/probe_default_map.gd:25)
+              [2] take_set (res://scripts/inventory.gd:63)
+              [3] take_set (res://scripts/storage.gd:216)
+              [4] tick (res://scripts/character_ai.gd:318)
+              [5] _process (res://scripts/character.gd:289)
+{"delta":{"木材":-2},"kind":"inventory","stack":["inventory_changed:24","take_set:63","take_set:216","tick:318","_process:289"],"time":232.6,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] snapshot (res://tools/probe_default_map.gd:33)
+              [2] _initialize (res://tools/probe_default_map.gd:46)
+{"capacity":360,"creatures":[],"events":[{"at":27.7999999999999,"text":"ワークベンチができた"},{"at":75.0000000000005,"text":"急に冷え込んできた…"},{"at":105.200000000001,"text":"寒波が来た！"},{"at":168.599999999999,"text":"車軸に亀裂が入った！走行装置が損傷（-37）"},{"at":173.199999999999,"text":"寒さが和らいだ"}],"fuel":81.996000000001,"hunted":0,"kind":"snapshot","parts":{"0":83.1860000000051,"1":87.3075738353705,"2":82.2900000000017},"phase":"stopped","region":"south_oasis","repair":1,"scenario":"stay","stock":{"4":5,"5":0,"6":2,"7":0,"8":8,"9":5,"10":2,"12":0,"15":0,"23":3,"24":2},"time":240.2,"weight":104,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] inventory_changed (res://tools/probe_default_map.gd:25)
+              [2] take_set (res://scripts/inventory.gd:63)
+              [3] take_set (res://scripts/storage.gd:216)
+              [4] tick (res://scripts/character_ai.gd:318)
+              [5] _process (res://scripts/character.gd:289)
+{"delta":{"木材":-1},"kind":"inventory","stack":["inventory_changed:24","take_set:63","take_set:216","tick:318","_process:289"],"time":241.8,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] inventory_changed (res://tools/probe_default_map.gd:25)
+              [2] add (res://scripts/inventory.gd:25)
+              [3] store_owned (res://scripts/storage.gd:133)
+              [4] unload_owned (res://scripts/character.gd:132)
+              [5] tick (res://scripts/character_ai.gd:274)
+              [6] _process (res://scripts/character.gd:289)
+{"delta":{"鉄":1},"kind":"inventory","stack":["inventory_changed:24","add:25","store_owned:133","unload_owned:132","tick:274","_process:289"],"time":249.8,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] inventory_changed (res://tools/probe_default_map.gd:25)
+              [2] take_set (res://scripts/inventory.gd:63)
+              [3] take_set (res://scripts/storage.gd:216)
+              [4] tick (res://scripts/character_ai.gd:318)
+              [5] _process (res://scripts/character.gd:289)
+{"delta":{"木材":-2,"鉄":-1},"kind":"inventory","stack":["inventory_changed:24","take_set:63","take_set:216","tick:318","_process:289"],"time":251.6,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] inventory_changed (res://tools/probe_default_map.gd:25)
+              [2] add (res://scripts/inventory.gd:25)
+              [3] store_owned (res://scripts/storage.gd:133)
+              [4] unload_owned (res://scripts/character.gd:132)
+              [5] tick (res://scripts/character_ai.gd:274)
+              [6] _process (res://scripts/character.gd:289)
+{"delta":{"応急修理板":1},"kind":"inventory","stack":["inventory_changed:24","add:25","store_owned:133","unload_owned:132","tick:274","_process:289"],"time":258.0,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] snapshot (res://tools/probe_default_map.gd:33)
+              [2] _initialize (res://tools/probe_default_map.gd:46)
+{"capacity":360,"creatures":[],"events":[{"at":27.7999999999999,"text":"ワークベンチができた"},{"at":75.0000000000005,"text":"急に冷え込んできた…"},{"at":105.200000000001,"text":"寒波が来た！"},{"at":168.599999999999,"text":"車軸に亀裂が入った！走行装置が損傷（-37）"},{"at":173.199999999999,"text":"寒さが和らいだ"},{"at":245.999999999995,"text":"砂嵐が近づいている…"}],"fuel":78.996000000001,"hunted":0,"kind":"snapshot","parts":{"0":81.0860000000057,"1":87.3075738353705,"2":78.2300000000021},"phase":"stopped","region":"south_oasis","repair":1,"scenario":"stay","stock":{"4":2,"5":0,"6":1,"7":0,"8":8,"9":5,"10":3,"12":1,"13":0,"15":0,"23":3,"24":3},"time":270.2,"weight":82,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] inventory_changed (res://tools/probe_default_map.gd:25)
+              [2] take_set (res://scripts/inventory.gd:63)
+              [3] take_set (res://scripts/storage.gd:216)
+              [4] tick (res://scripts/character_ai.gd:318)
+              [5] _process (res://scripts/character.gd:289)
+{"delta":{"木材":-1},"kind":"inventory","stack":["inventory_changed:24","take_set:63","take_set:216","tick:318","_process:289"],"time":281.4,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] inventory_changed (res://tools/probe_default_map.gd:25)
+              [2] take_set (res://scripts/inventory.gd:63)
+              [3] take_set (res://scripts/storage.gd:216)
+              [4] tick (res://scripts/character_ai.gd:318)
+              [5] _process (res://scripts/character.gd:289)
+{"delta":{"木材":-1},"kind":"inventory","stack":["inventory_changed:24","take_set:63","take_set:216","tick:318","_process:289"],"time":284.2,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] inventory_changed (res://tools/probe_default_map.gd:25)
+              [2] add (res://scripts/inventory.gd:25)
+              [3] store_owned (res://scripts/storage.gd:133)
+              [4] unload_owned (res://scripts/character.gd:132)
+              [5] tick (res://scripts/character_ai.gd:274)
+              [6] _process (res://scripts/character.gd:289)
+{"delta":{"鉄":1},"kind":"inventory","stack":["inventory_changed:24","add:25","store_owned:133","unload_owned:132","tick:274","_process:289"],"time":296.2,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] snapshot (res://tools/probe_default_map.gd:33)
+              [2] _initialize (res://tools/probe_default_map.gd:46)
+{"capacity":360,"creatures":[],"events":[{"at":75.0000000000005,"text":"急に冷え込んできた…"},{"at":105.200000000001,"text":"寒波が来た！"},{"at":168.599999999999,"text":"車軸に亀裂が入った！走行装置が損傷（-37）"},{"at":173.199999999999,"text":"寒さが和らいだ"},{"at":245.999999999995,"text":"砂嵐が近づいている…"},{"at":271.199999999993,"text":"砂嵐が来た！"}],"fuel":75.996000000001,"hunted":0,"kind":"snapshot","parts":{"0":78.3770000000067,"1":87.3075738353705,"2":75.0800000000024},"phase":"stopped","region":"south_oasis","repair":1,"scenario":"stay","stock":{"4":0,"5":0,"6":0,"7":1,"8":8,"9":6,"10":3,"12":2,"13":0,"15":0,"23":3,"24":3},"time":300.2,"weight":66,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] inventory_changed (res://tools/probe_default_map.gd:25)
+              [2] take_set (res://scripts/inventory.gd:63)
+              [3] take_set (res://scripts/storage.gd:216)
+              [4] tick (res://scripts/character_ai.gd:318)
+              [5] _process (res://scripts/character.gd:289)
+{"delta":{"応急修理板":-3,"鉄":-1},"kind":"inventory","stack":["inventory_changed:24","take_set:63","take_set:216","tick:318","_process:289"],"time":309.4,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] snapshot (res://tools/probe_default_map.gd:33)
+              [2] _initialize (res://tools/probe_default_map.gd:46)
+{"capacity":360,"creatures":[],"events":[{"at":105.200000000001,"text":"寒波が来た！"},{"at":168.599999999999,"text":"車軸に亀裂が入った！走行装置が損傷（-37）"},{"at":173.199999999999,"text":"寒さが和らいだ"},{"at":245.999999999995,"text":"砂嵐が近づいている…"},{"at":271.199999999993,"text":"砂嵐が来た！"},{"at":321.59999999999,"text":"砂嵐が過ぎ去った"}],"fuel":72.996000000001,"hunted":0,"kind":"snapshot","parts":{"0":75.8276000000076,"1":87.3075738353705,"2":72.9800000000026},"phase":"stopped","region":"south_oasis","repair":1,"scenario":"stay","stock":{"4":0,"5":0,"6":0,"7":0,"8":8,"9":8,"10":0,"12":2,"13":0,"15":0,"23":3,"24":3},"time":330.2,"weight":66,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] inventory_changed (res://tools/probe_default_map.gd:25)
+              [2] add (res://scripts/inventory.gd:25)
+              [3] store_owned (res://scripts/storage.gd:133)
+              [4] unload_owned (res://scripts/character.gd:132)
+              [5] tick (res://scripts/character_ai.gd:274)
+              [6] _process (res://scripts/character.gd:289)
+{"delta":{"鉄":1},"kind":"inventory","stack":["inventory_changed:24","add:25","store_owned:133","unload_owned:132","tick:274","_process:289"],"time":338.6,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] snapshot (res://tools/probe_default_map.gd:33)
+              [2] _initialize (res://tools/probe_default_map.gd:46)
+{"capacity":360,"creatures":[],"events":[{"at":168.599999999999,"text":"車軸に亀裂が入った！走行装置が損傷（-37）"},{"at":173.199999999999,"text":"寒さが和らいだ"},{"at":245.999999999995,"text":"砂嵐が近づいている…"},{"at":271.199999999993,"text":"砂嵐が来た！"},{"at":321.59999999999,"text":"砂嵐が過ぎ去った"},{"at":347.599999999989,"text":"気温が上がってきた…"}],"fuel":97.996000000001,"hunted":0,"kind":"snapshot","parts":{"0":73.7276000000083,"1":87.3075738353705,"2":69.410000000003},"phase":"stopped","region":"south_oasis","repair":1,"scenario":"stay","stock":{"4":0,"5":0,"6":0,"7":1,"8":8,"9":7,"10":0,"12":2,"13":0,"15":0,"23":3,"24":3},"time":360.2,"weight":42,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] snapshot (res://tools/probe_default_map.gd:33)
+              [2] _initialize (res://tools/probe_default_map.gd:46)
+{"capacity":360,"creatures":[],"events":[{"at":173.199999999999,"text":"寒さが和らいだ"},{"at":245.999999999995,"text":"砂嵐が近づいている…"},{"at":271.199999999993,"text":"砂嵐が来た！"},{"at":321.59999999999,"text":"砂嵐が過ぎ去った"},{"at":347.599999999989,"text":"気温が上がってきた…"},{"at":377.799999999987,"text":"酷暑が始まった！"}],"fuel":97.996000000001,"hunted":0,"kind":"snapshot","parts":{"0":71.6276000000089,"1":87.3075738353705,"2":69.410000000003},"phase":"stopped","region":"south_oasis","repair":1,"scenario":"stay","stock":{"4":0,"5":0,"6":0,"7":1,"8":8,"9":7,"10":0,"12":3,"13":0,"14":0,"15":0,"23":3,"24":3},"time":390.2,"weight":42,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] snapshot (res://tools/probe_default_map.gd:33)
+              [2] _initialize (res://tools/probe_default_map.gd:46)
+{"capacity":360,"creatures":[],"events":[{"at":173.199999999999,"text":"寒さが和らいだ"},{"at":245.999999999995,"text":"砂嵐が近づいている…"},{"at":271.199999999993,"text":"砂嵐が来た！"},{"at":321.59999999999,"text":"砂嵐が過ぎ去った"},{"at":347.599999999989,"text":"気温が上がってきた…"},{"at":377.799999999987,"text":"酷暑が始まった！"}],"fuel":97.996000000001,"hunted":0,"kind":"snapshot","parts":{"0":69.5276000000095,"1":87.3075738353705,"2":69.410000000003},"phase":"stopped","region":"south_oasis","repair":1,"scenario":"stay","stock":{"4":0,"5":0,"6":0,"7":1,"8":8,"9":7,"10":0,"12":3,"13":0,"14":0,"15":0,"23":3,"24":3},"time":420.2,"weight":42,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] snapshot (res://tools/probe_default_map.gd:33)
+              [2] _initialize (res://tools/probe_default_map.gd:46)
+{"capacity":360,"creatures":[],"events":[{"at":245.999999999995,"text":"砂嵐が近づいている…"},{"at":271.199999999993,"text":"砂嵐が来た！"},{"at":321.59999999999,"text":"砂嵐が過ぎ去った"},{"at":347.599999999989,"text":"気温が上がってきた…"},{"at":377.799999999987,"text":"酷暑が始まった！"},{"at":440.199999999984,"text":"暑さが和らいだ"}],"fuel":97.996000000001,"hunted":0,"kind":"snapshot","parts":{"0":67.4276000000101,"1":87.3075738353705,"2":69.410000000003},"phase":"stopped","region":"south_oasis","repair":1,"scenario":"stay","stock":{"4":0,"5":0,"6":0,"7":1,"8":8,"9":7,"10":0,"12":3,"13":0,"14":0,"15":0,"23":3,"24":3},"time":450.2,"weight":42,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] snapshot (res://tools/probe_default_map.gd:33)
+              [2] _initialize (res://tools/probe_default_map.gd:46)
+{"capacity":360,"creatures":[],"events":[{"at":271.199999999993,"text":"砂嵐が来た！"},{"at":321.59999999999,"text":"砂嵐が過ぎ去った"},{"at":347.599999999989,"text":"気温が上がってきた…"},{"at":377.799999999987,"text":"酷暑が始まった！"},{"at":440.199999999984,"text":"暑さが和らいだ"},{"at":458.199999999983,"text":"砂嵐が近づいている…"}],"fuel":97.996000000001,"hunted":0,"kind":"snapshot","parts":{"0":65.3276000000108,"1":87.3075738353705,"2":69.410000000003},"phase":"stopped","region":"south_oasis","repair":1,"scenario":"stay","stock":{"4":0,"5":0,"6":0,"7":1,"8":8,"9":7,"10":0,"12":3,"13":0,"14":0,"15":0,"23":3,"24":3},"time":480.2,"weight":42,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] snapshot (res://tools/probe_default_map.gd:33)
+              [2] _initialize (res://tools/probe_default_map.gd:46)
+{"capacity":360,"creatures":[{"allowed":true,"fleeing":true,"hp":16.0,"hunted":true,"room":true,"species":"hare","x":2700.0}],"events":[{"at":321.59999999999,"text":"砂嵐が過ぎ去った"},{"at":347.599999999989,"text":"気温が上がってきた…"},{"at":377.799999999987,"text":"酷暑が始まった！"},{"at":440.199999999984,"text":"暑さが和らいだ"},{"at":458.199999999983,"text":"砂嵐が近づいている…"},{"at":483.399999999981,"text":"砂嵐が来た！"}],"fuel":97.996000000001,"hunted":0,"kind":"snapshot","parts":{"0":62.6648000000112,"1":87.3075738353705,"2":69.410000000003},"phase":"stopped","region":"south_oasis","repair":1,"scenario":"stay","stock":{"4":0,"5":0,"6":0,"7":1,"8":8,"9":7,"10":0,"12":3,"13":0,"14":0,"15":0,"23":3,"24":3},"time":510.2,"weight":42,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] snapshot (res://tools/probe_default_map.gd:33)
+              [2] _initialize (res://tools/probe_default_map.gd:46)
+{"capacity":360,"creatures":[],"events":[{"at":347.599999999989,"text":"気温が上がってきた…"},{"at":377.799999999987,"text":"酷暑が始まった！"},{"at":440.199999999984,"text":"暑さが和らいだ"},{"at":458.199999999983,"text":"砂嵐が近づいている…"},{"at":483.399999999981,"text":"砂嵐が来た！"},{"at":540.199999999986,"text":"砂嵐が過ぎ去った"}],"fuel":97.996000000001,"hunted":0,"kind":"snapshot","parts":{"0":59.9348000000112,"1":87.3075738353705,"2":69.410000000003},"phase":"stopped","region":"south_oasis","repair":1,"scenario":"stay","stock":{"4":0,"5":0,"6":0,"7":1,"8":8,"9":7,"10":0,"12":3,"13":0,"14":0,"15":0,"23":3,"24":3},"time":540.2,"weight":42,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] snapshot (res://tools/probe_default_map.gd:33)
+              [2] _initialize (res://tools/probe_default_map.gd:46)
+{"capacity":360,"creatures":[],"events":[{"at":377.799999999987,"text":"酷暑が始まった！"},{"at":440.199999999984,"text":"暑さが和らいだ"},{"at":458.199999999983,"text":"砂嵐が近づいている…"},{"at":483.399999999981,"text":"砂嵐が来た！"},{"at":540.199999999986,"text":"砂嵐が過ぎ去った"},{"at":549.799999999988,"text":"急に冷え込んできた…"}],"fuel":97.996000000001,"hunted":0,"kind":"snapshot","parts":{"0":57.8348000000108,"1":87.3075738353705,"2":69.410000000003},"phase":"stopped","region":"south_oasis","repair":1,"scenario":"stay","stock":{"4":0,"5":0,"6":0,"7":1,"8":8,"9":7,"10":0,"12":3,"13":0,"14":0,"15":0,"23":3,"24":3},"time":570.2,"weight":42,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] snapshot (res://tools/probe_default_map.gd:33)
+              [2] _initialize (res://tools/probe_default_map.gd:46)
+{"capacity":360,"creatures":[],"events":[{"at":440.199999999984,"text":"暑さが和らいだ"},{"at":458.199999999983,"text":"砂嵐が近づいている…"},{"at":483.399999999981,"text":"砂嵐が来た！"},{"at":540.199999999986,"text":"砂嵐が過ぎ去った"},{"at":549.799999999988,"text":"急に冷え込んできた…"},{"at":579.999999999995,"text":"寒波が来た！"}],"fuel":93.5080000000014,"hunted":0,"kind":"snapshot","parts":{"0":55.7348000000103,"1":87.3075738353705,"2":69.410000000003},"phase":"stopped","region":"south_oasis","repair":1,"scenario":"stay","stock":{"4":0,"5":0,"6":0,"7":1,"8":8,"9":7,"10":0,"12":3,"13":0,"14":0,"15":0,"23":3,"24":3},"time":600.2,"weight":42,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] snapshot (res://tools/probe_default_map.gd:33)
+              [2] _initialize (res://tools/probe_default_map.gd:46)
+{"capacity":360,"creatures":[],"events":[{"at":458.199999999983,"text":"砂嵐が近づいている…"},{"at":483.399999999981,"text":"砂嵐が来た！"},{"at":540.199999999986,"text":"砂嵐が過ぎ去った"},{"at":549.799999999988,"text":"急に冷え込んできた…"},{"at":579.999999999995,"text":"寒波が来た！"},{"at":620.000000000004,"text":"車体の外板が裂けた！車体が損傷（-37）"}],"fuel":86.9520000000018,"hunted":0,"kind":"snapshot","parts":{"0":15.9545158119268,"1":87.3075738353705,"2":69.410000000003},"phase":"stopped","region":"south_oasis","repair":1,"scenario":"stay","stock":{"4":0,"5":0,"6":0,"7":1,"8":8,"9":7,"10":0,"12":3,"13":0,"14":0,"15":0,"23":3,"24":3},"time":630.0,"weight":42,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] snapshot (res://tools/probe_default_map.gd:33)
+              [2] _initialize (res://tools/probe_default_map.gd:46)
+{"capacity":360,"creatures":[],"events":[{"at":483.399999999981,"text":"砂嵐が来た！"},{"at":540.199999999986,"text":"砂嵐が過ぎ去った"},{"at":549.799999999988,"text":"急に冷え込んできた…"},{"at":579.999999999995,"text":"寒波が来た！"},{"at":620.000000000004,"text":"車体の外板が裂けた！車体が損傷（-37）"},{"at":645.20000000001,"text":"寒さが和らいだ"}],"fuel":83.6080000000021,"hunted":0,"kind":"snapshot","parts":{"0":13.8545158119269,"1":87.3075738353705,"2":69.410000000003},"phase":"stopped","region":"south_oasis","repair":1,"scenario":"stay","stock":{"4":0,"5":0,"6":0,"7":1,"8":8,"9":7,"10":0,"12":3,"13":0,"14":0,"15":0,"23":3,"24":3},"time":660.0,"weight":42,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] snapshot (res://tools/probe_default_map.gd:33)
+              [2] _initialize (res://tools/probe_default_map.gd:46)
+{"capacity":360,"creatures":[],"events":[{"at":483.399999999981,"text":"砂嵐が来た！"},{"at":540.199999999986,"text":"砂嵐が過ぎ去った"},{"at":549.799999999988,"text":"急に冷え込んできた…"},{"at":579.999999999995,"text":"寒波が来た！"},{"at":620.000000000004,"text":"車体の外板が裂けた！車体が損傷（-37）"},{"at":645.20000000001,"text":"寒さが和らいだ"}],"fuel":83.6080000000021,"hunted":0,"kind":"snapshot","parts":{"0":11.754515811927,"1":87.3075738353705,"2":69.410000000003},"phase":"stopped","region":"south_oasis","repair":1,"scenario":"stay","stock":{"4":0,"5":0,"6":0,"7":1,"8":8,"9":7,"10":0,"12":3,"13":0,"14":0,"15":0,"23":3,"24":3},"time":690.0,"weight":42,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] snapshot (res://tools/probe_default_map.gd:33)
+              [2] _initialize (res://tools/probe_default_map.gd:46)
+{"capacity":360,"creatures":[],"events":[{"at":483.399999999981,"text":"砂嵐が来た！"},{"at":540.199999999986,"text":"砂嵐が過ぎ去った"},{"at":549.799999999988,"text":"急に冷え込んできた…"},{"at":579.999999999995,"text":"寒波が来た！"},{"at":620.000000000004,"text":"車体の外板が裂けた！車体が損傷（-37）"},{"at":645.20000000001,"text":"寒さが和らいだ"}],"fuel":83.6080000000021,"hunted":0,"kind":"snapshot","parts":{"0":9.65451581192712,"1":87.3075738353705,"2":69.410000000003},"phase":"stopped","region":"south_oasis","repair":1,"scenario":"stay","stock":{"4":0,"5":0,"6":0,"7":1,"8":8,"9":7,"10":0,"12":3,"13":0,"14":0,"15":0,"23":3,"24":3},"time":720.0,"weight":42,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] snapshot (res://tools/probe_default_map.gd:33)
+              [2] _initialize (res://tools/probe_default_map.gd:46)
+{"capacity":360,"creatures":[],"events":[{"at":540.199999999986,"text":"砂嵐が過ぎ去った"},{"at":549.799999999988,"text":"急に冷え込んできた…"},{"at":579.999999999995,"text":"寒波が来た！"},{"at":620.000000000004,"text":"車体の外板が裂けた！車体が損傷（-37）"},{"at":645.20000000001,"text":"寒さが和らいだ"},{"at":735.20000000003,"text":"急に冷え込んできた…"}],"fuel":83.6080000000021,"hunted":0,"kind":"snapshot","parts":{"0":7.55451581192719,"1":87.3075738353705,"2":69.410000000003},"phase":"stopped","region":"south_oasis","repair":1,"scenario":"stay","stock":{"4":0,"5":0,"6":0,"7":1,"8":8,"9":7,"10":0,"12":3,"13":0,"14":0,"15":0,"23":3,"24":3},"time":750.0,"weight":42,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] snapshot (res://tools/probe_default_map.gd:33)
+              [2] _initialize (res://tools/probe_default_map.gd:46)
+{"capacity":360,"creatures":[],"events":[{"at":549.799999999988,"text":"急に冷え込んできた…"},{"at":579.999999999995,"text":"寒波が来た！"},{"at":620.000000000004,"text":"車体の外板が裂けた！車体が損傷（-37）"},{"at":645.20000000001,"text":"寒さが和らいだ"},{"at":735.20000000003,"text":"急に冷え込んできた…"},{"at":765.400000000037,"text":"寒波が来た！"}],"fuel":80.3520000000023,"hunted":0,"kind":"snapshot","parts":{"0":5.45451581192715,"1":87.3075738353705,"2":69.410000000003},"phase":"stopped","region":"south_oasis","repair":1,"scenario":"stay","stock":{"4":0,"5":0,"6":0,"7":1,"8":8,"9":7,"10":0,"12":3,"13":0,"14":0,"15":0,"23":3,"24":3},"time":780.0,"weight":42,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] snapshot (res://tools/probe_default_map.gd:33)
+              [2] _initialize (res://tools/probe_default_map.gd:46)
+{"capacity":360,"creatures":[],"events":[{"at":579.999999999995,"text":"寒波が来た！"},{"at":620.000000000004,"text":"車体の外板が裂けた！車体が損傷（-37）"},{"at":645.20000000001,"text":"寒さが和らいだ"},{"at":735.20000000003,"text":"急に冷え込んできた…"},{"at":765.400000000037,"text":"寒波が来た！"},{"at":806.600000000046,"text":"車軸に亀裂が入った！走行装置が損傷（-36）"}],"fuel":98.7520000000027,"hunted":0,"kind":"snapshot","parts":{"0":3.35451581192714,"1":50.9244187736799,"2":69.410000000003},"phase":"stopped","region":"south_oasis","repair":1,"scenario":"stay","stock":{"4":0,"5":0,"6":0,"7":1,"8":8,"9":6,"10":0,"12":3,"13":0,"14":0,"15":0,"23":3,"24":3},"time":810.0,"weight":38,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] snapshot (res://tools/probe_default_map.gd:33)
+              [2] _initialize (res://tools/probe_default_map.gd:46)
+{"capacity":360,"creatures":[],"events":[{"at":620.000000000004,"text":"車体の外板が裂けた！車体が損傷（-37）"},{"at":645.20000000001,"text":"寒さが和らいだ"},{"at":735.20000000003,"text":"急に冷え込んできた…"},{"at":765.400000000037,"text":"寒波が来た！"},{"at":806.600000000046,"text":"車軸に亀裂が入った！走行装置が損傷（-36）"},{"at":829.200000000052,"text":"寒さが和らいだ"}],"fuel":94.528000000003,"hunted":0,"kind":"snapshot","parts":{"0":1.25451581192716,"1":50.9244187736799,"2":69.410000000003},"phase":"stopped","region":"south_oasis","repair":1,"scenario":"stay","stock":{"4":0,"5":0,"6":0,"7":1,"8":8,"9":6,"10":0,"12":3,"13":0,"14":0,"15":0,"23":3,"24":3},"time":840.0,"weight":38,"workers":[]}
+SCRIPT ERROR: Invalid access to property or key 'satiety' on a base object of type 'Node2D (Worker)'.
+          at: workers (res://tools/probe_default_map.gd:28)
+          GDScript backtrace (most recent call first):
+              [0] workers (res://tools/probe_default_map.gd:28)
+              [1] snapshot (res://tools/probe_default_map.gd:33)
+              [2] _initialize (res://tools/probe_default_map.gd:54)
+{"capacity":360,"creatures":[],"events":[{"at":620.000000000004,"text":"車体の外板が裂けた！車体が損傷（-37）"},{"at":645.20000000001,"text":"寒さが和らいだ"},{"at":735.20000000003,"text":"急に冷え込んできた…"},{"at":765.400000000037,"text":"寒波が来た！"},{"at":806.600000000046,"text":"車軸に亀裂が入った！走行装置が損傷（-36）"},{"at":829.200000000052,"text":"寒さが和らいだ"}],"fuel":94.528000000003,"hunted":0,"kind":"snapshot","parts":{"0":0.0,"1":50.9244187736799,"2":69.410000000003},"phase":"stopped","region":"south_oasis","repair":1,"scenario":"stay","stock":{"4":0,"5":0,"6":0,"7":1,"8":8,"9":6,"10":0,"12":3,"13":0,"14":0,"15":0,"23":3,"24":3},"time":858.0,"weight":38,"workers":[]}
+{"game_over":true,"kind":"result","requested_seconds":3600.0,"scenario":"stay","seed":501,"time":858.0}

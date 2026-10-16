@@ -1,0 +1,19 @@
+{
+  "commit": "1d24d20562bc2aefcdb0345796967a67e3c28862",
+  "engine": "4.6.3.stable.official.7d41c59c4",
+  "scenario": "seed501, default map, workbench request only, stay",
+  "duration_to_defeat": 858.0,
+  "repair_kit_consumption": {
+    "time": 309.4,
+    "recipe": "tool_adv_pick",
+    "repair_kits": 3,
+    "iron": 1
+  },
+  "files": {
+    "scripts/main.gd": "e5e9c59e0cefa71a151ac9a1f551bf27fd4b984e83974c7779df27861b2d427d",
+    "scripts/character_ai.gd": "9cc063f13b0406882b043a27c2ebf1ae887d69b19681c4c2dec8307a407a4ba7",
+    "scripts/game_data.gd": "713aca9d81b80643332f0de03eda899b003ee8887a85223bbd75927cf828b713",
+    "scripts/creature.gd": "696051988039a1c571c4c3520ae34be00e2d63ddb1bb31317cd4565a171357ae",
+    "tools/test_first_cycle_flow.gd": "f0dc550baea8c45c1caf3336ec8c5ca520b47f15e47f64f170c701afbd560878"
+  }
+}
