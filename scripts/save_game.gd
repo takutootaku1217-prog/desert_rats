@@ -42,6 +42,7 @@ static func capture(g) -> Dictionary:
 		"director": fields(g.director, DIRECTOR), "quarry": fields(g.quarry, QUARRY), "expedition": fields(g.expedition, EXPEDITION),
 		"party": [], "crew": [], "resources": [], "creatures": [], "enemies": [],
 		"camera": g.camera.position, "follow": g.workers.find(g.follow_target), "scroll": 0.0}
+	d["production"] = {"orders":g.production_orders.duplicate(true),"refill":g.refill_settings.duplicate(true),"goals":g.procurement_goals.duplicate(true)}
 	d["operations"] = fields(g.operations,FieldOperations.FIELDS)
 	d["processor_extra"] = fields(g.processor.second,PROCESSOR)
 	d.processor_extra.orders = [] # 共有キューは主枠で一度だけ保存
@@ -108,6 +109,8 @@ static func counts(d) -> bool:
 static func recipe(r) -> bool:
 	if not r is Dictionary: return false
 	if r.has("automatic") and not r.automatic is bool: return false
+	if r.has("player_order") and not r.player_order is bool: return false
+	if r.has("build_request") and not r.build_request is bool: return false
 	if r.is_empty(): return true
 	if r.has("batch") and (not r.batch is bool or r.has("build")): return false
 	for k in ["id", "in", "out", "n", "time", "field", "tank_fuel"]:
@@ -170,6 +173,7 @@ static func operation_totals(row: Dictionary, time_key: String) -> bool:
 
 static func validate(d, g) -> bool:
 	if not d is Dictionary or not safe(d) or d.get("version") != VERSION: return false
+	if not ProductionPlan.valid(d.get("production",{})): return false
 	if not WorldTrip.valid(d.get("world"),g): return false
 	for k in ["main", "base", "processor", "stock", "inventory", "wasted", "butchered", "capacity", "weight", "director", "quarry", "expedition", "party", "crew", "resources", "creatures", "enemies", "camera", "follow", "scroll"]:
 		if not d.has(k): return false
@@ -346,6 +350,11 @@ static func apply(g, d: Dictionary) -> bool:
 	if not validate(d,g):
 		last_error = "保存内容の形式・数量・参照を検証できません。現在の進行は変更しません。"
 		return false
+	var plan:Dictionary=d.get("production",{})
+	g.production_orders=plan.get("orders",[]).duplicate(true)
+	g.refill_settings=ProductionPlan.defaults() if d.has("production") else ProductionPlan.legacy_settings(d.main.recipe_priority)
+	g.refill_settings.merge(plan.get("refill",{}),true)
+	g.procurement_goals=plan.get("goals",{}).duplicate(true)
 	g.cancel_facility_pack()
 	put(g.world,WorldTrip.normalized(d.world),WorldTrip.FIELDS)
 	put(g.operations,d.get("operations",fields(FieldOperations.new(),FieldOperations.FIELDS)),FieldOperations.FIELDS)

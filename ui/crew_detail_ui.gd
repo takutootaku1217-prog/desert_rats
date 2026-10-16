@@ -329,6 +329,9 @@ func _request_life_action(w, action: String) -> void:
 ## 個体情報内の配属・優先度。まとめて移動する対象は、詳細を見る1人とは別に保つ。
 func _build_personnel(w) -> void:
 	_section("配属と仕事")
+	_live["carried"]=_wrapped_label("",13,UIKit.C_DIM)
+	_body.add_child(_live["carried"])
+	_body.add_child(UIKit.button("今の採取分を収納",func():w.ai.store_now();_update_live()))
 	_section("配属（この仲間を、押した部署へ移動）")
 	var dr := HBoxContainer.new()
 	dr.add_theme_constant_override("separation", 6)
@@ -608,6 +611,16 @@ func _update_live() -> void:
 	if not is_instance_valid(w) or not _live.has("status"):
 		return
 	_live["status"].text = w.ai.status_text()
+	if _live.has("carried"):
+		var cargo:="なし"
+		if w.carrying>=0: cargo="%s ×%d"%[ItemDB.name_of(w.carrying),w.carry_n]
+		if w.carrying==GameData.Item.CARCASS:
+			cargo="獲物："
+			for it in w.carcass_cargo:cargo+="%s ×%d "%[ItemDB.name_of(it),w.carcass_cargo[it]]
+		if w.ai.state==CharacterAI.State.HAUL_MOVE:
+			cargo=""
+			for it in w.ai.haul_recipe.get("in",{}):cargo+="%s ×%d "%[ItemDB.name_of(it),w.ai.haul_recipe["in"][it]]
+		_live["carried"].text="運搬品：%s / 通常運搬容量 %d個\n仕事：%s"%[cargo,w.carry_limit(),w.ai.status_text()]
 	if GameData.department_visible(w.dept):
 		_live["status"].text += "     配属: %s" % GameData.FIELD_NAMES[w.dept]
 	if _live.has("batch_title"):

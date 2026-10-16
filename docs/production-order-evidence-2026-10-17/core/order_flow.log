@@ -1,0 +1,18 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+ORDER_FLOW 初期3人・既定出来事・物資/設備/道具注入なし。採取目標・有限注文・狩猟優先・手動行先のみ。
+STAGE 27.8s 木材採取→作業台
+STAGE 51.4s 注文→搬入→加工→収納 tool_wood_pick
+STAGE 87.8s 注文→搬入→加工→収納 tool_wood_axe
+STAGE 103.4s 注文→搬入→加工→収納 tool_hammer
+STAGE 129.4s 注文→搬入→加工→収納 tool_axe
+STAGE 177.8s 収納・運搬用の鉄4を精錬
+STAGE 224.2s 地域到着 east_sands
+STAGE 308.6s 注文→搬入→加工→収納 haul_frame
+STAGE 308.6s フレーム装備可能
+STAGE 313.6s 収納箱設置
+STAGE 345.8s 注文→搬入→加工→収納 tool_pick
+STAGE 363.2s 注文→搬入→加工→収納 tool_iron_axe
+ORDER_RESULT capacity=420 carry=5 hunger=[75.7866666666629, 75.7866666666629, 75.7866666666629] hull={ 0: 74.5760000000076, 1: 84.077690752898, 2: 85.0857038979728 }
+PROGRESSION {"build_queue":[],"capacity":420,"events":{"attack":0,"chance":0,"escaped":0,"kills":0,"repelled":0,"trouble":2,"weather":1},"game_over":false,"inventory":{"0":0,"1":0,"2":1,"4":15,"5":7,"6":0,"7":0,"8":10,"9":8,"10":2,"12":0,"13":0,"15":0,"16":1,"18":0,"22":0,"23":0,"24":0},"phase":"注文→搬入→加工→収納 tool_iron_axe","quarry":"road","report":{},"seconds":363.199999999988,"stages":["木材採取→作業台","注文→搬入→加工→収納 tool_wood_pick","注文→搬入→加工→収納 tool_wood_axe","注文→搬入→加工→収納 tool_hammer","注文→搬入→加工→収納 tool_axe","収納・運搬用の鉄4を精錬","地域到着 east_sands","注文→搬入→加工→収納 haul_frame","フレーム装備可能","収納箱設置","注文→搬入→加工→収納 tool_pick","注文→搬入→加工→収納 tool_iron_axe"],"weight":168}
+== 結果: すべて成功 ==

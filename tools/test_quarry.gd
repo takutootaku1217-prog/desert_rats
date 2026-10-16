@@ -83,6 +83,7 @@ func flow() -> void:
 	main.tool_auto = false
 	check(await until(func(): return q.group_left("近場") == 0, 200), "既存AIが近場を有限量まで採掘する")
 	check(q.group_left("奥") == 72, "近場のみなら奥には着手しない")
+	main.request_order("smelt",3)
 	check(await until(func(): return main.storage.count_of(GameData.Item.IRON) > 1, 120), "採った鉄鉱石を倉庫へ運び、既存精錬で鉄にする")
 	q.near_only = false
 	check(await until(func(): return w.ai.state == CharacterAI.State.GATHER and w.carrying >= 0, 200), "奥の鉱床で掘りかけの袋を作る")
@@ -223,6 +224,7 @@ func hauling() -> void:
 func stay() -> void:
 	print("-- 設備あり・初期備蓄で20ゲーム内分の滞在（出来事なし）")
 	await fresh(true)
+	main.request_order("smelt",5)
 	# 採掘準備後の長期滞在fixture。新規開始は道具なしなので、ここでは明示して装備。
 	main.workers[0].tools = {"mine": GameData.Item.HAMMER}
 	park_fixture()

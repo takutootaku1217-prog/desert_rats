@@ -272,6 +272,7 @@ func tick(delta: float) -> void:
 			timer -= delta
 			if timer <= 0.0:
 				ch.unload_owned()
+				game.update_procurement()
 				_set_state(State.SEARCH)
 
 		# ---- 狩猟 ----
@@ -630,6 +631,10 @@ func _enemy_valid() -> bool:
 
 
 func _prey_valid() -> bool:
+	return _prey_reachable(prey)
+
+
+func _prey_reachable(prey) -> bool:
 	if prey == null or not is_instance_valid(prey) or prey.dead or game.director.outdoor_blocked():
 		return false
 	# 逃走相手との距離が縮まらないなら追跡をやめる。移動中は地面の流れも考慮。
@@ -802,7 +807,7 @@ func _try_start(job: int) -> bool:
 			var best = null
 			var best_d := INF
 			for c in game.creatures_root.get_children():
-				if not game.operations.can_depart(ch,c.position): continue
+				if not game.operations.can_depart(ch,c.position) or not _prey_reachable(c): continue
 				if c.dead or c.hunted_by != null or c.position.x < 60.0 or c.position.x > 1180.0:
 					continue
 				if not game.hunt_allowed(c.species) or not game.hunt_has_room(c.species):
@@ -890,6 +895,7 @@ func _try_start(job: int) -> bool:
 				return false
 			if r.has("build"):
 				game.claim_build(r["build"])       # 建設の依頼を待ちから外す（運搬をやめたら Processor.cancel_reservation が戻す）
+			if r.get("player_order",false): game.claim_order(r.id)
 			haul_recipe = r
 			p.reserve(r)
 			_set_state(State.HAUL_TAKE)
@@ -1001,3 +1007,12 @@ func _recall_tick(delta: float) -> bool:
 	ch.target = game.storage.access_point() + ch.slot_offset
 	ch.move_to_target(delta)
 	return true
+
+
+func store_now() -> bool:
+	if ch.carrying<0 or ch.down or ch.away or retreating or manual_attack or game.operations.stance=="recall": return false
+	if state==State.GATHER:
+		_finish_trip()
+		return true
+	if state in [State.MOVE_TO_STORAGE,State.STORE]: return true
+	return false

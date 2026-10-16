@@ -27,7 +27,7 @@ static func reason(g,id: String,slot: int) -> String:
  if g.build_pending(id)>0: return "同じ設備の建設・設置依頼が残っています"
  for bid in g.build_queue:
   if FacilityDB.def(bid)["requires"]==id: return "この設備を使う建設依頼を完了または取消してください"
- for c in g.craft_queue:
+ for c in g.craft_queue+g.production_orders:
   if GameData.recipe_station(GameData.recipe_by_id(c.id))==id: return "この設備を使う製作依頼を完了または取消してください"
  var recipes:Array=g.processor.orders+g.processor.incoming
  recipes.append_array(g.processor.active_recipes())

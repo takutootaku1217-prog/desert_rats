@@ -50,7 +50,7 @@ func resources_left()->Dictionary:
 func snapshot():
  var creatures:=[]
  for c in main.creatures_root.get_children():creatures.append({"species":c.species,"hp":c.hp,"x":c.position.x,"hunted":c.hunted_by!=null,"fleeing":c._fleeing,"allowed":main.hunt_allowed(c.species),"room":main.hunt_has_room(c.species)})
- emit_record("snapshot",{"scenario":scenario,"region":main.world.region,"phase":main.world.phase,"stock":main.storage.inventory.counts,"parts":main.base.parts,"fuel":main.base.fuel,"hunted":main.total_hunted,"repair":main.base.total_repair,"events":main.director.log,"workers":workers(),"creatures":creatures,"resources_left":resources_left(),"receipts":receipts,"crafting":{"orders":main.processor.orders,"incoming":main.processor.incoming,"active":main.processor.active_recipes(),"build_queue":main.build_queue},"weight":main.storage.current_weight(),"capacity":main.storage.max_weight()})
+ emit_record("snapshot",{"scenario":scenario,"region":main.world.region,"phase":main.world.phase,"stock":main.storage.inventory.counts,"parts":main.base.parts,"fuel":main.base.fuel,"hunted":main.total_hunted,"repair":main.base.total_repair,"events":main.director.log,"workers":workers(),"creatures":creatures,"resources_left":resources_left(),"receipts":receipts,"crafting":{"player_orders":main.production_orders,"refill":main.refill_settings,"goals":main.procurement_goals,"orders":main.processor.orders,"incoming":main.processor.incoming,"active":main.processor.active_recipes(),"build_queue":main.build_queue},"weight":main.storage.current_weight(),"capacity":main.storage.max_weight()})
 func _initialize():
  for arg in OS.get_cmdline_user_args():
   if arg.begins_with("--seed="):seed_value=int(arg.get_slice("=",1))
@@ -68,6 +68,10 @@ func _initialize():
  if not main.world.active or not main.director.enabled or main.workers.size()!=3:violations.append("既定開始条件の不一致")
  emit_record("start",{"seed":seed_value,"scenario":scenario,"requested_seconds":duration,"events_enabled":main.director.enabled,"map_active":main.world.active,"recipe_priority":main.recipe_priority})
  emit_record("action",{"request":"workbench","accepted":main.request_build("workbench")})
+ if scenario.begins_with("ordered_"):
+  for id in ["tool_wood_pick","tool_wood_axe","tool_hammer","tool_axe","tool_pick","tool_iron_axe"]:
+   emit_record("action",{"request":id,"accepted":main.request_order(id,1)})
+  emit_record("action",{"request":"smelt","accepted":main.request_order("smelt",16)})
  while main.director.elapsed<duration and not main.game_over:
   await process_frame
   if main.storage.current_weight()+main.storage.processing_reserve()>main.storage.max_weight():
@@ -79,7 +83,7 @@ func _initialize():
     emit_record("hunt_transition",{"worker":w.char_name,"state":state,"position":w.position,"speed":w.current_speed(),"camera_left":main.camera_left(),"prey":{} if prey==null or not is_instance_valid(prey) else {"x":prey.position.x,"hp":prey.hp,"flee_speed":prey._flee_speed}})
    old_states[w.char_name]=state
   if main.director.elapsed>=next_snapshot:snapshot();next_snapshot+=30
-  if scenario=="route" and main.director.elapsed>=next_trip and main.world.phase=="stopped":
+  if scenario.ends_with("route") and main.director.elapsed>=next_trip and main.world.phase=="stopped":
    var route:=["east_sands","central_trade","old_mine","central_trade","south_oasis"]
    var target:String=route[route_index%route.size()]
    var accepted:bool=main.world.request(target)

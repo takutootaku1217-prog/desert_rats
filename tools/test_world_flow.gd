@@ -34,6 +34,9 @@ func _initialize():
  print("MAP_FLOW 通常初期物資・既定出来事。作業台、地図4地域往復、鉱床12、保存再開。満載時のみ既存の選択廃棄を利用。")
  if not main.world.active: fail("地図既定が無効"); finish(); return
  main.request_build("workbench")
+ # 新仕様: プレイヤーが必要な道具・精錬回数を有限注文する。
+ for id in ["tool_wood_pick","tool_hammer","tool_wood_axe","tool_axe"]: main.request_order(id,1)
+ main.request_order("smelt",12)
  if not await wait_for("村で作業台完成",func():return main.has_facility("workbench"),600): finish(); return
  if not await go("east_sands"): finish(); return
  if not await go("central_trade"): finish(); return

@@ -5,6 +5,8 @@ func _initialize():
  print("FIRST_CYCLE_FLOW 通常開始3人・有限資源・既定出来事・素材/道具/設備注入なし seed=",diagnostic_seed())
  for id in ["tool_pick","tool_iron_axe","tool_adv_pick","repair_iron"]:main.recipe_priority[id]=0
  main.request_build("workbench")
+ for id in ["tool_wood_pick","tool_hammer","tool_wood_axe","tool_axe"]:main.request_order(id,1)
+ main.request_order("smelt",16)
  if not await wait_for("木のみの作業台",func():return main.has_facility("workbench"),240):finish();return
  if not await wait_for("木製採掘具→石製採掘具",func():return owns_tool(GameData.Item.HAMMER),300):finish();return
  for id in ["tool_wood_pick","tool_wood_axe","tool_hammer","tool_axe"]:main.recipe_priority[id]=0
@@ -15,9 +17,10 @@ func _initialize():
  if not await wait_for("安全寄りの村で基本鉄斧を装備",func():return main.workers.any(func(w):return w.tools.get("chop",-1)==GameData.Item.IRON_AXE),120):finish();return
  # 以後の強化は有限の街道・砂原で追加素材を集める。村に無限補充しない。
  main.gather_policy[GameData.Item.STONE]=0
+ main.workers[0].set_priority(GameData.Job.HUNT,5)
  if not await go("east_sands"):finish();return
  if not main.world.request("central_trade"):fail("街道選択失敗");finish();return
- main.target_speed=15
+ main.target_speed=60
  main.recipe_priority["smelt"]=4
  if not await make_item("haul_frame"):finish();return
  var w=main.workers[0]
@@ -25,7 +28,13 @@ func _initialize():
  if not main.request_build("cargo_rack"):fail("箱の設置依頼失敗");finish();return
  if not await wait_for("収納箱を製作設置",func():return main.has_facility("cargo_rack"),600):finish();return
  if not await wait_for("中央交易都市到着",func():return main.world.phase=="stopped",600):finish();return
+ main.set_procurement(GameData.Item.IRON_ORE,4)
  if not main.world.request("old_mine"):fail("鉱山への街道選択失敗");finish();return
+ if not await wait_for("鉱山入口到着",func():return main.world.phase=="stopped",600):finish();return
+ if not main.quarry.select():fail("追加素材の鉱床選択失敗");finish();return
+ if not await wait_for("鉱床到着",func():return main.quarry.state=="parked",180):finish();return
+ main.operations.set_stance("alert")
+ if not await wait_for("警戒中も近場採取を継続",func():return main.workers.any(func(x):return x.ai.state==CharacterAI.State.GATHER),120):finish();return
  if not main.request_build("storage_upgrade"):fail("収納強化依頼失敗");finish();return
  if not await wait_for("収納強化1段階",func():return main.has_facility("storage_upgrade"),420):finish();return
  main.unequip_work_support(w)
@@ -33,11 +42,6 @@ func _initialize():
  if not main.equip_work_support(w,GameData.Item.HANDCART):fail("手押し車装備失敗");finish();return
  if not main.request_build("parallel_bench"):fail("2枠加工依頼失敗");finish();return
  if not await wait_for("2枠加工台完成",func():return main.has_facility("parallel_bench"),420):finish();return
- if not await wait_for("鉱山入口到着",func():return main.world.phase=="stopped",600):finish();return
- if not main.quarry.select():fail("鉱床選択失敗");finish();return
- if not await wait_for("鉱床到着",func():return main.quarry.state=="parked",180):finish();return
- main.operations.set_stance("alert")
- if not await wait_for("警戒中も近場採取を継続",func():return main.workers.any(func(x):return x.ai.state==CharacterAI.State.GATHER),120):finish();return
  main.operations.set_stance("recall")
  if not await wait_for("3人と荷物を呼び戻し",func():return main.operations.returned_count()==3,240):finish();return
  main.operations.tick()

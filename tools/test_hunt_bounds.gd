@@ -16,7 +16,14 @@ func _initialize():
  c.position.x=1250;w.ai.prey=c;c.hunted_by=w;w.ai._set_state(CharacterAI.State.HUNT_ATTACK)
  w.ai.tick(0.2)
  check(w.ai.state==CharacterAI.State.SEARCH and c.hp==hp,"攻撃中に逃げられ追いつけなくなった場合も終了")
- c.position.x=900;c._fleeing=false;main.hunt_policy["hare"]=true
+ c.position.x=1150;main.hunt_policy["hare"]=true
+ for other in main.creatures_root.get_children():
+  if other!=c:other.queue_free()
+ await process_frame
+ for i in 300:
+  check(not w.ai._try_start(GameData.Job.HUNT),"追いつけない逃走個体を候補から除外")
+ check(w.ai.prey==null and c.hunted_by==null and c._fleeing,"5秒相当の再選択でも予約・逃走を変更しない")
+ c.position.x=900
  check(w.ai._try_start(GameData.Job.HUNT),"同じ生存個体が範囲内へ戻れば既存条件で再挑戦")
  c._fleeing=true;c.position.x=w.position.x+120
  main.scroll_speed=60

@@ -77,23 +77,27 @@ static func entry_of(key: String) -> Dictionary:
 ## 返す辞書: state（"ok" 作れる／"short" 材料不足／"blocked" 置き場がいっぱい／"locked" 解放待ち／"done" 建設済み／"queued" 建設の依頼中）、
 ##   rows（材料ごとの {item, need, have, ok, in_storage}）、reason（解放待ち・不可の理由）、hint（何をすれば解放・解決するか）、
 ##   max_qty（いま作れる最大の回数。建設は 0/1）、max_with_storage（倉庫の材料も作業場へ運べば作れる最大の回数）、source（材料を数えている場所 "作業場"／"倉庫"）、can_transfer（足りない分が倉庫にある）、missing（足りない分 {item: 個数}）。
-static func evaluate(e: Dictionary, game, qty: int = 1) -> Dictionary:
+static func evaluate(e: Dictionary, game, qty: int = 1, warehouse := false) -> Dictionary:
 	qty = maxi(1, qty)
 	var res := {"state": "short", "rows": [], "reason": "", "hint": "", "max_qty": 0, "source": "作業場", "can_transfer": false, "missing": {}}
 	if e["kind"] == "build":
 		return _evaluate_build(e, game, res)
+	if warehouse:
+		var local:=evaluate(e,game,qty,false)
+		if int(local.max_qty)>=qty:return local
+		res["source"]="倉庫（仲間が搬入）"
 	var st: String = e["station"]
 	var maxq := 1000000
 	var maxq_all := 1000000                                     # 倉庫の材料も作業場へ運べば、作れる最大の回数
 	var missing := {}
 	for it in e["in"]:
 		var per: int = int(e["in"][it])
-		var have: int = game.workshop_available(it)
+		var have: int = AutoCraftGuard.available(game,it,null,true) if warehouse else game.workshop_available(it)
 		var need: int = per * qty
 		var ok: bool = have >= need
 		res["rows"].append({"item": it, "need": need, "have": have, "ok": ok, "in_storage": game.storage.count_of(it)})
 		maxq = mini(maxq, have / maxi(1, per))
-		maxq_all = mini(maxq_all, (have + game.storage.count_of(it)) / maxi(1, per))
+		maxq_all = mini(maxq_all, (have + (0 if warehouse else game.storage.count_of(it))) / maxi(1, per))
 		if not ok:
 			missing[it] = need - have
 	res["material_qty"] = maxi(0,maxq)

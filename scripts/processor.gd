@@ -110,6 +110,7 @@ func reserve(recipe: Dictionary) -> void:
 ## 運搬をやめた（材料は倉庫に残る／戻る）。建設の依頼は、待ちに戻す（依頼が消えないように）。
 func cancel_reservation(recipe: Dictionary) -> void:
 	_drop_reservation(recipe)
+	if recipe.get("player_order",false): base().game.restore_order(recipe)
 	if recipe.has("build"):
 		base().game.requeue_build(recipe["build"])
 
@@ -239,7 +240,7 @@ func take_output_stack(limit: int) -> Dictionary:
 
 func manual_status(id: String) -> Dictionary:
 	var d := {"queued":0,"loaded":0,"active":0,"progress":0.0,"time":0.0,"output":0}
-	for q in base().game.craft_queue:
+	for q in base().game.craft_queue + base().game.production_orders:
 		if q["id"] == id: d.queued += int(q["n"])
 	for r in orders:
 		if r.get("manual",false) and r["id"] == id: d.loaded += 1
@@ -291,6 +292,7 @@ func work(delta: float, speed_of: Callable) -> void:
 
 ## 次に始まる注文（燃料が足りて、すぐ始められる先頭のもの。なければ空）。作業者が向かう設備を決めるのに使う。
 func _peek_next() -> Dictionary:
+	orders.sort_custom(func(a,b): return ProductionPlan.rank(base().game,a)>ProductionPlan.rank(base().game,b))
 	for r in orders:
 		if r["tank_fuel"] <= 0.0 or base().fuel >= r["tank_fuel"]:
 			return r
@@ -299,6 +301,7 @@ func _peek_next() -> Dictionary:
 
 ## 次に加工する注文を選ぶ。炉を使うレシピは燃料が足りる時だけ。
 func _start_next() -> void:
+	_peek_next()
 	waiting_fuel = false
 	for i in orders.size():
 		var r: Dictionary = orders[i]

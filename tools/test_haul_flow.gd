@@ -6,6 +6,9 @@ func _initialize():
  print("DIAGNOSTIC_SEED ",diagnostic_seed())
  print("HAUL_FLOW 通常初期物資・既定出来事・実AI・定期保存復元。数量注入なし。")
  main.request_build("workbench")
+ # 新仕様: プレイヤーが必要な道具・精錬回数を有限注文する。
+ for id in ["tool_wood_pick","tool_hammer","tool_wood_axe","tool_axe"]: main.request_order(id,1)
+ main.request_order("smelt",12)
  if not await wait_for("作業台完成",func():return main.has_facility("workbench"),600):finish();return
  main.workers[0].set_priority(GameData.Job.HUNT,5)
  if not await go("east_sands"):finish();return

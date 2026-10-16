@@ -440,7 +440,7 @@ func _test_ui() -> void:
 		if c is PanelContainer and c.get_child_count() > 0 and c.get_child(0) is HBoxContainer and _count_type(c, "TextureRect") >= 2:
 			rows_in_detail += 1
 	check(rows_in_detail == 2, "必要な材料の行は、材料の数（石・木材の2つ）")
-	check(craft._craft_btn.disabled and not craft._carry_btn.disabled, "材料が作業場になければ［制作］は押せず、倉庫にあるので［素材を運ぶ］は押せる")
+	check(not craft._craft_btn.disabled and not craft._carry_btn.disabled, "倉庫在庫から直接注文でき、従来の明示搬入も利用可能")
 	craft._carry_btn.pressed.emit()
 	check(main.transfer_queue.size() == 2, "［素材を運ぶ］で、足りない材料（石・木材）の運搬の依頼が入る")
 	main.cancel_transfers()
@@ -454,7 +454,7 @@ func _test_ui() -> void:
 	craft._refresh(true)
 	craft._qty_val = 99
 	craft._refresh(true)
-	check(craft._qty.max_value == 15 and craft._qty.all_value == 6, "選べる最大は、倉庫の材料も運べば作れる回数（15）。「全部」は、いま作れる最大の回数（6）")
+	check(craft._qty.max_value == 99 and craft._qty.all_value == 9, "不足注文も99回まで選べ、「全部」は倉庫で製作可能な9回")
 	craft._qty_val = 1
 	craft._refresh(true)
 	_find_button(craft._qty, "全部").pressed.emit()

@@ -3,70 +3,56 @@ func _initialize():
  await setup()
  main.finish_build("workbench")
  var st=main.storage;var p=main.processor;var w=main.workers[0]
- w.priorities[GameData.Job.GATHER]=5
- var adv:=GameData.recipe_by_id("tool_adv_pick")
- st.inventory.counts={GameData.Item.IRON:1,GameData.Item.REPAIR_KIT:3}
- var before:Dictionary=st.inventory.counts.duplicate()
- check(not AutoCraftGuard.allows(main,adv) and st.inventory.counts==before,"自動高性能道具は最後の修理板3を消費しない・判定は無変更")
- main.recipe_priority["tool_adv_pick"]=5
- check(main.choose_recipe().is_empty(),"優先度5でも自動の修理備蓄保護")
- st.inventory.counts[GameData.Item.REPAIR_KIT]=6
- check(AutoCraftGuard.allows(main,adv),"余剰3個を得れば自動強化を再開可能")
- var selected:Dictionary=main.choose_recipe()
- check(selected.get("id","")=="tool_adv_pick" and selected.get("automatic",false),"自動選択の由来を保存可能な注文に記録")
- w.ai.haul_recipe=selected;w.ai._set_state(CharacterAI.State.HAUL_TAKE);p.reserve(selected)
- check(AutoCraftGuard.allows(main,selected,w) and not AutoCraftGuard.allows(main,adv),"自分の予約は一度だけ、他人の予約は二重消費しない")
- check(roundtrip(),"未搬出の自動予約・在庫・積載を保存復元")
- st.inventory.counts[GameData.Item.REPAIR_KIT]=3
- w.position=st.access_point()+w.slot_offset;w.floor_i=1
- w.ai.tick(0.2)
- check(st.count_of(GameData.Item.REPAIR_KIT)==3 and w.ai.haul_recipe.is_empty() and p.incoming.is_empty(),"搬出前に不足したら消費せず予約を解除")
- st.inventory.counts[GameData.Item.REPAIR_KIT]=6
- check(main.choose_recipe().get("id","")=="tool_adv_pick","補充後に自動注文が再開")
- main.request_transfer(GameData.Item.REPAIR_KIT,3,"to_workshop")
- check(not AutoCraftGuard.allows(main,adv),"手動運搬へ予約した3個を自動強化に流用しない")
- main.cancel_transfers()
- p.stock.add(GameData.Item.REPAIR_KIT,3);p.stock.add(GameData.Item.IRON,1)
- check(main.request_craft("tool_adv_pick",1)==1,"Fの明示製作は備蓄保護で拒否しない")
- var mass:int=st.current_weight();main._feed_crafts()
- check(p.orders.size()==1 and p.orders[0].get("manual",false) and not p.orders[0].get("automatic",false),"手動注文を自動注文と区別")
- check(roundtrip() and st.current_weight()==mass,"手動注文・積載・予約の保存互換")
- p.work(7,func(_f):return 1.0)
- check(p.output.has(GameData.Item.ADV_PICK) and p.stock.count(GameData.Item.REPAIR_KIT)==0,"明示製作は指定材料を一度だけ消費して完成")
- var old:=adv.duplicate(true)
- check(SaveGame.recipe(old),"automatic項目のない旧注文も有効")
- p.output.clear();p.receive_manual(old);p.orders[0].erase("manual")
- check(roundtrip(),"旧版の投入済み注文を保持して読込")
- p.work(7,func(_f):return 1.0)
- check(p.output.has(GameData.Item.ADV_PICK),"旧版で投入済みの材料は返却/再消費せず完成")
- await setup();main.finish_build("workbench");st=main.storage;p=main.processor;w=main.workers[0]
- w.priorities[GameData.Job.GATHER]=5;w.tools={"mine":GameData.Item.HAMMER,"chop":GameData.Item.AXE}
- main.recipe_priority["tool_pick"]=3;main.recipe_priority["tool_iron_axe"]=3
- var woodfuel:=GameData.recipe_by_id("firewood")
- st.inventory.counts={GameData.Item.WOOD:3,GameData.Item.STONE:2,GameData.Item.IRON:1,GameData.Item.FUEL:2}
- check(not AutoCraftGuard.allows(main,woodfuel),"薪は修理用木1＋次の鉄道具用木2を使い切らない")
- check(AutoCraftGuard.allows(main,GameData.recipe_by_id("tool_pick")),"木3なら鉄道具に2を使い修理用1を残す")
- st.inventory.counts[GameData.Item.WOOD]=2
- check(not AutoCraftGuard.allows(main,GameData.recipe_by_id("tool_pick")),"修理板不足時は鉄道具も修理用木1を保護")
- main.base.parts[GameData.Part.HULL]=10
- check(AutoCraftGuard.allows(main,GameData.recipe_by_id("repair_stone")),"緊急修理は鉄道具用の木より優先")
- st.inventory.counts[GameData.Item.FUEL]=0;main.base.fuel=0
- check(AutoCraftGuard.allows(main,woodfuel),"燃料枯渇時の既存救済を維持")
- main.base.fuel=100;st.inventory.counts[GameData.Item.WOOD]=10
- check(AutoCraftGuard.allows(main,woodfuel),"十分な補充で通常の薪作りを再開")
- st.inventory.counts[GameData.Item.REPAIR_KIT]=6
- w.ai.repair_part=GameData.Part.HULL;w.ai._set_state(CharacterAI.State.REPAIR_TAKE)
- check(not AutoCraftGuard.allows(main,adv),"修理へ予約中の板を自動強化に二重割当しない")
- w.ai._set_state(CharacterAI.State.SEARCH)
- main.build_queue.append("cargo_rack")
- st.inventory.counts[GameData.Item.WOOD]=10
- var other=main.workers[1]
- other.ai.haul_recipe=GameData.recipe_by_id("tool_pick").duplicate(true)
- other.ai._set_state(CharacterAI.State.HAUL_TAKE)
- check(AutoCraftGuard.available(main,GameData.Item.WOOD)==2,"建設用6＋運搬予約2を合算して保護")
- check(not AutoCraftGuard.allows(main,woodfuel),"建設・運搬・維持の予約を合算して自動薪を拒否")
- other.ai._release_task();other.ai._set_state(CharacterAI.State.SEARCH);main.build_queue.clear()
- var bad:=adv.duplicate(true);bad.automatic="yes"
- check(not SaveGame.recipe(bad),"新しい注文由来の不正型を拒否")
- check(main.storage.current_weight()+main.storage.processing_reserve()<=main.storage.max_weight(),"検査後も総積載＋加工予約が容量内")
+ st.inventory.counts={GameData.Item.WOOD:2,GameData.Item.STONE:2,GameData.Item.IRON:1}
+ check(main.choose_recipe().is_empty(),"注文なしで道具を自動製作しない")
+ main.refill_settings=ProductionPlan.defaults()
+ check(not main.choose_recipe().is_empty(),"木2・鉄1・板0でも消耗品補充が相互保護で停止しない")
+ st.inventory.counts.erase(GameData.Item.IRON)
+ check(not main.choose_recipe().is_empty(),"木2・鉄0でも補充開始可能")
+ for s in main.refill_settings.values():s.enabled=false
+ main.request_order("tool_pick",1)
+ check(main.choose_recipe().is_empty() and AutoCraftGuard.available(main,GameData.Item.WOOD,null,true)==2,"不足注文は木材を予約しない")
+ main.request_order("tool_wood_pick",1)
+ check(main.choose_recipe().get("id")=="tool_wood_pick","不足注文を飛ばして製作可能な明示注文を選ぶ")
+ w.priorities[GameData.Job.HAUL]=5
+ check(w.ai._try_start(GameData.Job.HAUL),"注文材料の搬入を引受け")
+ check(main.production_orders.size()==1 and p.incoming.size()==1,"引受け時に待ち注文から一回だけ移す")
+ check(AutoCraftGuard.available(main,GameData.Item.WOOD,null,true)==0,"別の仲間・移送は予約木材を使えない")
+ check(main.request_transfer(GameData.Item.WOOD,2,"to_workshop")==0,"手動移送との重複予約を防ぐ")
+ check(roundtrip(),"搬入前予約と不足注文の保存復元")
+ check(main.cancel_manual_craft("tool_wood_pick")==1 and p.incoming.is_empty() and st.count_of(GameData.Item.WOOD)==2,"搬入前取消で予約だけ解放・素材不変")
+ main.cancel_manual_craft("tool_pick")
+ main.request_order("tool_wood_pick",1)
+ check(w.ai._try_start(GameData.Job.HAUL),"再注文を引受け")
+ w.ai._release_task();w.ai._set_state(CharacterAI.State.SEARCH)
+ check(main.production_orders.size()==1 and p.incoming.is_empty(),"割込み時に未搬出注文を待ちへ戻す")
+ check(roundtrip(),"中断後の保存復元")
+ main.cancel_manual_craft("tool_wood_pick")
+ main.refill_settings=ProductionPlan.defaults()
+ main.request_order("tool_wood_pick",1)
+ check(main.choose_recipe().get("id")=="tool_wood_pick","通常は手動注文を補充より優先")
+ main.base.parts[GameData.Part.HULL]=10.0
+ check(main.choose_recipe().get("out")==GameData.Item.REPAIR_KIT,"危険水準の修理板を手動注文より優先")
+ main.base.parts[GameData.Part.HULL]=100.0
+ main.cancel_manual_craft("tool_wood_pick")
+ main.refill_settings[GameData.Item.FUEL].target=1
+ main.refill_settings[GameData.Item.REPAIR_KIT].enabled=false
+ var fuel:=GameData.recipe_by_id("firewood").duplicate(true);p.reserve(fuel)
+ check(main.choose_recipe().is_empty(),"加工予定1を一度だけ数え目標超過を防ぐ")
+ p.incoming.clear();w.carrying=GameData.Item.FUEL;w.carry_n=1;w.ai.state=CharacterAI.State.MOVE_TO_STORAGE
+ check(main.choose_recipe().is_empty(),"完成品運搬中も補充在庫へ計上")
+ w.carrying=-1;w.ai.state=CharacterAI.State.SEARCH
+ main.set_procurement(GameData.Item.WOOD,5);main.set_procurement(GameData.Item.WOOD,5)
+ check(main.procurement_goals.size()==1 and main.gather_weight(GameData.Item.WOOD)==30.0,"目標再送は重複せず優先採取")
+ main.set_procurement(GameData.Item.WOOD,2);main.update_procurement()
+ check(main.procurement_goals.is_empty(),"数量変更で達成した目標を終了")
+ main.set_procurement(GameData.Item.WOOD,6);main.set_procurement(GameData.Item.WOOD,0)
+ check(main.procurement_goals.is_empty(),"採取目標取消")
+ main.set_procurement(GameData.Item.WOOD,6)
+ check(roundtrip(),"補充ON/OFF・目標在庫・採取目標を保存")
+ var old:=SaveGame.capture(main);old.erase("production")
+ check(SaveGame.apply(main,old) and main.production_orders.is_empty() and main.refill_settings==ProductionPlan.legacy_settings(old.main.recipe_priority),"旧セーブは注文自動生成なし・補充ON/OFFを旧方針から移行")
+ var bad:=SaveGame.capture(main);bad.production.goals={GameData.Item.WOOD:-1}
+ check(not SaveGame.validate(bad,main),"不正な目標数量を拒否")
+ check(main.storage.current_weight()+main.storage.processing_reserve()<=main.storage.max_weight(),"所有重量と予約が容量内")
  print("== 結果: %s =="%("すべて成功" if fails==0 else "%d 件失敗"%fails));quit(1 if fails else 0)

@@ -13,6 +13,12 @@ func wait_for(label: String, condition: Callable, seconds: float) -> bool:
 	var end: float=main.director.elapsed+seconds
 	while not condition.call() and not main.game_over and main.director.elapsed<end:
 		await process_frame
+		if main.storage.free_for(GameData.Item.IRON_ORE)==0:
+			for item in [GameData.Item.STONE,GameData.Item.WOOD,GameData.Item.MEAT]:
+				if main.warehouse_discard_available(item)>12:
+					var shown:Dictionary=main.warehouse_discard_snapshot(item,5)
+					if main.discard_warehouse(shown):print("ACTION 満載時の確認付き廃棄 ",ItemDB.name_of(item)," x5")
+					break
 		if main.storage.current_weight()+main.storage.processing_reserve()>main.storage.max_weight():
 			fail("保有重量＋加工増量予約が容量超過")
 			return false
@@ -38,6 +44,9 @@ func _initialize():
 	print("操作方針: Bで作業台→寝床/箱を製作設置、Gで近場を採取し帰還。残置は数量確認して放棄。Fで槍を製作、Cで本人へ装備、Bで2個目の箱。出来事・各優先度は既定。")
 	if not main.director.enabled: fail("出来事が無効"); finish(); return
 	if not main.request_build("workbench"): fail("作業台の依頼拒否"); finish(); return
+	# 新仕様: プレイヤーが必要な道具・精錬回数を有限注文する。
+	for id in ["tool_wood_pick","tool_hammer","tool_wood_axe","tool_axe"]: main.request_order(id,1)
+	main.request_order("smelt",12)
 	if not await wait_for("作業台完成",func():return main.has_facility("workbench"),600): finish(); return
 	if not main.request_build("bed") or not main.request_build("cargo_rack"): fail("寝床/箱の依頼拒否");finish();return
 	if not await wait_for("寝床1台と箱1個を設置",func():return main.base.facility_count("bed")>=1 and main.base.facility_count("cargo_rack")>=1,900): finish();return
@@ -63,6 +72,7 @@ func _initialize():
 	if not await wait_for("本人が装備可能",func():return main.weapon_change_reason(main.workers[0],true)=="",180):finish();return
 	if not main.equip_weapon(main.workers[0]):fail("本人へ槍装備拒否");finish();return
 	stages.append("槍を本人に装備")
+	main.request_order("smelt",3)
 	if not main.request_build("cargo_rack"):fail("次の箱依頼拒否");finish();return
 	if not await wait_for("帰還後の次強化: 箱2個目を製作設置",func():return main.base.facility_count("cargo_rack")==2,900):finish();return
 	finish()

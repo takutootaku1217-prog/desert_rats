@@ -30,7 +30,7 @@ func _initialize():
 	check(main.warehouse_discard_snapshot(item, -1).is_empty(), "負数は拒否")
 	check(main.warehouse_discard_snapshot(item, 91).is_empty(), "在庫超過は拒否")
 	main.request_build("workbench")
-	check(main.warehouse_discard_available(item) == 87, "建設待ち3個を保護")
+	check(main.warehouse_discard_available(item) == 90, "未着手建設は素材を予約しない")
 	main.build_queue.clear()
 	var worker = main.workers[0]
 	worker.ai.state = CharacterAI.State.HAUL_TAKE

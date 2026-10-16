@@ -33,12 +33,14 @@ func gather(kind: String) -> void:
 	p.free()
 
 func craft(id: String) -> void:
+	for setting in main.refill_settings.values(): setting.enabled=false
+	main.request_order(id,1)
 	for r in GameData.RECIPES:
 		main.recipe_priority[r["id"]] = 5 if r["id"] == id else 0
 	var rec := GameData.recipe_by_id(id)
 	var before := st.inventory.counts.duplicate()
 	var count_before: int = main.processor.total_done
-	check(main.choose_recipe().get("id", "") == id, "%sが既存の自動加工候補になる" % id)
+	check(main.choose_recipe().get("id", "") == id, "%sが明示注文の加工候補になる" % id)
 	check(job(GameData.Job.HAUL), "%sの材料を加工設備へ運ぶ" % id)
 	for it in rec["in"]:
 		check(st.count_of(it) == int(before.get(it, 0)) - int(rec["in"][it]), "%sの材料%sを一度だけ消費" % [id, GameData.ITEM_NAMES[it]])

@@ -1,0 +1,20 @@
+extends "res://tools/test_equipment_ui.gd"
+func _initialize():
+ main=load("res://scenes/main.tscn").instantiate();root.add_child(main);await frames()
+ main.set_process(false)
+ for worker in main.workers:worker.set_process(false)
+ var w=main.workers[0]
+ w.carrying=GameData.Item.WOOD;w.carry_n=2;w.ai.state=CharacterAI.State.MOVE_TO_STORAGE
+ await key(KEY_C)
+ main.detail._scroll.ensure_control_visible(main.detail._live.carried);await frames()
+ check(main.detail._live.carried.text.contains("木材 ×2") and main.detail._live.carried.text.contains("3個"),"運搬中の木材2と容量3を個体画面に表示")
+ if DisplayServer.get_name()!="headless":
+  await RenderingServer.frame_post_draw
+  root.get_texture().get_image().save_png("/workspace/orders-ui/crew-cargo-loaded.png")
+ w.carrying=GameData.Item.CARCASS;w.carcass_cargo={GameData.Item.HIDE:1,GameData.Item.BONE:1}
+ await frames()
+ check(main.detail._live.carried.text.contains("皮 ×1") and main.detail._live.carried.text.contains("骨 ×1"),"獲物内の確定済み素材も品目・数量を表示")
+ if DisplayServer.get_name()!="headless":
+  await RenderingServer.frame_post_draw
+  root.get_texture().get_image().save_png("/workspace/orders-ui/crew-carcass.png")
+ print("== 結果: %s =="%("すべて成功" if fails==0 else "%d 件失敗"%fails));quit(1 if fails else 0)

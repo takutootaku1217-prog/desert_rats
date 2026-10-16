@@ -174,6 +174,8 @@ func _say(text: String) -> void:
 
 
 func _refresh(force := false) -> void:
+	var focus:=get_viewport().gui_get_focus_owner()
+	if not force and focus is LineEdit and _detail.is_ancestor_of(focus):return
 	if game == null or game.storage == null:
 		return
 	if _cat == "" or not CraftDB.categories_in_use().has(_cat):
@@ -183,15 +185,15 @@ func _refresh(force := false) -> void:
 	if selected_entry().is_empty() or selected_entry()["cat"] != _cat:
 		_key = es[0]["key"] if not es.is_empty() else ""
 	# 目印: 分類・選択・各エントリの状態・選んだ物の材料の数・待ち行列
-	var parts: Array = [_cat, _key, str(_qty_val)]
+	var parts: Array = [_cat, _key, str(_qty_val),str(game.production_orders),str(game.refill_settings),str(game.procurement_goals),str(game.gather_room()),str(game.workers.map(func(w):return [w.carrying,w.carry_n]))]
 	if not selected_entry().is_empty(): parts.append(str(game.processor.manual_status(selected_entry()["id"])))
 	for e in es:
-		var ev: Dictionary = CraftDB.evaluate(e, game, 1)
+		var ev: Dictionary = CraftDB.evaluate(e, game, 1, true)
 		parts.append("%s:%s" % [e["key"], ev["state"]])
 	var sel := selected_entry()
 	if not sel.is_empty():
 		parts.append(CraftDB.detail_text(sel, game))
-		var evs: Dictionary = CraftDB.evaluate(sel, game, _qty_val)
+		var evs: Dictionary = CraftDB.evaluate(sel, game, _qty_val, true)
 		for r in evs["rows"]:
 			parts.append("%d/%d/%d" % [r["item"], r["have"], r["in_storage"]])
 		parts.append("%d:%d" % [evs["max_qty"], int(evs["state"] == "ok")])
@@ -229,7 +231,7 @@ func _entry_item(e: Dictionary) -> int:
 func _rebuild_list() -> void:
 	UIKit.clear(_list)
 	for e in _entries():
-		var ev: Dictionary = CraftDB.evaluate(e, game, 1)
+		var ev: Dictionary = CraftDB.evaluate(e, game, 1, true)
 		var selected: bool = e["key"] == _key
 		var row := PanelContainer.new()
 		row.add_theme_stylebox_override("panel", UIKit.box(Color("2a3140") if selected else Color("23272f"), C_SEL if selected else Color("3a3f4a"), 3 if selected else 2, 4))
@@ -268,7 +270,7 @@ func _rebuild_detail() -> void:
 		return
 	var is_build: bool = e["kind"] == "build"
 	var qty: int = 1 if is_build else _qty_val
-	var ev: Dictionary = CraftDB.evaluate(e, game, qty)
+	var ev: Dictionary = CraftDB.evaluate(e, game, qty, true)
 	var state: String = ev["state"]
 	# 見出し: 作る物の大きな絵・名前・状態の札
 	var head := HBoxContainer.new()
@@ -298,7 +300,7 @@ func _rebuild_detail() -> void:
 		out.add_child(UIKit.lbl("×%d" % (int(e["n"]) * qty), 18, UIKit.C_TEXT))
 		out.add_child(ItemWidgets.chip(FacilityDB.name_of(String(e["station"])) if e["station"] != "" else "手作業", Color("6f7a8c"), 12))
 	if not is_build:
-		var summary := UIKit.lbl("%d回まとめて予約 / 成果%d個 / 基準加工時間 %.1f秒（1回%.1f秒×%d、能力補正前）\n複数回だけまとめ回収：通常3個／フレーム5個。単発・自動は1個ずつ。割引なし。" % [qty,int(e["n"])*qty,float(e["time"])*qty,float(e["time"]),qty],13,UIKit.C_DIM)
+		var summary := UIKit.lbl("%d回の注文 / 成果%d個 / 基準加工時間 %.1f秒（1回%.1f秒×%d、能力補正前）\n複数回だけまとめ回収：通常3個／フレーム5個。単発・自動は1個ずつ。割引なし。" % [qty,int(e["n"])*qty,float(e["time"])*qty,float(e["time"]),qty],13,UIKit.C_DIM)
 		summary.name = "BatchSummary"
 		summary.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		summary.custom_minimum_size = Vector2(540,0)
@@ -330,7 +332,7 @@ func _rebuild_detail() -> void:
 	if not is_build and state != "locked":
 		_detail.add_child(UIKit.lbl("回数", 13, UIKit.C_DIM))
 		_qty = QtyPicker.new().setup([1, 5, -1])
-		var top_n: int = maxi(int(ev["material_qty"]), int(ev["material_with_storage"]))                          # 材料が足りなくても、必要な数を見るために、倉庫の分まで選べる
+		var top_n: int = maxi(99, maxi(int(ev["material_qty"]), int(ev["material_with_storage"])))                          # 材料が足りなくても、必要な数を見るために、倉庫の分まで選べる
 		_qty.set_max(top_n, int(ev["max_qty"]) if int(ev["max_qty"]) > 0 else int(ev["max_with_storage"]))
 		_qty.set_value(_qty_val, false)
 		_qty_val = _qty.value
@@ -350,7 +352,7 @@ func _rebuild_detail() -> void:
 		_craft_btn.disabled = not (state in ["ok", "short"])
 	else:
 		_craft_btn = UIKit.button("1回制作" if qty == 1 else "%d回まとめて制作" % qty, _do_craft)
-		_craft_btn.disabled = state != "ok"
+		_craft_btn.disabled = state == "locked"
 	_craft_btn.alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_craft_btn.custom_minimum_size = Vector2(190, 38)
 	acts.add_child(_craft_btn)
@@ -358,7 +360,7 @@ func _rebuild_detail() -> void:
 		_carry_btn = UIKit.button("素材を運ぶ", _do_carry)
 		_carry_btn.alignment = HORIZONTAL_ALIGNMENT_CENTER
 		_carry_btn.custom_minimum_size = Vector2(150, 38)
-		_carry_btn.disabled = not (state == "short" and ev["can_transfer"])
+		_carry_btn.disabled = not CraftDB.evaluate(e,game,qty).can_transfer
 		_carry_btn.tooltip_text = "足りない材料を、倉庫から作業場へ運ぶ（仲間が運ぶ）"
 		acts.add_child(_carry_btn)
 	if state == "locked" and String(e["station"]) != "":
@@ -381,11 +383,12 @@ func _rebuild_detail() -> void:
 		var rid: String = e["id"]
 		var cancel := UIKit.button("この品目の未着手分を取消",func():
 			var count: int = game.cancel_manual_craft(rid)
-			_say("未着手%d回を取消。投入済の未着手材料は作業場へ返却。加工中・完成品・運搬中は保持。" % count)
+			_say("未着手%d回を取消。投入済の未着手材料は元の保管先へ返却。加工中・完成品・運搬中は保持。" % count)
 			_refresh(true))
 		cancel.name = "CancelUnstarted"
-		cancel.disabled = s.queued+s.loaded == 0
+		cancel.disabled = s.queued+s.loaded == 0 and not game.production_orders.any(func(q):return q.id==rid) and not game.processor.incoming.any(func(r):return r.id==rid and r.get("player_order",false))
 		_detail.add_child(cancel)
+	_add_production(e,qty)
 	_add_queue()
 
 
@@ -465,10 +468,10 @@ func _do_craft() -> void:
 	var e := selected_entry()
 	if e.is_empty():
 		return
-	var got: int = game.request_craft(e["id"], _qty_val)
+	var got: int = game.request_order(e["id"], _qty_val)
 	_refresh(true)
 	if got > 0:
-		_say("制作を頼んだ: %s ×%d回（材料と増量を予約。1回ずつ加工し、完成品をまとめて回収）" % [e["name"], got])
+		_say("制作を頼んだ: %s ×%d回（材料一式がそろった分から仲間が搬入・加工）" % [e["name"], got])
 	else:
 		_say("頼めない（材料・置き場・必要設備を確認）")
 
@@ -496,3 +499,41 @@ func _do_carry() -> void:
 		_say("足りない材料 %d 個の運搬を頼んだ（仲間が運ぶ）" % total)
 	else:
 		_say("運べる材料がない（倉庫にない・すでに頼んだ）")
+
+
+func _add_production(e:Dictionary,qty:int) -> void:
+	_detail.add_child(UIKit.lbl("注文・調達（倉庫在庫と個体の所持品は別）",16,UIKit.C_ACCENT))
+	var costs:Dictionary=game.build_cost(e.id) if e.kind=="build" else e["in"]
+	for it in costs:
+		var need:int=int(costs[it])*(1 if e.kind=="build" else qty)
+		var have:int=game.storage.count_of(it)
+		var transit:int=game.procurement_transit(it)
+		var available:int=AutoCraftGuard.available(game,it,null,true)
+		var missing:int=maxi(0,need-available-transit)
+		_detail.add_child(UIKit.lbl("%s 必要%d / 箱%d（利用可%d）/ 運搬中%d / 不足%d"%[ItemDB.name_of(it),need,have,available,transit,missing],13))
+		var item:int=it
+		var goal:=SpinBox.new();goal.name="GoalQuantity%d"%item;goal.min_value=0;goal.max_value=999;goal.value=game.procurement_goals.get(it,need)
+		var row:=HBoxContainer.new();_detail.add_child(row);row.add_child(UIKit.lbl("箱の目標",12));row.add_child(goal)
+		var collect:=UIKit.button("不足分を集める / 目標更新",func():game.set_procurement(item,int(goal.value));_refresh(true));collect.name="CollectGoal%d"%item;row.add_child(collect)
+		var cancel:=UIKit.button("取消",func():game.set_procurement(item,0);_refresh(true));cancel.name="CancelGoal%d"%item;row.add_child(cancel)
+		if game.procurement_goals.has(it):
+			var reason:="採取目標 %d"%game.procurement_goals[it]
+			if not game.resources_root.get_children().any(func(r):return r.item==item and (not r is GatherPoint or r.available())): reason+=" / ここに採取対象なし（加工品は製作注文が必要）"
+			elif game.storage.free_for(item)<=0:reason+=" / 積載満杯"
+			elif not game.resources_root.get_children().any(func(r):return r.item==item and (not r is GatherPoint or game.workers.any(func(w):return float(w.gather_eval(r.kind).eff)>=GatherDB.MIN_EFF))):reason+=" / 今の道具では採取できない"
+			_detail.add_child(UIKit.lbl(reason,13,UIKit.C_DIM))
+	if e.kind=="recipe" and game.refill_settings.has(e.out):
+		var setting:Dictionary=game.refill_settings[e.out]
+		var row:=HBoxContainer.new();_detail.add_child(row)
+		var enabled:=CheckBox.new();enabled.name="RefillEnabled";enabled.text="自動補充";enabled.button_pressed=setting.enabled;row.add_child(enabled)
+		enabled.toggled.connect(func(v):setting.enabled=v;_refresh(true))
+		var target:=SpinBox.new();target.name="RefillTarget";target.min_value=0;target.max_value=999;target.value=setting.target;row.add_child(target)
+		target.value_changed.connect(func(v):setting.target=int(v))
+		var pending:int=ProductionPlan.future(game,e.out)
+		var status:="補充中" if pending>0 else ("目標達成" if ProductionPlan.finished(game,e.out)>=int(setting.target) else "素材不足・搬入待ち")
+		if not setting.enabled:status="補充OFF"
+		_detail.add_child(UIKit.lbl("%s / 完成%d＋加工・予約%d / 目標%d"%[status,ProductionPlan.finished(game,e.out),pending,setting.target],13,UIKit.C_DIM))
+	for q in game.production_orders:
+		var r:=GameData.recipe_by_id(q.id)
+		var reason:=ProductionPlan.order_reason(game,r)
+		_detail.add_child(UIKit.lbl("%s ×%d / %s"%[r.name,q.n,reason],13))

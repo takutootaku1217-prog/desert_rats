@@ -12,10 +12,15 @@ func _initialize():
  seed(diagnostic_seed()); Engine.time_scale=12
  print("DIAGNOSTIC_SEED ",diagnostic_seed())
  print("PACKING_FLOW 初期物資・既定出来事・仲間の正規行動で建設→撤去→保存再開→再設置。数量注入なし。")
+ for id in ["tool_wood_pick","tool_hammer","tool_wood_axe","tool_axe"]:main.request_order(id,1)
+ main.request_order("smelt",12)
+ var prior_gather:Dictionary=main.gather_policy.duplicate()
  var prior_hunt:int=main.workers[0].priorities[GameData.Job.HUNT]
  for id in ["workbench","bed","cargo_rack","supply_cache"]:
   if not main.request_build(id): fail("建設依頼拒否 "+id); finish(); return
   if id=="bed":
+   for item in main.gather_policy:main.gather_policy[item]=0 # 獲物の持帰り枠を空け、原料の作り置きを止める
+   main.refill_settings[GameData.Item.REPAIR_KIT].enabled=false # 寝床用の皮・骨を補充で使わないプレイヤー設定
    main.workers[0].set_priority(GameData.Job.HUNT,5) # Cの優先度操作と同じAPIで必要素材を確保。
    print("ACTION 1人の狩猟優先度を5へ")
    # 寝床の既存材料（皮/骨）を未訪問地域の既存生物から確保する。
@@ -49,6 +54,15 @@ func _initialize():
    if not await wait_for("村へ到着",func():return main.world.phase=="stopped" and main.world.region=="south_oasis",300): finish(); return
   if not await wait_for("建設 "+id,func():return main.base.facility_count(id)==1,600): finish(); return
   for repeat in 2:
+   while main.storage.current_weight()+main.storage.processing_reserve()+main.storage.item_weight(FacilityDB.packed_item_of(id)) > main.storage.max_weight()-int(FacilityDB.def(id).get("capacity_bonus",0)):
+    var discarded:=false
+    for item in [GameData.Item.WOOD,GameData.Item.STONE,GameData.Item.IRON_ORE]:
+     if main.warehouse_discard_available(item)>8:
+      var shown:Dictionary=main.warehouse_discard_snapshot(item,5)
+      discarded=main.discard_warehouse(shown)
+      if discarded:print("ACTION 撤去後容量のため確認付き廃棄 ",ItemDB.name_of(item)," x5")
+      break
+    if not discarded:fail("撤去容量を確保できない");finish();return
    if not await wait_for("使用と運搬完了 "+id,func():return main.facility_pack_reason(id,0)=="",600): finish(); return
    var token:Dictionary=main.facility_pack_request(id,0)
    if not main.pack_facility(token): fail("撤去拒否 "+id); finish(); return
@@ -58,5 +72,8 @@ func _initialize():
    if not main.request_build(id): fail("再設置依頼拒否 "+id); finish(); return
    if not await wait_for("再設置 %s %d"%[id,repeat],func():return main.base.facility_count(id)==1,300): finish(); return
    if main.storage.count_of(FacilityDB.packed_item_of(id))!=0: fail("再設置後に完成品が残る"); finish(); return
-  if id=="bed": main.workers[0].set_priority(GameData.Job.HUNT,prior_hunt)
+  if id=="bed":
+   main.workers[0].set_priority(GameData.Job.HUNT,prior_hunt)
+   main.gather_policy=prior_gather.duplicate()
+   main.refill_settings[GameData.Item.REPAIR_KIT].enabled=true
  finish()

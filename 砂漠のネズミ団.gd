@@ -326,6 +326,10 @@ func _update_hungry_flag() -> void:
 # ---------------------------------------------------------------- 方針
 ## 回収の方針。獲物は常に拾う（★5相当）。方針にない物（敵の落とした肉・皮など）は★3で拾う。
 func gather_weight(item: int) -> float:
+	update_procurement()
+	if procurement_goals.has(item):
+		if storage.count_of(item)+procurement_transit(item)>=int(procurement_goals[item]): return 0.0
+		return 30.0
 	if item == GameData.Item.CARCASS:
 		return 5.0
 	var w := float(gather_policy.get(item, 3))
@@ -437,7 +441,7 @@ func request_transfer(item: int, n: int, dir: String) -> int:
 		return 0
 	var can := 0
 	if dir == "to_workshop":
-		can = storage.count_of(item) - _queued_transfer(item, "to_workshop")
+		can = AutoCraftGuard.available(self,item,null,true)
 	elif dir == "to_storage":
 		can = workshop_available(item)
 	else:
@@ -519,6 +523,16 @@ func cancel_craft(index: int) -> void:
 ## 同じ品目の未着手分だけ取消。加工中の1回/完成品/運搬中は保持する。
 func cancel_manual_craft(id: String) -> int:
 	var cancelled := 0
+	for q in production_orders.duplicate():
+		if q.id==id:
+			cancelled+=q.n
+			production_orders.erase(q)
+	for w in workers:
+		if w.ai.state==CharacterAI.State.HAUL_TAKE and w.ai.haul_recipe.get("player_order",false) and w.ai.haul_recipe.id==id:
+			w.ai.haul_recipe.erase("player_order")
+			w.ai._release_task()
+			w.ai._set_state(CharacterAI.State.SEARCH)
+			cancelled+=1
 	for q in craft_queue.duplicate():
 		if q["id"] == id:
 			cancelled += int(q["n"])
@@ -526,14 +540,17 @@ func cancel_manual_craft(id: String) -> int:
 	for r in processor.orders.duplicate():
 		if r.get("manual", false) and r["id"] == id:
 			processor.orders.erase(r)
-			for it in r["in"]: processor.stock.add(it, r["in"][it], Inventory.SOURCE_TRANSFER)
+			for it in r["in"]:
+				if r.get("player_order",false): storage.store_owned(it,r["in"][it])
+				else: processor.stock.add(it, r["in"][it], Inventory.SOURCE_TRANSFER)
 			cancelled += 1
 	return cancelled
 
 
 ## 手動の制作を、作業場の材料で加工設備の注文にする（材料がそろっていて、注文の空きがあるとき）
 func _feed_crafts() -> void:
-	if quarry.recalling():
+	update_procurement()
+	if quarry.recalling() or not ProductionPlan.refill(self,true).is_empty():
 		return
 	while not craft_queue.is_empty() and processor.free_slots() > 0:
 		var started := false
@@ -602,7 +619,9 @@ func gather_free_for(item: int, inflight: Dictionary) -> int:
 		if CargoDB.bay_of(it) >= 0:
 			reserved_weight += int(inflight[it]) * CargoDB.size_of(it)
 	var room := storage.max_weight() - storage.current_weight() - storage.processing_reserve() - reserved_weight
-	return maxi(0, floori(float(room) / CargoDB.size_of(item)))
+	var space:=maxi(0, floori(float(room) / CargoDB.size_of(item)))
+	if procurement_goals.has(item): space=mini(space,maxi(0,int(procurement_goals[item])-storage.count_of(item)-procurement_transit(item)-int(inflight.get(item,0))))
+	return space
 
 
 ## その生物を狩ってよいか（倒した獲物の素材が倉庫に入るか）
@@ -971,7 +990,10 @@ func _next_build_recipe() -> Dictionary:
 		if item >= 0 and packed_in_transit(item) > 0: continue
 		if d.has("pack_recipe"):
 			var r := GameData.recipe_by_id(d["pack_recipe"])
-			if storage.has_set(r["in"]): return r
+			if storage.has_set(r["in"]):
+				var unit:=r.duplicate(true)
+				unit["build_request"]=true
+				return unit
 		elif storage.has_set(d["cost"]):
 			return FacilityDB.recipe_of(id)
 	return {}
@@ -1006,13 +1028,11 @@ func pack_facility(snapshot: Dictionary) -> bool:
 	return true
 
 
-## 建設の依頼のために取っておく材料 {Item: 個数}（待ちの依頼と、材料を取りに向かっている依頼のぶん。倉庫にある量まで）。
-## 取り置きがないと、材料が集まるそばから薪や修理部品に使われて、いつまでも建てられない。
+## 引受け済み・未搬出の建設材料だけを保護する。未着手の不足注文は取り置かない。
 func reserved_for_builds() -> Dictionary:
 	var need := {}
 	var costs: Array = []
-	for id in build_queue:
-		costs.append(build_cost(id))
+	# 未着手の建設は材料一式がそろうまで予約しない。
 	for w in workers:
 		if w.ai.state == CharacterAI.State.HAUL_TAKE and w.ai.haul_recipe.has("build"):
 			costs.append(w.ai.haul_recipe["in"])                 # まだ倉庫にあって、これから取りに行く材料
@@ -1190,40 +1210,70 @@ func _on_overflow(item: int, amount: int) -> void:
 ## プレイヤーが依頼した建設は、方針より先（材料と必要設備がそろっていれば）。必要設備（recipe の station）がまだない物は選ばない。
 ## 選ぶだけで何も変えない（建設の依頼を待ちから外すのは、仲間が引き受けたとき claim_build）。
 func choose_recipe() -> Dictionary:
+	var refill := ProductionPlan.refill(self, true)
+	if not refill.is_empty(): return refill
 	var build := _next_build_recipe()
-	if not build.is_empty():
-		return build
-	var reserved := reserved_for_builds()
-	var best := {}
-	var best_key := -1.0
-	# 道具・建設に使う鉄が足りないときは精錬を優先する。ただし食料に余裕があるときだけ（調理が後回しになって空腹になるのを防ぐ）
-	var smelt_boost := not hungry and storage.count_of(GameData.Item.FOOD) >= GameData.TOOL_IRON_FOOD_MIN \
-			and (_builds_need_iron() or _tools_need_iron())
-	for r in GameData.RECIPES:
-		var pr: int = recipe_priority.get(r["id"], 0)
-		if pr <= 0:
-			continue
-		if not has_facility(GameData.recipe_station(r)):
-			continue                                                        # 必要設備（ワークベンチなど）がまだない
-		if smelt_boost and r["id"] == "smelt":
-			pr = maxi(pr, 4)
-		if not storage.has_set(r["in"]) or not _spares_for(r, reserved) or not AutoCraftGuard.allows(self,r):
-			continue                                                        # 材料がない、または建設のために取ってある
-		# 炉を使うレシピは、タンクの燃料に余裕があるときだけ（移動用の燃料を守る）
-		if r["tank_fuel"] > 0.0 and base.fuel < 25.0:
-			continue
-		if r["out"] in GameData.TOOL_ITEMS and not tool_wanted(r["out"]):
-			continue                                                        # 誰の道具の更新にもならない道具は作らない
-		var have: int = storage.count_of(r["out"]) + processor.pending_of(r["out"])
-		var target: int = GameData.STOCK_TARGET.get(r["out"], 5)
-		if have >= target or storage.transform_limit(r) <= 0:
-			continue                                                        # 作り足りている、または置き場に入りきらない
-		var key: float = pr * 10.0 + (1.0 - float(have) / float(target))
-		if key > best_key:
-			best_key = key
-			best = r.duplicate(true)
-			best["automatic"] = true
-	return best
+	if not build.is_empty() and AutoCraftGuard.allows(self,build): return build
+	for q in production_orders:
+		var r := GameData.recipe_by_id(q.id)
+		if ProductionPlan.ready(self,r):
+			var unit := r.duplicate(true)
+			unit.merge({"manual":true,"player_order":true,"batch":q.batch})
+			return unit
+	return ProductionPlan.refill(self, false)
+
+var production_orders: Array = []
+var refill_settings: Dictionary = ProductionPlan.defaults()
+var procurement_goals: Dictionary = {}
+
+func request_order(id: String, n: int) -> int:
+	if GameData.recipe_by_id(id).is_empty() or n<=0 or n>999: return 0
+	var e:=CraftDB.entry_of(id)
+	if int(CraftDB.evaluate(e,self,n).max_qty)>=n: return request_craft(id,n)
+	# 旧保存等で作業場に分散した未予約材料は、既存運搬で倉庫へ戻して合流する。
+	for it in e["in"]:
+		var missing:=maxi(0,int(e["in"][it])*n-AutoCraftGuard.available(self,it,null,true))
+		if missing>0:request_transfer(it,mini(missing,workshop_available(it)),"to_storage")
+	for q in production_orders:
+		if q.id==id:
+			var accepted:=mini(n,999-int(q.n))
+			q.n+=accepted
+			return accepted
+	production_orders.append({"id":id,"n":n,"batch":n>1})
+	return n
+
+func restore_order(r: Dictionary) -> void:
+	for q in production_orders:
+		if q.id==r.id and int(q.n)<999:
+			q.n+=1
+			return
+	production_orders.append({"id":r.id,"n":1,"batch":r.get("batch",false)})
+
+func claim_order(id: String) -> void:
+	for q in production_orders:
+		if q.id==id:
+			q.n-=1
+			if q.n<=0: production_orders.erase(q)
+			return
+
+func set_procurement(item: int, target: int) -> void:
+	if item not in ItemDB.ORDER:return
+	if target<=0: procurement_goals.erase(item)
+	else: procurement_goals[item]=clampi(target,1,999)
+
+func procurement_transit(item: int) -> int:
+	var n:=0
+	for w in workers:
+		if w.ai.state in [CharacterAI.State.GATHER,CharacterAI.State.MOVE_TO_STORAGE,CharacterAI.State.STORE] or (w.ai.state==CharacterAI.State.XFER_MOVE and w.ai.xfer_dir=="to_storage"):
+			if w.carrying==item:n+=w.carry_n
+			n+=int(w.carry_bonus.get(item,0))
+			if w.carrying==GameData.Item.CARCASS:n+=int(w.carcass_cargo.get(item,0))
+	return n
+
+func update_procurement() -> void:
+	for it in procurement_goals.keys():
+		if storage.count_of(it)>=int(procurement_goals[it]): procurement_goals.erase(it)
+
 
 
 # ---------------------------------------------------------------- 出現

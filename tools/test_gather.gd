@@ -437,7 +437,7 @@ func _run() -> void:
 	main.recipe_priority["tool_pick"] = 1
 	st.add_item(GameData.Item.STONE, 4)
 	st.add_item(GameData.Item.WOOD, 4)
-	check(main.tool_wanted(GameData.Item.HAMMER) and main.choose_recipe().get("id", "") == "tool_hammer", "みんな素手なら、簡易ハンマーを作る")
+	check(main.tool_wanted(GameData.Item.HAMMER) and main.choose_recipe().get("id", "") != "tool_hammer", "更新候補でも注文なしでは道具を作らない")
 	main.processor.reserve(GameData.recipe_by_id("tool_hammer"))
 	check(not main.tool_wanted(GameData.Item.HAMMER), "作りかけ（運搬中）があるときは、重ねて作らない")
 	main.processor.incoming.clear()

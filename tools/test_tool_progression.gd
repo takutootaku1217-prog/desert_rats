@@ -29,6 +29,7 @@ func _initialize() -> void:
  for parent in [main.resources_root,main.creatures_root]:
   for node in parent.get_children(): node.free()
  for id in main.recipe_priority: main.recipe_priority[id]=0
+ for setting in main.refill_settings.values(): setting.enabled=false
  w=main.workers[0]
  w.priorities[GameData.Job.GATHER]=3
  w.floor_i=1
@@ -139,6 +140,7 @@ func _initialize() -> void:
  for worker in main.workers:
   worker.tools={}
  for id in main.recipe_priority:main.recipe_priority[id]=0
+ for setting in main.refill_settings.values(): setting.enabled=false
  st.add_item(GameData.Item.WOOD,2) # 競合境界fixture: 箱の木6には届かない量
  check(main.request_build("cargo_rack"),"先に鉄を使う箱の建設を依頼")
  check(main.choose_recipe().is_empty(),"道具の方針0を前提解放で上書きしない")
@@ -150,7 +152,7 @@ func _initialize() -> void:
  craft("tool_hammer")
  check(main.equip_tool(w,GameData.Item.HAMMER),"箱の木材取り置きを保ったまま最初の石採掘具へ進む")
  check(not main.build_needs_gather_tool(GameData.Item.HAMMER),"一人が鉱石を採れるようになれば例外を終了")
- check(not main._spares_for(GameData.recipe_by_id("tool_hammer"),main.reserved_for_builds()),"2本目の石道具は箱の予約材料を消費しない")
+ check(main.reserved_for_builds().is_empty(),"不足建設は他の注文用材料を取り置きしない")
  check(main.cancel_build("cargo_rack"),"境界fixtureの箱依頼を通常APIで取消")
  # 製作画面を実際に開く。描画ありの実行時は同じ画面を保存。
  main.craft_ui.open_entry("tool_wood_pick")

@@ -1,0 +1,302 @@
+[
+  {
+    "case": "world_endurance_501_ordered_route",
+    "seconds": 3600.2,
+    "food": 4,
+    "hunger": [
+      31.2,
+      31.2,
+      31.2
+    ],
+    "hull": 86.6,
+    "repair": 32,
+    "result": [
+      {
+        "accepted_trips": 11,
+        "game_over": false,
+        "kind": "result",
+        "reached_60_minutes": true,
+        "requested_seconds": 3600.0,
+        "scenario": "ordered_route",
+        "seed": 501,
+        "time": 3600.2,
+        "violations": []
+      }
+    ]
+  },
+  {
+    "case": "world_endurance_501_ordered_stay",
+    "seconds": 2097.0,
+    "food": 0,
+    "hunger": [
+      10.1,
+      40.1,
+      40.1
+    ],
+    "hull": 0.0,
+    "repair": 14,
+    "result": [
+      {
+        "accepted_trips": 0,
+        "game_over": true,
+        "kind": "result",
+        "reached_60_minutes": false,
+        "requested_seconds": 3600.0,
+        "scenario": "ordered_stay",
+        "seed": 501,
+        "time": 2097.0,
+        "violations": []
+      }
+    ]
+  },
+  {
+    "case": "world_endurance_501_route",
+    "seconds": 2294.2,
+    "food": 9,
+    "hunger": [
+      30.3,
+      30.3,
+      30.3
+    ],
+    "hull": 0.0,
+    "repair": 6,
+    "result": [
+      {
+        "accepted_trips": 7,
+        "game_over": true,
+        "kind": "result",
+        "reached_60_minutes": false,
+        "requested_seconds": 3600.0,
+        "scenario": "route",
+        "seed": 501,
+        "time": 2294.2,
+        "violations": []
+      }
+    ]
+  },
+  {
+    "case": "world_endurance_501_stay",
+    "seconds": 1319.4,
+    "food": 5,
+    "hunger": [
+      40.2,
+      40.2,
+      40.2
+    ],
+    "hull": 0.0,
+    "repair": 2,
+    "result": [
+      {
+        "accepted_trips": 0,
+        "game_over": true,
+        "kind": "result",
+        "reached_60_minutes": false,
+        "requested_seconds": 3600.0,
+        "scenario": "stay",
+        "seed": 501,
+        "time": 1319.4,
+        "violations": []
+      }
+    ]
+  },
+  {
+    "case": "world_endurance_502_ordered_route",
+    "seconds": 3600.2,
+    "food": 2,
+    "hunger": [
+      30.4,
+      30.4,
+      30.4
+    ],
+    "hull": 95.6,
+    "repair": 27,
+    "result": [
+      {
+        "accepted_trips": 11,
+        "game_over": false,
+        "kind": "result",
+        "reached_60_minutes": true,
+        "requested_seconds": 3600.0,
+        "scenario": "ordered_route",
+        "seed": 502,
+        "time": 3600.2,
+        "violations": []
+      }
+    ]
+  },
+  {
+    "case": "world_endurance_502_ordered_stay",
+    "seconds": 2527.8,
+    "food": 0,
+    "hunger": [
+      11.3,
+      11.3,
+      0.0
+    ],
+    "hull": 0.0,
+    "repair": 16,
+    "result": [
+      {
+        "accepted_trips": 0,
+        "game_over": true,
+        "kind": "result",
+        "reached_60_minutes": false,
+        "requested_seconds": 3600.0,
+        "scenario": "ordered_stay",
+        "seed": 502,
+        "time": 2527.8,
+        "violations": []
+      }
+    ]
+  },
+  {
+    "case": "world_endurance_502_route",
+    "seconds": 1329.8,
+    "food": 13,
+    "hunger": [
+      41.3,
+      41.3,
+      41.3
+    ],
+    "hull": 0.0,
+    "repair": 4,
+    "result": [
+      {
+        "accepted_trips": 4,
+        "game_over": true,
+        "kind": "result",
+        "reached_60_minutes": false,
+        "requested_seconds": 3600.0,
+        "scenario": "route",
+        "seed": 502,
+        "time": 1329.8,
+        "violations": []
+      }
+    ]
+  },
+  {
+    "case": "world_endurance_502_stay",
+    "seconds": 933.0,
+    "food": 8,
+    "hunger": [
+      35.9,
+      35.9,
+      35.9
+    ],
+    "hull": 0.0,
+    "repair": 2,
+    "result": [
+      {
+        "accepted_trips": 0,
+        "game_over": true,
+        "kind": "result",
+        "reached_60_minutes": false,
+        "requested_seconds": 3600.0,
+        "scenario": "stay",
+        "seed": 502,
+        "time": 933.0,
+        "violations": []
+      }
+    ]
+  },
+  {
+    "case": "world_endurance_503_ordered_route",
+    "seconds": 3600.2,
+    "food": 2,
+    "hunger": [
+      30.2,
+      30.2,
+      30.2
+    ],
+    "hull": 85.8,
+    "repair": 27,
+    "result": [
+      {
+        "accepted_trips": 11,
+        "game_over": false,
+        "kind": "result",
+        "reached_60_minutes": true,
+        "requested_seconds": 3600.0,
+        "scenario": "ordered_route",
+        "seed": 503,
+        "time": 3600.2,
+        "violations": []
+      }
+    ]
+  },
+  {
+    "case": "world_endurance_503_ordered_stay",
+    "seconds": 2476.2,
+    "food": 0,
+    "hunger": [
+      12.1,
+      12.1,
+      0.0
+    ],
+    "hull": 0.0,
+    "repair": 16,
+    "result": [
+      {
+        "accepted_trips": 0,
+        "game_over": true,
+        "kind": "result",
+        "reached_60_minutes": false,
+        "requested_seconds": 3600.0,
+        "scenario": "ordered_stay",
+        "seed": 503,
+        "time": 2476.2,
+        "violations": []
+      }
+    ]
+  },
+  {
+    "case": "world_endurance_503_route",
+    "seconds": 1517.8,
+    "food": 13,
+    "hunger": [
+      26.5,
+      26.5,
+      26.5
+    ],
+    "hull": 0.0,
+    "repair": 6,
+    "result": [
+      {
+        "accepted_trips": 5,
+        "game_over": true,
+        "kind": "result",
+        "reached_60_minutes": false,
+        "requested_seconds": 3600.0,
+        "scenario": "route",
+        "seed": 503,
+        "time": 1517.8,
+        "violations": []
+      }
+    ]
+  },
+  {
+    "case": "world_endurance_503_stay",
+    "seconds": 1278.4,
+    "food": 5,
+    "hunger": [
+      44.8,
+      44.8,
+      44.8
+    ],
+    "hull": 0.0,
+    "repair": 2,
+    "result": [
+      {
+        "accepted_trips": 0,
+        "game_over": true,
+        "kind": "result",
+        "reached_60_minutes": false,
+        "requested_seconds": 3600.0,
+        "scenario": "stay",
+        "seed": 503,
+        "time": 1278.4,
+        "violations": []
+      }
+    ]
+  }
+]

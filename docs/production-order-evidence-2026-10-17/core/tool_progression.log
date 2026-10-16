@@ -1,0 +1,152 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+  ok 新規開始は全員素手・支給道具なし
+  ok 新規開始に鉄・石の支給なし
+  ok 初期作業台なし
+  ok 高能力の素手でも石・鉱石は採れない
+  ok 木製道具には作業台が必要
+  ok treeを採取→運搬→収納
+  ok treeを採取→運搬→収納
+  ok treeを採取→運搬→収納
+  ok treeを採取→運搬→収納
+  ok treeを採取→運搬→収納
+  ok treeを採取→運搬→収納
+  ok 素手で木材18を採取・収納
+  ok 木材のみの作業台建設を依頼
+  ok 実AIで木材を運び作業台を組立
+  ok 作業台は木3のみ消費、鉄不要
+  ok tool_wood_pickが明示注文の加工候補になる
+  ok tool_wood_pickの材料を加工設備へ運ぶ
+  ok tool_wood_pickの材料木材を一度だけ消費
+  ok tool_wood_pickの加工／出力運搬を完了
+  ok tool_wood_pickの出力が指定数だけ倉庫に届く
+  ok tool_wood_pickの加工1回、予約・出力の取り残しなし
+  ok tool_wood_axeが明示注文の加工候補になる
+  ok tool_wood_axeの材料を加工設備へ運ぶ
+  ok tool_wood_axeの材料木材を一度だけ消費
+  ok tool_wood_axeの加工／出力運搬を完了
+  ok tool_wood_axeの出力が指定数だけ倉庫に届く
+  ok tool_wood_axeの加工1回、予約・出力の取り残しなし
+  ok 製作した木製道具を両枠へ装備
+  ok 木製で石を解放、鉱石は未解放
+  ok 木製段階 保存
+  ok 木製段階 復元
+  ok 木製段階 資産・途中進捗一致
+  ok rockを採取→運搬→収納
+  ok tool_hammerが明示注文の加工候補になる
+  ok tool_hammerの材料を加工設備へ運ぶ
+  ok tool_hammerの材料石を一度だけ消費
+  ok tool_hammerの材料木材を一度だけ消費
+  ok tool_hammerの加工／出力運搬を完了
+  ok tool_hammerの出力が指定数だけ倉庫に届く
+  ok tool_hammerの加工1回、予約・出力の取り残しなし
+  ok tool_axeが明示注文の加工候補になる
+  ok tool_axeの材料を加工設備へ運ぶ
+  ok tool_axeの材料石を一度だけ消費
+  ok tool_axeの材料木材を一度だけ消費
+  ok tool_axeの加工／出力運搬を完了
+  ok tool_axeの出力が指定数だけ倉庫に届く
+  ok tool_axeの加工1回、予約・出力の取り残しなし
+  ok 製作した石製道具へ更新
+  ok 旧道具は倉庫に保全
+  ok 石製段階 保存
+  ok 石製段階 復元
+  ok 石製段階 資産・途中進捗一致
+  ok veinを採取→運搬→収納
+  ok smeltが明示注文の加工候補になる
+  ok smeltの材料を加工設備へ運ぶ
+  ok smeltの材料鉄鉱石を一度だけ消費
+  ok smeltの加工／出力運搬を完了
+  ok smeltの出力が指定数だけ倉庫に届く
+  ok smeltの加工1回、予約・出力の取り残しなし
+  ok tool_pickが明示注文の加工候補になる
+  ok tool_pickの材料を加工設備へ運ぶ
+  ok tool_pickの材料鉄を一度だけ消費
+  ok tool_pickの材料木材を一度だけ消費
+  ok tool_pickの加工／出力運搬を完了
+  ok tool_pickの出力が指定数だけ倉庫に届く
+  ok tool_pickの加工1回、予約・出力の取り残しなし
+  ok smeltが明示注文の加工候補になる
+  ok smeltの材料を加工設備へ運ぶ
+  ok smeltの材料鉄鉱石を一度だけ消費
+  ok smeltの加工／出力運搬を完了
+  ok smeltの出力が指定数だけ倉庫に届く
+  ok smeltの加工1回、予約・出力の取り残しなし
+  ok tool_iron_axeが明示注文の加工候補になる
+  ok tool_iron_axeの材料を加工設備へ運ぶ
+  ok tool_iron_axeの材料鉄を一度だけ消費
+  ok tool_iron_axeの材料木材を一度だけ消費
+  ok tool_iron_axeの加工／出力運搬を完了
+  ok tool_iron_axeの出力が指定数だけ倉庫に届く
+  ok tool_iron_axeの加工1回、予約・出力の取り残しなし
+  ok 採った鉱石→精錬→鉄製道具を製作して装備
+  ok 鉄製段階 保存
+  ok 鉄製段階 復元
+  ok 鉄製段階 資産・途中進捗一致
+  ok 旧版の投入済レシピを受理
+  ok 未知のレシピ改変は拒否
+  ok 旧版の加工中石道具 保存
+  ok 旧版の加工中石道具 復元
+  ok 旧版の加工中石道具 資産・途中進捗一致
+  ok 旧加工は二重消費なしで完了
+  ok 旧版の鉄入り作業台組立中 保存
+  ok 旧版の鉄入り作業台組立中 復元
+  ok 旧版の鉄入り作業台組立中 資産・途中進捗一致
+  ok 旧作業台も投入済み材料を二重消費せず完成
+  ok 通常袋3・20往復で60個を過不足なく収納 -1
+NORMAL_BAG tool=-1 elapsed=365.5 work_seconds=89.5 maximum_bag=3
+  ok 通常袋3・20往復で60個を過不足なく収納 24
+NORMAL_BAG tool=24 elapsed=320.75 work_seconds=44.75 maximum_bag=3
+  ok 通常袋3・20往復で60個を過不足なく収納 15
+NORMAL_BAG tool=15 elapsed=305.85 work_seconds=29.85 maximum_bag=3
+  ok 通常袋3・20往復で60個を過不足なく収納 16
+NORMAL_BAG tool=16 elapsed=298.4 work_seconds=22.4 maximum_bag=3
+  ok 通常袋と実運搬でも上位ほど同じ60個の所要時間が短い [365.5, 320.75, 305.85, 298.4]
+  ok 有限残量と取得量の保存: -1
+  ok 有限残量と取得量の保存: 24
+  ok 有限残量と取得量の保存: 15
+  ok 有限残量と取得量の保存: 16
+  ok 同じ採取時間の実取得数が素手→木→石→鉄で増加 [1, 2, 3, 4]
+  ok 最後の残量1・積載空き1を厳守
+  ok 満載では採取開始しない
+  ok 旧保存の素手石採取キャッシュで解放条件を迂回しない
+  ok treeを採取→運搬→収納
+  ok firewoodが明示注文の加工候補になる
+  ok firewoodの材料を加工設備へ運ぶ
+  ok firewoodの材料木材を一度だけ消費
+  ok firewoodの加工／出力運搬を完了
+  ok firewoodの出力が指定数だけ倉庫に届く
+  ok firewoodの加工1回、予約・出力の取り残しなし
+  ok 素手のまま材料運搬・加工・完成品収納
+  ok 素手でも狩猟→獲物運搬→解体（生物の配置・静止は診断fixture）
+  ok 新方針キーのない旧形式・鉄/旧道具/撤去品の所有 保存
+  ok 新方針キーのない旧形式・鉄/旧道具/撤去品の所有 復元
+  ok 新方針キーのない旧形式・鉄/旧道具/撤去品の所有 資産・途中進捗一致
+  ok 旧資産を削除せず復元
+  ok 失効した追跡先は保存コピーだけ正規化、ライブAIは変更しない
+  ok 失効参照の保存再開でも全資産と持続値が一致
+  ok 先に鉄を使う箱の建設を依頼
+  ok 道具の方針0を前提解放で上書きしない
+  ok tool_wood_pickが明示注文の加工候補になる
+  ok tool_wood_pickの材料を加工設備へ運ぶ
+  ok tool_wood_pickの材料木材を一度だけ消費
+  ok tool_wood_pickの加工／出力運搬を完了
+  ok tool_wood_pickの出力が指定数だけ倉庫に届く
+  ok tool_wood_pickの加工1回、予約・出力の取り残しなし
+  ok 箱の取り置きから最初の木製採掘具だけを製作、建設依頼は維持
+  ok 倉庫に採取可能な道具があれば重複する前提製作は不要
+  ok 前提の木製採掘具を装備
+  ok rockを採取→運搬→収納
+  ok treeを採取→運搬→収納
+  ok tool_hammerが明示注文の加工候補になる
+  ok tool_hammerの材料を加工設備へ運ぶ
+  ok tool_hammerの材料石を一度だけ消費
+  ok tool_hammerの材料木材を一度だけ消費
+  ok tool_hammerの加工／出力運搬を完了
+  ok tool_hammerの出力が指定数だけ倉庫に届く
+  ok tool_hammerの加工1回、予約・出力の取り残しなし
+  ok 箱の木材取り置きを保ったまま最初の石採掘具へ進む
+  ok 一人が鉱石を採れるようになれば例外を終了
+  ok 不足建設は他の注文用材料を取り置きしない
+  ok 境界fixtureの箱依頼を通常APIで取消
+== 結果: すべて成功 ==

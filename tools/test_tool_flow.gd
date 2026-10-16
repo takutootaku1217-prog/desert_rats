@@ -24,6 +24,8 @@ func _initialize():
  if main.storage.count_of(GameData.Item.IRON)!=0 or GameData.TOOL_ITEMS.any(func(it):return owns_tool(it)):fail("初期支給が進行を迂回");finish();return
  for id in ["tool_pick","tool_iron_axe","tool_adv_pick","repair_iron"]:main.recipe_priority[id]=0
  main.request_build("workbench")
+ for id in ["tool_wood_pick","tool_hammer","tool_wood_axe","tool_axe"]:main.request_order(id,1)
+ main.request_order("smelt",12)
  if not await wait_for("木のみの作業台",func():return main.has_facility("workbench"),240):finish();return
  if not await wait_for("木製採掘具→石製採掘具",func():return owns_tool(GameData.Item.HAMMER),300):finish();return
  if not await wait_for("木製斧・石製斧を通常製作",func():return owns_tool(GameData.Item.WOOD_AXE) and owns_tool(GameData.Item.AXE),240):finish();return

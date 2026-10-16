@@ -89,27 +89,17 @@ func _rebuild() -> void:
 	right.add_theme_constant_override("separation", 3)
 	cols.add_child(right)
 
-	left.add_child(UIKit.lbl("自動製作は修理板3個・修理用の木1個・次の鉄道具用の木2個を保護。", 12, UIKit.C_DIM))
-	left.add_child(UIKit.lbl("不足時は待機し、補充後に再開。Fの手動製作は保護対象外。緊急修理・燃料は優先。", 12, UIKit.C_DIM))
-	# 加工の優先
-	left.add_child(UIKit.lbl("── 加工の優先（材料が揃い、作り置きが足りない物を作る） ──", 14, UIKit.C_DIM))
-	for r in GameData.RECIPES:
-		var id: String = r["id"]
-		var row := HBoxContainer.new()
-		row.add_theme_constant_override("separation", 6)
-		left.add_child(row)
-		row.add_child(UIKit.lbl(r["name"], 15, UIKit.C_TEXT, 200))
-		row.add_child(_stepper(func(): return game.recipe_priority.get(id, 0),
-				func(v): game.recipe_priority[id] = v))
-		var extra := "（炉で燃料%d使用）" % int(r["tank_fuel"]) if r["tank_fuel"] > 0.0 else ""
-		var stn: String = GameData.recipe_station(r)
-		if stn != "":                                 # 必要設備。まだ建てていなければ作られない（建設の画面 B）
-			extra += "　【%s%s】" % [FacilityDB.name_of(stn), "" if game.has_facility(stn) else "が必要・まだない"]
-		row.add_child(UIKit.lbl(GameData.recipe_text(r) + extra, 13, UIKit.C_DIM if game.has_facility(stn) else Color("ff8a70")))
-	var tgt: Array = []
-	for it in GameData.STOCK_TARGET:
-		tgt.append("%s %d" % [GameData.ITEM_NAMES[it], GameData.STOCK_TARGET[it]])
-	left.add_child(UIKit.lbl("作り置きの上限: " + "、".join(PackedStringArray(tgt)), 12, UIKit.C_DIM))
+	left.add_child(UIKit.lbl("道具・装備・設備・精錬はF/Bで注文。自動補充は消耗品だけ。",13,UIKit.C_DIM))
+	left.add_child(UIKit.lbl("危険水準の補充→プレイヤー注文→通常補充の順。",13,UIKit.C_DIM))
+	for it in game.refill_settings:
+		var setting:Dictionary=game.refill_settings[it]
+		var row:=HBoxContainer.new();left.add_child(row)
+		var enabled:=CheckBox.new();enabled.text=ItemDB.name_of(it);enabled.button_pressed=setting.enabled;row.add_child(enabled)
+		enabled.toggled.connect(func(v):setting.enabled=v)
+		row.add_child(UIKit.lbl("目標在庫",13))
+		var target:=SpinBox.new();target.min_value=0;target.max_value=999;target.value=setting.target;row.add_child(target)
+		target.value_changed.connect(func(v):setting.target=int(v))
+	left.add_child(UIKit.button("製作・採取目標を開く (F)",func():close();game.craft_ui.open()))
 
 	# 回収の優先
 	right.add_child(UIKit.lbl("── 回収の優先（獲物は常に拾う） ──", 14, UIKit.C_DIM))
@@ -196,10 +186,7 @@ func _build_cargo_page() -> void:
 		for it in CargoDB.items_of(bay):
 			col.add_child(_weight_row(it))
 	_body.add_child(UIKit.lbl("捨てた累計: %d 個" % game.total_wasted, 13, UIKit.C_DIM))
-	var tgt: Array = []
-	for it in GameData.STOCK_TARGET:
-		tgt.append("%s%d" % [GameData.ITEM_NAMES[it], GameData.STOCK_TARGET[it]])
-	_body.add_child(UIKit.lbl("加工品の「作り置きの上限」（%s）は変わっていません（重さが余っていても、そこで止まります）。" % "・".join(PackedStringArray(tgt)), 12, UIKit.C_DIM))
+	_body.add_child(UIKit.lbl("食料・燃料・修理板の目標在庫は方針画面で変更できます。道具・装備はFから必要な数を注文します。", 12, UIKit.C_DIM))
 
 
 func _weight_bar(ratio: float, w: float) -> Control:
@@ -222,7 +209,7 @@ func _weight_bar(ratio: float, w: float) -> Control:
 func _build_tools_page() -> void:
 	var st = game.storage
 	_body.add_child(UIKit.lbl("木材・石・鉄鉱石は、採取ポイント（岩場・鉱床・枯れ木）から道具で掘ります。取れる量は「採取ポイント × 道具 × 仲間の能力」で決まります。"
-			+ "\n道具は加工でつくります（誰かの道具の更新になるときだけ作ります）。良い道具は、回収ランクの高い仲間に持たせると活きます。", 13, UIKit.C_DIM))
+			+ "\n道具はFから注文してつくります。良い道具は、回収ランクの高い仲間に持たせると活きます。", 13, UIKit.C_DIM))
 	var auto_btn := UIKit.button("道具の自動割り当て: %s" % ("ON（倉庫の道具を、効果の大きい仲間へ自動で持たせる）" if game.tool_auto else "OFF（個体情報で手動）"), func():
 		game.tool_auto = not game.tool_auto
 		_rebuild())

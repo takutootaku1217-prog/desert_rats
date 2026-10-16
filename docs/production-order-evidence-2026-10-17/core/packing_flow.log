@@ -1,0 +1,43 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+DIAGNOSTIC_SEED 501
+PACKING_FLOW 初期物資・既定出来事・仲間の正規行動で建設→撤去→保存再開→再設置。数量注入なし。
+STAGE 27.8s 建設 workbench
+STAGE 111.2s 使用と運搬完了 workbench
+STAGE 126.6s 再設置 workbench 0
+STAGE 137.4s 使用と運搬完了 workbench
+STAGE 148.8s 再設置 workbench 1
+ACTION 1人の狩猟優先度を5へ
+STAGE 193.8s 地域到着 east_sands
+STAGE 259.6s 地域到着 central_trade
+STAGE 272.8s 都市のコブ獣から皮を回収
+STAGE 272.8s 街道のコブ獣も狩り寝床完成
+STAGE 318.2s 村到着
+STAGE 318.2s 建設 bed
+STAGE 324.0s 使用と運搬完了 bed
+STAGE 332.2s 再設置 bed 0
+STAGE 332.2s 使用と運搬完了 bed
+STAGE 341.6s 再設置 bed 1
+STAGE 393.6s 地域到着 central_trade
+STAGE 459.8s 地域到着 old_mine
+STAGE 481.8s 鉱床到着
+STAGE 545.4s 近場12単位を採取
+STAGE 551.8s 鉱床帰還
+STAGE 576.4s 鉱山入口へ復帰
+STAGE 590.8s 建設 cargo_rack
+STAGE 591.6s 使用と運搬完了 cargo_rack
+STAGE 610.8s 再設置 cargo_rack 0
+STAGE 618.2s 使用と運搬完了 cargo_rack
+STAGE 623.8s 再設置 cargo_rack 1
+STAGE 669.8s 地域到着 central_trade
+STAGE 688.4s 木材採取のため街道中ほどへ
+ACTION 街道で停車し、物資庫に必要な木材を採る
+STAGE 688.4s 街道で物資庫完成
+STAGE 733.4s 村へ到着
+STAGE 733.4s 建設 supply_cache
+STAGE 737.6s 使用と運搬完了 supply_cache
+STAGE 780.8s 再設置 supply_cache 0
+STAGE 783.2s 使用と運搬完了 supply_cache
+STAGE 790.6s 再設置 supply_cache 1
+PROGRESSION {"build_queue":[],"capacity":420,"events":{"attack":0,"chance":0,"escaped":0,"kills":0,"repelled":0,"site":2,"trouble":2,"weather":4},"game_over":false,"inventory":{"0":4,"1":1,"2":2,"3":1,"4":14,"5":12,"6":8,"7":5,"8":12,"9":9,"10":5,"12":0,"15":0,"17":0,"18":0,"20":0,"21":0,"23":0,"24":0},"phase":"再設置 supply_cache 1","quarry":"road","report":{"discarded":{},"food":0,"generated":{"6":12},"nearby":{}},"seconds":790.600000000043,"stages":["建設 workbench","使用と運搬完了 workbench","再設置 workbench 0","使用と運搬完了 workbench","再設置 workbench 1","地域到着 east_sands","地域到着 central_trade","都市のコブ獣から皮を回収","街道のコブ獣も狩り寝床完成","村到着","建設 bed","使用と運搬完了 bed","再設置 bed 0","使用と運搬完了 bed","再設置 bed 1","地域到着 central_trade","地域到着 old_mine","鉱床到着","近場12単位を採取","鉱床帰還","鉱山入口へ復帰","建設 cargo_rack","使用と運搬完了 cargo_rack","再設置 cargo_rack 0","使用と運搬完了 cargo_rack","再設置 cargo_rack 1","地域到着 central_trade","木材採取のため街道中ほどへ","街道で物資庫完成","村へ到着","建設 supply_cache","使用と運搬完了 supply_cache","再設置 supply_cache 0","使用と運搬完了 supply_cache","再設置 supply_cache 1"],"weight":320}
+== 結果: すべて成功 ==

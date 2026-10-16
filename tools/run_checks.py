@@ -38,7 +38,7 @@ def diagnostic(name: str, marker: str = "== 結果: すべて成功 ==") -> Chec
 
 CHECKS = {c.id: c for c in [
     Check("import", ("--editor", "--import", "--quit"), timeout=120),
-    *(diagnostic(n) for n in ("hunt_bounds", "auto_craft_guard", "developer_mode", "quarry", "gather", "cargo", "items", "crew_status", "life_actions", "tool_management", "rooms", "view", "camera", "artscale", "packed_equipment", "equipment_ui", "weapon", "weapon_ui", "cargo_accounting", "cargo_escape_ui", "progression", "clarity_ui", "inventory_discard", "save_game", "save_ui", "save_progression", "world_map", "world_flow", "world_boundaries", "world_fauna", "world_scenery", "world_reencounter", "seed_initialization", "tool_progression", "tool_flow", "first_cycle", "field_operations", "manual_combat", "field_ui", "ecosystem", "first_cycle_flow", "navigation_bar", "batch_crafting", "batch_ui", "batch_flow", "haul_support", "haul_ui", "haul_flow", "facility_packing", "packing_flow", "crew_detail", "build")),
+    *(diagnostic(n) for n in ("production_reservations", "order_flow", "production_ui", "hunt_bounds", "auto_craft_guard", "developer_mode", "quarry", "gather", "cargo", "items", "crew_status", "life_actions", "tool_management", "rooms", "view", "camera", "artscale", "packed_equipment", "equipment_ui", "weapon", "weapon_ui", "cargo_accounting", "cargo_escape_ui", "progression", "clarity_ui", "inventory_discard", "save_game", "save_ui", "save_progression", "world_map", "world_flow", "world_boundaries", "world_fauna", "world_scenery", "world_reencounter", "seed_initialization", "tool_progression", "tool_flow", "first_cycle", "field_operations", "manual_combat", "field_ui", "ecosystem", "first_cycle_flow", "navigation_bar", "batch_crafting", "batch_ui", "batch_flow", "haul_support", "haul_ui", "haul_flow", "facility_packing", "packing_flow", "crew_detail", "build")),
     *(diagnostic(n, "== 結果: 0 件失敗 ==") for n in ("cargo_reservations", "consumption_loop")),
     Check("loop_vanilla", ("-s", "res://tools/test_loop.gd", "--", "32", "2", "12", "500", "0", "vanilla"),
           "== 結果: 問題なし ==", 300, 32, 2),
@@ -51,14 +51,14 @@ CHECKS = {c.id: c for c in [
     Check("quarry_rear", ("-s", "res://tools/test_quarry.gd", "--", "rear"), "== 結果: すべて成功 =="),
     Check("manual_repro", ("-s", "res://tools/test_loop.gd", "--", "28", "3", "12", "700", "0", "manual", "trace"), "== 結果: 問題なし ==", 400, 28, 3),
     *(Check("manual_" + mode, ("-s", "res://tools/test_loop.gd", "--", "28", "1", "12", "700", "0", "manual", "trace", mode), "== 結果: 問題なし ==", 300, 28, 1) for mode in ("legacy_inputs", "legacy_boundary", "legacy_both")),
-    *(Check(f"world_endurance_{seed}_{mode}", ("-s", "res://tools/probe_default_map.gd", "--", f"--seed={seed}", f"--scenario={mode}"), "== 観測完了: 整合性違反なし ==", 900) for seed in (501, 502, 503) for mode in ("stay", "route")),
+    *(Check(f"world_endurance_{seed}_{mode}", ("-s", "res://tools/probe_default_map.gd", "--", f"--seed={seed}", f"--scenario={mode}"), "== 観測完了: 整合性違反なし ==", 900) for seed in (501, 502, 503) for mode in ("stay", "route", "ordered_stay", "ordered_route")),
     Check("developer_enabled", ("-s", "res://tools/test_developer_mode.gd", "--", "--developer-mode"), "== 結果: すべて成功 =="),
     Check("startup", ("--quit-after", "300")),
 ]}
 SUITES = {
-    "core": ["hunt_bounds", "auto_craft_guard", "developer_mode", "developer_enabled", "artscale", "tool_progression", "tool_flow", "first_cycle", "field_operations", "manual_combat", "field_ui", "ecosystem", "first_cycle_flow", "navigation_bar", "batch_crafting", "batch_ui", "batch_flow", "haul_support", "haul_ui", "haul_flow", "facility_packing", "packing_flow", "world_map", "world_flow", "world_boundaries", "world_fauna", "world_scenery", "world_reencounter", "save_game", "save_ui", "inventory_discard", "clarity_ui", "cargo_accounting", "cargo_escape_ui", "progression", "weapon", "weapon_ui", "equipment_ui", "packed_equipment", "quarry", "gather", "cargo", "items", "crew_status", "life_actions", "tool_management",
+    "core": ["production_reservations", "order_flow", "production_ui", "hunt_bounds", "auto_craft_guard", "developer_mode", "developer_enabled", "artscale", "tool_progression", "tool_flow", "first_cycle", "field_operations", "manual_combat", "field_ui", "ecosystem", "first_cycle_flow", "navigation_bar", "batch_crafting", "batch_ui", "batch_flow", "haul_support", "haul_ui", "haul_flow", "facility_packing", "packing_flow", "world_map", "world_flow", "world_boundaries", "world_fauna", "world_scenery", "world_reencounter", "save_game", "save_ui", "inventory_discard", "clarity_ui", "cargo_accounting", "cargo_escape_ui", "progression", "weapon", "weapon_ui", "equipment_ui", "packed_equipment", "quarry", "gather", "cargo", "items", "crew_status", "life_actions", "tool_management",
              "cargo_reservations", "consumption_loop", "loop_vanilla", "loop_normal", "startup"],
-    "endurance": [f"world_endurance_{seed}_{mode}" for seed in (501, 502, 503) for mode in ("stay", "route")],
+    "endurance": [f"world_endurance_{seed}_{mode}" for seed in (501, 502, 503) for mode in ("stay", "route", "ordered_stay", "ordered_route")],
     "extra": ["loop_manual", "loop_events"],
     "layout": ["rooms", "view", "camera", "artscale", "quarry", "quarry_rear", "consumption_loop"],
 }
@@ -216,11 +216,11 @@ def main() -> int:
                 "runner_command": [sys.executable, *sys.argv], "root": str(ROOT), "git_before": git_state(ROOT),
                 "godot_version": capture([args.godot, "--version"], ROOT), "suite": None if args.check else args.suite,
                 "unverified": ["Windows / Godot 4.7.2", "OS-level input", "Audio"],
-                "scope_note": "first_cycle_flow/ecosystem, tool_progression/tool_flow, world_*, batch_*, haul_*, facility_packing, packing_flow and startup use the default map; other gameplay checks explicitly use legacy-world-test fixtures. world_endurance runs up to 60 game minutes with defaults, workbench request and optional 5-minute map trips; passed means observation integrity, not survival. Only selected checks; core does not cover extra/endurance or all gameplay conditions."}
+                "scope_note": "order_flow/production_ui, first_cycle_flow/ecosystem, tool_progression/tool_flow, world_*, batch_*, haul_*, facility_packing, packing_flow and startup use the default map; other gameplay checks explicitly use legacy-world-test fixtures. world_endurance runs up to 60 game minutes with defaults, workbench request and optional 5-minute map trips; ordered_* additionally place finite tool and smelting orders; passed means observation integrity, not survival. Only selected checks; core does not cover extra/endurance or all gameplay conditions."}
     checks = []
     for name in selected:
         argv = [args.godot, "--headless", "--path", str(ROOT), "--fixed-fps", "60", *CHECKS[name].args]
-        if name not in ("import", "startup", "seed_initialization", "tool_progression", "tool_flow", "ecosystem", "first_cycle_flow", "navigation_bar", "batch_crafting", "batch_ui", "batch_flow", "haul_support", "haul_ui", "haul_flow", "facility_packing", "packing_flow") and not name.startswith("world_"):
+        if name not in ("import", "startup", "order_flow", "production_ui", "seed_initialization", "tool_progression", "tool_flow", "ecosystem", "first_cycle_flow", "navigation_bar", "batch_crafting", "batch_ui", "batch_flow", "haul_support", "haul_ui", "haul_flow", "facility_packing", "packing_flow") and not name.startswith("world_"):
             if "--" not in argv: argv.append("--")
             argv.append("legacy-world-test")  # Existing-loop fixtures; world_* exercise the new default map.
         checks.append((CHECKS[name], argv))
