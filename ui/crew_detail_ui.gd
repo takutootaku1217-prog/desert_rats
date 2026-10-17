@@ -1,13 +1,13 @@
 class_name CrewDetailUI
 extends CanvasLayer
 ## 仲間の管理画面。通常HUDの仲間ボタン（またはCキー）で開閉する。
-## 左: 部署（Lv・人数） / 中: メンバー一覧（複数選択できる CrewPicker） / 右: スクロールできる個体情報。
-## 個体情報へプロフィール・状態・能力・採取道具・優先度・配属をまとめる。部署の解放情報は別タブ。
+## 左: 部署（Lv・人数） / 中: メンバー一覧（複数選択できる CrewPicker） / 右: 固定ヘッダー＋用途別タブ。
+## 概要 / 装備・荷物 / 仕事・能力へ整理し、部署の解放情報は別タブに残す。
 
 var game
 var _worker
 var _filter := -1                # -1 = 全員、それ以外は GameData.Field
-var _tab := 0                    # 0 = 個体情報、1 = 部署
+var _tab := 0                    # 0 = 概要、1 = 装備・荷物、2 = 仕事・能力、3 = 部署
 var _overlay: Control
 var _dept_btns := {}             # -1 / Field -> Button
 var _tab_btns: Array = []
@@ -15,6 +15,7 @@ var _picker: CrewPicker
 var _scroll: ScrollContainer
 var _body: VBoxContainer
 var _live := {}                  # 毎回更新する表示
+var _header := {}                # タブ切替でも残る個体ヘッダー
 var _timer := 0.0
 
 
@@ -75,7 +76,7 @@ func _ready() -> void:
 	_picker.selection_changed.connect(_on_selection_changed)
 	cols.add_child(_picker)
 
-	# 右: タブ + 個体の詳細
+	# 右: タブ + タブ切替でも消えない個体ヘッダー + 個体の詳細
 	var right := VBoxContainer.new()
 	right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	right.add_theme_constant_override("separation", 6)
@@ -84,14 +85,15 @@ func _ready() -> void:
 	tabs.add_theme_constant_override("separation", 4)
 	right.add_child(tabs)
 	var i := 0
-	for name in ["個体情報", "部署"]:
+	for name in ["概要", "装備・荷物", "仕事・能力", "部署"]:
 		var idx := i
 		var tb := UIKit.button(name, func(): _set_tab(idx))
 		tb.alignment = HORIZONTAL_ALIGNMENT_CENTER
-		tb.custom_minimum_size = Vector2(150, 36)
+		tb.custom_minimum_size = Vector2(118, 36)
 		tabs.add_child(tb)
 		_tab_btns.append(tb)
 		i += 1
+	_build_detail_header(right)
 	_scroll = ScrollContainer.new()
 	_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -197,13 +199,13 @@ func _set_filter(f: int) -> void:
 	if f >= 0 and not GameData.department_visible(f):
 		_refresh_depts()
 		_picker.refresh()
-		if _tab == 1:
+		if _tab == 3:
 			_build_detail()
 		return
 	_filter = f
 	_refresh_depts()
 	_picker.refresh()
-	if _tab == 1:
+	if _tab == 3:
 		_build_detail()
 
 
@@ -247,32 +249,189 @@ func _build_detail() -> void:
 	UIKit.clear(_body)
 	_live.clear()
 	_scroll.scroll_vertical = 0
-	if _tab == 1:
+	if _tab == 3:
 		_build_department()
 		return
 	var w = _worker
 	if not is_instance_valid(w) or not game.workers.has(w):
 		return
-	_section("プロフィール")
+	match _tab:
+		0: _build_overview(w)
+		1: _build_equipment_and_cargo(w)
+		2: _build_work_and_ability(w)
+	_update_live()
+
+
+## 顔・名前・現在行動・受付中の指示・重要な不調・頻出操作は、どのタブでも見失わない。
+func _build_detail_header(right: VBoxContainer) -> void:
+	var card := PanelContainer.new()
+	card.custom_minimum_size = Vector2(0, 112)
+	card.add_theme_stylebox_override("panel", UIKit.box(Color("25282e"), Color("636b7a"), 2, 7))
+	right.add_child(card)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 8)
+	card.add_child(row)
+	var portrait := TextureRect.new()
+	portrait.custom_minimum_size = Vector2(72, 72)
+	portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	portrait.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_child(portrait)
+	_header["portrait"] = portrait
+	var text := VBoxContainer.new()
+	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	text.add_theme_constant_override("separation", 2)
+	row.add_child(text)
+	_header["name"] = _wrapped_label("", 21, UIKit.C_ACCENT)
+	text.add_child(_header["name"])
+	_header["action"] = _wrapped_label("", 15)
+	text.add_child(_header["action"])
+	_header["instruction"] = _wrapped_label("", 13, UIKit.C_DIM)
+	text.add_child(_header["instruction"])
+	_header["warning"] = _wrapped_label("", 13, UIKit.C_DIM)
+	text.add_child(_header["warning"])
+	var actions := VBoxContainer.new()
+	actions.custom_minimum_size = Vector2(150, 0)
+	actions.add_theme_constant_override("separation", 5)
+	row.add_child(actions)
+	var returning := UIKit.button("帰還を指示", _request_return)
+	returning.custom_minimum_size = Vector2(150, 32)
+	actions.add_child(returning)
+	_header["return"] = returning
+	var rest := UIKit.button("休憩を促す", _request_header_rest)
+	rest.custom_minimum_size = Vector2(150, 32)
+	actions.add_child(rest)
+	_header["rest"] = rest
+	var follow := UIKit.button("画面で選択・追従", _follow_worker)
+	follow.custom_minimum_size = Vector2(150, 28)
+	actions.add_child(follow)
+	_header["follow"] = follow
+
+
+func _portrait_of(w) -> Texture2D:
+	var sheet := GameData.tex("res://assets/characters/mouse_%s.png" % w.palette)
+	var atlas := AtlasTexture.new()
+	atlas.atlas = sheet
+	atlas.region = ArtSpec.frame_src(sheet, ArtSpec.WORKER, Worker.F_IDLE0)
+	atlas.filter_clip = true
+	return atlas
+
+
+func _build_overview(w) -> void:
+	_section("概要")
 	var number: int = game.crew_alerts.number_of(w) if game.crew_alerts != null else 0
-	var title: String = "No.%02d %s" % [number, w.char_name] if number > 0 else w.char_name
-	_body.add_child(_wrapped_label(title, 26, UIKit.C_ACCENT))
-	_body.add_child(_wrapped_label("Lv %d   %s   個体ランク %s   得意分野: %s" % [w.level, GameData.GENDER_NAMES[w.gender],
-			w.rank_letter(), w.best_fields_text()], 16))
-	_live["follow"] = UIKit.button("画面で選択・追従", _follow_worker)
-	_live["follow"].custom_minimum_size = Vector2(0, 34)
-	_body.add_child(_live["follow"])
-	_section("状態・生活")
+	_body.add_child(_wrapped_label("No.%02d  Lv %d  %s  個体ランク %s  得意分野: %s" % [number, w.level, GameData.GENDER_NAMES[w.gender], w.rank_letter(), w.best_fields_text()], 16))
 	_live["status"] = _wrapped_label("", 15)
 	_body.add_child(_live["status"])
-	var view := CrewStatusView.new().setup(Vector2i(16, 16), 13, true)
+	var view := CrewStatusView.new().setup(Vector2i(12, 12), 11, true)
 	_body.add_child(view)
 	_live["view"] = view
-	_build_life_controls(w)
+	_body.add_child(_wrapped_label("余力＝100 − 疲労度（数字と塗りは同じ余力）", 11, UIKit.C_DIM))
+	# 休憩は固定ヘッダーの頻出操作。既存のライブ更新・診断でも同じ個人操作として参照できるようにする。
+	_live["life_rest"] = _header["rest"]
+	_build_life_controls(w, false)
+	_section("使用中の装備")
+	_live["equipped_summary"] = _wrapped_label("", 14)
+	_body.add_child(_live["equipped_summary"])
+	_build_cargo_panel(w, false)
+
+
+func _build_equipment_and_cargo(w) -> void:
 	_build_tools(w)
+	_build_cargo_panel(w, true)
+
+
+func _build_work_and_ability(w) -> void:
 	_build_personnel(w)
 	_build_training(w)
-	_update_live()
+
+
+## carrying/carry_n は個人バッグではなく、既存AIが届ける途中の物資。
+## 狩猟素材、加工材料、倉庫⇄作業場の移し替えなどを、届け先ごとに表示する。
+func _build_cargo_panel(w, include_store := true) -> void:
+	_section("運搬中（個人バッグではありません）")
+	_live["cargo_summary"] = _wrapped_label("", 15)
+	_body.add_child(_live["cargo_summary"])
+	# 旧来の診断・他画面は carried を読んでいたため、用途を分けた見出しへ同じ参照を残す。
+	# 現在の仕事は固定ヘッダーと概要の状態行で、運搬容量はこの見出しで常に確認できる。
+	_live["carried"] = _live["cargo_summary"]
+	_live["cargo_detail"] = _wrapped_label("", 13, UIKit.C_DIM)
+	_body.add_child(_live["cargo_detail"])
+	if include_store:
+		_live["store_now"] = UIKit.button("今の採取分を収納", func(): w.ai.store_now(); _update_live())
+		_live["store_now"].custom_minimum_size = Vector2(0, 30)
+		_body.add_child(_live["store_now"])
+
+
+func _items_text(items: Dictionary) -> String:
+	var parts: Array[String] = []
+	for it in items:
+		var n: int = int(items[it])
+		if n > 0:
+			parts.append("%s ×%d" % [ItemDB.name_of(int(it)), n])
+	return "、".join(PackedStringArray(parts)) if not parts.is_empty() else "なし"
+
+
+func _recipe_destination(recipe: Dictionary) -> String:
+	if recipe.has("build"):
+		return "%sの建設場所" % FacilityDB.name_of(String(recipe["build"]))
+	var station := String(recipe.get("station", ""))
+	return "%sへ" % FacilityDB.name_of(station) if not station.is_empty() else "加工設備へ"
+
+
+func _cargo_status(w) -> Dictionary:
+	var a = w.ai
+	if a.state == CharacterAI.State.HAUL_TAKE:
+		return {"main": "材料を取りに行っています", "detail": "%s → %s" % [_items_text(a.haul_recipe.get("in", {})), _recipe_destination(a.haul_recipe)]}
+	if a.state == CharacterAI.State.HAUL_MOVE:
+		return {"main": "加工材料を運搬中", "detail": "%s → %s" % [_items_text(a.haul_recipe.get("in", {})), _recipe_destination(a.haul_recipe)]}
+	if a.state == CharacterAI.State.XFER_TAKE or a.state == CharacterAI.State.XFER_MOVE:
+		var destination := "作業場" if a.xfer_dir == "to_workshop" else "倉庫"
+		var item_name := ItemDB.name_of(a.xfer_item) if a.xfer_item >= 0 else "素材"
+		var amount: int = w.carry_n if w.carrying >= 0 else 0
+		return {"main": "倉庫・作業場の移し替え", "detail": "%s%s → %s" % [item_name, " ×%d" % amount if amount > 0 else "を取りに行く", destination]}
+	if a.state in [CharacterAI.State.REFUEL_TAKE, CharacterAI.State.REFUEL_MOVE, CharacterAI.State.REFUEL]:
+		return {"main": "燃料を補給中", "detail": "%s → 機関室" % (ItemDB.name_of(w.carrying) if w.carrying >= 0 else "燃料を取りに行く")}
+	if a.state in [CharacterAI.State.REPAIR_TAKE, CharacterAI.State.REPAIR_MOVE, CharacterAI.State.REPAIR]:
+		return {"main": "修理資材を運搬中", "detail": "%s → 修理箇所" % (ItemDB.name_of(w.carrying) if w.carrying >= 0 else "応急修理板を取りに行く")}
+	if w.carrying == GameData.Item.CARCASS:
+		return {"main": "獲物の素材を持ち帰り中", "detail": "%s → 倉庫" % _items_text(w.carcass_cargo)}
+	if w.carrying >= 0:
+		var extras := _items_text(w.carry_bonus)
+		var detail := "%s ×%d → 倉庫" % [ItemDB.name_of(w.carrying), w.carry_n]
+		if extras != "なし":
+			detail += "（副産物: %s）" % extras
+		return {"main": "持ち帰り中", "detail": detail}
+	return {"main": "今は運搬中の荷物なし", "detail": "持ち帰る資源・加工材料・補給物はありません"}
+
+
+func _equipment_summary(w) -> String:
+	var parts: Array[String] = []
+	if w.weapon >= 0:
+		parts.append("武器: " + ItemDB.name_of(w.weapon))
+	if w.work_support >= 0:
+		parts.append("仕事補助: " + ItemDB.name_of(w.work_support))
+	for slot in GatherDB.SLOTS:
+		var item: int = int(w.tools.get(slot, -1))
+		if item >= 0:
+			parts.append("%s: %s" % [GatherDB.SLOTS[slot], ItemDB.name_of(item)])
+	return " ／ ".join(PackedStringArray(parts)) if not parts.is_empty() else "使用中の装備はありません"
+
+
+func _important_warning(w) -> String:
+	var parts: Array[String] = []
+	if w.down:
+		parts.append("戦闘不能")
+	if w.hp < CrewStatusDB.WARN_LINE["hp"]:
+		parts.append("HP低下")
+	if w.hunger < CrewStatusDB.WARN_LINE["hunger"]:
+		parts.append("空腹")
+	if w.fatigue >= CrewStatusDB.WARN_LINE["fatigue"]:
+		parts.append("疲労が高い")
+	if w.mental >= CrewStatusDB.Mental.BAD:
+		parts.append("精神:" + CrewStatusDB.MENTAL_NAMES[w.mental])
+	return "重要な不調：" + (" / ".join(PackedStringArray(parts)) if not parts.is_empty() else "なし")
 
 
 ## 一覧の閲覧では追従を変えず、この操作だけで世界側の選択へ渡す。
@@ -295,21 +454,21 @@ func _follow_reason(w) -> String:
 
 
 func _update_follow_control() -> void:
-	if not _live.has("follow"):
+	if not _header.has("follow"):
 		return
 	var reason := _follow_reason(_worker)
-	var button: Button = _live["follow"]
+	var button: Button = _header["follow"]
 	button.disabled = not reason.is_empty()
 	button.tooltip_text = reason if not reason.is_empty() else "管理画面を閉じ、この仲間を画面で選択・追従します。Escキーで追従を解除できます。"
 
 
 ## 生活行動は自動。ここでは個体のAIへ促しを伝え、作業や予約を直接変更しない。
-func _build_life_controls(w) -> void:
-	_body.add_child(_wrapped_label("休憩・食事は自動で行います。必要なら早めに促せます。", 13, UIKit.C_DIM))
+func _build_life_controls(w, include_rest := true) -> void:
+	_body.add_child(_wrapped_label("休憩・食事は自動。必要なら早めに促せます。", 11 if not include_rest else 13, UIKit.C_DIM))
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 8)
 	_body.add_child(row)
-	for action in ["rest", "eat"]:
+	for action in (["rest", "eat"] if include_rest else ["eat"]):
 		var kind: String = action
 		var text := "休憩を促す" if kind == "rest" else "食事を促す"
 		var button := UIKit.button(text, func(): _request_life_action(w, kind))
@@ -326,12 +485,19 @@ func _request_life_action(w, action: String) -> void:
 	_update_live()
 
 
+func _request_header_rest() -> void:
+	_request_life_action(_worker, "rest")
+
+
+func _request_return() -> void:
+	if is_instance_valid(_worker) and game.workers.has(_worker):
+		_worker.ai.request_return()
+	_update_live()
+
+
 ## 個体情報内の配属・優先度。まとめて移動する対象は、詳細を見る1人とは別に保つ。
 func _build_personnel(w) -> void:
 	_section("配属と仕事")
-	_live["carried"]=_wrapped_label("",13,UIKit.C_DIM)
-	_body.add_child(_live["carried"])
-	_body.add_child(UIKit.button("今の採取分を収納",func():w.ai.store_now();_update_live()))
 	_section("配属（この仲間を、押した部署へ移動）")
 	var dr := HBoxContainer.new()
 	dr.add_theme_constant_override("separation", 6)
@@ -490,7 +656,7 @@ func _build_tools(w) -> void:
 		_body.add_child(_live["tool_reason_%s" % s])
 		_live["yield_%s" % s] = _wrapped_label("", 13, UIKit.C_DIM)
 		_body.add_child(_live["yield_%s" % s])
-	_body.add_child(_wrapped_label("回収率は既存の採取効率です。端数や袋の上限により、実際に持ち帰る個数は変わります。", 13, UIKit.C_DIM))
+	_body.add_child(_wrapped_label("採取速度は既存の採取効率です。端数や袋の上限により、実際に持ち帰る個数は変わります。", 13, UIKit.C_DIM))
 
 
 func _toggle_tool_auto() -> void:
@@ -608,20 +774,24 @@ func _build_department() -> void:
 func _update_live() -> void:
 	var w = _worker
 	_update_follow_control()
-	if not is_instance_valid(w) or not _live.has("status"):
+	_update_header(w)
+	if not is_instance_valid(w) or not game.workers.has(w):
 		return
-	_live["status"].text = w.ai.status_text()
-	if _live.has("carried"):
-		var cargo:="なし"
-		if w.carrying>=0: cargo="%s ×%d"%[ItemDB.name_of(w.carrying),w.carry_n]
-		if w.carrying==GameData.Item.CARCASS:
-			cargo="獲物："
-			for it in w.carcass_cargo:cargo+="%s ×%d "%[ItemDB.name_of(it),w.carcass_cargo[it]]
-		if w.ai.state==CharacterAI.State.HAUL_MOVE:
-			cargo=""
-			for it in w.ai.haul_recipe.get("in",{}):cargo+="%s ×%d "%[ItemDB.name_of(it),w.ai.haul_recipe["in"][it]]
-		_live["carried"].text="運搬品：%s / 通常運搬容量 %d個\n仕事：%s"%[cargo,w.carry_limit(),w.ai.status_text()]
-	if GameData.department_visible(w.dept):
+	if _live.has("status"):
+		_live["status"].text = "%s　HP %d / 満腹 %d / 余力 %d（疲労 %d）" % [w.ai.status_text(), roundi(w.hp), roundi(w.hunger), roundi(CrewStatus.gauge_value(w, "fatigue")), roundi(w.fatigue)]
+	if _live.has("equipped_summary"):
+		_live["equipped_summary"].text = _equipment_summary(w)
+	if _live.has("cargo_summary"):
+		var cargo := _cargo_status(w)
+		_live["cargo_summary"].text = "%s（通常運搬容量 %d個）" % [String(cargo["main"]), w.carry_limit()]
+		_live["cargo_detail"].text = String(cargo["detail"])
+		if _live.has("store_now"):
+			var store_button: Button = _live["store_now"]
+			# store_now は採取中だけ既存の移動処理へ渡す。表示更新では状態を変えず、可否を状態から復元する。
+			var store_enabled: bool = w.carrying >= 0 and not w.down and not w.away and not w.ai.retreating and not w.ai.manual_attack and game.operations.stance != "recall" and w.ai.state in [CharacterAI.State.GATHER, CharacterAI.State.MOVE_TO_STORAGE, CharacterAI.State.STORE]
+			store_button.disabled = not store_enabled
+			store_button.tooltip_text = "採取中の荷物を先に倉庫へ届けます。" if store_enabled else "採取中または倉庫へ向かっている荷物があるときだけ使えます。"
+	if _live.has("status") and GameData.department_visible(w.dept):
 		_live["status"].text += "     配属: %s" % GameData.FIELD_NAMES[w.dept]
 	if _live.has("batch_title"):
 		var count: int = _picker.selected_list().size()
@@ -683,6 +853,31 @@ func _update_live() -> void:
 		if _live.has("prio_%d" % job):
 			var n: int = w.priorities.get(job, 0)
 			_live["prio_%d" % job].text = ("★".repeat(n) + "☆".repeat(GameData.MAX_PRIORITY - n)) if n > 0 else "─ やらない ─"
+
+
+func _update_header(w) -> void:
+	if not is_instance_valid(w) or not game.workers.has(w) or _header.is_empty():
+		return
+	_header["portrait"].texture = _portrait_of(w)
+	var number: int = game.crew_alerts.number_of(w) if game.crew_alerts != null else 0
+	_header["name"].text = ("No.%02d " % number if number > 0 else "") + w.char_name
+	_header["action"].text = "現在行動：" + w.ai.status_text()
+	var directives: Array[String] = []
+	if w.ai.return_request:
+		directives.append("帰還を指示済み（荷物・作業の安全な区切りを待機）")
+	if not w.ai.life_request.is_empty():
+		directives.append(("休憩" if w.ai.life_request == "rest" else "食事") + "を促し済み")
+	_header["instruction"].text = "指示：" + (" / ".join(PackedStringArray(directives)) if not directives.is_empty() else "なし（自動作業）")
+	_header["warning"].text = _important_warning(w)
+	_header["warning"].modulate = CrewStatusDB.COLOR_DANGER if _important_warning(w) != "重要な不調：なし" else Color.WHITE
+	var return_reason: String = w.ai.return_action_reason()
+	var returning: Button = _header["return"]
+	returning.disabled = not return_reason.is_empty()
+	returning.tooltip_text = return_reason if not return_reason.is_empty() else "この仲間だけに帰還を指示します。全員撤退は行いません。"
+	var rest_reason: String = w.ai.life_action_reason("rest")
+	var rest: Button = _header["rest"]
+	rest.disabled = not rest_reason.is_empty()
+	rest.tooltip_text = rest_reason if not rest_reason.is_empty() else "この仲間だけに休憩を促します。受付後は安全な区切りでAIが実行します。"
 
 
 ## 仲間（1人でも複数でも）を部署 f へ移す。移動先の部署の一覧に切り替えて追う。

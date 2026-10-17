@@ -5,7 +5,7 @@ extends HBoxContainer
 ## 簡易情報（32px）と仲間の管理画面（64px）で同じ部品を使い回す。アイコンの大きさは size_units（ユニット）。
 ##  - 絵は assets/ui/<名前>.png（枠）と <名前>_mask.png（充填範囲）。tools/art_ui.py が作る。差し替えるだけで形を変えられる。
 ##  - 色・点滅の基準・精神状態の色は data/crew_status.gd（CrewStatusDB）。危険域（値が悪い側の線を越えた）では、そのアイコンだけが赤く点滅する。
-##  - 疲労度の塗りは「余力（100 − 疲労度）」: 疲れるほど中身が減る。数字は疲労度そのもの（高いほど疲れている）。
+##  - 疲労度の塗りと数字は「余力（100 − 疲労度）」で統一: 疲れるほど中身も数字も減る。
 ##  - 数字はアイコンの中に出す（拠点の耐久・燃料・積載重量と同じルール）。数字のON/OFFは UIKit.show_icon_numbers（OFF でもアイコンだけで状態が分かる）。
 
 var _gauges := {}                     # ステータス名 -> IconGauge
@@ -66,7 +66,8 @@ func update_from(w) -> void:
 	for stat in CrewStatusDB.STATS:
 		var v: float = CrewStatus.gauge_value(w, stat)
 		var g: IconGauge = _gauges[stat]
-		g.set_value(v, CrewStatusDB.max_of(stat), str(int(round(float(w.get(stat))))) if UIKit.show_icon_numbers else "")
+		var number := int(round(v)) if stat == "fatigue" else int(round(float(w.get(stat))))
+		g.set_value(v, CrewStatusDB.max_of(stat), str(number) if UIKit.show_icon_numbers else "")
 		g.set_blink(CrewStatus.is_blinking(w, stat))
 		g.tooltip_text = tooltip_of(w, stat)
 	var m: int = w.mental
@@ -92,7 +93,7 @@ static func tooltip_of(w, stat: String) -> String:
 	var name: String = CrewStatusDB.STAT_NAMES[stat]
 	var v: float = float(w.get(stat))
 	if stat == "fatigue":
-		return "%s %d / 100（高いほど疲れている。余力 %d）" % [name, int(round(v)), int(round(100.0 - v))]
+		return "余力 %d / 100（疲労度 %d。高いほど疲れています）" % [int(round(CrewStatus.gauge_value(w, stat))), int(round(v))]
 	return "%s %d / 100" % [name, int(round(v))]
 
 

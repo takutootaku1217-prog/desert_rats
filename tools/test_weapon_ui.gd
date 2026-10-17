@@ -24,6 +24,9 @@ func _initialize():
 	main.storage.add_item(GameData.Item.SIMPLE_SPEAR)
 	await key(KEY_C)
 	check(main.detail._overlay.visible and not main.craft_ui._overlay.visible, "Cで個体情報へ集約・他画面を閉じる")
+	# 武器の個別変更は用途別の「装備・荷物」で行う。
+	await click(main.detail._tab_btns[1])
+	await frames()
 	var first = main.detail._worker
 	await reveal(main.detail._live["weapon_equip"])
 	await click(main.detail._live["weapon_equip"])
@@ -35,6 +38,8 @@ func _initialize():
 	var second = main.workers[1]
 	await click(main.detail._picker._rows[second])
 	check(main.detail._worker == second, "一覧実入力で別個体を選択")
+	await click(main.detail._tab_btns[1])
+	await frames()
 	await reveal(main.detail._live["weapon_equip"])
 	await click(main.detail._live["weapon_equip"])
 	check(second.weapon == GameData.Item.SIMPLE_SPEAR and first.weapon == -1, "別個体の装備ボタンで持替え")

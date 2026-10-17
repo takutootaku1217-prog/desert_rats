@@ -96,6 +96,7 @@ func set_priority(job: int, value: int) -> void:
 func stop_work() -> void:
 	var a := ai
 	a.life_request = ""                              # 遠征・戦闘不能になったら、保留中の生活の促しは取り消す
+	a.return_request = false                           # 遠征・戦闘不能へ移るとき、個人帰還の保留を残さない
 	match a.state:
 		CharacterAI.State.HAUL_MOVE:              # 加工設備へ運んでいる材料は倉庫へ戻す
 			if not a.haul_recipe.is_empty():

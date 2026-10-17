@@ -842,13 +842,13 @@ func _test_step9_ui() -> void:
 	w.fatigue = 0.0
 	v.update_from(w)
 	var fg: IconGauge = v.gauge("fatigue")
-	check(is_equal_approx(fg.ratio, 1.0) and fg.current_color() == CrewStatusDB.COLOR_GOOD and fg.text == "0", "疲労度0: 塗りは余力100%、数字は実際の疲労度0")
+	check(is_equal_approx(fg.ratio, 1.0) and fg.current_color() == CrewStatusDB.COLOR_GOOD and fg.text == "100", "疲労度0: 塗りと数字は余力100で一致する")
 	w.fatigue = 60.0
 	v.update_from(w)
-	check(is_equal_approx(fg.ratio, 0.4) and fg.current_color() == CrewStatusDB.COLOR_WARN and not fg.blink and fg.text == "60", "疲労度60: 塗りは余力40%、数字は疲労度60（だいだい・点滅なし）")
+	check(is_equal_approx(fg.ratio, 0.4) and fg.current_color() == CrewStatusDB.COLOR_WARN and not fg.blink and fg.text == "40", "疲労度60: 塗りと数字は余力40で一致する（だいだい・点滅なし）")
 	w.fatigue = 80.0
 	v.update_from(w)
-	check(is_equal_approx(fg.ratio, 0.2) and fg.text == "80" and fg.current_color() == CrewStatusDB.COLOR_DANGER and fg.blink, "疲労度80: 余力20%、数字80、赤く点滅（疲労度75以上）")
+	check(is_equal_approx(fg.ratio, 0.2) and fg.text == "20" and fg.current_color() == CrewStatusDB.COLOR_DANGER and fg.blink, "疲労度80: 塗りと数字は余力20で一致し、危険なので赤く点滅する")
 	w.fatigue = 0.0
 	# 数字
 	w.hunger = 64.0
@@ -894,7 +894,7 @@ func _test_step9_ui() -> void:
 	await process_frame
 	var cv: CrewStatusView = main.detail._live["view"]
 	check(cv._gauges.size() == 3 and cv.face() is TextureRect, "個体情報に、アイコンゲージ（3つ）と精神状態の顔がある")
-	check(is_equal_approx(cv.gauge("hp").ratio, 0.3) and is_equal_approx(cv.gauge("fatigue").ratio, 0.4) and cv.gauge("fatigue").text == "60", "管理画面の表示が、その仲間のHP・疲労度を反映する")
+	check(is_equal_approx(cv.gauge("hp").ratio, 0.3) and is_equal_approx(cv.gauge("fatigue").ratio, 0.4) and cv.gauge("fatigue").text == "40" and cv.gauge("fatigue").tooltip_text.contains("疲労度 60"), "管理画面の余力表示が塗り・数字で一致し、実際の疲労度も確認できる")
 	main.detail.show_worker(W[0])
 	await process_frame
 	var other_view: CrewStatusView = main.detail._live["view"]
@@ -930,7 +930,7 @@ func _test_step10_detail() -> void:
 	await process_frame
 	check(main.detail._overlay.visible and main.detail._live.has("view") and main.detail._live["view"] is CrewStatusView, "管理画面を開くと、選んだ仲間のステータスがアイコンで出る")
 	var dv: CrewStatusView = main.detail._live["view"]
-	check(dv.gauge("hp").display_size == Vector2(64, 64) and dv.gauge("hunger").display_size == Vector2(64, 64) and dv.gauge("fatigue").display_size == Vector2(64, 64), "管理画面のHP・満腹度・疲労度アイコンは64pxで表示する")
+	check(dv.gauge("hp").display_size == Vector2(48, 48) and dv.gauge("hunger").display_size == Vector2(48, 48) and dv.gauge("fatigue").display_size == Vector2(48, 48), "管理画面のHP・満腹度・余力アイコンは読みやすい48pxで表示する")
 	w.hp = 55.0
 	w.hunger = 70.0
 	w.fatigue = 45.0
@@ -948,12 +948,15 @@ func _test_step10_detail() -> void:
 	var dv2: CrewStatusView = main.detail._live["view"]
 	main.detail._update_live()
 	check(is_equal_approx(dv2.gauge("hp").ratio, 0.15), "別の仲間を選ぶと、その仲間の値に切り替わる")
-	# 個体情報にステータス・分野ランク・スキルが同居し、部署は別タブ
+	# 概要には必要状態・装備・運搬を集め、仕事・能力と部署を用途別に分ける。
 	main.detail._set_tab(0)
 	await process_frame
-	check(main.detail._tab_btns.size() == 2 and main.detail._tab_btns[0].text == "個体情報" and main.detail._tab_btns[1].text == "部署", "管理画面のタブは個体情報・部署の2つ")
-	check(main.detail._live.has("view") and _find_text(main.detail._body, "分野ランク") and _find_text(main.detail._body, "スキル"), "個体情報の同じパネル内に、状態・分野ランク・スキルが出る")
-	main.detail._set_tab(1)
+	check(main.detail._tab_btns.size() == 4 and main.detail._tab_btns[0].text == "概要" and main.detail._tab_btns[1].text == "装備・荷物" and main.detail._tab_btns[2].text == "仕事・能力" and main.detail._tab_btns[3].text == "部署", "管理画面を用途別の4カテゴリへ分ける")
+	check(main.detail._live.has("view") and _find_text(main.detail._body, "使用中の装備") and _find_text(main.detail._body, "運搬中"), "概要に状態・使用中装備・個人バッグではない運搬中を集める")
+	main.detail._set_tab(2)
+	await process_frame
+	check(_find_text(main.detail._body, "分野ランク") and _find_text(main.detail._body, "スキル"), "仕事・能力に分野ランクとスキルを集める")
+	main.detail._set_tab(3)
 	await process_frame
 	check(_find_text(main.detail._body, "部署"), "部署タブへ切り替えられる")
 	main.detail._set_tab(0)

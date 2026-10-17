@@ -21,6 +21,9 @@ func _initialize():
  # 在庫はUI境界fixture。製作から完成はhaul_support/haul_flowで検査。
  main.storage.store_owned(GameData.Item.HAUL_FRAME,1)
  await key(KEY_C)
+ # 個人装備は「装備・荷物」カテゴリで変更する。
+ await click(main.detail._tab_btns[1])
+ await frames()
  var a=main.detail._worker
  await reveal(main.detail._live["work_support_equip"])
  await click(main.detail._live["work_support_equip"])
@@ -34,6 +37,7 @@ func _initialize():
  await click(main.detail._live["work_support_off"])
  check(a.work_support==-1 and main.storage.count_of(GameData.Item.HAUL_FRAME)==1,"実入力で解除")
  var b=main.workers[1];await click(main.detail._picker._rows[b])
+ await click(main.detail._tab_btns[1]);await frames()
  await reveal(main.detail._live["work_support_equip"]);await click(main.detail._live["work_support_equip"])
  check(b.work_support==GameData.Item.HAUL_FRAME and a.work_support==-1,"別個体へ持替え")
  await key(KEY_C)

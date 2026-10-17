@@ -32,6 +32,9 @@ func _initialize():
  main.storage.store_owned(GameData.Item.HANDCART)
  main.detail.open_worker(main.workers[0])
  await frames()
+ # 手押し車は用途別の「装備・荷物」に置く。実クリックでカテゴリを開いてから操作する。
+ await click(main.detail._tab_btns[1])
+ await frames()
  main.detail._scroll.ensure_control_visible(main.detail._live.handcart)
  await frames()
  await click(main.detail._live.handcart)

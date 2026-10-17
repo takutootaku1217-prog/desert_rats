@@ -85,6 +85,7 @@ var manual_attack := false # 明示対象のみ。自動仕事の戦闘と区別
 var process_slot := 0
 var current_job := -1
 var life_request: String = ""   # プレイヤーの促し（rest / eat）。安全な区切りで1回だけ評価する。受理時は物資・ベッドを予約しない
+var return_request := false       # 個人への帰還指示。荷物を安全に届けた後、既存の RETURN_BASE を使う。
 
 
 func setup(worker, g) -> void:
@@ -127,6 +128,25 @@ func request_life_action(action: String) -> bool:
 	if life_action_reason(action) != "":
 		return false
 	life_request = action
+	return true
+
+
+## 個人だけを拠点内へ戻す。全員撤退（FieldOperations の stance）には触れない。
+## 受付時に作業・予約・持ち物を直接変えず、既存の _recall_tick が安全な区切りで処理する。
+func return_action_reason() -> String:
+	if ch.away:
+		return "遠征中は帰還を指示できません"
+	if ch.down or state == State.DOWN:
+		return "戦闘不能のため帰還を指示できません"
+	if return_request:
+		return "すでに帰還を指示しています"
+	return ""
+
+
+func request_return() -> bool:
+	if not return_action_reason().is_empty():
+		return false
+	return_request = true
 	return true
 
 
@@ -184,9 +204,9 @@ func tick(delta: float) -> void:
 				safe_after = game.director.elapsed + FieldOperations.RETRY_SECONDS
 				break
 	if retreating and ch.floor_i != 0 and ch._climb_dest == null: retreating = false
-	if (retreating or game.operations.stance == "recall") and (ch.floor_i == 0 or ch._climb_dest != null or state in [State.NOTICE,State.MOVE_TO_RESOURCE,State.GATHER,State.HUNT_MOVE,State.HUNT_ATTACK,State.COMBAT_MOVE,State.COMBAT]):
+	if (retreating or game.operations.stance == "recall" or return_request) and (ch.floor_i == 0 or ch._climb_dest != null or state in [State.NOTICE,State.MOVE_TO_RESOURCE,State.GATHER,State.HUNT_MOVE,State.HUNT_ATTACK,State.COMBAT_MOVE,State.COMBAT]):
 		if _recall_tick(delta): return
-	if state == State.RETURN_BASE and not game.world.recalling() and not game.quarry.recalling() and ch.floor_i != 0:
+	if state == State.RETURN_BASE and not game.world.recalling() and not game.quarry.recalling() and not return_request and ch.floor_i != 0:
 		_set_state(State.SEARCH)
 	if eat_wait > 0.0:
 		eat_wait -= delta
@@ -1005,7 +1025,10 @@ func _recall_tick(delta: float) -> bool:
 	if not (retreating and ch.floor_i==0) and _try_life_need():
 		return true
 	ch.target = game.storage.access_point() + ch.slot_offset
-	ch.move_to_target(delta)
+	if ch.move_to_target(delta) and return_request and not retreating and game.operations.stance != "recall":
+		# 個人指示の到着だけを解除する。全員撤退・危険退避の待機は既存どおり保持する。
+		return_request = false
+		_set_state(State.SEARCH)
 	return true
 
 
