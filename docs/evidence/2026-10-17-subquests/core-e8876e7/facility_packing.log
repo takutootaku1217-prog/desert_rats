@@ -1,0 +1,88 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+OK 1台を完成品として撤去 bed
+OK 1台と1個の一対一交換 bed
+OK 連打で二重返却しない bed
+OK 原材料や副産物を別途返さない bed
+OK 撤去後 bed 保存 
+OK 撤去後 bed 数量・設備・効果状態を復元
+OK 完成品の設置依頼 bed
+OK 再製作材料・作業台・製作時間なし bed
+OK 未設置品を1個だけ取り出す bed
+OK 再設置で1台に戻る bed
+OK 再設置は完成品を消費 bed
+OK 1台上限を維持 bed
+OK 1台を完成品として撤去 cargo_rack
+OK 1台と1個の一対一交換 cargo_rack
+OK 連打で二重返却しない cargo_rack
+OK 原材料や副産物を別途返さない cargo_rack
+OK 箱撤去で容量が60減る
+OK 撤去後 cargo_rack 保存 
+OK 撤去後 cargo_rack 数量・設備・効果状態を復元
+OK 完成品の設置依頼 cargo_rack
+OK 再製作材料・作業台・製作時間なし cargo_rack
+OK 未設置品を1個だけ取り出す cargo_rack
+OK 再設置で1台に戻る cargo_rack
+OK 再設置は完成品を消費 cargo_rack
+OK 箱の容量が再設置で戻る
+OK 1台上限を維持 cargo_rack
+OK 1台を完成品として撤去 supply_cache
+OK 1台と1個の一対一交換 supply_cache
+OK 連打で二重返却しない supply_cache
+OK 原材料や副産物を別途返さない supply_cache
+OK 物資庫の疲労軽減が撤去中だけ消える
+OK 撤去後 supply_cache 保存 
+OK 撤去後 supply_cache 数量・設備・効果状態を復元
+OK 完成品の設置依頼 supply_cache
+OK 再製作材料・作業台・製作時間なし supply_cache
+OK 未設置品を1個だけ取り出す supply_cache
+OK 再設置で1台に戻る supply_cache
+OK 再設置は完成品を消費 supply_cache
+OK 物資庫の効果が再設置で戻る
+OK 1台上限を維持 supply_cache
+OK 1台を完成品として撤去 workbench
+OK 1台と1個の一対一交換 workbench
+OK 連打で二重返却しない workbench
+OK 原材料や副産物を別途返さない workbench
+OK 撤去後 workbench 保存 
+OK 撤去後 workbench 数量・設備・効果状態を復元
+OK 完成品の設置依頼 workbench
+OK 再製作材料・作業台・製作時間なし workbench
+OK 未設置品を1個だけ取り出す workbench
+OK 再設置で1台に戻る workbench
+OK 再設置は完成品を消費 workbench
+OK 1台上限を維持 workbench
+OK 容量減60＋箱重量42で満載撤去を拒否
+OK 縮小後容量ぴったりは許可
+OK 未取得の採取予約も容量へ算入
+OK 加工材料・出力増量予約を含め容量超過を拒否
+OK 確認後の重量変更は撤去を拒否
+OK 使用・予約中の寝床は拒否
+OK 持帰り中の撤去を拒否
+OK 使用中の作業台を拒否
+OK 運搬予約に依存する作業台を拒否
+OK 依存する建設待ちを拒否
+OK 依存する製作待ちを拒否
+OK 作業台撤去で他設備を連鎖削除しない
+OK 作業台なしで物資庫を撤去
+OK 完成品の設置依頼 supply_cache
+OK 再製作材料・作業台・製作時間なし supply_cache
+OK 未設置品を1個だけ取り出す supply_cache
+OK 再設置で1台に戻る supply_cache
+OK 完成品でも設置先の部屋が必要
+OK 完成品の設置依頼 workbench
+OK 再製作材料・作業台・製作時間なし workbench
+OK 未設置品を1個だけ取り出す workbench
+OK 再設置で1台に戻る workbench
+OK 使用中の寝床と空き寝床を枠ごとに判定
+OK 選んだ空き枠だけ撤去し別枠の休息予約を保持
+OK 撤去確認中に保存復元 保存 
+OK 撤去確認中に保存復元 数量・設備・効果状態を復元
+OK ロードで未実行の撤去確認を失効
+OK 従来の設置・新規建設レシピも保存互換
+OK 実入力で完成品返却の確認
+OK Escで撤去せず保全
+OK 実入力で1台だけ撤去
+OK 確認ボタン連打で増殖なし
+OK 実入力で作業台なしの再設置を依頼
+== 結果: すべて成功 ==

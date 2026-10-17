@@ -1,0 +1,163 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+  ok seed 501: 通常速度・既定優先度を維持
+  ok seed 501: 初期オアシスから実走行で中央都市へ
+  ok 配達を受注（通常素材は増やさず専用荷物だけ積載）
+  ok 配達先へ実走行して専用荷物を引渡し
+  ok 配達後に仲間・荷物を戻して都市へ実帰還
+  ok 配達報酬を都市で一度受領
+SUBQUEST_FLOW kind=delivery seed=501 game_seconds=229.0 before={ "cr": 0, "fuel": 94.06, "hull": 92.17, "food": 12, "wood": 18, "stone": 0, "elapsed": 111.8 } after={ "cr": 32, "fuel": 78.44, "hull": 83.97, "food": 12, "wood": 36, "stone": 0, "elapsed": 229.0 } extra={ "mission_weight": 12 }
+  ok 木材6個の調達納品を受注
+  ok 納品素材を求めて通常ルートを実走行
+  ok 既定優先度の仲間が有限採取場から木材6個を実採取
+  ok 採取物を持ち帰り中央都市へ実帰還
+  ok 予約外の手持ち木材だけを納品し調達報酬を受領
+SUBQUEST_FLOW kind=supply seed=501 game_seconds=335.4 before={ "cr": 32, "fuel": 78.44, "hull": 83.97, "food": 12, "wood": 36, "stone": 0, "elapsed": 229.0 } after={ "cr": 56, "fuel": 94.55, "hull": 75.57, "food": 12, "wood": 41, "stone": 0, "elapsed": 335.4 } extra={ "gathered_wood": 6, "initial": { "cr": 0, "fuel": 100.0, "hull": 100.0, "food": 8, "wood": 0, "stone": 0, "elapsed": 0.0 } }
+  ok 遺失物回収を受注
+  ok 回収地点へ実走行
+  ok 画面上の仲間が既存の警戒判定を通って遺失物へ歩き出す
+  ok 遺失物へ向かう途中の通常保存/ロード
+  ok 仲間が専用荷物を移動拠点へ実運搬
+  ok 回収荷物は通常素材を増やさず専用重量だけを保持
+  ok 回収荷物を積んで都市へ実帰還
+  ok 回収報酬を都市で一度受領
+SUBQUEST_FLOW kind=recovery seed=501 game_seconds=460.2 before={ "cr": 56, "fuel": 94.55, "hull": 75.57, "food": 12, "wood": 41, "stone": 0, "elapsed": 335.4 } after={ "cr": 94, "fuel": 85.66, "hull": 90.8, "food": 12, "wood": 53, "stone": 0, "elapsed": 460.2 } extra={ "mission_weight": 16, "initial": { "cr": 0, "fuel": 100.0, "hull": 100.0, "food": 8, "wood": 0, "stone": 0, "elapsed": 0.0 } }
+  ok seed 501: 3種通し後もゲームオーバーなし
+  ok seed 502: 通常速度・既定優先度を維持
+  ok seed 502: 初期オアシスから実走行で中央都市へ
+  ok 配達を受注（通常素材は増やさず専用荷物だけ積載）
+  ok 配達先へ実走行して専用荷物を引渡し
+  ok 配達後に仲間・荷物を戻して都市へ実帰還
+  ok 配達報酬を都市で一度受領
+SUBQUEST_FLOW kind=delivery seed=502 game_seconds=219.4 before={ "cr": 0, "fuel": 95.56, "hull": 93.26, "food": 10, "wood": 10, "stone": 0, "elapsed": 96.2 } after={ "cr": 32, "fuel": 75.23, "hull": 84.64, "food": 12, "wood": 33, "stone": 0, "elapsed": 219.4 } extra={ "mission_weight": 12 }
+  ok 木材6個の調達納品を受注
+  ok 納品素材を求めて通常ルートを実走行
+  ok 既定優先度の仲間が有限採取場から木材6個を実採取
+  ok 採取物を持ち帰り中央都市へ実帰還
+  ok 予約外の手持ち木材だけを納品し調達報酬を受領
+SUBQUEST_FLOW kind=supply seed=502 game_seconds=322.6 before={ "cr": 32, "fuel": 75.23, "hull": 84.64, "food": 12, "wood": 33, "stone": 0, "elapsed": 219.4 } after={ "cr": 56, "fuel": 91.43, "hull": 77.42, "food": 12, "wood": 34, "stone": 0, "elapsed": 322.6 } extra={ "gathered_wood": 6, "initial": { "cr": 0, "fuel": 100.0, "hull": 100.0, "food": 8, "wood": 0, "stone": 0, "elapsed": 0.0 } }
+  ok 遺失物回収を受注
+  ok 回収地点へ実走行
+  ok 画面上の仲間が既存の警戒判定を通って遺失物へ歩き出す
+  ok 遺失物へ向かう途中の通常保存/ロード
+  ok 仲間が専用荷物を移動拠点へ実運搬
+  ok 回収荷物は通常素材を増やさず専用重量だけを保持
+  ok 回収荷物を積んで都市へ実帰還
+  ok 回収報酬を都市で一度受領
+SUBQUEST_FLOW kind=recovery seed=502 game_seconds=450.2 before={ "cr": 56, "fuel": 91.43, "hull": 77.42, "food": 12, "wood": 34, "stone": 0, "elapsed": 322.6 } after={ "cr": 94, "fuel": 82.69, "hull": 93.48, "food": 12, "wood": 49, "stone": 0, "elapsed": 450.2 } extra={ "mission_weight": 16, "initial": { "cr": 0, "fuel": 100.0, "hull": 100.0, "food": 8, "wood": 0, "stone": 0, "elapsed": 0.0 } }
+  ok seed 502: 3種通し後もゲームオーバーなし
+  ok seed 503: 通常速度・既定優先度を維持
+  ok seed 503: 初期オアシスから実走行で中央都市へ
+  ok 配達を受注（通常素材は増やさず専用荷物だけ積載）
+  ok 配達先へ実走行して専用荷物を引渡し
+  ok 配達後に仲間・荷物を戻して都市へ実帰還
+  ok 配達報酬を都市で一度受領
+SUBQUEST_FLOW kind=delivery seed=503 game_seconds=194.6 before={ "cr": 0, "fuel": 95.56, "hull": 93.38, "food": 10, "wood": 14, "stone": 0, "elapsed": 94.6 } after={ "cr": 32, "fuel": 91.11, "hull": 86.38, "food": 12, "wood": 29, "stone": 0, "elapsed": 194.6 } extra={ "mission_weight": 12 }
+  ok 木材6個の調達納品を受注
+  ok 納品素材を求めて通常ルートを実走行
+  ok 既定優先度の仲間が有限採取場から木材6個を実採取
+  ok 採取物を持ち帰り中央都市へ実帰還
+  ok 予約外の手持ち木材だけを納品し調達報酬を受領
+SUBQUEST_FLOW kind=supply seed=503 game_seconds=288.6 before={ "cr": 32, "fuel": 91.11, "hull": 86.38, "food": 12, "wood": 29, "stone": 0, "elapsed": 194.6 } after={ "cr": 56, "fuel": 82.22, "hull": 79.8, "food": 12, "wood": 33, "stone": 0, "elapsed": 288.6 } extra={ "gathered_wood": 6, "initial": { "cr": 0, "fuel": 100.0, "hull": 100.0, "food": 8, "wood": 0, "stone": 0, "elapsed": 0.0 } }
+  ok 遺失物回収を受注
+  ok 回収地点へ実走行
+  ok 画面上の仲間が既存の警戒判定を通って遺失物へ歩き出す
+  ok 遺失物へ向かう途中の通常保存/ロード
+  ok 仲間が専用荷物を移動拠点へ実運搬
+  ok 回収荷物は通常素材を増やさず専用重量だけを保持
+  ok 回収荷物を積んで都市へ実帰還
+  ok 回収報酬を都市で一度受領
+SUBQUEST_FLOW kind=recovery seed=503 game_seconds=413.4 before={ "cr": 56, "fuel": 82.22, "hull": 79.8, "food": 12, "wood": 33, "stone": 0, "elapsed": 288.6 } after={ "cr": 94, "fuel": 83.59, "hull": 96.06, "food": 12, "wood": 48, "stone": 0, "elapsed": 413.4 } extra={ "mission_weight": 16, "initial": { "cr": 0, "fuel": 100.0, "hull": 100.0, "food": 8, "wood": 0, "stone": 0, "elapsed": 0.0 } }
+  ok seed 503: 3種通し後もゲームオーバーなし
+  ok 枯渇ケース: 初期オアシスの木材採取場を実AIで全枯渇
+  ok 枯渇後も都市へ実帰還
+  ok 枯渇後も配達だけで1周し報酬を得る
+  ok 枯渇後も通常素材なしで回収へ出発
+  ok 枯渇後も回収だけで1周し報酬を得る
+SUBQUEST_FLOW kind=exhausted_repeat seed=701 game_seconds=454.4 before={ "cr": 0, "fuel": 100.0, "hull": 100.0, "food": 8, "wood": 0, "stone": 0, "elapsed": 0.0 } after={ "cr": 70, "fuel": 82.22, "hull": 92.45, "food": 12, "wood": 71, "stone": 0, "elapsed": 454.4 } extra={ "tree_left": 0, "claimed": { "supply": 0, "delivery": 1, "recovery": 1 } }
+  ok ゼロ資源都市: 前渡し燃料で配達を受注
+  ok ゼロ資源都市: 実走行配達で32 Crを再取得
+  ok 配達報酬で次の活動用燃料を購入
+  ok 燃料購入後に回収も実AIで完了
+  ok ゼロ資源都市: 配達→給油→回収で次の燃料・修理・食料の資金を確保
+SUBQUEST_FLOW kind=zero_city_restart seed=801 game_seconds=320.4 before={ "cr": 0, "fuel": 0.0, "hull": 100.0, "food": 0, "wood": 0, "stone": 0, "elapsed": 0.0 } after={ "cr": 62, "fuel": 91.38, "hull": 77.57, "food": 6, "wood": 32, "stone": 0, "elapsed": 320.4 } extra={ "claim": { "supply": 0, "delivery": 1, "recovery": 1 }, "depletion_fixture": true }
+  ok cash-only seed 811: 対象3地域・道路03/04の木石鉱を全枯渇、通常素材0
+  ok cash-only seed 811: 採取・狩猟の通常素材取得を除外
+  ok cash-only 1周目: 前渡し付き配達を受注
+  ok cash-only 1周目: 素材なしで配達報酬32 Crを受領
+  ok cash-only 1周目: 報酬金で食料・修理・燃料を実購入
+  ok cash-only: 購入食料を3人が実際に消費して回復
+  ok cash-only 1周目: 通常素材なしで仲間が遺失物を回収
+  ok cash-only 1周目: 回収報酬38 Crを受領
+  ok cash-only 1周目: 採取・狩猟の通常素材収入なし
+  ok cash-only 2周目: 前渡し付き配達を受注
+  ok cash-only 2周目: 素材なしで配達報酬32 Crを受領
+  ok cash-only 2周目: 報酬金で食料・修理・燃料を実購入
+  ok cash-only 2周目: 通常素材なしで仲間が遺失物を回収
+  ok cash-only 2周目: 回収報酬38 Crを受領
+  ok cash-only 2周目: 採取・狩猟の通常素材収入なし
+  ok cash-only 3周目: 前渡し付き配達を受注
+  ok cash-only 3周目: 素材なしで配達報酬32 Crを受領
+  ok cash-only 3周目: 報酬金で食料・修理・燃料を実購入
+  ok cash-only 3周目: 通常素材なしで仲間が遺失物を回収
+  ok cash-only 3周目: 回収報酬38 Crを受領
+  ok cash-only 3周目: 採取・狩猟の通常素材収入なし
+  ok cash-only seed 811: 購入品で3配達+3回収を維持
+SUBQUEST_FLOW kind=cash_only_repeat seed=811 game_seconds=664.8 before={ "cr": 0, "fuel": 0.0, "hull": 100.0, "food": 0, "wood": 0, "stone": 0, "elapsed": 0.0 } after={ "cr": 148, "fuel": 34.85, "hull": 100.0, "food": 0, "wood": 0, "stone": 0, "elapsed": 664.8 } extra={ "claimed": { "supply": 0, "delivery": 3, "recovery": 3 }, "ordinary_total": 0, "gathered": 0, "hunted": 0, "eaten": 5, "weather": 5, "route_depleted": true }
+  ok cash-only seed 812: 対象3地域・道路03/04の木石鉱を全枯渇、通常素材0
+  ok cash-only seed 812: 採取・狩猟の通常素材取得を除外
+  ok cash-only 1周目: 前渡し付き配達を受注
+  ok cash-only 1周目: 素材なしで配達報酬32 Crを受領
+  ok cash-only 1周目: 報酬金で食料・修理・燃料を実購入
+  ok cash-only: 購入食料を3人が実際に消費して回復
+  ok cash-only 1周目: 通常素材なしで仲間が遺失物を回収
+  ok cash-only 1周目: 回収報酬38 Crを受領
+  ok cash-only 1周目: 採取・狩猟の通常素材収入なし
+  ok cash-only 2周目: 前渡し付き配達を受注
+  ok cash-only 2周目: 素材なしで配達報酬32 Crを受領
+  ok cash-only 2周目: 報酬金で食料・修理・燃料を実購入
+  ok cash-only 2周目: 通常素材なしで仲間が遺失物を回収
+  ok cash-only 2周目: 回収報酬38 Crを受領
+  ok cash-only 2周目: 採取・狩猟の通常素材収入なし
+  ok cash-only 3周目: 前渡し付き配達を受注
+  ok cash-only 3周目: 素材なしで配達報酬32 Crを受領
+  ok cash-only 3周目: 報酬金で食料・修理・燃料を実購入
+  ok cash-only 3周目: 通常素材なしで仲間が遺失物を回収
+  ok cash-only 3周目: 回収報酬38 Crを受領
+  ok cash-only 3周目: 採取・狩猟の通常素材収入なし
+  ok cash-only seed 812: 購入品で3配達+3回収を維持
+SUBQUEST_FLOW kind=cash_only_repeat seed=812 game_seconds=564.8 before={ "cr": 0, "fuel": 0.0, "hull": 100.0, "food": 0, "wood": 0, "stone": 0, "elapsed": 0.0 } after={ "cr": 140, "fuel": 52.09, "hull": 100.0, "food": 0, "wood": 0, "stone": 0, "elapsed": 564.8 } extra={ "claimed": { "supply": 0, "delivery": 3, "recovery": 3 }, "ordinary_total": 0, "gathered": 0, "hunted": 0, "eaten": 5, "weather": 2, "route_depleted": true }
+  ok cash-only seed 813: 対象3地域・道路03/04の木石鉱を全枯渇、通常素材0
+  ok cash-only seed 813: 採取・狩猟の通常素材取得を除外
+  ok cash-only 1周目: 前渡し付き配達を受注
+  ok cash-only 1周目: 素材なしで配達報酬32 Crを受領
+  ok cash-only 1周目: 報酬金で食料・修理・燃料を実購入
+  ok cash-only: 購入食料を3人が実際に消費して回復
+  ok cash-only 1周目: 通常素材なしで仲間が遺失物を回収
+  ok cash-only 1周目: 回収報酬38 Crを受領
+  ok cash-only 1周目: 採取・狩猟の通常素材収入なし
+  ok cash-only 2周目: 前渡し付き配達を受注
+  ok cash-only 2周目: 素材なしで配達報酬32 Crを受領
+  ok cash-only 2周目: 報酬金で食料・修理・燃料を実購入
+  ok cash-only 2周目: 通常素材なしで仲間が遺失物を回収
+  ok cash-only 2周目: 回収報酬38 Crを受領
+  ok cash-only 2周目: 採取・狩猟の通常素材収入なし
+  ok cash-only 3周目: 前渡し付き配達を受注
+  ok cash-only 3周目: 素材なしで配達報酬32 Crを受領
+  ok cash-only 3周目: 報酬金で食料・修理・燃料を実購入
+  ok cash-only 3周目: 通常素材なしで仲間が遺失物を回収
+  ok cash-only 3周目: 回収報酬38 Crを受領
+  ok cash-only 3周目: 採取・狩猟の通常素材収入なし
+  ok cash-only seed 813: 購入品で3配達+3回収を維持
+SUBQUEST_FLOW kind=cash_only_repeat seed=813 game_seconds=647.8 before={ "cr": 0, "fuel": 0.0, "hull": 100.0, "food": 0, "wood": 0, "stone": 0, "elapsed": 0.0 } after={ "cr": 119, "fuel": 34.68, "hull": 100.0, "food": 0, "wood": 0, "stone": 0, "elapsed": 647.8 } extra={ "claimed": { "supply": 0, "delivery": 3, "recovery": 3 }, "ordinary_total": 0, "gathered": 0, "hunted": 0, "eaten": 5, "weather": 2, "route_depleted": true }
+  ok cash-only: 複数seedで悪天候を含む走行でも前渡し開始から報酬循環
+  ok 前渡し取消ケース: 配達を受注
+  ok 前渡し取消ケース: 前渡し燃料だけで往復
+  ok 前渡し取消ケース: 未受領取消→再受注で燃料を再発行しない
+  ok 前渡しを使い切っても既存の低速走行では出発要求自体は可能（保証を過大化しない）
+SUBQUEST_FLOW kind=advance_cancel seed=851 game_seconds=80.4 before={ "fuel": 1.11 } after={ "cr": 0, "fuel": 1.11, "hull": 94.37, "food": 0, "wood": 0, "stone": 0, "elapsed": 80.4 } extra={ "fuel_after_reaccept": 1.11, "crawl_speed": 15.0 }
+  ok 寒波ケース: 暖房消費・悪天候中に前渡し配達を受注
+  ok 寒波ケース: 前渡し後に燃料切れ低速を含んでも都市へ往復して32 Crを受領
+  ok 寒波ケース: 通常素材取得なし
+SUBQUEST_FLOW kind=cold_advance seed=852 game_seconds=248.4 before={ "fuel": 0.0 } after={ "cr": 32, "fuel": 0.0, "hull": 82.61, "food": 0, "wood": 0, "stone": 0, "elapsed": 248.4 } extra={ "fuel_after": 0.0, "weather": 1, "log": [{ "text": "寒波が来た！", "at": 0.01666666666667 }, { "text": "寒さが和らいだ", "at": 69.2166666666671 }, { "text": "加工設備から火花が出た！加工設備が損傷（-36）", "at": 75.0166666666672 }, { "text": "停車：オアシスの交易村", "at": 88.0166666666674 }, { "text": "遺跡を見つけた！（崩れた見張り台）調査隊を出せる", "at": 188.816666666664 }, { "text": "停車：中央交易都市", "at": 248.216666666661 }] }
+== 結果: すべて成功 ==
