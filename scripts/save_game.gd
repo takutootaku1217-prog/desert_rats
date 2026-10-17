@@ -251,6 +251,9 @@ static func validate(d, g) -> bool:
 	var processor_slots := []
 	var transfer_count := 0
 	var fuel_count := 0
+	var recovery_move_count := 0
+	var recovery_return_count := 0
+	var town_state:Dictionary = TownEconomy.normalized(d.get("town",{}))
 	for i in d.crew.size():
 		var row = d.crew[i]
 		if not row is Dictionary or not row.get("worker") is Dictionary or not shape(worker_data(row.worker),g.workers[i],WORKER) or not shape(ai_data(row.ai) if row.get("ai") is Dictionary else row.get("ai"),g.workers[i].ai,AI): return false
@@ -292,12 +295,20 @@ static func validate(d, g) -> bool:
 		if a.state in [CharacterAI.State.REFUEL_TAKE,CharacterAI.State.REFUEL_MOVE,CharacterAI.State.REFUEL]:
 			fuel_count += 1
 			if a.haul_item not in GameData.FUEL_ITEMS: return false
+		if a.state in [CharacterAI.State.MISSION_RECOVERY_MOVE,CharacterAI.State.MISSION_RECOVERY_LOAD]:
+			recovery_move_count += 1
+			if town_state.recovery != "loading" or town_state.recovery_worker != i: return false
+		if a.state == CharacterAI.State.MISSION_RECOVERY_RETURN:
+			recovery_return_count += 1
+			if town_state.recovery != "carried" or town_state.recovery_worker != i: return false
 		if a.state in [CharacterAI.State.HAUL_MOVE,CharacterAI.State.REPAIR_MOVE,CharacterAI.State.REPAIR,CharacterAI.State.REFUEL_MOVE,CharacterAI.State.REFUEL,CharacterAI.State.EAT,CharacterAI.State.XFER_MOVE] and w.carrying < 0: return false
 		if w.level < 1 or w.gender not in [0,1] or w.dept not in GameData.Field.values(): return false
 		if not a.gather_ev.is_empty():
 			for key in ["eff","seconds"]:
 				if typeof(a.gather_ev.get(key)) not in [TYPE_FLOAT,TYPE_INT]: return false
-	if transfer_count > 1 or fuel_count > 1: return false
+	if transfer_count > 1 or fuel_count > 1 or recovery_move_count > 1 or recovery_return_count > 1: return false
+	if town_state.recovery == "loading" and recovery_move_count != 1: return false
+	if town_state.recovery == "carried" and recovery_return_count != 1: return false
 	var party_seen := []
 	for i in d.party:
 		if not i is int or i < 0 or i >= d.crew.size() or i in party_seen: return false
@@ -459,6 +470,9 @@ static func saved_weight(d: Dictionary) -> int:
 		if w.weapon >= 0: n += item_mass(w.weapon)
 		if w.work_support >= 0: n += item_mass(w.work_support)
 	if d.expedition.state == "running" and d.expedition.kit and not d.expedition.kit_used: n += item_mass(GameData.Item.REPAIR_KIT)
+	var town:Dictionary = TownEconomy.normalized(d.get("town",{}))
+	if town.get("delivery","")=="outbound" and town.get("delivery_cargo",false): n += TownDB.DELIVERY_PARCEL_WEIGHT
+	if town.get("recovery","") in ["carried","return","ready"]: n += TownDB.RECOVERY_PARCEL_WEIGHT
 	return n
 
 static func exists(path: String = PATH) -> bool:

@@ -20,6 +20,7 @@ enum State {
 	REFUEL_TAKE, REFUEL_MOVE, REFUEL,
 	HUNT_MOVE, HUNT_ATTACK,
 	EAT_TAKE, EAT, DOWN, REST_HERE, XFER_TAKE, XFER_MOVE, RETURN_BASE,
+	MISSION_RECOVERY_MOVE, MISSION_RECOVERY_LOAD, MISSION_RECOVERY_RETURN,
 }
 
 const STATE_TEXT := {
@@ -53,6 +54,9 @@ const STATE_TEXT := {
 	State.REST_HERE: "その場で休憩",
 	State.XFER_TAKE: "素材を取りに行く（運搬の依頼）",
 	State.XFER_MOVE: "素材を運ぶ（運搬の依頼）",
+	State.MISSION_RECOVERY_MOVE: "遺失物の回収へ移動",
+	State.MISSION_RECOVERY_LOAD: "遺失物を回収中",
+	State.MISSION_RECOVERY_RETURN: "遺失物を拠点へ運搬中",
 }
 
 var ch      # Worker
@@ -181,7 +185,7 @@ func _interrupt_for_life_need() -> bool:
 		return false
 	if ch._climb_dest != null:
 		return false                                      # 斜路・ハシゴの途中では、まず今の移動を終える
-	if ch.carrying >= 0:
+	if ch.carrying >= 0 or game.town.recovery_carried_by(ch):
 		if state == State.GATHER:
 			_finish_trip()                              # 掘った分を通常どおり倉庫へ届けてから生活行動へ
 			return true
@@ -204,7 +208,14 @@ func tick(delta: float) -> void:
 				safe_after = game.director.elapsed + FieldOperations.RETRY_SECONDS
 				break
 	if retreating and ch.floor_i != 0 and ch._climb_dest == null: retreating = false
-	if (retreating or game.operations.stance == "recall" or return_request) and (ch.floor_i == 0 or ch._climb_dest != null or state in [State.NOTICE,State.MOVE_TO_RESOURCE,State.GATHER,State.HUNT_MOVE,State.HUNT_ATTACK,State.COMBAT_MOVE,State.COMBAT]):
+	# 専用荷物を持った回収役は、既存の呼戻しでも荷物を失わず拠点へ納める。
+	if (retreating or game.operations.stance == "recall" or game.world.recalling() or game.quarry.recalling()) and game.town.recovery_carried_by(ch):
+		ch.target = game.storage.access_point() + ch.slot_offset
+		if ch.move_to_target(delta):
+			game.town.recovery_stowed(ch)
+			_set_state(State.SEARCH)
+		return
+	if (retreating or game.operations.stance == "recall" or return_request) and (ch.floor_i == 0 or ch._climb_dest != null or state in [State.NOTICE,State.MOVE_TO_RESOURCE,State.GATHER,State.HUNT_MOVE,State.HUNT_ATTACK,State.COMBAT_MOVE,State.COMBAT,State.MISSION_RECOVERY_MOVE,State.MISSION_RECOVERY_LOAD,State.MISSION_RECOVERY_RETURN]):
 		if _recall_tick(delta): return
 	if state == State.RETURN_BASE and not game.world.recalling() and not game.quarry.recalling() and not return_request and ch.floor_i != 0:
 		_set_state(State.SEARCH)
@@ -476,6 +487,32 @@ func tick(delta: float) -> void:
 				_release_task()
 				_set_state(State.SEARCH)
 
+		# ---- サブクエスト：遺失物回収（専用荷物は通常素材ではない）----
+		State.MISSION_RECOVERY_MOVE:
+			if game.town.recovery != "loading" or game.town.recovery_worker != game.workers.find(ch):
+				_set_state(State.SEARCH)
+				return
+			ch.target = TownDB.RECOVERY_POINT
+			if ch.move_to_target(delta):
+				timer = 0.8
+				_set_state(State.MISSION_RECOVERY_LOAD)
+		State.MISSION_RECOVERY_LOAD:
+			ch.pose = "pick"
+			timer -= delta
+			if timer <= 0.0:
+				if game.town.recovery_loaded(ch):
+					_set_state(State.MISSION_RECOVERY_RETURN)
+				else:
+					_set_state(State.SEARCH)
+		State.MISSION_RECOVERY_RETURN:
+			if not game.town.recovery_carried_by(ch):
+				_set_state(State.SEARCH)
+				return
+			ch.target = game.storage.access_point() + ch.slot_offset
+			if ch.move_to_target(delta):
+				game.town.recovery_stowed(ch)
+				_set_state(State.SEARCH)
+
 		# ---- ベッドが使えないときの簡易休憩（その場で休む。回復は遅い）----
 		State.REST_HERE:
 			ch.resting = true
@@ -683,6 +720,14 @@ func _search() -> void:
 		if pa != pb:
 			return pa > pb
 		return a < b)
+	# 依頼された遺失物は既存の画面内生物確認・警戒/撤退方針を通してから取りに行く。
+	var recovery_job:int=game.town.recovery_job_for(ch)
+	if recovery_job == 1:
+		_set_state(State.MISSION_RECOVERY_MOVE)
+		return
+	if recovery_job == 2:
+		_set_state(State.MISSION_RECOVERY_RETURN)
+		return
 	# 自動の生活の必要を促しや仕事より先に見る。食料がないときは仕事を続ける。休憩はベッドがなくてもできる
 	if _try_life_need():
 		return
@@ -962,6 +1007,8 @@ func _try_start(job: int) -> bool:
 
 ## 途中の仕事を破棄して予約を解放する（荷物を持っていない時のみ呼ぶ）。
 func _release_task() -> void:
+	if state in [State.MISSION_RECOVERY_MOVE,State.MISSION_RECOVERY_LOAD,State.MISSION_RECOVERY_RETURN]:
+		game.town.release_recovery_worker(ch)
 	manual_attack=false
 	if res != null and is_instance_valid(res) and res.claimed_by == ch:
 		res.claimed_by = null

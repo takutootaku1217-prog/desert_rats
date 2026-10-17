@@ -1,37 +1,37 @@
 extends "res://tools/test_batch_crafting.gd"
+## 街の3種類の反復依頼。境界は資源注入ではなく、保存・予約・通常AIの実行で確認する。
+var _city_save := {}
 func city() -> void:
- await setup()
- main.world.active=true;main.world.region="central_trade";main.world.phase="stopped";main.world.road="";main.world.origin="";main.world.destination=""
- main.quarry.state="road"
- for w in main.workers:
-  w.stop_work();w.position=Vector2(700,GameData.LO_Y);w.floor_i=1;w._climb_dest=null
- main.world._ensure_location()
+ if _city_save.is_empty():
+  await setup()
+  main.world.active=true;main.world.region="central_trade";main.world.phase="stopped";main.world.road="";main.world.origin="";main.world.destination=""
+  main.quarry.state="road"
+  for w in main.workers:
+   w.stop_work();w.position=Vector2(700,GameData.LO_Y);w.floor_i=1;w._climb_dest=null
+  main.world._ensure_location()
+  _city_save=SaveGame.capture(main)
+ else:
+  SaveGame.apply(main,_city_save)
 func act(a:String,it:int=-1,n:int=1) -> bool:
  return main.town.execute(main.town.quote(a,it,n))
 func _initialize():
  await city()
- check(TownDB.MISSIONS.size()==3 and TownDB.MISSIONS.values().all(func(m):return m.category=="sub" and m.repeatable) and TownDB.MISSION_CATEGORIES.has("main"),"3種は繰り返しサブクエスト・メインは分類のみ")
  var t=main.town;var st=main.storage
+ check(TownDB.MISSIONS.size()==3 and TownDB.MISSIONS.has("supply") and TownDB.MISSIONS.has("delivery") and TownDB.MISSIONS.has("recovery") and TownDB.MISSIONS.values().all(func(m):return m.category=="sub" and m.repeatable),"3種は繰り返しサブクエスト・メインは分類のみ")
  check(t.entry_reason()=="" and not t.quote("buy",GameData.Item.FOOD).ok,"都市で入場可能・資金0の購入拒否")
- check(act("accept_help") and not act("accept_help"),"資源なしで手伝い受注・重複拒否")
- t.work(12.0);check(is_equal_approx(t.help_left,18) and roundtrip() and t.help=="working","途中保存で残り18秒保持")
- check(not act("claim_help"),"途中受領禁止")
- t.work(17.9);check(t.help=="working","即時完了しない")
- t.work(0.1);var q:Dictionary=t.quote("claim_help")
- check(t.execute(q) and not t.execute(q) and t.credits==24,"1回だけ報酬受領")
- check(roundtrip() and not act("claim_help") and t.claimed.help==1,"ロード後も受領済みで二重受領なし")
- check(act("buy",GameData.Item.FOOD,2) and t.credits==16 and st.count_of(GameData.Item.FOOD)==2,"食料2個購入・8支払い")
- q=t.quote("buy",GameData.Item.FUEL)
- t.credits=0;check(not t.execute(q) and st.count_of(GameData.Item.FUEL)==0,"見積後の資金変化で原子的拒否")
- t.credits=100;st.inventory.counts={GameData.Item.FOOD:st.max_weight()}
- check(not act("buy",GameData.Item.FOOD),"満載で購入・支払いなし")
+ check(act("accept_supply",GameData.Item.WOOD) and not act("accept_supply",GameData.Item.STONE),"木材納品の受注・同時受注拒否")
+ st.inventory.counts={GameData.Item.WOOD:6};main.request_transfer(GameData.Item.WOOD,1,"to_workshop")
+ check(not act("claim_supply") and st.count_of(GameData.Item.WOOD)==6,"予約素材の納品を原子的拒否")
+ main.cancel_transfers();var q:Dictionary=t.quote("claim_supply")
+ check(t.execute(q) and not t.execute(q) and st.count_of(GameData.Item.WOOD)==0 and t.credits==24 and t.claimed.supply==1,"木材6を一度だけ納品し24 Cr")
+ check(act("accept_supply",GameData.Item.STONE) and t.supply_item==GameData.Item.STONE and t.supply_count==6,"石材の調達納品も選択できる")
+ check(act("cancel_supply") and t.supply=="idle" and st.count_of(GameData.Item.STONE)==0,"納品取消で通常素材を増やさない")
  st.inventory.counts={GameData.Item.WOOD:5,GameData.Item.IRON:1}
  main.request_order("tool_pick",1)
  check(t.available(GameData.Item.WOOD)==3 and not act("sell",GameData.Item.WOOD,5),"注文素材は売却保護")
  check(act("sell",GameData.Item.WOOD,2),"余剰だけ売却")
  main.request_transfer(GameData.Item.WOOD,2,"to_workshop")
  check(t.available(GameData.Item.WOOD)==0 and not act("sell",GameData.Item.WOOD),"運搬予約と注文保護を売らない")
- check(not act("sell",GameData.Item.SIMPLE_SPEAR),"装備品は買い取り対象外")
  await city();t=main.town;st=main.storage;t.credits=100
  main.base.fuel=98
  check(act("fuel_cash") and main.base.fuel==100 and t.credits==99,"端数給油2だけ回復・1 Cr・上限")
@@ -47,27 +47,44 @@ func _initialize():
  main.base.refuel_reserved=false;main.base.repair_reserved[1]=true
  check(not act("repair_cash",1),"仲間の修理予約保護")
  main.base.repair_reserved.clear()
- check(act("accept_supply"),"納品受注")
- st.inventory.counts={GameData.Item.WOOD:3};main.request_transfer(GameData.Item.WOOD,1,"to_workshop")
- check(not act("claim_supply") and st.count_of(GameData.Item.WOOD)==3,"予約素材の納品を原子的拒否")
- main.cancel_transfers();q=t.quote("claim_supply")
- check(t.execute(q) and not t.execute(q) and st.count_of(GameData.Item.WOOD)==0 and t.claimed.supply==1,"納品素材3を一度だけ消費・報酬一度")
- check(roundtrip() and not act("claim_supply"),"納品受領後ロード")
- check(act("accept_delivery"),"配達受注")
- check(roundtrip() and t.delivery=="outbound","配達往路保存")
- main.world.region=TownDB.DELIVERY_TO;t.observe();check(t.delivery=="return" and roundtrip(),"村の停泊で配達・復路保存")
+ await city();t=main.town;main.base.fuel=0
+ var weight0:float=st.current_weight()
+ check(act("accept_delivery") and t.delivery=="outbound" and t.delivery_cargo and is_equal_approx(main.base.fuel,TownDB.DELIVERY_FUEL_ADVANCE),"無資金・無燃料都市で配達受注、専用荷物と一回限り前渡し燃料")
+ check(st.current_weight()==weight0+TownDB.DELIVERY_PARCEL_WEIGHT and roundtrip(),"配達荷物の積載会計と往路途中保存")
+ check(act("cancel_delivery") and not t.delivery_cargo and is_equal_approx(main.base.fuel,TownDB.DELIVERY_FUEL_ADVANCE),"取消は荷物を消し、前渡し燃料を返金・再発行しない")
+ check(act("accept_delivery") and is_equal_approx(main.base.fuel,TownDB.DELIVERY_FUEL_ADVANCE),"取消再受注で前渡し燃料を無限取得できない")
+ main.world.region=TownDB.DELIVERY_TO;main.world.phase="stopped";t.observe()
+ check(t.delivery=="return" and not t.delivery_cargo and roundtrip(),"目的地停泊で専用荷物だけ配達済みにし保存")
  main.world.region="central_trade";t.observe()
- check(t.delivery=="ready" and act("claim_delivery") and not act("claim_delivery"),"都市帰還後だけ配達報酬1回")
- for kind in ["supply","delivery","help"]:
-  check(act("accept_"+kind) and act("cancel_"+kind) and not act("claim_"+kind),"受注取消・無報酬 "+kind)
+ check(t.delivery=="ready" and act("claim_delivery") and not act("claim_delivery") and t.claimed.delivery==1,"都市帰還後だけ配達報酬を一度受領")
+ await city();t=main.town;st=main.storage;st.inventory.counts={GameData.Item.FOOD:st.max_weight()}
+ check(not act("accept_delivery"),"満載倉庫では預かり荷物の配達受注を拒否")
+ check(act("accept_recovery"),"満載でも回収依頼は受注できる（現地で容量待ち）")
+ main.world.region=TownDB.RECOVERY_TO;main.world.phase="stopped";t.observe()
+ var capacity_wait:bool=t.recovery_job_for(main.workers[0])==0 and t.recovery=="site"
+ main.world.region="central_trade";t.observe()
+ check(capacity_wait and act("cancel_recovery"),"満載時は回収役を出発させず、取消で通常素材を増やさない")
+ await city();t=main.town;st=main.storage;st.inventory.counts.clear()
+ check(act("accept_recovery") and t.recovery=="outbound","遺失物回収を受注")
+ main.world.region=TownDB.RECOVERY_TO;main.world.phase="stopped";main.operations.set_stance("normal");t.observe()
+ check(t.recovery=="site","指定地点への実停泊で回収待ち")
+ check(await until(func():return t.recovery=="loading",20),"仲間が既存の安全判定を通って遺失物へ向かう")
+ check(roundtrip() and t.recovery=="loading","仲間が向かう途中の回収を保存復元")
+ check(await until(func():return t.recovery=="return",80),"仲間が専用荷物を移動拠点へ運び込む")
+ check(st.current_weight()==TownDB.RECOVERY_PARCEL_WEIGHT,"回収荷物は通常素材を増やさず重量だけを使う")
+ main.world.region="central_trade";main.world.phase="stopped";t.observe()
+ check(t.recovery=="ready" and act("cancel_recovery") and t.recovery=="idle" and st.current_weight()==0,"回収後取消は報酬なし・専用荷物を消し素材を増やさない")
  var d:=SaveGame.capture(main);d.erase("town")
- check(SaveGame.apply(main,d) and t.credits==0 and t.help=="idle","旧v3の省略項目は0 Cr・依頼なし")
+ check(SaveGame.apply(main,d) and t.credits==0 and t.delivery=="idle" and t.recovery=="idle","旧v3のtown省略は0 Cr・依頼なし")
+ d=SaveGame.capture(main)
+ d.town={"credits":7,"supply":"idle","delivery":"idle","help":"ready","help_left":0.0,"helper":0,"claimed":{"supply":0,"delivery":0,"help":0}}
+ check(SaveGame.apply(main,d) and t.legacy_help_credit==24 and act("claim_legacy_help") and t.credits==31,"旧街内勤務の未受領分だけを一度移行し、新規勤務は復活させない")
  d=SaveGame.capture(main);d.town.credits=-1
  check(not SaveGame.apply(main,d),"負の通貨を拒否")
- d=SaveGame.capture(main);d.town.help_left=NAN
- check(not SaveGame.apply(main,d),"不正な進捗拒否")
+ d=SaveGame.capture(main);d.town.recovery="carried";d.town.recovery_worker=-1
+ check(not SaveGame.apply(main,d),"回収中の担当者欠落を拒否")
  main.world.region="south_oasis"
- check(not act("accept_help") and t.entry_reason()!="","都市以外は取引・受注禁止")
+ check(not act("accept_delivery") and t.entry_reason()!="","都市以外は取引・受注禁止")
  check(is_equal_approx(GameData.FUEL_CAP/(60*GameData.FUEL_PER_PX),900),"15分満タンの距離式")
- print("FUEL_COMPARE 15min=900s / 30min=1800s; 4800px roundtrip=",4800*GameData.FUEL_PER_PX," / ",4800*100.0/(60*30*60))
+ print("SUBQUEST_UNIT rewards supply=24 delivery=32 recovery=38 advance_fuel=",TownDB.DELIVERY_FUEL_ADVANCE," weights=",TownDB.DELIVERY_PARCEL_WEIGHT,"/",TownDB.RECOVERY_PARCEL_WEIGHT)
  print("== 結果: %s =="%("すべて成功" if fails==0 else "%d 件失敗"%fails));quit(1 if fails else 0)

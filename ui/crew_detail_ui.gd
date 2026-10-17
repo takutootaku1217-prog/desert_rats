@@ -480,6 +480,10 @@ func _recipe_destination(recipe: Dictionary) -> String:
 
 func _cargo_status(w) -> Dictionary:
 	var a = w.ai
+	if a.state in [CharacterAI.State.MISSION_RECOVERY_MOVE, CharacterAI.State.MISSION_RECOVERY_LOAD]:
+		return {"main": "依頼の遺失物を回収中", "detail": "%sの遺失地点 → 移動拠点（専用荷物・通常素材ではありません）" % game.town.recovery_target_text()}
+	if a.state == CharacterAI.State.MISSION_RECOVERY_RETURN or game.town.recovery_carried_by(w):
+		return {"main": "依頼の遺失物を運搬中", "detail": "遺失地点 → 移動拠点（専用荷物・重量%d）" % TownDB.RECOVERY_PARCEL_WEIGHT}
 	if a.state == CharacterAI.State.HAUL_TAKE:
 		return {"main": "材料を取りに行っています", "detail": "%s → %s" % [_items_text(a.haul_recipe.get("in", {})), _recipe_destination(a.haul_recipe)]}
 	if a.state == CharacterAI.State.HAUL_MOVE:

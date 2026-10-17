@@ -15,12 +15,8 @@ var _quote := {}
 var _selection := ""
 var _action := ""
 var _item := -1
-var _running := false
 var _waiting := false
 var _previous_stance := ""
-var _shift: VBoxContainer
-var _progress: Label
-var _progress_bar: ProgressBar
 var _message := ""
 func _ready() -> void:
  layer=45;process_mode=Node.PROCESS_MODE_ALWAYS
@@ -60,7 +56,7 @@ func close() -> void:
  if not is_open():return
  stop_clock();_quote={};_overlay.hide();get_tree().paused=_was_paused
 func stop_clock() -> void:
- _running=false;_quote={}
+ _quote={}
 func show_street() -> void:
  stop_clock();_selection="";_panel.hide();_facilities.show();_backdrop.show()
 func _refresh_summary() -> void:
@@ -91,14 +87,16 @@ func show_facility(id:String) -> void:
   if not row.is_empty():_row(row)
  else:
   _body.add_child(UIKit.lbl("メインクエスト：ストーリー進行（内容は準備中）",16,UIKit.C_DIM))
-  _body.add_child(UIKit.lbl("サブクエスト：繰り返し3種。自由探索は受注不要・全達成は必須ではありません。",16))
-  _body.add_child(UIKit.lbl("%s%d個の納品 / %d Cr    状態："%[ItemDB.name_of(TownDB.SUPPLY_ITEM),TownDB.SUPPLY_COUNT,TownDB.SUPPLY_REWARD]+({"idle":"未受注","accepted":"納品待ち"}.get(game.town.supply,"")),16))
-  _row([["受注","accept_supply",-1],["納品・受領","claim_supply",-1],["取消","cancel_supply",-1]])
-  _body.add_child(UIKit.lbl("村への書状配達 / %d Cr    状態："%TownDB.DELIVERY_REWARD+{"idle":"未受注","outbound":"村へ配達","return":"都市へ帰還","ready":"報酬未受領"}.get(game.town.delivery,""),16))
+  _body.add_child(UIKit.lbl("サブクエスト：繰り返し3種。期限・失敗罰金なし。自由探索は受注不要です。",16))
+  _body.add_child(UIKit.lbl("調達納品：%s / %d Cr    状態："%[game.town.supply_text(),game.town.supply_reward]+({"idle":"未受注","accepted":"納品待ち"}.get(game.town.supply,"")),16))
+  _row([["木材で受注","accept_supply",GameData.Item.WOOD],["石材で受注","accept_supply",GameData.Item.STONE],["納品・受領","claim_supply",-1],["取消","cancel_supply",-1]])
+  _body.add_child(UIKit.lbl("預かり荷物の配達（重量%d） / %d Cr    状態："%[TownDB.DELIVERY_PARCEL_WEIGHT,TownDB.DELIVERY_REWARD]+game.town.delivery_status_text(),16))
   _row([["受注","accept_delivery",-1],["報酬受領","claim_delivery",-1],["取消","cancel_delivery",-1]])
-  _body.add_child(UIKit.lbl("都市の荷札整理 / %.0f秒・%d Cr    状態："%[TownDB.HELP_SECONDS,TownDB.HELP_REWARD]+{"idle":"未受注","working":"作業残り %.1f秒"%game.town.help_left,"ready":"報酬未受領"}.get(game.town.help,""),16))
-  _row([["引き受ける","accept_help",-1],["報酬受領","claim_help",-1],["取消","cancel_help",-1]])
-  if game.town.help=="working":_body.add_child(UIKit.button("街パネルを閉じて勤務を開始 / 再開",run_shift))
+  _body.add_child(UIKit.lbl("遺失物回収（重量%d） / %d Cr    状態："%[TownDB.RECOVERY_PARCEL_WEIGHT,TownDB.RECOVERY_REWARD]+game.town.recovery_status_text(),16))
+  _row([["受注","accept_recovery",-1],["報酬受領","claim_recovery",-1],["取消","cancel_recovery",-1]])
+  if game.town.legacy_help_credit>0:
+   _body.add_child(UIKit.lbl("保存移行：旧荷札整理の未受領報酬 %d Cr"%game.town.legacy_help_credit,15,UIKit.C_DIM))
+   _row([["旧報酬を受領","claim_legacy_help",-1]])
  var amount:=HBoxContainer.new();_body.add_child(amount)
  amount.visible=id!="missions"
  amount.add_child(UIKit.lbl("数量（有料整備は%.0f単位）"%TownDB.SERVICE_UNIT,16))
@@ -122,25 +120,11 @@ func confirm() -> void:
  var ok:bool=game.town.execute(_quote);_quote={}
  _message="完了しました。次の操作は改めて選択してください。" if ok else "状態が変わったため実行しませんでした。再確認してください。"
  show_facility(_selection)
-func run_shift() -> void:
- if game.town.help!="working" or game.town.entry_reason()!="":return
- _clear_body();_facilities.hide();_backdrop.hide();_panel.show();_running=true
- _body.add_child(UIKit.lbl("整備ヤード勤務 / 荷札整理",28,UIKit.C_ACCENT))
- _body.add_child(UIKit.lbl("%sが働いています。完了後、交易所で%d Crを受領してください。"%[game.workers[game.town.helper].char_name,TownDB.HELP_REWARD],20))
- _body.add_child(UIKit.lbl("試作の専用勤務表示：実時間%.0f秒。街の滞在支援で維持費0。\n通常の採取・製作・移動も停止。中断しても経過は保存できます。"%TownDB.HELP_SECONDS,18))
- _progress=UIKit.lbl("",24);_body.add_child(_progress)
- _progress_bar=ProgressBar.new();_progress_bar.max_value=TownDB.HELP_SECONDS;_progress_bar.custom_minimum_size.y=38;_body.add_child(_progress_bar)
- _body.add_child(UIKit.button("勤務を一時中断して街へ",show_street))
 func _process(delta:float) -> void:
  if _waiting:
   if not game.town.location_ok():close()
   elif game.town.entry_reason()=="":_waiting=false;open()
  if not is_open():return
- if _running:
-  game.town.work(delta)
-  _progress.text="残り %.1f秒"%game.town.help_left
-  _progress_bar.value=TownDB.HELP_SECONDS-game.town.help_left
-  if game.town.help!="working":_message="勤務完了。報酬を受領できます。";show_facility("missions")
  _refresh_summary()
 func _unhandled_input(event:InputEvent) -> void:
  if event is InputEventKey and event.pressed and not event.echo and is_open():

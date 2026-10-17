@@ -52,7 +52,11 @@ func current_weight() -> int:
 	var n := 0
 	for bay in CargoDB.BAY_NAMES:
 		n += used_in(bay)
-	return n + equipped_support_weight() + equipped_weapon_weight() + workshop_weight() + carried_weight() + expedition_weight()
+	var mission_weight := 0
+	var g = game()
+	if g != null and g.town != null:
+		mission_weight = g.town.mission_cargo_weight()
+	return n + equipped_support_weight() + equipped_weapon_weight() + workshop_weight() + carried_weight() + expedition_weight() + mission_weight
 
 
 func item_weight(item: int, n := 1) -> int:

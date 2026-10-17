@@ -303,7 +303,7 @@ func _frame() -> int:
 		return F_WORK0 + (int(_t * 6.0) % 2)
 	if moving:
 		return F_WALK0 + (int(_t * 10.0) % 4)
-	if carrying >= 0:
+	if carrying >= 0 or (game != null and game.town != null and game.town.recovery_carried_by(self)):
 		return F_CARRY
 	return F_IDLE0 + (int(_t * 1.6) % 2)
 
@@ -351,6 +351,12 @@ func _draw() -> void:
 	if carrying == GameData.Item.CARCASS and carrying_species != "":
 		GameData.draw_creature(self, carrying_species, 0, snap + Vector2(0, top + 6), facing, true, 0.6)
 		top -= 34.0
+	elif game != null and game.town != null and game.town.recovery_carried_by(self):
+		# 依頼専用荷物。通常素材・生物の予兆ではなく、回収役の手荷物としてだけ描く。
+		draw_rect(Rect2(snap + Vector2(-11, top - 23), Vector2(22, 16)), Color("9f7148"))
+		draw_rect(Rect2(snap + Vector2(-11, top - 23), Vector2(22, 16)), Color("f4d49c"), false, 2.0)
+		draw_line(snap + Vector2(-11, top - 15), snap + Vector2(11, top - 15), Color("f4d49c"), 2.0)
+		top -= 28.0
 	elif carrying >= 0:
 		GameData.draw_item(self, carrying, snap + Vector2(0, top - 8), 0.5)
 		top -= 30.0

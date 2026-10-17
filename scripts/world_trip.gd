@@ -31,7 +31,7 @@ func ready_reason() -> String:
  if game.expedition.state == "running": return "遠征隊の帰還待ち"
  if not game.quarry.loose.is_empty(): return "鉱床の残置品が未回収"
  for w in game.workers:
-  if w.away or w.floor_i == 0 or w._climb_dest != null or w.carrying >= 0 or not w.carry_bonus.is_empty(): return "仲間と荷物の帰還・荷卸し待ち"
+  if w.away or w.floor_i == 0 or w._climb_dest != null or w.carrying >= 0 or not w.carry_bonus.is_empty() or game.town.recovery_carried_by(w): return "仲間と荷物の帰還・荷卸し待ち"
   for target in [w.ai.res,w.ai.prey,w.ai.enemy]:
    if is_instance_valid(target): return "屋外作業の予約解除待ち"
  return ""
