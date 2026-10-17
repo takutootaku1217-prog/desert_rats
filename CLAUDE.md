@@ -1057,3 +1057,31 @@ Linux Godot 4.6.3 で `test_crew_detail`、`test_crew_status`、production/field
 上記コミット `5ce0b00` を履歴に残したまま、確認済み採用方針の視覚面を仕上げた。左は部署フィルターと顔／短い名前のコンパクト一覧にして、右は個体ごとに広く使う。概要では使用中装備の既存4枠と、個人バッグではない運搬中の実素材・数量・届け先を、既存アイコン付きの別カードとして表示する。装備・荷物は武器、仕事補助、採取道具をアイコン付き分類カードにし、存在しない防具枠を追加しない。詳細な効果・採取効果は展開時だけ表示し、変更／外す／自動割当／変更不能理由を維持した。
 
 疲労の内部値は変更せず、管理画面の見出しを「余力」に統一して `100 - fatigue` の塗り・数字と意味を一致させた。実画面3枚は `docs/crew-ui-evidence-2026-10-17/` に更新。撮影時だけ視覚確認用の個体状態・装備・獲物素材・受付中指示を注入しており、通常操作の確認はViewport入力の `test_crew_detail`、`test_crew_status`、production/field/haul/weapon UI回帰で別に行った（OS実入力ではない）。Linux Godot 4.6.3/OpenGL Compatibility/Xorg dummy displayで描画を目視。視覚仕上げ後の最終coreは **62/62**（`/tmp/desert-rats-core-visual-final/20261017T093606Z-68rxd8uk/results.json`）。Windows実機同期・検証、Linux 4.7.2、スマホ実機は未実施。
+
+## 2026-10-18 仲間状態・退却・燃料漏れの完成ループ（作業ログ）
+
+作業先は `C:\Users\user\Documents\desert_rats`、ブランチは `main`。開始HEADは
+`6807d6f6997e144a8b08ebb09c7aca2dffd2060d`、開始時clean、fetch後の
+`origin/main` と 0/0 だった。ユーザーのstash
+`09e6de75e16a7e695b1c47d88650189dadf5f979`、既存セーブ、APPDATAは変更しない。
+
+Notionは `docs/Notion参照索引.md` を入口に確認した。採用ページ本体はこの環境から再取得
+できなかったため、2026-10-17に親スレッドで再照合済みの採用内容（敵攻撃によるエンジン燃料
+漏れ、減速で軽減・停止でも残る、修理前の資材不足表示、修理後の元仕事復帰、速度は手動復帰）
+を用いた。時間経過だけの故障は追加していない。
+
+実装は、実AI状態の表示、個人の永続退却（食事・戦闘・修理を中断し、解除まで新規採取/戦闘を
+行わない）、現地手動修理と自律復帰、敵攻撃からDRIVE損傷・燃料漏れへの接続、セーブ互換、
+HUD/仲間詳細表示、新規回帰テストである。既存の全員帰還は、運搬済みの資材納品と既存の回復
+待機を維持する安全境界のままとし、個人の退却だけが食事/修理を即時中断する。
+
+Windows Godot 4.7.2で、修正後に `production_recovery`、`quarry`、`town_flow`、
+`first_cycle_flow`、`world_flow`、`save_game`、`trouble_loop` を隔離APPDATAで再実行し成功。
+最終core、commit/push、origin照合結果はこのログと検証文書へ追記する。
+
+最終コード確認では、Windows Godot 4.7.2 / 隔離APPDATAのcoreが **63/63成功・失敗0**。
+結果は `C:\Users\user\AppData\Local\Temp\desert-rats-trouble-checks\20261017T192848Z-bzf4ds3i\results.json`。
+実行対象 `9545edfb1a5bdf7fe86cb5c277c60447378081bf` は実行前後ともcleanで、runnerの
+`source_changed` は空だった。通常Compatibility renderer (Intel Iris Xe) でも新規トラブル試験と
+HUD/仲間詳細PNGを成功生成した。Computer Useがネイティブウィンドウを列挙できなかったため、OS入力は
+未実施（renderer描画・画像目視とは区別）。この記録と証跡をamend後、同じ最終コードで再度coreを実行する。

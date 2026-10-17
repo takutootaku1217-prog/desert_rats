@@ -8,7 +8,7 @@ static var last_error := ""
 static var disabled := false
 const MAIN := ["target_speed", "scroll_speed", "room_layout", "total_rooms_built", "recipe_priority", "gather_policy", "hunt_policy", "blueprints", "total_gathered", "total_hunted", "total_eaten", "tool_auto", "_tool_clock", "build_queue", "total_built", "total_wasted", "_waste_note_at", "_spawn_dist", "_creature_dist", "wave", "kills", "_wave_timer", "transfer_queue", "craft_queue", "total_transferred", "total_crafted_by_hand", "_feed_clock"]
 const WORKER := ["char_name", "palette", "priorities", "carrying", "carcass_cargo", "carrying_species", "carry_source", "carry_n", "carry_bonus", "weapon", "work_support", "tools", "speed", "target", "position", "slot_offset", "hp", "hunger", "fatigue", "stress", "calm", "mental", "down", "floor_i", "facing", "level", "gender", "ranks", "skills", "dept", "away", "bed_index", "_climb_dest", "_climb_floor", "_climb_kind"]
-const AI := ["state", "timer", "haul_item", "haul_recipe", "repair_part", "gather_ev", "bag_limit", "bag_frac", "eat_wait", "xfer_item", "xfer_dir", "current_job", "life_request", "process_slot", "safe_after", "retreating", "danger_hold", "manual_attack"]
+const AI := ["state", "timer", "haul_item", "haul_recipe", "repair_part", "gather_ev", "bag_limit", "bag_frac", "eat_wait", "xfer_item", "xfer_dir", "current_job", "life_request", "process_slot", "safe_after", "retreating", "danger_hold", "manual_attack", "return_request", "manual_job"]
 const BASE := ["built", "max_hp", "hp", "fuel", "parts", "total_refuel", "total_repair"]
 const PROCESSOR := ["orders", "current", "progress", "output", "batch_output", "total_done", "waiting_fuel"]
 const DIRECTOR := ["active", "forecast", "default_stance", "log", "elapsed", "distance", "stats", "enabled", "_next_in"]
@@ -163,6 +163,8 @@ static func ai_data(row: Dictionary) -> Dictionary:
 	if not result.has("retreating"): result.retreating = false
 	if not result.has("danger_hold"): result.danger_hold = false
 	if not result.has("manual_attack"): result.manual_attack = false
+	if not result.has("return_request"): result.return_request = false
+	if not result.has("manual_job"): result.manual_job = -1
 	return result
 
 static func extra_data(d: Dictionary) -> Dictionary:
@@ -260,6 +262,7 @@ static func validate(d, g) -> bool:
 		var w: Dictionary = worker_data(row.worker)
 		var a: Dictionary = ai_data(row.ai)
 		if a.state not in CharacterAI.State.values() or w.floor_i not in [0,1,2] or w._climb_floor not in [0,1,2]: return false
+		if a.manual_job not in [-1, GameData.Job.REPAIR]: return false
 		if w.hp < 0 or w.hp > 100 or w.hunger < 0 or w.hunger > 100 or w.fatigue < 0 or w.fatigue > 100: return false
 		if w.palette not in ["grey","tan","pink"] or w.weapon not in [-1,GameData.Item.SIMPLE_SPEAR]: return false
 		if w.work_support != -1 and w.work_support not in GameData.SUPPORT_ITEMS: return false

@@ -306,6 +306,11 @@ const MACHINE_WEAR_PER_SEC := 0.35          # 加工設備: 加工している�
 const PART_BAD := 30.0                      # これ未満で不調（効果が半分）
 const REPAIR_BELOW := 75.0                  # これ未満なら修理に向かう
 const REPAIR_AMOUNT := 25.0
+## Enemy damage to DRIVE starts a fuel leak. These are documented tuning values.
+## Stopping reduces, but does not eliminate, the leak.
+const ENGINE_LEAK_DAMAGE_THRESHOLD := 70.0
+const ENGINE_LEAK_PER_SEC_AT_FULL_SPEED := 0.045
+const ENGINE_LEAK_IDLE_MULT := 0.25
 
 
 # ------------------------------------------------------------------

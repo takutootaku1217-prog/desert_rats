@@ -97,6 +97,7 @@ func stop_work() -> void:
 	var a := ai
 	a.life_request = ""                              # 遠征・戦闘不能になったら、保留中の生活の促しは取り消す
 	a.return_request = false                           # 遠征・戦闘不能へ移るとき、個人帰還の保留を残さない
+	a.manual_job = -1                                  # A downed worker must not retain a repair assignment.
 	match a.state:
 		CharacterAI.State.HAUL_MOVE:              # 加工設備へ運んでいる材料は倉庫へ戻す
 			if not a.haul_recipe.is_empty():

@@ -88,6 +88,7 @@ var danger_hold := false
 var manual_attack := false # 明示対象のみ。自動仕事の戦闘と区別して保存する。
 var process_slot := 0
 var current_job := -1
+var manual_job := -1              # One-shot direct work order; completion returns to priority AI.
 var life_request: String = ""   # プレイヤーの促し（rest / eat）。安全な区切りで1回だけ評価する。受理時は物資・ベッドを予約しない
 var return_request := false       # 個人への帰還指示。荷物を安全に届けた後、既存の RETURN_BASE を使う。
 
@@ -101,7 +102,12 @@ func setup(worker, g) -> void:
 func status_text() -> String:
 	if ch.away:
 		return "遠征中"
-	return STATE_TEXT[state]
+	var current: String = STATE_TEXT[state]
+	if return_request:
+		return "退却命令・" + current
+	if manual_job == GameData.Job.REPAIR and state not in [State.REPAIR_TAKE, State.REPAIR_MOVE, State.REPAIR]:
+		return "修理指示待ち・" + current
+	return current
 
 
 func _set_state(s: int) -> void:
@@ -151,6 +157,52 @@ func request_return() -> bool:
 	if not return_action_reason().is_empty():
 		return false
 	return_request = true
+	return true
+
+
+func cancel_return() -> bool:
+	if not return_request:
+		return false
+	return_request = false
+	if state == State.RETURN_BASE and ch.floor_i != 0 and game.operations.stance != "recall":
+		_set_state(State.SEARCH)
+	return true
+
+
+func manual_repair_reason() -> String:
+	if ch.away:
+		return "派遣中の仲間には修理を依頼できません"
+	if ch.down or state == State.DOWN:
+		return "戦闘不能中の仲間には修理を依頼できません"
+	if return_request or game.operations.stance == "recall":
+		return "退却命令中のため修理依頼は待機させています"
+	if manual_job == GameData.Job.REPAIR:
+		return "すでに修理を依頼しています"
+	if game.base.part_to_repair() < 0:
+		return "現地修理が必要な部位はありません"
+	if game.storage.count_of(GameData.Item.REPAIR_KIT) < 1:
+		return "修理キットが1個必要です（不足）"
+	return ""
+
+
+func request_manual_repair() -> bool:
+	if not manual_repair_reason().is_empty():
+		return false
+	manual_job = GameData.Job.REPAIR
+	if state in [State.IDLE, State.SEARCH]:
+		_set_state(State.SEARCH)
+	return true
+
+
+func cancel_manual_repair() -> bool:
+	if manual_job != GameData.Job.REPAIR:
+		return false
+	manual_job = -1
+	if state in [State.REPAIR_TAKE, State.REPAIR_MOVE, State.REPAIR]:
+		if ch.carrying == GameData.Item.REPAIR_KIT:
+			ch.unload_owned()
+		_release_task()
+		_set_state(State.SEARCH)
 	return true
 
 
@@ -215,7 +267,11 @@ func tick(delta: float) -> void:
 			game.town.recovery_stowed(ch)
 			_set_state(State.SEARCH)
 		return
-	if (retreating or game.operations.stance == "recall" or return_request) and (ch.floor_i == 0 or ch._climb_dest != null or state in [State.NOTICE,State.MOVE_TO_RESOURCE,State.GATHER,State.HUNT_MOVE,State.HUNT_ATTACK,State.COMBAT_MOVE,State.COMBAT,State.MISSION_RECOVERY_MOVE,State.MISSION_RECOVERY_LOAD,State.MISSION_RECOVERY_RETURN]):
+	# A personal withdrawal is an explicit, persistent order. It can interrupt
+	# meals and field repairs; group recall retains its existing safe boundaries.
+	var personal_withdrawal: bool = return_request and (ch.floor_i == 0 or ch._climb_dest != null or state in [State.NOTICE, State.MOVE_TO_RESOURCE, State.GATHER, State.MOVE_TO_STORAGE, State.STORE, State.HAUL_TAKE, State.HAUL_MOVE, State.MOVE_TO_MACHINE, State.PROCESS, State.XFER_TAKE, State.XFER_MOVE, State.REFUEL_TAKE, State.REFUEL_MOVE, State.REFUEL, State.HUNT_MOVE, State.HUNT_ATTACK, State.COMBAT_MOVE, State.COMBAT, State.MISSION_RECOVERY_MOVE, State.MISSION_RECOVERY_LOAD, State.MISSION_RECOVERY_RETURN, State.REPAIR_TAKE, State.REPAIR_MOVE, State.REPAIR, State.EAT_TAKE, State.EAT, State.REST_MOVE, State.REST, State.REST_HERE])
+	var group_recall: bool = (retreating or game.operations.stance == "recall") and (ch.floor_i == 0 or ch._climb_dest != null or state in [State.NOTICE,State.MOVE_TO_RESOURCE,State.GATHER,State.HUNT_MOVE,State.HUNT_ATTACK,State.COMBAT_MOVE,State.COMBAT,State.MISSION_RECOVERY_MOVE,State.MISSION_RECOVERY_LOAD,State.MISSION_RECOVERY_RETURN])
+	if personal_withdrawal or group_recall:
 		if _recall_tick(delta): return
 	if state == State.RETURN_BASE and not game.world.recalling() and not game.quarry.recalling() and not return_request and ch.floor_i != 0:
 		_set_state(State.SEARCH)
@@ -427,6 +483,8 @@ func tick(delta: float) -> void:
 				else:
 					game.base.repair_reserved.erase(repair_part)
 					repair_part = -1
+					if manual_job == GameData.Job.REPAIR:
+						manual_job = -1
 					_set_state(State.SEARCH)
 		State.REPAIR_MOVE:
 			ch.target = game.base.part_point(repair_part) + ch.slot_offset
@@ -440,6 +498,8 @@ func tick(delta: float) -> void:
 				game.base.repair(repair_part)
 				repair_part = -1
 				ch.carrying = -1
+				if manual_job == GameData.Job.REPAIR:
+					manual_job = -1
 				_set_state(State.SEARCH)
 
 		# ---- 食事 ----
@@ -676,7 +736,7 @@ func begin_retreat() -> void:
 	safe_after=game.director.elapsed+FieldOperations.RETRY_SECONDS
 
 func order_attack(target) -> bool:
-	if not is_instance_valid(target) or target.dead or not target.present or ch.carrying>=0 or ch.away or ch.down or retreating or _urgent_life_need() or game.operations.stance=="recall" or ch.hp<FieldOperations.RECOVER_HP:return false
+	if not is_instance_valid(target) or target.dead or not target.present or ch.carrying>=0 or ch.away or ch.down or retreating or return_request or _urgent_life_need() or game.operations.stance=="recall" or ch.hp<FieldOperations.RECOVER_HP:return false
 	if ch.position.distance_to(target.position)>FieldOperations.NOTICE_DISTANCE:return false
 	_release_task();enemy=target;manual_attack=true;danger_hold=false
 	_set_state(State.COMBAT_MOVE)
@@ -733,6 +793,13 @@ func _search() -> void:
 		return
 	if _try_life_request():
 		return
+	if manual_job == GameData.Job.REPAIR:
+		if _try_start(GameData.Job.REPAIR):
+			current_job = GameData.Job.REPAIR
+			return
+		# The target or kit can disappear while this order waits; do not leave a stuck order.
+		if game.base.part_to_repair() < 0 or game.storage.count_of(GameData.Item.REPAIR_KIT) < 1:
+			manual_job = -1
 	# 拠点の部位が壊れかけていたら（修理が0でなければ）まず直す
 	if ch.priorities.get(GameData.Job.REPAIR, 0) > 0 and game.base.has_critical_part() and _try_start(GameData.Job.REPAIR):
 		current_job = GameData.Job.REPAIR
@@ -863,7 +930,7 @@ func _urgent_life_need() -> bool:
 
 
 func _try_start(job: int) -> bool:
-	if game.quarry.recalling():
+	if return_request or game.quarry.recalling():
 		return false
 	match job:
 		GameData.Job.HUNT:
@@ -989,7 +1056,7 @@ func _try_start(job: int) -> bool:
 			var best = null
 			var best_d := INF
 			for e in game.enemies_root.get_children():
-				if game.operations.stance == "recall" or retreating or danger_hold: continue
+				if game.operations.stance == "recall" or retreating or return_request or danger_hold: continue
 				if e.ecological and (ch.hp < FieldOperations.RECOVER_HP or not e.threatens(ch) or ch.position.distance_to(e.position)>FieldOperations.NOTICE_DISTANCE): continue
 				if e.dead or e.position.x > 1270.0:
 					continue
@@ -1028,9 +1095,9 @@ func _release_task() -> void:
 	if state == State.HAUL_TAKE and not haul_recipe.is_empty():
 		game.processor.cancel_reservation(haul_recipe)
 		haul_recipe = {}
-	if state == State.REFUEL_TAKE:
+	if state in [State.REFUEL_TAKE, State.REFUEL_MOVE, State.REFUEL]:
 		game.base.refuel_reserved = false
-	if state == State.REPAIR_TAKE and repair_part >= 0:
+	if state in [State.REPAIR_TAKE, State.REPAIR_MOVE, State.REPAIR] and repair_part >= 0:
 		game.base.repair_reserved.erase(repair_part)
 		repair_part = -1
 	for p in game.processor.lanes():
@@ -1056,6 +1123,17 @@ func on_priority_changed() -> void:
 
 ## 出発時だけの集合。持ち物は通常の届け先へ。生活・気絶は既存の回復条件を使う。
 func _recall_tick(delta: float) -> bool:
+	# Direct withdrawal overrides a meal or repair. Group recall is intentionally
+	# left at its established safe boundary so existing shipments can finish.
+	if return_request and state in [State.REPAIR_TAKE, State.REPAIR_MOVE, State.REPAIR, State.EAT_TAKE, State.EAT, State.REST_MOVE, State.REST, State.REST_HERE, State.REFUEL_TAKE, State.REFUEL_MOVE, State.REFUEL]:
+		if ch.carrying >= 0:
+			ch.unload_owned()
+		_release_task()
+		current_job = -1
+		_set_state(State.RETURN_BASE)
+		ch.target = game.storage.access_point() + ch.slot_offset
+		ch.move_to_target(delta)
+		return true
 	if ch.carrying >= 0:
 		if state == State.GATHER:
 			_finish_trip()
@@ -1064,23 +1142,21 @@ func _recall_tick(delta: float) -> bool:
 		return false
 	if state != State.RETURN_BASE:
 		_release_task()
-		if not (retreating and ch.floor_i==0) and _try_life_need():
+		if not return_request and not (retreating and ch.floor_i==0) and _try_life_need():
 			return true
 		current_job = -1
 		_set_state(State.RETURN_BASE)
 	# 待機が長引いたときも空腹や疲労を無視しない。
-	if not (retreating and ch.floor_i==0) and _try_life_need():
+	if not return_request and not (retreating and ch.floor_i==0) and _try_life_need():
 		return true
 	ch.target = game.storage.access_point() + ch.slot_offset
-	if ch.move_to_target(delta) and return_request and not retreating and game.operations.stance != "recall":
+	ch.move_to_target(delta)
 		# 個人指示の到着だけを解除する。全員撤退・危険退避の待機は既存どおり保持する。
-		return_request = false
-		_set_state(State.SEARCH)
 	return true
 
 
 func store_now() -> bool:
-	if ch.carrying<0 or ch.down or ch.away or retreating or manual_attack or game.operations.stance=="recall": return false
+	if ch.carrying<0 or ch.down or ch.away or retreating or return_request or manual_attack or game.operations.stance=="recall": return false
 	if state==State.GATHER:
 		_finish_trip()
 		return true

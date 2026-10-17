@@ -302,6 +302,10 @@ func _build_detail_header(right: VBoxContainer) -> void:
 	returning.custom_minimum_size = Vector2(150, 32)
 	actions.add_child(returning)
 	_header["return"] = returning
+	var repair := UIKit.button("\u4fee\u7406\u3092\u4efb\u305b\u308b", _request_header_repair)
+	repair.custom_minimum_size = Vector2(150, 32)
+	actions.add_child(repair)
+	_header["repair"] = repair
 	var rest := UIKit.button("休憩を促す", _request_header_rest)
 	rest.custom_minimum_size = Vector2(150, 32)
 	actions.add_child(rest)
@@ -593,7 +597,19 @@ func _request_header_rest() -> void:
 
 func _request_return() -> void:
 	if is_instance_valid(_worker) and game.workers.has(_worker):
-		_worker.ai.request_return()
+		if _worker.ai.return_request:
+			_worker.ai.cancel_return()
+		else:
+			_worker.ai.request_return()
+	_update_live()
+
+
+func _request_header_repair() -> void:
+	if is_instance_valid(_worker) and game.workers.has(_worker):
+		if _worker.ai.manual_job == GameData.Job.REPAIR:
+			_worker.ai.cancel_manual_repair()
+		else:
+			game.request_repair(_worker)
 	_update_live()
 
 
@@ -1015,6 +1031,8 @@ func _update_header(w) -> void:
 	var directives: Array[String] = []
 	if w.ai.return_request:
 		directives.append("帰還指示：受付中")
+	if w.ai.manual_job == GameData.Job.REPAIR:
+		directives.append("\u4fee\u7406\u6307\u793a: \u53d7\u4ed8\u4e2d")
 	if not w.ai.life_request.is_empty():
 		directives.append(("休憩" if w.ai.life_request == "rest" else "食事") + "：受付中")
 	_header["instruction"].text = " / ".join(PackedStringArray(directives)) if not directives.is_empty() else "自動作業中"
@@ -1023,10 +1041,26 @@ func _update_header(w) -> void:
 	_header["warning"].visible = has_warning
 	_header["warning"].text = warning.replace("重要な不調：", "不調：") if has_warning else ""
 	_header["warning"].modulate = CrewStatusDB.COLOR_DANGER if has_warning else Color.WHITE
-	var return_reason: String = w.ai.return_action_reason()
+	var return_reason: String = "" if w.ai.return_request else w.ai.return_action_reason()
 	var returning: Button = _header["return"]
 	returning.disabled = not return_reason.is_empty()
+	returning.text = "\u9000\u5374\u3092\u89e3\u9664" if w.ai.return_request else "\u9000\u5374\u547d\u4ee4"
 	returning.tooltip_text = return_reason if not return_reason.is_empty() else "この仲間だけに帰還を指示します。全員撤退は行いません。"
+	if w.ai.return_request:
+		returning.tooltip_text = "\u9000\u5374\u3092\u89e3\u9664\u3057\u3001\u5e30\u9084\u5f8c\u306e\u6b21\u306e\u5b89\u5168\u306a\u6642\u70b9\u304b\u3089\u81ea\u5f8b\u884c\u52d5\u306b\u623b\u3057\u307e\u3059\u3002"
+	var repair: Button = _header["repair"]
+	var info: Dictionary = game.repair_order_info()
+	var repair_reason: String = ""
+	if w.ai.manual_job != GameData.Job.REPAIR:
+		if info["assigned"] != null:
+			repair_reason = "\u4ed6\u306e\u4ef2\u9593\u304c\u4fee\u7406\u6307\u793a\u3092\u5f15\u304d\u53d7\u3051\u3066\u3044\u307e\u3059"
+		elif int(info["missing"]) > 0:
+			repair_reason = "\u4fee\u7406\u30ad\u30c3\u30c8%d\u500b\u304c\u4e0d\u8db3\u3067\u3059" % int(info["missing"])
+		else:
+			repair_reason = w.ai.manual_repair_reason()
+	repair.text = "\u4fee\u7406\u4f9d\u983c\u3092\u53d6\u6d88" if w.ai.manual_job == GameData.Job.REPAIR else "\u4fee\u7406\u3092\u4efb\u305b\u308b"
+	repair.disabled = w.ai.manual_job != GameData.Job.REPAIR and not repair_reason.is_empty()
+	repair.tooltip_text = "\u4fee\u7406\u4f9d\u983c\u3092\u53d6\u6d88\u3057\u3066\u512a\u5148\u5ea6\u306b\u623b\u3057\u307e\u3059\u3002" if w.ai.manual_job == GameData.Job.REPAIR else (repair_reason if not repair_reason.is_empty() else "\u73fe\u5730\u4fee\u7406: \u4fee\u7406\u30ad\u30c31\u500b\u30fb1.2\u79d2\u3002\u4fee\u7406\u5f8c\u306f\u512a\u5148\u5ea6\u884c\u52d5\u306b\u623b\u308a\u307e\u3059\u3002")
 	var rest_reason: String = w.ai.life_action_reason("rest")
 	var rest: Button = _header["rest"]
 	rest.disabled = not rest_reason.is_empty()

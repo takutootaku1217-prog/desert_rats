@@ -16,6 +16,8 @@ var _gauges := {}            # key -> IconGauge
 var _weight: IconGauge       # 積載重量（= _gauges["weight"]。診断ツールが読む）
 var _stock: StockGrid
 var _repair: Button
+var _crew_repair: Button
+var _leak: Label
 var _totals: Label
 var _capacity: Label
 
@@ -78,6 +80,9 @@ func _ready() -> void:
 	_weight = _gauges["weight"]
 	_capacity = UIKit.lbl("", 13, UIKit.C_DIM)
 	v.add_child(_capacity)
+	_leak = UIKit.lbl("", 12, Color("ffb347"))
+	_leak.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	v.add_child(_leak)
 	# 3段目: 倉庫の中身
 	_stock = StockGrid.new().setup(STOCK_ROWS)
 	v.add_child(_stock)
@@ -87,6 +92,8 @@ func _ready() -> void:
 	_repair = UIKit.button("応急修理", func(): game.emergency_repair())
 	_repair.tooltip_text = "最も傷んだ未予約の部位を%d回復（上限100）。燃料・仲間HPは回復しません" % GameData.REPAIR_AMOUNT
 	v.add_child(_repair)
+	_crew_repair = UIKit.button("\u9069\u4efb\u306b\u4fee\u7406\u3092\u4f9d\u983c", func(): game.request_repair())
+	v.add_child(_crew_repair)
 
 
 func _set_gauge(key: String, value: float, maximum: float, label: String, tip: String) -> void:
@@ -107,6 +114,11 @@ func _process(_d: float) -> void:
 		return
 	var b = game.base
 	_repair.disabled = game.emergency_repair_target() < 0 or game.storage.count_of(GameData.Item.REPAIR_KIT) <= 0
+	var repair_info: Dictionary = game.repair_order_info()
+	var assigned = repair_info["assigned"]
+	_crew_repair.disabled = int(repair_info["part"]) < 0 or int(repair_info["missing"]) > 0 or assigned != null
+	_crew_repair.text = "\u4fee\u7406\u4e2d: %s" % assigned.char_name if assigned != null else "\u9069\u4efb\u306b\u4fee\u7406\u3092\u4f9d\u983c"
+	_crew_repair.tooltip_text = "\u73fe\u5730\u4fee\u7406\u306f\u4fee\u7406\u30ad\u30c3\u30c8%d\u500b\u304c\u5fc5\u8981(\u6240\u6301%d / \u4e0d\u8db3%d)\u3002\u90fd\u5e02\u306e\u5373\u6642\u4fee\u7406\u3068\u306f\u5225\u306e\u884c\u52d5\u3067\u3059\u3002" % [int(repair_info["required"]), int(repair_info["available"]), int(repair_info["missing"])]
 	_repair.text = "応急修理（%d）" % game.storage.count_of(GameData.Item.REPAIR_KIT)
 	# 1段目
 	var move := "停止中"
@@ -129,6 +141,12 @@ func _process(_d: float) -> void:
 	_speed.tooltip_text = "速度 / 目標（↑↓キーで目標の速度を変える）"
 	# 2段目: 拠点HP（外装の耐久）。走行装置・加工設備の耐久はHUDに出さない。
 	(_gauges["hull"] as BaseHPGauge).update_appearance(game)
+	_speed.tooltip_text = "\u901f\u5ea6 / \u76ee\u6a19(\u4e0a\u4e0b\u30ad\u30fc\u3067\u5909\u66f4)\u3002\u30a8\u30f3\u30b8\u30f3\u4fee\u7406\u5f8c\u3082\u901f\u5ea6\u306f\u624b\u52d5\u3067\u623b\u3057\u307e\u3059\u3002"
+	var leak_rate: float = b.engine_leak_rate(game.scroll_speed)
+	_leak.visible = b.engine_leaking()
+	if _leak.visible:
+		_leak.text = "\u30a8\u30f3\u30b8\u30f3\u71c3\u6599\u6f0f\u308c: %.3f/\u79d2 (\u6e1b\u901f\u3067\u6e1b\u5c11\u30fb\u505c\u6b62\u4e2d\u3082\u7d99\u7d9a)" % leak_rate
+		_leak.tooltip_text = "DRIVE %d / 100\n\u73fe\u5730\u4fee\u7406\u304c\u5b8c\u4e86\u3059\u308b\u307e\u3067\u6f0f\u308c\u307e\u3059\u3002" % int(b.condition(GameData.Part.DRIVE))
 	var cond: float = b.condition(GameData.Part.HULL)
 	_set_gauge("hull", cond, 100.0, str(int(cond)), "拠点HP %d / 100%s" % [int(cond), "（不調）" if cond < GameData.PART_BAD else ""])
 	_set_gauge("fuel", b.fuel, GameData.FUEL_CAP, str(int(b.fuel / GameData.FUEL_CAP * 100.0)), "燃料 %d / %d" % [int(b.fuel), int(GameData.FUEL_CAP)])

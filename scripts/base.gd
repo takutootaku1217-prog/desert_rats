@@ -201,6 +201,27 @@ func burn(distance: float) -> void:
 	consume_fuel(distance * GameData.FUEL_PER_PX * game.director.burn_mult())
 
 
+## DRIVE damage below the leak threshold drains fuel even while stopped.
+## At lower speeds the leak costs less, but it is never fully stopped until repaired.
+func engine_leaking() -> bool:
+	return condition(GameData.Part.DRIVE) < GameData.ENGINE_LEAK_DAMAGE_THRESHOLD
+
+
+func engine_leak_rate(speed: float) -> float:
+	if not engine_leaking():
+		return 0.0
+	var damage_ratio := clampf((GameData.ENGINE_LEAK_DAMAGE_THRESHOLD - condition(GameData.Part.DRIVE)) / GameData.ENGINE_LEAK_DAMAGE_THRESHOLD, 0.0, 1.0)
+	var severity := lerpf(0.35, 1.0, damage_ratio)
+	var speed_ratio := maxf(GameData.ENGINE_LEAK_IDLE_MULT, maxf(0.0, speed) / GameData.FUEL_STANDARD_SPEED)
+	return GameData.ENGINE_LEAK_PER_SEC_AT_FULL_SPEED * severity * speed_ratio
+
+
+func leak_fuel(delta: float, speed: float) -> float:
+	var amount := engine_leak_rate(speed) * maxf(0.0, delta)
+	consume_fuel(amount)
+	return amount
+
+
 func has_fuel() -> bool:
 	return fuel > 0.0
 
@@ -273,7 +294,16 @@ func repair_point() -> Vector2:
 
 func take_damage(amount: float) -> void:
 	# 敵の攻撃は車体に当たる（車体の耐久度が0になると拠点は動かなくなる）
+	# Enemy attacks damage both the hull and engine-side DRIVE; only the latter can leak fuel.
+	var drive_before := condition(GameData.Part.DRIVE)
 	parts[GameData.Part.HULL] = maxf(0.0, parts[GameData.Part.HULL] - amount)
+	parts[GameData.Part.DRIVE] = maxf(0.0, parts[GameData.Part.DRIVE] - amount)
+	# Damage may force a lower target speed. Repair intentionally does not restore it.
+	if game.target_speed > speed_limit():
+		game.target_speed = speed_limit()
+		game.director.note("\u30a8\u30f3\u30b8\u30f3\u640d\u50b7: \u76ee\u6a19\u901f\u5ea6\u3092\u4f4e\u4e0b\u3002\u4fee\u7406\u5f8c\u3082\u901f\u5ea6\u306f\u624b\u52d5\u3067\u623b\u3059")
+	if drive_before >= GameData.ENGINE_LEAK_DAMAGE_THRESHOLD and engine_leaking():
+		game.director.note("エンジン損傷: 燃料漏れ発生。減速で減るが、修理まで止まらない")
 	hit_timer = 0.25
 
 

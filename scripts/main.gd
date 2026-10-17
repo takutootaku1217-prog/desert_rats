@@ -292,6 +292,7 @@ func _process(delta: float) -> void:
 	world.tick(dist)
 	town.observe()
 	base.burn(dist)
+	base.leak_fuel(delta, scroll_speed)
 	base.wear_by(delta, dist)
 	director.tick(delta, dist)                 # 出来事の進行（予報・発生・終了）
 	operations.tick()
@@ -1148,6 +1149,39 @@ func emergency_repair() -> bool:
 
 ## 部屋と設備の効果の合計（休憩の回復・元気の消耗など。Worker（CrewStatus）が読む）。設備の効果は data/facilities.gd の
 ## "effects"（部屋の効果と同じ kind・形。例: 物資庫の drain_cut）。元気の消耗を減らす分は、部屋＋設備の合計に上限をかける。
+func repair_order_info() -> Dictionary:
+	var assigned = null
+	for w in workers:
+		if is_instance_valid(w) and w.ai.manual_job == GameData.Job.REPAIR:
+			assigned = w
+			break
+	var part := base.part_to_repair()
+	var required := 1 if part >= 0 else 0
+	var available := storage.count_of(GameData.Item.REPAIR_KIT)
+	return {"part": part, "required": required, "available": available,
+		"missing": maxi(0, required - available), "assigned": assigned}
+
+
+func request_repair(worker = null) -> bool:
+	var info := repair_order_info()
+	if int(info["part"]) < 0 or int(info["missing"]) > 0 or info["assigned"] != null:
+		return false
+	var chosen = worker
+	if chosen == null:
+		var best_score := -INF
+		for candidate in workers:
+			if not is_instance_valid(candidate) or not candidate.ai.manual_repair_reason().is_empty():
+				continue
+			var score: float = candidate.skill_mult(GameData.Job.REPAIR) + float(candidate.priorities.get(GameData.Job.REPAIR, 0)) * 0.01
+			if score > best_score:
+				best_score = score
+				chosen = candidate
+	if chosen == null or not is_instance_valid(chosen) or not chosen.ai.request_manual_repair():
+		return false
+	director.note("修理依頼: %sが%sの修理に向かう" % [chosen.char_name, GameData.PART_NAMES[int(info["part"])]] )
+	return true
+
+
 func room_effect(kind: String) -> float:
 	var v := Rooms.total(room_layout, kind) + facility_effect(kind)
 	return minf(v, Rooms.CAP_DRAIN_CUT) if kind == "drain_cut" else v
