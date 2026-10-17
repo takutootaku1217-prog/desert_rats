@@ -1,0 +1,636 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Started Project initialization (5 steps)[39m[0m
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Scanning file structure...[39m[0m
+[  16% ] [90m[1mfirst_scan_filesystem[22m | Loading global class names...[39m[0m
+[  33% ] [90m[1mfirst_scan_filesystem[22m | Verifying GDExtensions...[39m[0m
+[  50% ] [90m[1mfirst_scan_filesystem[22m | Creating autoload scripts...[39m[0m
+[  66% ] [90m[1mfirst_scan_filesystem[22m | Initializing plugins...[39m[0m
+[  83% ] [90m[1mfirst_scan_filesystem[22m | Starting file scan...[39m[0m
+[92m[ DONE ][39m [1mfirst_scan_filesystem[22m
+[0m
+[   0% ] [90m[1mupdate_scripts_classes[22m | Started Registering global classes... (167 steps)[39m[0m
+[   0% ] [90m[1mupdate_scripts_classes[22m | ArtSpec[39m[0m
+[   0% ] [90m[1mupdate_scripts_classes[22m | Balance[39m[0m
+[   1% ] [90m[1mupdate_scripts_classes[22m | CargoDB[39m[0m
+[   1% ] [90m[1mupdate_scripts_classes[22m | CraftDB[39m[0m
+[   2% ] [90m[1mupdate_scripts_classes[22m | CrewStatusDB[39m[0m
+[   2% ] [90m[1mupdate_scripts_classes[22m | EffectDB[39m[0m
+[   3% ] [90m[1mupdate_scripts_classes[22m | EventDB[39m[0m
+[   4% ] [90m[1mupdate_scripts_classes[22m | ExpeditionDB[39m[0m
+[   4% ] [90m[1mupdate_scripts_classes[22m | ExteriorDB[39m[0m
+[   5% ] [90m[1mupdate_scripts_classes[22m | FacilityDB[39m[0m
+[   5% ] [90m[1mupdate_scripts_classes[22m | GatherDB[39m[0m
+[   6% ] [90m[1mupdate_scripts_classes[22m | ItemDB[39m[0m
+[   7% ] [90m[1mupdate_scripts_classes[22m | QuarryDB[39m[0m
+[   7% ] [90m[1mupdate_scripts_classes[22m | Rooms[39m[0m
+[   8% ] [90m[1mupdate_scripts_classes[22m | SkillDB[39m[0m
+[   8% ] [90m[1mupdate_scripts_classes[22m | Unlocks[39m[0m
+[   9% ] [90m[1mupdate_scripts_classes[22m | WorldMapDB[39m[0m
+[  10% ] [90m[1mupdate_scripts_classes[22m | AutoCraftGuard[39m[0m
+[  10% ] [90m[1mupdate_scripts_classes[22m | MobileBase[39m[0m
+[  11% ] [90m[1mupdate_scripts_classes[22m | BaseExterior[39m[0m
+[  11% ] [90m[1mupdate_scripts_classes[22m | BaseView[39m[0m
+[  12% ] [90m[1mupdate_scripts_classes[22m | Worker[39m[0m
+[  13% ] [90m[1mupdate_scripts_classes[22m | CharacterAI[39m[0m
+[  13% ] [90m[1mupdate_scripts_classes[22m | Creature[39m[0m
+[  14% ] [90m[1mupdate_scripts_classes[22m | CrewGen[39m[0m
+[  14% ] [90m[1mupdate_scripts_classes[22m | CrewStatus[39m[0m
+[  15% ] [90m[1mupdate_scripts_classes[22m | Department[39m[0m
+[  16% ] [90m[1mupdate_scripts_classes[22m | Director[39m[0m
+[  16% ] [90m[1mupdate_scripts_classes[22m | Enemy[39m[0m
+[  17% ] [90m[1mupdate_scripts_classes[22m | Expedition[39m[0m
+[  17% ] [90m[1mupdate_scripts_classes[22m | FacilityPacking[39m[0m
+[  18% ] [90m[1mupdate_scripts_classes[22m | FieldOperations[39m[0m
+[  19% ] [90m[1mupdate_scripts_classes[22m | FxSprite[39m[0m
+[  19% ] [90m[1mupdate_scripts_classes[22m | GameData[39m[0m
+[  20% ] [90m[1mupdate_scripts_classes[22m | GatherPoint[39m[0m
+[  20% ] [90m[1mupdate_scripts_classes[22m | Inventory[39m[0m
+[  21% ] [90m[1mupdate_scripts_classes[22m | InventoryModel[39m[0m
+[  22% ] [90m[1mupdate_scripts_classes[22m | ItemStack[39m[0m
+[  22% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  23% ] [90m[1mupdate_scripts_classes[22m | BaseProcessor[39m[0m
+[  23% ] [90m[1mupdate_scripts_classes[22m | ProductionPlan[39m[0m
+[  24% ] [90m[1mupdate_scripts_classes[22m | QuarryTrip[39m[0m
+[  25% ] [90m[1mupdate_scripts_classes[22m | ResourceNode[39m[0m
+[  25% ] [90m[1mupdate_scripts_classes[22m | SaveGame[39m[0m
+[  26% ] [90m[1mupdate_scripts_classes[22m | BaseStorage[39m[0m
+[  26% ] [90m[1mupdate_scripts_classes[22m | WeatherFX[39m[0m
+[  27% ] [90m[1mupdate_scripts_classes[22m | WorldScroll[39m[0m
+[  27% ] [90m[1mupdate_scripts_classes[22m | WorldTrip[39m[0m
+[  28% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  29% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  29% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  30% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  30% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  31% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  32% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  32% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  33% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  33% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  34% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  35% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  35% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  36% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  36% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  37% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  38% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  38% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  39% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  39% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  40% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  41% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  41% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  42% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  42% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  43% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  44% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  44% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  45% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  45% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  46% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  47% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  47% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  48% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  48% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  49% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  50% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  50% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  51% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  51% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  52% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  52% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  53% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  54% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  54% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  55% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  55% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  56% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  57% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  57% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  58% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  58% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  59% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  60% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  60% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  61% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  61% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  62% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  63% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  63% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  64% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  64% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  65% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  66% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  66% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  67% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  67% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  68% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  69% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  69% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  70% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  70% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  71% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  72% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  72% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  73% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  73% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  74% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  75% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  75% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  76% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  76% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  77% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  77% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  78% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  79% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  79% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  80% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  80% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  81% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  82% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  82% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  83% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  83% ] [90m[1mupdate_scripts_classes[22m | BaseHPGauge[39m[0m
+[  84% ] [90m[1mupdate_scripts_classes[22m | BaseUI[39m[0m
+[  85% ] [90m[1mupdate_scripts_classes[22m | BuildUI[39m[0m
+[  85% ] [90m[1mupdate_scripts_classes[22m | CraftUI[39m[0m
+[  86% ] [90m[1mupdate_scripts_classes[22m | CrewAlertUI[39m[0m
+[  86% ] [90m[1mupdate_scripts_classes[22m | CrewDetailUI[39m[0m
+[  87% ] [90m[1mupdate_scripts_classes[22m | CrewPicker[39m[0m
+[  88% ] [90m[1mupdate_scripts_classes[22m | CrewStatusView[39m[0m
+[  88% ] [90m[1mupdate_scripts_classes[22m | DepartmentUI[39m[0m
+[  89% ] [90m[1mupdate_scripts_classes[22m | EventHUD[39m[0m
+[  89% ] [90m[1mupdate_scripts_classes[22m | ExpeditionUI[39m[0m
+[  90% ] [90m[1mupdate_scripts_classes[22m | IconGauge[39m[0m
+[  91% ] [90m[1mupdate_scripts_classes[22m | InventoryUI[39m[0m
+[  91% ] [90m[1mupdate_scripts_classes[22m | ItemWidgets[39m[0m
+[  92% ] [90m[1mupdate_scripts_classes[22m | NavigationBar[39m[0m
+[  92% ] [90m[1mupdate_scripts_classes[22m | PolicyUI[39m[0m
+[  93% ] [90m[1mupdate_scripts_classes[22m | QtyPicker[39m[0m
+[  94% ] [90m[1mupdate_scripts_classes[22m | QuarryUI[39m[0m
+[  94% ] [90m[1mupdate_scripts_classes[22m | SaveUI[39m[0m
+[  95% ] [90m[1mupdate_scripts_classes[22m | StatusPanel[39m[0m
+[  95% ] [90m[1mupdate_scripts_classes[22m | StockGrid[39m[0m
+[  96% ] [90m[1mupdate_scripts_classes[22m | UIKit[39m[0m
+[  97% ] [90m[1mupdate_scripts_classes[22m | ViewSwitchUI[39m[0m
+[  97% ] [90m[1mupdate_scripts_classes[22m | WorkPriorityUI[39m[0m
+[  98% ] [90m[1mupdate_scripts_classes[22m | WorldMapUI[39m[0m
+[  98% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[92m[ DONE ][39m [1mupdate_scripts_classes[22m
+[0m
+[   0% ] [90m[1m_update_scan_actions[22m | Started Scanning actions... (146 steps)[39m[0m
+[   0% ] [90m[1m_update_scan_actions[22m | armor.png[39m[0m
+[   0% ] [90m[1m_update_scan_actions[22m | body.png[39m[0m
+[   1% ] [90m[1m_update_scan_actions[22m | roof_parts.png[39m[0m
+[   2% ] [90m[1m_update_scan_actions[22m | wall_parts.png[39m[0m
+[   2% ] [90m[1m_update_scan_actions[22m | windows.png[39m[0m
+[   3% ] [90m[1m_update_scan_actions[22m | room_l1_bedroom.png[39m[0m
+[   4% ] [90m[1m_update_scan_actions[22m | room_l1_empty.png[39m[0m
+[   4% ] [90m[1m_update_scan_actions[22m | room_l1_engine.png[39m[0m
+[   5% ] [90m[1m_update_scan_actions[22m | room_l1_infirmary.png[39m[0m
+[   6% ] [90m[1m_update_scan_actions[22m | room_l1_mess.png[39m[0m
+[   6% ] [90m[1m_update_scan_actions[22m | room_l1_storage.png[39m[0m
+[   7% ] [90m[1m_update_scan_actions[22m | room_l1_training.png[39m[0m
+[   8% ] [90m[1m_update_scan_actions[22m | room_l1_workshop.png[39m[0m
+[   8% ] [90m[1m_update_scan_actions[22m | room_l2_bedroom.png[39m[0m
+[   9% ] [90m[1m_update_scan_actions[22m | room_l2_empty.png[39m[0m
+[  10% ] [90m[1m_update_scan_actions[22m | room_l2_engine.png[39m[0m
+[  10% ] [90m[1m_update_scan_actions[22m | room_l2_infirmary.png[39m[0m
+[  11% ] [90m[1m_update_scan_actions[22m | room_l2_mess.png[39m[0m
+[  12% ] [90m[1m_update_scan_actions[22m | room_l2_storage.png[39m[0m
+[  12% ] [90m[1m_update_scan_actions[22m | room_l2_training.png[39m[0m
+[  13% ] [90m[1m_update_scan_actions[22m | room_l2_workshop.png[39m[0m
+[  14% ] [90m[1m_update_scan_actions[22m | room_l3_bedroom.png[39m[0m
+[  14% ] [90m[1m_update_scan_actions[22m | room_l3_empty.png[39m[0m
+[  15% ] [90m[1m_update_scan_actions[22m | room_l3_engine.png[39m[0m
+[  16% ] [90m[1m_update_scan_actions[22m | room_l3_infirmary.png[39m[0m
+[  17% ] [90m[1m_update_scan_actions[22m | room_l3_mess.png[39m[0m
+[  17% ] [90m[1m_update_scan_actions[22m | room_l3_storage.png[39m[0m
+[  18% ] [90m[1m_update_scan_actions[22m | room_l3_training.png[39m[0m
+[  19% ] [90m[1m_update_scan_actions[22m | room_l3_workshop.png[39m[0m
+[  19% ] [90m[1m_update_scan_actions[22m | room_u1_bedroom.png[39m[0m
+[  20% ] [90m[1m_update_scan_actions[22m | room_u1_empty.png[39m[0m
+[  21% ] [90m[1m_update_scan_actions[22m | room_u1_infirmary.png[39m[0m
+[  21% ] [90m[1m_update_scan_actions[22m | room_u1_mess.png[39m[0m
+[  22% ] [90m[1m_update_scan_actions[22m | room_u1_training.png[39m[0m
+[  23% ] [90m[1m_update_scan_actions[22m | room_u1_workshop.png[39m[0m
+[  23% ] [90m[1m_update_scan_actions[22m | room_u2_bedroom.png[39m[0m
+[  24% ] [90m[1m_update_scan_actions[22m | room_u2_empty.png[39m[0m
+[  25% ] [90m[1m_update_scan_actions[22m | room_u2_infirmary.png[39m[0m
+[  25% ] [90m[1m_update_scan_actions[22m | room_u2_mess.png[39m[0m
+[  26% ] [90m[1m_update_scan_actions[22m | room_u2_training.png[39m[0m
+[  27% ] [90m[1m_update_scan_actions[22m | room_u2_workshop.png[39m[0m
+[  27% ] [90m[1m_update_scan_actions[22m | room_u3_bedroom.png[39m[0m
+[  28% ] [90m[1m_update_scan_actions[22m | room_u3_empty.png[39m[0m
+[  29% ] [90m[1m_update_scan_actions[22m | room_u3_infirmary.png[39m[0m
+[  29% ] [90m[1m_update_scan_actions[22m | room_u3_mess.png[39m[0m
+[  30% ] [90m[1m_update_scan_actions[22m | room_u3_training.png[39m[0m
+[  31% ] [90m[1m_update_scan_actions[22m | room_u3_workshop.png[39m[0m
+[  31% ] [90m[1m_update_scan_actions[22m | bed_0.png[39m[0m
+[  32% ] [90m[1m_update_scan_actions[22m | bed_1.png[39m[0m
+[  33% ] [90m[1m_update_scan_actions[22m | bed_2.png[39m[0m
+[  34% ] [90m[1m_update_scan_actions[22m | cargo_rack_0.png[39m[0m
+[  34% ] [90m[1m_update_scan_actions[22m | cargo_rack_1.png[39m[0m
+[  35% ] [90m[1m_update_scan_actions[22m | cargo_rack_2.png[39m[0m
+[  36% ] [90m[1m_update_scan_actions[22m | hull.png[39m[0m
+[  36% ] [90m[1m_update_scan_actions[22m | machine.png[39m[0m
+[  37% ] [90m[1m_update_scan_actions[22m | ramp.png[39m[0m
+[  38% ] [90m[1m_update_scan_actions[22m | supply_cache.png[39m[0m
+[  38% ] [90m[1m_update_scan_actions[22m | wheels.png[39m[0m
+[  39% ] [90m[1m_update_scan_actions[22m | workbench.png[39m[0m
+[  40% ] [90m[1m_update_scan_actions[22m | crew24_blue.png[39m[0m
+[  40% ] [90m[1m_update_scan_actions[22m | crew24_green.png[39m[0m
+[  41% ] [90m[1m_update_scan_actions[22m | crew24_grey.png[39m[0m
+[  42% ] [90m[1m_update_scan_actions[22m | crew24_pink.png[39m[0m
+[  42% ] [90m[1m_update_scan_actions[22m | crew24_red.png[39m[0m
+[  43% ] [90m[1m_update_scan_actions[22m | crew24_tan.png[39m[0m
+[  44% ] [90m[1m_update_scan_actions[22m | crew_blue.png[39m[0m
+[  44% ] [90m[1m_update_scan_actions[22m | crew_green.png[39m[0m
+[  45% ] [90m[1m_update_scan_actions[22m | crew_grey.png[39m[0m
+[  46% ] [90m[1m_update_scan_actions[22m | crew_pink.png[39m[0m
+[  46% ] [90m[1m_update_scan_actions[22m | crew_red.png[39m[0m
+[  47% ] [90m[1m_update_scan_actions[22m | crew_tan.png[39m[0m
+[  48% ] [90m[1m_update_scan_actions[22m | mouse_grey.png[39m[0m
+[  48% ] [90m[1m_update_scan_actions[22m | mouse_pink.png[39m[0m
+[  49% ] [90m[1m_update_scan_actions[22m | mouse_tan.png[39m[0m
+[  50% ] [90m[1m_update_scan_actions[22m | hare.png[39m[0m
+[  51% ] [90m[1m_update_scan_actions[22m | hump.png[39m[0m
+[  51% ] [90m[1m_update_scan_actions[22m | lizard.png[39m[0m
+[  52% ] [90m[1m_update_scan_actions[22m | proc_done.png[39m[0m
+[  53% ] [90m[1m_update_scan_actions[22m | proc_drop.png[39m[0m
+[  53% ] [90m[1m_update_scan_actions[22m | proc_steam.png[39m[0m
+[  54% ] [90m[1m_update_scan_actions[22m | clouds.png[39m[0m
+[  55% ] [90m[1m_update_scan_actions[22m | dunes.png[39m[0m
+[  55% ] [90m[1m_update_scan_actions[22m | ground.png[39m[0m
+[  56% ] [90m[1m_update_scan_actions[22m | mesa_far.png[39m[0m
+[  57% ] [90m[1m_update_scan_actions[22m | mesa_mid.png[39m[0m
+[  57% ] [90m[1m_update_scan_actions[22m | props.png[39m[0m
+[  58% ] [90m[1m_update_scan_actions[22m | sky.png[39m[0m
+[  59% ] [90m[1m_update_scan_actions[22m | rock.png[39m[0m
+[  59% ] [90m[1m_update_scan_actions[22m | tree.png[39m[0m
+[  60% ] [90m[1m_update_scan_actions[22m | vein.png[39m[0m
+[  61% ] [90m[1m_update_scan_actions[22m | item_adv_pick.png[39m[0m
+[  61% ] [90m[1m_update_scan_actions[22m | item_axe.png[39m[0m
+[  62% ] [90m[1m_update_scan_actions[22m | item_bed_pack.png[39m[0m
+[  63% ] [90m[1m_update_scan_actions[22m | item_bone.png[39m[0m
+[  63% ] [90m[1m_update_scan_actions[22m | item_bone_prod.png[39m[0m
+[  64% ] [90m[1m_update_scan_actions[22m | item_cactus.png[39m[0m
+[  65% ] [90m[1m_update_scan_actions[22m | item_cloth.png[39m[0m
+[  65% ] [90m[1m_update_scan_actions[22m | item_fabric.png[39m[0m
+[  66% ] [90m[1m_update_scan_actions[22m | item_fat.png[39m[0m
+[  67% ] [90m[1m_update_scan_actions[22m | item_food.png[39m[0m
+[  68% ] [90m[1m_update_scan_actions[22m | item_fuel.png[39m[0m
+[  68% ] [90m[1m_update_scan_actions[22m | item_hammer.png[39m[0m
+[  69% ] [90m[1m_update_scan_actions[22m | item_handcart.png[39m[0m
+[  70% ] [90m[1m_update_scan_actions[22m | item_haul_frame.png[39m[0m
+[  70% ] [90m[1m_update_scan_actions[22m | item_hide.png[39m[0m
+[  71% ] [90m[1m_update_scan_actions[22m | item_iron.png[39m[0m
+[  72% ] [90m[1m_update_scan_actions[22m | item_iron_axe.png[39m[0m
+[  72% ] [90m[1m_update_scan_actions[22m | item_iron_ore.png[39m[0m
+[  73% ] [90m[1m_update_scan_actions[22m | item_meat.png[39m[0m
+[  74% ] [90m[1m_update_scan_actions[22m | item_metal.png[39m[0m
+[  74% ] [90m[1m_update_scan_actions[22m | item_pickaxe.png[39m[0m
+[  75% ] [90m[1m_update_scan_actions[22m | item_plank.png[39m[0m
+[  76% ] [90m[1m_update_scan_actions[22m | item_ration.png[39m[0m
+[  76% ] [90m[1m_update_scan_actions[22m | item_repair_kit.png[39m[0m
+[  77% ] [90m[1m_update_scan_actions[22m | item_scrap.png[39m[0m
+[  78% ] [90m[1m_update_scan_actions[22m | item_simple_spear.png[39m[0m
+[  78% ] [90m[1m_update_scan_actions[22m | item_stone.png[39m[0m
+[  79% ] [90m[1m_update_scan_actions[22m | item_storage_box.png[39m[0m
+[  80% ] [90m[1m_update_scan_actions[22m | item_wood.png[39m[0m
+[  80% ] [90m[1m_update_scan_actions[22m | base_hp_cartoon.png[39m[0m
+[  81% ] [90m[1m_update_scan_actions[22m | fatigue.png[39m[0m
+[  82% ] [90m[1m_update_scan_actions[22m | fatigue_mask.png[39m[0m
+[  82% ] [90m[1m_update_scan_actions[22m | fuel.png[39m[0m
+[  83% ] [90m[1m_update_scan_actions[22m | fuel_mask.png[39m[0m
+[  84% ] [90m[1m_update_scan_actions[22m | hp.png[39m[0m
+[  85% ] [90m[1m_update_scan_actions[22m | hp_mask.png[39m[0m
+[  85% ] [90m[1m_update_scan_actions[22m | hunger.png[39m[0m
+[  86% ] [90m[1m_update_scan_actions[22m | hunger_mask.png[39m[0m
+[  87% ] [90m[1m_update_scan_actions[22m | mark_lock.png[39m[0m
+[  87% ] [90m[1m_update_scan_actions[22m | mark_ng.png[39m[0m
+[  88% ] [90m[1m_update_scan_actions[22m | mark_ok.png[39m[0m
+[  89% ] [90m[1m_update_scan_actions[22m | mental_anxious.png[39m[0m
+[  89% ] [90m[1m_update_scan_actions[22m | mental_bad.png[39m[0m
+[  90% ] [90m[1m_update_scan_actions[22m | mental_good.png[39m[0m
+[  91% ] [90m[1m_update_scan_actions[22m | mental_limit.png[39m[0m
+[  91% ] [90m[1m_update_scan_actions[22m | mental_normal.png[39m[0m
+[  92% ] [90m[1m_update_scan_actions[22m | shield_drive.png[39m[0m
+[  93% ] [90m[1m_update_scan_actions[22m | shield_drive_mask.png[39m[0m
+[  93% ] [90m[1m_update_scan_actions[22m | shield_hull.png[39m[0m
+[  94% ] [90m[1m_update_scan_actions[22m | shield_hull_mask.png[39m[0m
+[  95% ] [90m[1m_update_scan_actions[22m | shield_machine.png[39m[0m
+[  95% ] [90m[1m_update_scan_actions[22m | shield_machine_mask.png[39m[0m
+[  96% ] [90m[1m_update_scan_actions[22m | stamina.png[39m[0m
+[  97% ] [90m[1m_update_scan_actions[22m | stamina_mask.png[39m[0m
+[  97% ] [90m[1m_update_scan_actions[22m | weight.png[39m[0m
+[  98% ] [90m[1m_update_scan_actions[22m | weight_mask.png[39m[0m
+[92m[ DONE ][39m [1m_update_scan_actions[22m
+[0m
+[   0% ] [90m[1mreimport[22m | Started (Re)Importing Assets (146 steps)[39m[0m
+[   0% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[   0% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[   1% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[   2% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[   2% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[   3% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[   4% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[   4% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[   5% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[   6% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[   6% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[   7% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[   8% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[   8% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[   9% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  10% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  10% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  11% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  12% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  12% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  13% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  14% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  14% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  15% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  16% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  17% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  17% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  18% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  19% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  19% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  20% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  21% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  21% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  22% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  23% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  23% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  24% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  25% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  25% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  26% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  27% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  27% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  28% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  29% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  29% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  30% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  31% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  31% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  32% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  33% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  34% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  34% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  35% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  36% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  36% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  37% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  38% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  38% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  39% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  40% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  40% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  41% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  42% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  42% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  43% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  44% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  44% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  45% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  46% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  46% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  47% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  48% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  48% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  49% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  50% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  51% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  51% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  52% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  53% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  53% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  54% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  55% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  55% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  56% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  57% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  57% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  58% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  59% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  59% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  60% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  61% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  61% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  62% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  63% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  63% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  64% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  65% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  65% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  66% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  67% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  68% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  68% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  69% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  70% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  70% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  71% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  72% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  72% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  73% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  74% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  74% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  75% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  76% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  76% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  77% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  78% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  78% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  79% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  80% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  80% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  81% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  82% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  82% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  83% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  84% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  85% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  85% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  86% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  87% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  87% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  88% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  89% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  89% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  90% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  91% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  91% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  92% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  93% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  93% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  94% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  95% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  95% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  96% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  97% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  97% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  98% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[   0% ] [90m[1mreimport[22m | Executing pre-reimport operations...[39m[0m
+[   0% ] [90m[1mreimport[22m | item_axe.png[39m[0m
+[   0% ] [90m[1mreimport[22m | item_bed_pack.png[39m[0m
+[   1% ] [90m[1mreimport[22m | item_bone.png[39m[0m
+[   2% ] [90m[1mreimport[22m | item_bone_prod.png[39m[0m
+[   2% ] [90m[1mreimport[22m | item_cactus.png[39m[0m
+[   3% ] [90m[1mreimport[22m | item_cloth.png[39m[0m
+[   4% ] [90m[1mreimport[22m | item_fabric.png[39m[0m
+[   4% ] [90m[1mreimport[22m | item_fat.png[39m[0m
+[   5% ] [90m[1mreimport[22m | item_food.png[39m[0m
+[   6% ] [90m[1mreimport[22m | item_fuel.png[39m[0m
+[   6% ] [90m[1mreimport[22m | item_hammer.png[39m[0m
+[   7% ] [90m[1mreimport[22m | item_handcart.png[39m[0m
+[   8% ] [90m[1mreimport[22m | item_haul_frame.png[39m[0m
+[   8% ] [90m[1mreimport[22m | item_hide.png[39m[0m
+[   9% ] [90m[1mreimport[22m | item_iron.png[39m[0m
+[  10% ] [90m[1mreimport[22m | item_iron_axe.png[39m[0m
+[  10% ] [90m[1mreimport[22m | item_iron_ore.png[39m[0m
+[  11% ] [90m[1mreimport[22m | item_meat.png[39m[0m
+[  12% ] [90m[1mreimport[22m | mouse_tan.png[39m[0m
+[  12% ] [90m[1mreimport[22m | hare.png[39m[0m
+[  13% ] [90m[1mreimport[22m | hump.png[39m[0m
+[  14% ] [90m[1mreimport[22m | lizard.png[39m[0m
+[  14% ] [90m[1mreimport[22m | proc_done.png[39m[0m
+[  15% ] [90m[1mreimport[22m | proc_drop.png[39m[0m
+[  16% ] [90m[1mreimport[22m | proc_steam.png[39m[0m
+[  17% ] [90m[1mreimport[22m | clouds.png[39m[0m
+[  17% ] [90m[1mreimport[22m | dunes.png[39m[0m
+[  18% ] [90m[1mreimport[22m | ground.png[39m[0m
+[  19% ] [90m[1mreimport[22m | mesa_far.png[39m[0m
+[  19% ] [90m[1mreimport[22m | mesa_mid.png[39m[0m
+[  20% ] [90m[1mreimport[22m | props.png[39m[0m
+[  21% ] [90m[1mreimport[22m | sky.png[39m[0m
+[  21% ] [90m[1mreimport[22m | rock.png[39m[0m
+[  22% ] [90m[1mreimport[22m | tree.png[39m[0m
+[  23% ] [90m[1mreimport[22m | vein.png[39m[0m
+[  23% ] [90m[1mreimport[22m | item_adv_pick.png[39m[0m
+[  24% ] [90m[1mreimport[22m | mark_lock.png[39m[0m
+[  25% ] [90m[1mreimport[22m | mark_ng.png[39m[0m
+[  25% ] [90m[1mreimport[22m | mark_ok.png[39m[0m
+[  26% ] [90m[1mreimport[22m | mental_anxious.png[39m[0m
+[  27% ] [90m[1mreimport[22m | mental_bad.png[39m[0m
+[  27% ] [90m[1mreimport[22m | mental_good.png[39m[0m
+[  28% ] [90m[1mreimport[22m | mental_limit.png[39m[0m
+[  29% ] [90m[1mreimport[22m | mental_normal.png[39m[0m
+[  29% ] [90m[1mreimport[22m | shield_drive.png[39m[0m
+[  30% ] [90m[1mreimport[22m | shield_drive_mask.png[39m[0m
+[  31% ] [90m[1mreimport[22m | shield_hull.png[39m[0m
+[  31% ] [90m[1mreimport[22m | shield_hull_mask.png[39m[0m
+[  32% ] [90m[1mreimport[22m | shield_machine.png[39m[0m
+[  33% ] [90m[1mreimport[22m | shield_machine_mask.png[39m[0m
+[  34% ] [90m[1mreimport[22m | stamina.png[39m[0m
+[  34% ] [90m[1mreimport[22m | stamina_mask.png[39m[0m
+[  35% ] [90m[1mreimport[22m | weight.png[39m[0m
+[  36% ] [90m[1mreimport[22m | weight_mask.png[39m[0m
+[  36% ] [90m[1mreimport[22m | item_metal.png[39m[0m
+[  37% ] [90m[1mreimport[22m | item_pickaxe.png[39m[0m
+[  38% ] [90m[1mreimport[22m | item_plank.png[39m[0m
+[  38% ] [90m[1mreimport[22m | item_ration.png[39m[0m
+[  39% ] [90m[1mreimport[22m | item_repair_kit.png[39m[0m
+[  40% ] [90m[1mreimport[22m | item_scrap.png[39m[0m
+[  40% ] [90m[1mreimport[22m | item_simple_spear.png[39m[0m
+[  41% ] [90m[1mreimport[22m | item_stone.png[39m[0m
+[  42% ] [90m[1mreimport[22m | item_storage_box.png[39m[0m
+[  42% ] [90m[1mreimport[22m | item_wood.png[39m[0m
+[  43% ] [90m[1mreimport[22m | base_hp_cartoon.png[39m[0m
+[  44% ] [90m[1mreimport[22m | fatigue.png[39m[0m
+[  44% ] [90m[1mreimport[22m | fatigue_mask.png[39m[0m
+[  45% ] [90m[1mreimport[22m | fuel.png[39m[0m
+[  46% ] [90m[1mreimport[22m | fuel_mask.png[39m[0m
+[  46% ] [90m[1mreimport[22m | hp.png[39m[0m
+[  47% ] [90m[1mreimport[22m | hp_mask.png[39m[0m
+[  48% ] [90m[1mreimport[22m | hunger.png[39m[0m
+[  48% ] [90m[1mreimport[22m | hunger_mask.png[39m[0m
+[  49% ] [90m[1mreimport[22m | room_l2_storage.png[39m[0m
+[  50% ] [90m[1mreimport[22m | room_l2_training.png[39m[0m
+[  51% ] [90m[1mreimport[22m | room_l2_workshop.png[39m[0m
+[  51% ] [90m[1mreimport[22m | room_l3_bedroom.png[39m[0m
+[  52% ] [90m[1mreimport[22m | room_l3_empty.png[39m[0m
+[  53% ] [90m[1mreimport[22m | room_l3_engine.png[39m[0m
+[  53% ] [90m[1mreimport[22m | room_l3_infirmary.png[39m[0m
+[  54% ] [90m[1mreimport[22m | room_l3_mess.png[39m[0m
+[  55% ] [90m[1mreimport[22m | room_l3_storage.png[39m[0m
+[  55% ] [90m[1mreimport[22m | room_l3_training.png[39m[0m
+[  56% ] [90m[1mreimport[22m | room_l3_workshop.png[39m[0m
+[  57% ] [90m[1mreimport[22m | room_u1_bedroom.png[39m[0m
+[  57% ] [90m[1mreimport[22m | room_u1_empty.png[39m[0m
+[  58% ] [90m[1mreimport[22m | room_u1_infirmary.png[39m[0m
+[  59% ] [90m[1mreimport[22m | room_u1_mess.png[39m[0m
+[  59% ] [90m[1mreimport[22m | room_u1_training.png[39m[0m
+[  60% ] [90m[1mreimport[22m | room_u1_workshop.png[39m[0m
+[  61% ] [90m[1mreimport[22m | room_u2_bedroom.png[39m[0m
+[  61% ] [90m[1mreimport[22m | armor.png[39m[0m
+[  62% ] [90m[1mreimport[22m | body.png[39m[0m
+[  63% ] [90m[1mreimport[22m | roof_parts.png[39m[0m
+[  63% ] [90m[1mreimport[22m | wall_parts.png[39m[0m
+[  64% ] [90m[1mreimport[22m | windows.png[39m[0m
+[  65% ] [90m[1mreimport[22m | room_l1_bedroom.png[39m[0m
+[  65% ] [90m[1mreimport[22m | room_l1_empty.png[39m[0m
+[  66% ] [90m[1mreimport[22m | room_l1_engine.png[39m[0m
+[  67% ] [90m[1mreimport[22m | room_l1_infirmary.png[39m[0m
+[  68% ] [90m[1mreimport[22m | room_l1_mess.png[39m[0m
+[  68% ] [90m[1mreimport[22m | room_l1_storage.png[39m[0m
+[  69% ] [90m[1mreimport[22m | room_l1_training.png[39m[0m
+[  70% ] [90m[1mreimport[22m | room_l1_workshop.png[39m[0m
+[  70% ] [90m[1mreimport[22m | room_l2_bedroom.png[39m[0m
+[  71% ] [90m[1mreimport[22m | room_l2_empty.png[39m[0m
+[  72% ] [90m[1mreimport[22m | room_l2_engine.png[39m[0m
+[  72% ] [90m[1mreimport[22m | room_l2_infirmary.png[39m[0m
+[  73% ] [90m[1mreimport[22m | room_l2_mess.png[39m[0m
+[  74% ] [90m[1mreimport[22m | ramp.png[39m[0m
+[  74% ] [90m[1mreimport[22m | supply_cache.png[39m[0m
+[  75% ] [90m[1mreimport[22m | wheels.png[39m[0m
+[  76% ] [90m[1mreimport[22m | workbench.png[39m[0m
+[  76% ] [90m[1mreimport[22m | crew24_blue.png[39m[0m
+[  77% ] [90m[1mreimport[22m | crew24_green.png[39m[0m
+[  78% ] [90m[1mreimport[22m | crew24_grey.png[39m[0m
+[  78% ] [90m[1mreimport[22m | crew24_pink.png[39m[0m
+[  79% ] [90m[1mreimport[22m | crew24_red.png[39m[0m
+[  80% ] [90m[1mreimport[22m | crew24_tan.png[39m[0m
+[  80% ] [90m[1mreimport[22m | crew_blue.png[39m[0m
+[  81% ] [90m[1mreimport[22m | crew_green.png[39m[0m
+[  82% ] [90m[1mreimport[22m | crew_grey.png[39m[0m
+[  82% ] [90m[1mreimport[22m | crew_pink.png[39m[0m
+[  83% ] [90m[1mreimport[22m | crew_red.png[39m[0m
+[  84% ] [90m[1mreimport[22m | crew_tan.png[39m[0m
+[  85% ] [90m[1mreimport[22m | mouse_grey.png[39m[0m
+[  85% ] [90m[1mreimport[22m | mouse_pink.png[39m[0m
+[  86% ] [90m[1mreimport[22m | room_u2_empty.png[39m[0m
+[  87% ] [90m[1mreimport[22m | room_u2_infirmary.png[39m[0m
+[  87% ] [90m[1mreimport[22m | room_u2_mess.png[39m[0m
+[  88% ] [90m[1mreimport[22m | room_u2_training.png[39m[0m
+[  89% ] [90m[1mreimport[22m | room_u2_workshop.png[39m[0m
+[  89% ] [90m[1mreimport[22m | room_u3_bedroom.png[39m[0m
+[  90% ] [90m[1mreimport[22m | room_u3_empty.png[39m[0m
+[  91% ] [90m[1mreimport[22m | room_u3_infirmary.png[39m[0m
+[  91% ] [90m[1mreimport[22m | room_u3_mess.png[39m[0m
+[  92% ] [90m[1mreimport[22m | room_u3_training.png[39m[0m
+[  93% ] [90m[1mreimport[22m | room_u3_workshop.png[39m[0m
+[  93% ] [90m[1mreimport[22m | bed_0.png[39m[0m
+[  94% ] [90m[1mreimport[22m | bed_1.png[39m[0m
+[  95% ] [90m[1mreimport[22m | bed_2.png[39m[0m
+[  95% ] [90m[1mreimport[22m | cargo_rack_0.png[39m[0m
+[  96% ] [90m[1mreimport[22m | cargo_rack_1.png[39m[0m
+[  97% ] [90m[1mreimport[22m | cargo_rack_2.png[39m[0m
+[  97% ] [90m[1mreimport[22m | hull.png[39m[0m
+[  98% ] [90m[1mreimport[22m | machine.png[39m[0m
+[  99% ] [90m[1mreimport[22m | Finalizing Asset Import...[39m[0m
+[92m[ DONE ][39m [1mreimport[22m
+[0m
+[   0% ] [90m[1mreimport[22m | Started (Re)Importing Assets (146 steps)[39m[0m
+[   0% ] [90m[1mreimport[22m | Executing post-reimport operations...[39m[0m
+[92m[ DONE ][39m [1mreimport[22m
+[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Started Loading editor (5 steps)[39m[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Loading editor layout...[39m[0m
+[  16% ] [90m[1mloading_editor_layout[22m | Loading docks...[39m[0m
+[92m[ DONE ][39m [1mloading_editor_layout[22m
+[0m

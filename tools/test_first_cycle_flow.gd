@@ -3,13 +3,11 @@ func _initialize():
  main=load("res://scenes/main.tscn").instantiate();main.set_meta("diagnostic_seed",diagnostic_seed());root.add_child(main);await main.ready
  Engine.time_scale=12
  print("FIRST_CYCLE_FLOW 通常開始3人・有限資源・既定出来事・素材/道具/設備注入なし seed=",diagnostic_seed())
- for id in ["tool_pick","tool_iron_axe","tool_adv_pick","repair_iron"]:main.recipe_priority[id]=0
  main.request_build("workbench")
  for id in ["tool_wood_pick","tool_hammer","tool_wood_axe","tool_axe"]:main.request_order(id,1)
  main.request_order("smelt",16)
  if not await wait_for("木のみの作業台",func():return main.has_facility("workbench"),240):finish();return
  if not await wait_for("木製採掘具→石製採掘具",func():return owns_tool(GameData.Item.HAMMER),300):finish();return
- for id in ["tool_wood_pick","tool_wood_axe","tool_hammer","tool_axe"]:main.recipe_priority[id]=0
  if not await prepare_material(GameData.Item.WOOD,4,"鉄道具の柄用木4を先に確保"):finish();return
  if not await make_item("tool_pick"):finish();return
  if not await wait_for("安全寄りの村で基本鉄採掘具を装備",func():return main.workers.any(func(w):return w.tools.get("mine",-1)==GameData.Item.PICKAXE),120):finish();return
@@ -21,7 +19,6 @@ func _initialize():
  if not await go("east_sands"):finish();return
  if not main.world.request("central_trade"):fail("街道選択失敗");finish();return
  main.target_speed=60
- main.recipe_priority["smelt"]=4
  if not await make_item("haul_frame"):finish();return
  var w=main.workers[0]
  if not main.equip_work_support(w):fail("フレーム装備失敗");finish();return

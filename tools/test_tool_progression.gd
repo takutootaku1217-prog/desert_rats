@@ -28,7 +28,6 @@ func _initialize() -> void:
   for j in GameData.job_list(): worker.priorities[j]=0
  for parent in [main.resources_root,main.creatures_root]:
   for node in parent.get_children(): node.free()
- for id in main.recipe_priority: main.recipe_priority[id]=0
  for setting in main.refill_settings.values(): setting.enabled=false
  w=main.workers[0]
  w.priorities[GameData.Job.GATHER]=3
@@ -124,8 +123,8 @@ func _initialize() -> void:
  main.creatures_root.add_child(prey)
  var meat_before:int=st.count_of(GameData.Item.MEAT)
  check(job(GameData.Job.HUNT) and st.count_of(GameData.Item.MEAT)>meat_before,"素手でも狩猟→獲物運搬→解体（生物の配置・静止は診断fixture）")
+ main.recipe_priority.erase("tool_wood_pick");main.recipe_priority.erase("tool_wood_axe") # 旧保存の欠落キーを再現
  # 旧保存には新規レシピの方針キーがない。新規開始の支給変更をロードへ適用しない。
- main.recipe_priority.erase("tool_wood_pick");main.recipe_priority.erase("tool_wood_axe")
  st.add_item(GameData.Item.IRON,2);st.add_item(GameData.Item.HAMMER,1);st.add_item(GameData.Item.WORKBENCH_PACK,1)
  snapshot("新方針キーのない旧形式・鉄/旧道具/撤去品の所有")
  check(st.count_of(GameData.Item.IRON)==2 and st.count_of(GameData.Item.HAMMER)==1 and st.count_of(GameData.Item.WORKBENCH_PACK)==1,"旧資産を削除せず復元")
@@ -139,11 +138,10 @@ func _initialize() -> void:
  st.inventory.counts.clear();main.processor.stock.counts.clear()
  for worker in main.workers:
   worker.tools={}
- for id in main.recipe_priority:main.recipe_priority[id]=0
  for setting in main.refill_settings.values(): setting.enabled=false
  st.add_item(GameData.Item.WOOD,2) # 競合境界fixture: 箱の木6には届かない量
  check(main.request_build("cargo_rack"),"先に鉄を使う箱の建設を依頼")
- check(main.choose_recipe().is_empty(),"道具の方針0を前提解放で上書きしない")
+ check(main.choose_recipe().is_empty(),"道具は明示注文するまで作らない")
  craft("tool_wood_pick")
  check(st.count_of(GameData.Item.WOOD)==0 and main.build_pending("cargo_rack")==1,"箱の取り置きから最初の木製採掘具だけを製作、建設依頼は維持")
  check(not main.build_needs_gather_tool(GameData.Item.WOOD_PICK),"倉庫に採取可能な道具があれば重複する前提製作は不要")

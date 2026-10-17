@@ -45,8 +45,7 @@ func _fresh(all_facilities := false, keep_defaults := false) -> void:
 		return
 	main.target_speed = 0.0
 	st.inventory.counts.clear()
-	for k in main.recipe_priority:
-		main.recipe_priority[k] = 0
+	for setting in main.refill_settings.values():setting.enabled=false
 
 
 ## W[0] だけが運搬と加工をする（建設の流れだけを見る）
@@ -128,8 +127,8 @@ func _test_tables() -> void:
 		var s: String = GameData.recipe_station(r)
 		check(s == "" or (FacilityDB.has(s) and FacilityDB.def(s)["station"]), "%s: 必要設備は「製作できる設備」" % r["id"])
 	var wb: Dictionary = FacilityDB.def("workbench")
-	check(wb["cost"].keys().size() == 2 and wb["cost"].has(GameData.Item.WOOD) and wb["cost"].has(GameData.Item.IRON),
-			"ワークベンチは 木材＋鉄 で建てる")
+	check(wb["cost"] == {GameData.Item.WOOD:3},
+			"ワークベンチは木材3だけで建てる")
 	check(String(FacilityDB.def("bed")["requires"]) == "workbench", "ベッドはワークベンチがないと建てられない")
 	check(String(wb["requires"]) == "", "ワークベンチは手作業（加工設備）で建てられる")
 	var hand := 0
@@ -141,9 +140,9 @@ func _test_tables() -> void:
 			gated += 1
 	check(hand >= 5 and gated >= 3, "手作業でできる物（%d）と、ワークベンチが必要な物（%d）がある" % [hand, gated])
 	# 鉄の道具・効率のよい修理部品は、ワークベンチが必要。最初の道具・簡易な修理は手作業でできる
-	for id in ["tool_hammer", "tool_axe", "repair_stone", "repair_hide", "smelt", "cook", "firewood", "tallow"]:
+	for id in ["repair_stone", "repair_hide", "smelt", "cook", "firewood", "tallow"]:
 		check(GameData.recipe_station(GameData.recipe_by_id(id)) == "", "%s は手作業でできる" % id)
-	for id in ["tool_pick", "tool_iron_axe", "tool_adv_pick", "repair_iron"]:
+	for id in ["tool_hammer", "tool_axe", "tool_pick", "tool_iron_axe", "tool_adv_pick", "repair_iron"]:
 		check(GameData.recipe_station(GameData.recipe_by_id(id)) == "workbench", "%s はワークベンチが必要" % id)
 
 
@@ -161,15 +160,15 @@ func _test_initial_state() -> void:
 	check(W[0].ai.state == CharacterAI.State.REST_HERE and W[0].bed_index < 0, "ベッドがなくても、疲れた仲間は予約を残さずその場で休める")
 	# 材料がすべてあっても、必要設備の要る物は作らない
 	for k in ["repair_iron", "tool_pick", "tool_iron_axe", "tool_adv_pick"]:
-		main.recipe_priority[k] = 5
+		main.request_order(k,1)
 	st.add_item(GameData.Item.IRON, 6)
 	st.add_item(GameData.Item.WOOD, 10)
 	st.add_item(GameData.Item.REPAIR_KIT, 4)
 	check(main.choose_recipe().is_empty(), "ワークベンチがないうちは、鉄の道具・修理部品（鉄＋木材）は選ばれない")
-	check(not main._tools_need_iron(), "作れない道具のために、精錬を急がない")
-	main.recipe_priority["tool_hammer"] = 5
+	check(main.choose_recipe().get("id", "")!="smelt", "未注文の精錬を自動開始しない")
+	main.request_order("tool_hammer",1)
 	st.add_item(GameData.Item.STONE, 4)
-	check(main.choose_recipe().get("id", "") == "tool_hammer", "手作業でできる物（簡易ハンマー）は作れる")
+	check(main.choose_recipe().is_empty(), "石のハンマーも作業台完成まで注文を保持")
 
 
 # ---------------------------------------------------------------- 依頼の受け付け
@@ -254,7 +253,7 @@ func _test_flow() -> void:
 	w1.hunger = CrewStatusDB.MAX_HUNGER
 	var woke: float = await _until(func(): return not w1.sleeping and w1.bed_index < 0, 5.0)
 	check(woke >= 0.0, "回復した仲間は自然に起き、ベッド予約を解放する")
-	main.recipe_priority["repair_iron"] = 5
+	main.refill_settings[GameData.Item.REPAIR_KIT].enabled=true
 	st.add_item(GameData.Item.IRON, 1)
 	st.add_item(GameData.Item.WOOD, 1)
 	var kits_before: int = st.count_of(GameData.Item.REPAIR_KIT)
@@ -275,15 +274,15 @@ func _test_flow() -> void:
 func _test_reserve() -> void:
 	print("-- 建設の材料の取り置き")
 	await _fresh(false)
-	main.recipe_priority["firewood"] = 5
+	main.refill_settings[GameData.Item.FUEL].enabled=true
 	var need_w := _need("workbench", GameData.Item.WOOD)
 	var have_w := need_w - 1                              # 木材が1つ足りない
 	st.add_item(GameData.Item.WOOD, have_w)
 	check(main.choose_recipe().get("id", "") == "firewood", "依頼がなければ、木材は薪（燃料）に使われる")
 	st.add_item(GameData.Item.IRON, _need("workbench", GameData.Item.IRON))
 	main.request_build("workbench")                       # 木材は足りない・鉄はそろっている
-	check(main.reserved_for_builds() == {GameData.Item.WOOD: have_w, GameData.Item.IRON: _need("workbench", GameData.Item.IRON)},
-			"倉庫にある分だけ取り置く")
+	check(main.reserved_for_builds().is_empty() and ProductionPlan.held_for_orders(main).get(GameData.Item.WOOD)==need_w,
+			"未着手の建設は通常補充から論理保護し、物理予約はしない")
 	check(main.choose_recipe().is_empty(), "木材が足りないあいだは、薪に使わない（建設のために取っておく）")
 	main.base.fuel = 10.0
 	check(main.choose_recipe().get("id", "") == "firewood", "燃料の在庫がなくタンクも尽きかけなら、取り置きに構わず燃料を作る")
@@ -293,8 +292,7 @@ func _test_reserve() -> void:
 	main.cancel_build("workbench")
 	check(main.choose_recipe().get("id", "") == "firewood", "依頼を取り消すと、また薪に使える")
 	main.request_build("workbench")
-	st.inventory.counts[GameData.Item.IRON] = 0            # 鉄が足りない → 依頼は待ち。木材の余り（need_w − 1 ≧ 1）は薪に使える
-	check(main.choose_recipe().get("id", "") == "firewood", "取り置きを超える木材（余り）は、ほかの加工に使える")
+	check(ProductionPlan.spares_orders(main,GameData.recipe_by_id("firewood")), "注文必要量を超える木材は通常補充に使える")
 	main.build_queue.clear()
 
 
@@ -304,16 +302,16 @@ func _test_unlock() -> void:
 	await _fresh(false)
 	st.add_item(GameData.Item.IRON, 3)
 	st.add_item(GameData.Item.WOOD, 4)
-	main.recipe_priority["repair_iron"] = 5
+	main.refill_settings[GameData.Item.REPAIR_KIT].enabled=true
 	check(main.choose_recipe().is_empty(), "ワークベンチの前: 修理部品（鉄＋木材）は作れない")
 	main.base.add_facility("workbench")
 	check(main.choose_recipe().get("id", "") == "repair_iron", "ワークベンチの後: 修理部品（鉄＋木材）が作れる")
 	check(main.choose_recipe().get("station", "") == "workbench" and main.processor.station_point(main.choose_recipe()) == main.base.facility_spots("workbench")[0],
 			"作る場所はワークベンチ")
-	main.recipe_priority["repair_iron"] = 0
-	main.recipe_priority["tool_pick"] = 5
+	main.refill_settings[GameData.Item.REPAIR_KIT].enabled=false
+	main.request_order("tool_pick",1)
 	check(main.choose_recipe().get("id", "") == "tool_pick", "ワークベンチの後: 鉄製ピッケルが作れる")
-	check(main.processor.station_point(GameData.recipe_by_id("tool_hammer")) == main.processor.global_position, "手作業の物は加工設備で作る")
+	check(main.processor.station_point(GameData.recipe_by_id("tool_hammer")) == main.base.facility_spots("workbench")[0], "石道具は作業台で作る")
 
 
 # ---------------------------------------------------------------- ベッド
@@ -430,9 +428,9 @@ func _test_ui() -> void:
 	ui._refresh()
 	locked = 0
 	for rr in ui._recipe_rows:
-		if GameData.recipe_station(rr["recipe"]) == "workbench" and String(rr["stars"].text).begins_with("★"):
+		if GameData.recipe_station(rr["recipe"]) == "workbench" and String(rr["stars"].text) in ["Fから注文","補充ON","補充OFF"]:
 			locked += 1
-	check(locked >= 3, "ワークベンチができると、製作物の優先（★）が出る（%d件）" % locked)
+	check(locked >= 3, "ワークベンチができると、製作物の注文・補充方式が出る（%d件）" % locked)
 	check(not bed_btn.disabled and String(ui._fac_rows["workbench"]["state"].text).contains("完成"), "ベッドが押せるようになり、ワークベンチは「完成」")
 	var ev := InputEventKey.new()
 	ev.keycode = KEY_B

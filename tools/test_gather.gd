@@ -431,10 +431,6 @@ func _run() -> void:
 
 	print("== 道具の加工（作る意味があるときだけ作る） ==")
 	_reset()
-	for r in GameData.RECIPES:
-		main.recipe_priority[r["id"]] = 0
-	main.recipe_priority["tool_hammer"] = 2
-	main.recipe_priority["tool_pick"] = 1
 	st.add_item(GameData.Item.STONE, 4)
 	st.add_item(GameData.Item.WOOD, 4)
 	check(main.tool_wanted(GameData.Item.HAMMER) and main.choose_recipe().get("id", "") != "tool_hammer", "更新候補でも注文なしでは道具を作らない")

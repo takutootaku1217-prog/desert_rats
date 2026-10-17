@@ -1,0 +1,6 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+  FAIL A 不足注文の鉄を通常修理補充が横取りしない
+  FAIL B 注文後の素材運搬でも着手
+  FAIL C 予約木材2は利用可能な目標2の達成ではない
+== 結果: 3 件失敗 ==

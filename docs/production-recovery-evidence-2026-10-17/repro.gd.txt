@@ -1,0 +1,19 @@
+extends "res://tools/test_batch_crafting.gd"
+func _initialize():
+ await setup();main.finish_build("workbench")
+ main.refill_settings=ProductionPlan.defaults()
+ main.storage.inventory.counts={GameData.Item.WOOD:1,GameData.Item.IRON:1,GameData.Item.FUEL:8,GameData.Item.FOOD:12}
+ main.request_order("tool_pick",1)
+ check(main.choose_recipe().get("id")!="repair_iron","A 不足注文の鉄を通常修理補充が横取りしない")
+ await setup();main.finish_build("workbench")
+ main.storage.inventory.counts={GameData.Item.WOOD:2}
+ main.request_order("tool_wood_pick",1)
+ main.request_transfer(GameData.Item.WOOD,2,"to_workshop")
+ var w=main.workers[0];w.priorities[GameData.Job.HAUL]=5;w.priorities[GameData.Job.PROCESS]=5
+ check(await until(func():return main.processor.manual_status("tool_wood_pick").active>0 or main.total_crafted_by_hand>0,120),"B 注文後の素材運搬でも着手")
+ await setup();main.finish_build("workbench")
+ main.storage.inventory.counts={GameData.Item.WOOD:2}
+ main.request_order("tool_wood_pick",1);w=main.workers[0];w.ai._try_start(GameData.Job.HAUL)
+ main.set_procurement(GameData.Item.WOOD,2);main.update_procurement()
+ check(main.procurement_goals.has(GameData.Item.WOOD),"C 予約木材2は利用可能な目標2の達成ではない")
+ print("== 結果: %s =="%("すべて成功" if fails==0 else "%d 件失敗"%fails));quit(1 if fails else 0)

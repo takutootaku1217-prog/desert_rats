@@ -1,0 +1,6 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+  ok A 不足注文の鉄を通常修理補充が横取りしない
+  ok B 注文後の素材運搬でも着手
+  ok C 予約木材2は利用可能な目標2の達成ではない
+== 結果: すべて成功 ==

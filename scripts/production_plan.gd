@@ -29,14 +29,46 @@ static func future(g,item:int) -> int:
 		if r.out==item:n+=int(q.n)*int(r.n)
 	return n
 
-static func refill(g, emergency_only:bool) -> Dictionary:
+## 待ち注文の次の1回分を通常補充から保護する。物理予約ではなく再計算する。
+## 他の明示注文・緊急維持には適用しないため、精錬や初期道具を相互に塞がない。
+static func held_for_orders(g) -> Dictionary:
+	var needed:Dictionary={}
+	var seen:Dictionary={}
+	for q in g.production_orders:
+		if seen.has(q.id):continue
+		seen[q.id]=true
+		var r:=GameData.recipe_by_id(q.id)
+		for it in r["in"]:needed[it]=int(needed.get(it,0))+int(r["in"][it])
+	for id in g.build_queue:
+		var packed:=FacilityDB.packed_item_of(id)
+		if packed>=0 and g.packed_in_transit(packed)>0:continue
+		for it in g.build_cost(id):needed[it]=int(needed.get(it,0))+int(g.build_cost(id)[it])
+	for it in needed:needed[it]=maxi(0,int(needed[it])-g.workshop_available(it))
+	return needed
+
+static func spares_orders(g,r:Dictionary,claimant=null) -> bool:
+	var held:=held_for_orders(g)
+	for it in r["in"]:
+		if AutoCraftGuard.available(g,it,claimant)-int(held.get(it,0))<int(r["in"][it]):return false
+	return true
+
+static func refill_recipes() -> Array:
+	# 消耗品間の既存順は維持。同じ修理板だけ石・皮骨を鉄より先に試す。
+	var recipes:Array=[]
 	for r in GameData.RECIPES:
+		if r.out!=GameData.Item.REPAIR_KIT:recipes.append(r)
+	for id in ["repair_stone","repair_hide","repair_iron"]:recipes.append(GameData.recipe_by_id(id))
+	return recipes
+
+static func refill(g, emergency_only:bool) -> Dictionary:
+	for r in refill_recipes():
 		if not g.refill_settings.has(r.out): continue
 		var setting:Dictionary=g.refill_settings[r.out]
 		if not setting.enabled or setting.target<=0: continue
 		if emergency_only and not urgent(g,r.out): continue
 		var have:int=finished(g,r.out)+future(g,r.out)
 		if have>=int(setting.target) or not ready(g,r): continue
+		if not urgent(g,r.out) and not spares_orders(g,r):continue
 		var unit:Dictionary=r.duplicate(true)
 		unit["automatic"]=true
 		return unit
@@ -69,3 +101,24 @@ static func order_reason(g,r:Dictionary) -> String:
 	if not emergency.is_empty():return "緊急"+ItemDB.name_of(emergency.out)+"を優先中"
 	if g.processor.free_slots()<=0:return "加工枠待ち"
 	return "搬入待ち"
+
+## 全候補を説明する。自動で道具注文や地域移動は行わない。
+static func refill_reason(g,item:int) -> String:
+	var setting:Dictionary=g.refill_settings[item]
+	if not setting.enabled:return "補充OFF"
+	if finished(g,item)+future(g,item)>=int(setting.target):return "補充中" if future(g,item)>0 else "目標達成"
+	var reasons:PackedStringArray=[]
+	for r in refill_recipes():
+		if r.out!=item:continue
+		if ready(g,r):
+			if not urgent(g,item) and not spares_orders(g,r):reasons.append(r.name+"：注文の材料を確保中")
+			else:return r.name+"：搬入・加工枠待ち（緊急維持→注文→通常補充の順）"
+		else:
+			var missing:PackedStringArray=[]
+			for it in r["in"]:
+				var n:=maxi(0,int(r["in"][it])-AutoCraftGuard.available(g,it))
+				if n>0:missing.append("%s%d"%[ItemDB.name_of(it),n])
+			reasons.append(r.name+"："+("不足 "+"・".join(missing) if not missing.is_empty() else order_reason(g,r)))
+	if item==GameData.Item.REPAIR_KIT:
+		reasons.append("石・鉱石を採れない場合はFの道具で木製採掘具→石のハンマーを注文。鉄は精錬注文。地域移動・道具製作は任意です")
+	return " / ".join(reasons)

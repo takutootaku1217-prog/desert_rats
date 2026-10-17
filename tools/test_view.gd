@@ -44,8 +44,7 @@ func _fresh(all_facilities := false, keep_defaults := false) -> void:
 		return
 	main.target_speed = 0.0
 	st.inventory.counts.clear()
-	for k in main.recipe_priority:
-		main.recipe_priority[k] = 0
+	for setting in main.refill_settings.values():setting.enabled=false
 
 
 func _until(cond: Callable, limit: float) -> float:

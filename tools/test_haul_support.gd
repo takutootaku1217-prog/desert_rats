@@ -9,7 +9,6 @@ func _initialize():
  check(FileAccess.file_exists("res://assets/resources/item_haul_frame.png"),"専用画像ファイルが存在（代替画像ではない）")
  main.target_speed=0
  main.base.add_facility("workbench",true)
- for k in main.recipe_priority: main.recipe_priority[k]=0
  for it in GameData.recipe_by_id("haul_frame")["in"]: main.processor.stock.add(it,GameData.recipe_by_id("haul_frame")["in"][it])
  for w in main.workers:
   w.priorities[GameData.Job.PROCESS]=5; w.priorities[GameData.Job.HAUL]=5
@@ -77,7 +76,6 @@ func _initialize():
 func compare_transfer(equip: bool, remove_mid: bool) -> int:
  await fresh();main.target_speed=0
  main.storage.inventory.counts.clear();main.processor.stock.counts.clear()
- for k in main.recipe_priority: main.recipe_priority[k]=0
  main.storage.store_owned(ITEM,1);main.storage.store_owned(GameData.Item.WOOD,15)
  var w=main.workers[0]
  if equip: main.equip_work_support(w)

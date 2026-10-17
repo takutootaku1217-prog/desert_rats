@@ -11,7 +11,7 @@ var duration := 3600.0
 var old_states := {}
 var violations := []
 var receipts := {}
-var initial_recipe_priority := {}
+var initial_refill_settings := {}
 var initial_gather_policy := {}
 var initial_worker_priorities := []
 func emit_record(kind:String, data:Dictionary):
@@ -59,14 +59,14 @@ func _initialize():
  main=load("res://scenes/main.tscn").instantiate();main.set_meta("diagnostic_seed",seed_value);root.add_child(main);await main.ready
  Engine.time_scale=12
  previous=main.storage.inventory.counts.duplicate();main.storage.inventory.changed.connect(inventory_changed)
- initial_recipe_priority=main.recipe_priority.duplicate();initial_gather_policy=main.gather_policy.duplicate()
+ initial_refill_settings=main.refill_settings.duplicate(true);initial_gather_policy=main.gather_policy.duplicate()
  for w in main.workers:initial_worker_priorities.append(w.priorities.duplicate())
  main.storage.inventory.item_added.connect(func(it,n,source):
   var key:String=source+":"+ItemDB.name_of(it)
   receipts[key]=int(receipts.get(key,0))+n
   if source==Inventory.SOURCE_PURCHASE:violations.append("開発用物資の注入"))
  if not main.world.active or not main.director.enabled or main.workers.size()!=3:violations.append("既定開始条件の不一致")
- emit_record("start",{"seed":seed_value,"scenario":scenario,"requested_seconds":duration,"events_enabled":main.director.enabled,"map_active":main.world.active,"recipe_priority":main.recipe_priority})
+ emit_record("start",{"seed":seed_value,"scenario":scenario,"requested_seconds":duration,"events_enabled":main.director.enabled,"map_active":main.world.active,"refill_settings":main.refill_settings})
  emit_record("action",{"request":"workbench","accepted":main.request_build("workbench")})
  if scenario.begins_with("ordered_"):
   for id in ["tool_wood_pick","tool_wood_axe","tool_hammer","tool_axe","tool_pick","tool_iron_axe"]:
@@ -90,7 +90,7 @@ func _initialize():
    emit_record("action",{"request":"travel","destination":target,"accepted":accepted})
    if accepted:route_index+=1
    next_trip=main.director.elapsed+300
- if main.recipe_priority!=initial_recipe_priority or main.gather_policy!=initial_gather_policy:violations.append("既定方針の変更")
+ if main.refill_settings!=initial_refill_settings or main.gather_policy!=initial_gather_policy:violations.append("既定方針の変更")
  for i in main.workers.size():
   if main.workers[i].priorities!=initial_worker_priorities[i]:violations.append("仕事優先度の変更")
  snapshot();emit_record("result",{"game_over":main.game_over,"reached_60_minutes":main.director.elapsed>=3600,"requested_seconds":duration,"seed":seed_value,"scenario":scenario,"accepted_trips":route_index,"violations":violations})

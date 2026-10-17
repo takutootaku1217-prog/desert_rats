@@ -205,7 +205,7 @@ func _run() -> void:
 	_reset()
 	# 積載量に余裕がない（食料2個ぶん入らない）なら、加工は選ばない
 	st.add_item(GameData.Item.MEAT, 5)
-	main.recipe_priority = GameData.DEFAULT_RECIPE_PRIORITY.duplicate()
+	main.refill_settings = ProductionPlan.defaults()
 	var r1: Dictionary = main.choose_recipe()
 	check(r1.get("id", "") == "cook", "材料があり積載量に余裕があれば、加工を選ぶ（%s）" % r1.get("id", "なし"))
 	st.capacity_bonus = -(CargoDB.CAPACITY - 11)                          # 残りの重さを1にする（食料2個ぶんの重さ2に届かない）

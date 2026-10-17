@@ -7,7 +7,6 @@ func setup():
  await fresh();main.target_speed=0
  main.storage.inventory.counts.clear();main.processor.stock.counts.clear()
  for setting in main.refill_settings.values():setting.enabled=false
- for k in main.recipe_priority:main.recipe_priority[k]=0
  main.base.parts[GameData.Part.MACHINE]=100.0
 func roundtrip() -> bool:
  var d:=SaveGame.capture(main);SaveGame.disabled=false

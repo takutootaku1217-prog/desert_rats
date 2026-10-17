@@ -265,8 +265,9 @@ func _refresh() -> void:
 		var r: Dictionary = rr["recipe"]
 		var ok: bool = game.has_facility(GameData.recipe_station(r))
 		rr["name"].add_theme_color_override("font_color", UIKit.C_TEXT if ok else UIKit.C_DIM)
-		var pr: int = game.recipe_priority.get(r["id"], 0)
-		rr["stars"].text = ("★%d" % pr) if ok else "作れない"
+		var mode: String = "Fから注文"
+		if game.refill_settings.has(r.out):mode="補充ON" if game.refill_settings[r.out].enabled else "補充OFF"
+		rr["stars"].text = mode if ok else "作れない"
 		rr["stars"].add_theme_color_override("font_color", UIKit.C_ACCENT if ok else C_BAD)
 
 

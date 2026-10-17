@@ -3,7 +3,6 @@ func setup():
 	await fresh()
 	park_fixture()
 	main.storage.inventory.counts.clear()
-	for k in main.recipe_priority: main.recipe_priority[k] = 0
 	main.tool_auto = false
 func _initialize():
 	await transfers()

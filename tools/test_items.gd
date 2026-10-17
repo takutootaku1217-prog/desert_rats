@@ -454,11 +454,11 @@ func _test_ui() -> void:
 	craft._refresh(true)
 	craft._qty_val = 99
 	craft._refresh(true)
-	check(craft._qty.max_value == 99 and craft._qty.all_value == 9, "不足注文も99回まで選べ、「全部」は倉庫で製作可能な9回")
+	check(craft._qty.max_value == 99 and craft._qty.all_value == 15, "不足注文も99回まで選べ、「全部」は倉庫と作業場を合算した15回")
 	craft._qty_val = 1
 	craft._refresh(true)
 	_find_button(craft._qty, "全部").pressed.emit()
-	check(craft._qty.value == 6 and craft._qty_val == 6, "「全部」を押すと、いま作れる最大の回数（6 回。石12・木材6）になる")
+	check(craft._qty.value == 15 and craft._qty_val == 15, "「全部」を押すと、倉庫と作業場から作れる最大の15回になる")
 	craft._qty.set_value(5)
 	craft._do_craft()
 	check(main.craft_queue.size() == 1 and main.craft_queue[0]["n"] == 5, "［制作］で、5回分の制作の待ちが入る")

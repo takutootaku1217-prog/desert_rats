@@ -1,0 +1,182 @@
+[
+  {
+    "seed": 501,
+    "scenario": "ordered_route",
+    "seconds": 3600.2,
+    "game_over": false,
+    "food": 0,
+    "hunger": [
+      29.4,
+      29.4,
+      29.4
+    ],
+    "hull": 95.6,
+    "repairs": 32,
+    "violations": []
+  },
+  {
+    "seed": 501,
+    "scenario": "ordered_stay",
+    "seconds": 2819.6,
+    "game_over": true,
+    "food": 0,
+    "hunger": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "hull": 0.0,
+    "repairs": 14,
+    "violations": []
+  },
+  {
+    "seed": 501,
+    "scenario": "route",
+    "seconds": 2294.2,
+    "game_over": true,
+    "food": 9,
+    "hunger": [
+      30.3,
+      30.3,
+      30.3
+    ],
+    "hull": 0.0,
+    "repairs": 6,
+    "violations": []
+  },
+  {
+    "seed": 501,
+    "scenario": "stay",
+    "seconds": 1319.4,
+    "game_over": true,
+    "food": 5,
+    "hunger": [
+      40.2,
+      40.2,
+      40.2
+    ],
+    "hull": 0.0,
+    "repairs": 2,
+    "violations": []
+  },
+  {
+    "seed": 502,
+    "scenario": "ordered_route",
+    "seconds": 3600.2,
+    "game_over": false,
+    "food": 2,
+    "hunger": [
+      34.5,
+      34.5,
+      34.5
+    ],
+    "hull": 76.7,
+    "repairs": 33,
+    "violations": []
+  },
+  {
+    "seed": 502,
+    "scenario": "ordered_stay",
+    "seconds": 2354.0,
+    "game_over": true,
+    "food": 0,
+    "hunger": [
+      0.0,
+      27.2,
+      27.2
+    ],
+    "hull": 0.0,
+    "repairs": 16,
+    "violations": []
+  },
+  {
+    "seed": 502,
+    "scenario": "route",
+    "seconds": 1329.8,
+    "game_over": true,
+    "food": 13,
+    "hunger": [
+      41.3,
+      41.3,
+      41.3
+    ],
+    "hull": 0.0,
+    "repairs": 4,
+    "violations": []
+  },
+  {
+    "seed": 502,
+    "scenario": "stay",
+    "seconds": 933.0,
+    "game_over": true,
+    "food": 8,
+    "hunger": [
+      35.9,
+      35.9,
+      35.9
+    ],
+    "hull": 0.0,
+    "repairs": 2,
+    "violations": []
+  },
+  {
+    "seed": 503,
+    "scenario": "ordered_route",
+    "seconds": 3600.2,
+    "game_over": false,
+    "food": 6,
+    "hunger": [
+      25.3,
+      25.3,
+      25.3
+    ],
+    "hull": 77.1,
+    "repairs": 32,
+    "violations": []
+  },
+  {
+    "seed": 503,
+    "scenario": "ordered_stay",
+    "seconds": 3510.8,
+    "game_over": true,
+    "food": 0,
+    "hunger": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "hull": 0.0,
+    "repairs": 16,
+    "violations": []
+  },
+  {
+    "seed": 503,
+    "scenario": "route",
+    "seconds": 1517.8,
+    "game_over": true,
+    "food": 13,
+    "hunger": [
+      26.5,
+      26.5,
+      26.5
+    ],
+    "hull": 0.0,
+    "repairs": 6,
+    "violations": []
+  },
+  {
+    "seed": 503,
+    "scenario": "stay",
+    "seconds": 1278.4,
+    "game_over": true,
+    "food": 5,
+    "hunger": [
+      44.8,
+      44.8,
+      44.8
+    ],
+    "hull": 0.0,
+    "repairs": 2,
+    "violations": []
+  }
+]

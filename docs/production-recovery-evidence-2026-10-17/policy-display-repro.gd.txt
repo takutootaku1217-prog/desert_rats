@@ -1,0 +1,13 @@
+extends "res://tools/test_equipment_ui.gd"
+func _initialize():
+ main=load("res://scenes/main.tscn").instantiate();root.add_child(main);await frames()
+ main.set_process(false)
+ for w in main.workers:w.set_process(false)
+ main.policy.toggle();await frames()
+ var labels=main.policy._body.find_children("*","Label",true,false)
+ var status=labels.filter(func(x):return x.text.contains("木製採掘具"))[0]
+ var toggles=main.policy._body.find_children("*","CheckBox",true,false)
+ var box=toggles.filter(func(x):return x.text==ItemDB.name_of(GameData.Item.REPAIR_KIT))[0]
+ await click(box);await frames()
+ check(not main.refill_settings[GameData.Item.REPAIR_KIT].enabled and status.text.contains("補充OFF"),"方針で補充OFFにした直後、理由表示も更新")
+ print("== 結果: %s =="%("すべて成功" if fails==0 else "%d 件失敗"%fails));quit(1 if fails else 0)

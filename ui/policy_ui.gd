@@ -1,12 +1,14 @@
 class_name PolicyUI
 extends CanvasLayer
 ## 運営の方針（Pキー）。仲間は自動で動くので、プレイヤーは「何を優先するか」だけを決める。
-##  - 加工の優先: レシピごとの★（0 = 作らない）
+##  - 消耗品の補充: 品目ごとのON/OFFと目標在庫
 ##  - 回収の優先: 木材・石・鉄鉱石ごとの★（0 = 拾わない。獲物は常に拾う）
 ##  - 狩る生物: 生物ごとに 狩る / 見逃す
 ##  - テスト用の購入（ショップは第1段階では作らない）
 
 var game
+var _repair_reason: Label
+var _reason_clock := 0.0
 var _overlay: Control
 var _body: VBoxContainer
 var _page := 0                   # 0 = 方針（回収・加工・狩猟） / 1 = 積載の割り当て（data/cargo.gd）
@@ -71,6 +73,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _rebuild() -> void:
+	_repair_reason=null
 	UIKit.clear(_body)
 	_body.add_child(_tabs())
 	if _page == 1:
@@ -94,11 +97,17 @@ func _rebuild() -> void:
 	for it in game.refill_settings:
 		var setting:Dictionary=game.refill_settings[it]
 		var row:=HBoxContainer.new();left.add_child(row)
-		var enabled:=CheckBox.new();enabled.text=ItemDB.name_of(it);enabled.button_pressed=setting.enabled;row.add_child(enabled)
-		enabled.toggled.connect(func(v):setting.enabled=v)
+		var enabled:=CheckBox.new();enabled.name="PolicyRefill%d"%it;enabled.text=ItemDB.name_of(it);enabled.button_pressed=setting.enabled;row.add_child(enabled)
+		enabled.toggled.connect(func(v):setting.enabled=v;_refresh_repair_reason())
 		row.add_child(UIKit.lbl("目標在庫",13))
 		var target:=SpinBox.new();target.min_value=0;target.max_value=999;target.value=setting.target;row.add_child(target)
-		target.value_changed.connect(func(v):setting.target=int(v))
+		target.value_changed.connect(func(v):setting.target=int(v);_refresh_repair_reason())
+	var repair_info:=UIKit.lbl(ProductionPlan.refill_reason(game,GameData.Item.REPAIR_KIT),13,UIKit.C_DIM)
+	repair_info.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+	repair_info.custom_minimum_size=Vector2(540,0)
+	repair_info.name="RepairRefillReason"
+	_repair_reason=repair_info
+	left.add_child(repair_info)
 	left.add_child(UIKit.button("製作・採取目標を開く (F)",func():close();game.craft_ui.open()))
 
 	# 回収の優先
@@ -348,3 +357,15 @@ func _stepper(getter: Callable, setter: Callable) -> Control:
 	h.add_child(plus)
 	refresh.call()
 	return h
+
+
+func _refresh_repair_reason() -> void:
+	if is_instance_valid(_repair_reason):
+		_repair_reason.text=ProductionPlan.refill_reason(game,GameData.Item.REPAIR_KIT)
+
+func _process(delta:float) -> void:
+	if not _overlay.visible or _page!=0:return
+	_reason_clock+=delta
+	if _reason_clock>=0.25:
+		_reason_clock=0.0
+		_refresh_repair_reason()

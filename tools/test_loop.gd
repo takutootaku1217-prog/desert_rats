@@ -219,8 +219,10 @@ func _one(n: int, minutes: float, scale: float, seed_base: int, events_on: bool,
 				var jobs: Array = GameData.job_list()
 				sw.set_priority(jobs[randi() % jobs.size()], randi() % (GameData.MAX_PRIORITY + 1))
 			if randi() % 2 == 0:
-				var rid: String = GameData.RECIPES[randi() % GameData.RECIPES.size()]["id"]
-				main.recipe_priority[rid] = randi() % (GameData.MAX_PRIORITY + 1)
+				var items:Array=main.refill_settings.keys()
+				var setting:Dictionary=main.refill_settings[items[randi()%items.size()]]
+				setting.enabled=randi()%2==0
+				setting.target=randi()%13
 			else:
 				main.gather_policy[GameData.GROUND_ITEMS[randi() % GameData.GROUND_ITEMS.size()]] = randi() % (GameData.MAX_PRIORITY + 1)
 

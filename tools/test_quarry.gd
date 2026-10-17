@@ -202,7 +202,7 @@ func hauling() -> void:
 	var w = main.workers[0]
 	main.storage.inventory.counts.clear()
 	main.storage.add_item(GameData.Item.MEAT, 1)
-	for id in main.recipe_priority: main.recipe_priority[id] = 5 if id == "cook" else 0
+	for item in main.refill_settings: main.refill_settings[item].enabled = item == GameData.Item.FOOD
 	check(w.ai._try_start(GameData.Job.HAUL), "加工入力の運搬を開始")
 	check(await until(func(): return w.ai.state == CharacterAI.State.HAUL_MOVE, 30), "材料を持った途中まで進む")
 	q.request_departure()

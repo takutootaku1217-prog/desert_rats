@@ -1,6 +1,6 @@
 class_name AutoCraftGuard
 extends RefCounted
-## 倉庫に残る実予約だけを差し引く。未着手注文の材料保護はしない。
+## 利用可能数は実予約だけを差し引く。通常補充のみ別途、注文の次の1回分を保護。
 
 static func available(g, item:int, claimant = null, _allow_build_buffer := false) -> int:
  var n:int=g.storage.count_of(item)-g._queued_transfer(item,"to_workshop")
@@ -14,6 +14,7 @@ static func available(g, item:int, claimant = null, _allow_build_buffer := false
  return maxi(0,n)
 
 static func allows(g,r:Dictionary,claimant = null) -> bool:
+ if r.get("automatic",false) and not ProductionPlan.urgent(g,r.out) and not ProductionPlan.spares_orders(g,r,claimant):return false
  for item in r["in"]:
   if available(g,item,claimant,true)<int(r["in"][item]):return false
  return true

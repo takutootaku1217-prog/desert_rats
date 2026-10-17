@@ -508,12 +508,12 @@ func _add_production(e:Dictionary,qty:int) -> void:
 		var need:int=int(costs[it])*(1 if e.kind=="build" else qty)
 		var have:int=game.storage.count_of(it)
 		var transit:int=game.procurement_transit(it)
-		var available:int=AutoCraftGuard.available(game,it,null,true)
+		var available:int=game.procurement_available(it)
 		var missing:int=maxi(0,need-available-transit)
-		_detail.add_child(UIKit.lbl("%s 必要%d / 箱%d（利用可%d）/ 運搬中%d / 不足%d"%[ItemDB.name_of(it),need,have,available,transit,missing],13))
+		_detail.add_child(UIKit.lbl("%s 必要%d / 箱%d＋作業場%d（利用可%d）/ 運搬予定%d / 不足%d"%[ItemDB.name_of(it),need,have,game.workshop_count(it),available,transit,missing],13))
 		var item:int=it
 		var goal:=SpinBox.new();goal.name="GoalQuantity%d"%item;goal.min_value=0;goal.max_value=999;goal.value=game.procurement_goals.get(it,need)
-		var row:=HBoxContainer.new();_detail.add_child(row);row.add_child(UIKit.lbl("箱の目標",12));row.add_child(goal)
+		var row:=HBoxContainer.new();_detail.add_child(row);row.add_child(UIKit.lbl("利用可能数の目標",12));row.add_child(goal)
 		var collect:=UIKit.button("不足分を集める / 目標更新",func():game.set_procurement(item,int(goal.value));_refresh(true));collect.name="CollectGoal%d"%item;row.add_child(collect)
 		var cancel:=UIKit.button("取消",func():game.set_procurement(item,0);_refresh(true));cancel.name="CancelGoal%d"%item;row.add_child(cancel)
 		if game.procurement_goals.has(it):
@@ -530,9 +530,18 @@ func _add_production(e:Dictionary,qty:int) -> void:
 		var target:=SpinBox.new();target.name="RefillTarget";target.min_value=0;target.max_value=999;target.value=setting.target;row.add_child(target)
 		target.value_changed.connect(func(v):setting.target=int(v))
 		var pending:int=ProductionPlan.future(game,e.out)
-		var status:="補充中" if pending>0 else ("目標達成" if ProductionPlan.finished(game,e.out)>=int(setting.target) else "素材不足・搬入待ち")
-		if not setting.enabled:status="補充OFF"
-		_detail.add_child(UIKit.lbl("%s / 完成%d＋加工・予約%d / 目標%d"%[status,ProductionPlan.finished(game,e.out),pending,setting.target],13,UIKit.C_DIM))
+		var status:=ProductionPlan.refill_reason(game,e.out)
+		var info:=UIKit.lbl("%s / 完成%d＋加工・予約%d / 目標%d"%[status,ProductionPlan.finished(game,e.out),pending,setting.target],13,UIKit.C_DIM)
+		info.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+		info.custom_minimum_size=Vector2(540,0)
+		_detail.add_child(info)
+		if e.out==GameData.Item.REPAIR_KIT:
+			var tools_button:=UIKit.button("採掘具の注文を見る",func():
+				var tool:=CraftDB.entry_of("tool_wood_pick")
+				_cat=tool.cat;_key=tool.key;_refresh(true))
+			tools_button.name="OpenMiningOrder"
+			_detail.add_child(tools_button)
+
 	for q in game.production_orders:
 		var r:=GameData.recipe_by_id(q.id)
 		var reason:=ProductionPlan.order_reason(game,r)

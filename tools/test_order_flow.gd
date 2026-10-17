@@ -7,7 +7,8 @@ func order_and_wait(id:String)->bool:
 func _initialize():
  main=load("res://scenes/main.tscn").instantiate();main.set_meta("diagnostic_seed",diagnostic_seed());root.add_child(main);await main.ready
  Engine.time_scale=12
- print("ORDER_FLOW 初期3人・既定出来事・物資/設備/道具注入なし。採取目標・有限注文・狩猟優先・手動行先のみ。")
+ print("ORDER_FLOW 初期3人・既定出来事・物資/設備/道具注入なし。採取目標・有限注文・手動行先のみ。補充/採取/仕事は既定値。")
+ check_defaults()
  main.set_procurement(GameData.Item.WOOD,5)
  main.request_build("workbench")
  if not await wait_for("木材採取→作業台",func():return main.has_facility("workbench"),240):finish();return
@@ -15,11 +16,8 @@ func _initialize():
  if not await order_and_wait("tool_wood_axe"):finish();return
  if not await order_and_wait("tool_hammer"):finish();return
  if not await order_and_wait("tool_axe"):finish();return
- main.refill_settings[GameData.Item.REPAIR_KIT].target=1 # 方針画面で成長準備中の備蓄量を指定
  main.request_order("smelt",8)
  if not await wait_for("収納・運搬用の鉄4を精錬",func():return main.storage.count_of(GameData.Item.IRON)>=4,480):finish();return
- main.gather_policy[GameData.Item.STONE]=0
- main.workers[0].set_priority(GameData.Job.HUNT,5)
  if not await go("east_sands"):finish();return
  main.request_build("cargo_rack")
  if not main.world.request("central_trade"):fail("行先拒否");finish();return
@@ -31,5 +29,9 @@ func _initialize():
  if not await order_and_wait("tool_iron_axe"):finish();return
  var d:=SaveGame.capture(main)
  if not SaveGame.apply(main,d) or SaveGame.capture(main)!=d:fail("注文進行後の保存不一致")
+ check_defaults()
  print("ORDER_RESULT capacity=",main.storage.max_weight()," carry=",main.workers[0].carry_limit()," hunger=",main.workers.map(func(w):return w.hunger)," hull=",main.base.parts)
  finish()
+
+func check_defaults():
+ if main.refill_settings!=ProductionPlan.defaults():fail("消耗品目標12/8/6とONが既定値から変わった")

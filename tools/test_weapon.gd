@@ -5,7 +5,6 @@ func _initialize():
 	main.target_speed = 0
 	main.base.add_facility("workbench", true)
 	main.storage.inventory.counts.clear()
-	for k in main.recipe_priority: main.recipe_priority[k] = 0
 	for w in main.workers:
 		w.priorities[GameData.Job.PROCESS] = 5
 		w.priorities[GameData.Job.HAUL] = 5

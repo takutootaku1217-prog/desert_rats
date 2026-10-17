@@ -56,7 +56,7 @@ var room_layout: Dictionary = Rooms.default_layout()   # 区画 -> 部屋の種�
 var total_rooms_built := 0                              # 部屋を建てた・移した・空けた回数（確認用）
 
 # ---- プレイヤーの方針（運営の方針画面で変更する） ----
-var recipe_priority := GameData.DEFAULT_RECIPE_PRIORITY.duplicate()   # レシピid -> ★0〜5
+var recipe_priority := GameData.DEFAULT_RECIPE_PRIORITY.duplicate()   # 旧保存の移行用。現在の補充は refill_settings
 var gather_policy := {GameData.Item.WOOD: 3, GameData.Item.STONE: 3, GameData.Item.IRON_ORE: 3}  # ★0〜5
 var hunt_policy := {"hare": true, "lizard": true, "hump": true}
 
@@ -328,7 +328,7 @@ func _update_hungry_flag() -> void:
 func gather_weight(item: int) -> float:
 	update_procurement()
 	if procurement_goals.has(item):
-		if storage.count_of(item)+procurement_transit(item)>=int(procurement_goals[item]): return 0.0
+		if procurement_available(item)+procurement_transit(item)>=int(procurement_goals[item]): return 0.0
 		return 30.0
 	if item == GameData.Item.CARCASS:
 		return 5.0
@@ -547,8 +547,26 @@ func cancel_manual_craft(id: String) -> int:
 	return cancelled
 
 
-## 手動の制作を、作業場の材料で加工設備の注文にする（材料がそろっていて、注文の空きがあるとき）
+## 注文後の素材移送も追跡し、材料がそろう保管先へ通常運搬で合流する。
+func _reconcile_order_stock() -> void:
+	for q in production_orders.duplicate():
+		var r:=GameData.recipe_by_id(q.id)
+		if not has_facility(GameData.recipe_station(r)):continue
+		var complete:bool=r["in"].keys().all(func(it):return workshop_available(it)>=int(r["in"][it]))
+		if complete and storage.transform_limit(r)>0:
+			craft_queue.append({"id":q.id,"n":1,"batch":q.batch})
+			claim_order(q.id)
+			continue
+		# 移送中は到着を待つ。部分在庫は実運搬で合流し、瞬間移動させない。
+		if r["in"].keys().any(func(it):return workshop_incoming(it)>0):continue
+		for it in r["in"]:
+			var missing:=maxi(0,int(r["in"][it])-AutoCraftGuard.available(self,it))
+			if missing>0:request_transfer(it,mini(missing,workshop_available(it)),"to_storage")
+
+
+## 作業場で材料がそろった手動注文を加工設備へ投入する。
 func _feed_crafts() -> void:
+	_reconcile_order_stock()
 	update_procurement()
 	if quarry.recalling() or not ProductionPlan.refill(self,true).is_empty():
 		return
@@ -620,7 +638,7 @@ func gather_free_for(item: int, inflight: Dictionary) -> int:
 			reserved_weight += int(inflight[it]) * CargoDB.size_of(it)
 	var room := storage.max_weight() - storage.current_weight() - storage.processing_reserve() - reserved_weight
 	var space:=maxi(0, floori(float(room) / CargoDB.size_of(item)))
-	if procurement_goals.has(item): space=mini(space,maxi(0,int(procurement_goals[item])-storage.count_of(item)-procurement_transit(item)-int(inflight.get(item,0))))
+	if procurement_goals.has(item): space=mini(space,maxi(0,int(procurement_goals[item])-procurement_available(item)-procurement_transit(item)-int(inflight.get(item,0))))
 	return space
 
 
@@ -875,19 +893,6 @@ func tool_wanted(item: int) -> bool:
 	var without: Dictionary = _assign_tools(slot)
 	var with_it: Dictionary = _assign_tools(slot, [item])
 	return float(with_it["total"]) - float(without["total"]) > GatherDB.TOOL_MIN_GAIN
-
-
-## 作る意味のある道具で、鉄が足りなくて作れない物があるか（あれば精錬を優先する。鉄は修理部品にもすぐ使われて溜まらないため）
-func _tools_need_iron() -> bool:
-	var iron_have: int = storage.count_of(GameData.Item.IRON) + processor.pending_of(GameData.Item.IRON)
-	for r in GameData.RECIPES:
-		if not (r["out"] in GameData.TOOL_ITEMS) or not r["in"].has(GameData.Item.IRON):
-			continue
-		if not has_facility(GameData.recipe_station(r)):
-			continue                                                     # 必要設備がまだない道具は、鉄があっても作れない
-		if recipe_priority.get(r["id"], 0) > 0 and iron_have < int(r["in"][GameData.Item.IRON]) and tool_wanted(r["out"]):
-			return true
-	return false
 
 
 # ---------------------------------------------------------------- 建設・必要設備（data/facilities.gd）
@@ -1261,10 +1266,14 @@ func set_procurement(item: int, target: int) -> void:
 	if target<=0: procurement_goals.erase(item)
 	else: procurement_goals[item]=clampi(target,1,999)
 
+func procurement_available(item: int) -> int:
+	return AutoCraftGuard.available(self,item)+workshop_available(item)
+
 func procurement_transit(item: int) -> int:
-	var n:=0
+	# 内部移送の待ちは元在庫の利用可能数から引かれているため、ここで一度だけ計上。
+	var n:=_queued_transfer(item,"to_workshop")+_queued_transfer(item,"to_storage")
 	for w in workers:
-		if w.ai.state in [CharacterAI.State.GATHER,CharacterAI.State.MOVE_TO_STORAGE,CharacterAI.State.STORE] or (w.ai.state==CharacterAI.State.XFER_MOVE and w.ai.xfer_dir=="to_storage"):
+		if w.ai.state in [CharacterAI.State.GATHER,CharacterAI.State.MOVE_TO_STORAGE,CharacterAI.State.STORE] or w.ai.state==CharacterAI.State.XFER_MOVE:
 			if w.carrying==item:n+=w.carry_n
 			n+=int(w.carry_bonus.get(item,0))
 			if w.carrying==GameData.Item.CARCASS:n+=int(w.carcass_cargo.get(item,0))
@@ -1272,7 +1281,7 @@ func procurement_transit(item: int) -> int:
 
 func update_procurement() -> void:
 	for it in procurement_goals.keys():
-		if storage.count_of(it)>=int(procurement_goals[it]): procurement_goals.erase(it)
+		if procurement_available(it)>=int(procurement_goals[it]): procurement_goals.erase(it)
 
 
 

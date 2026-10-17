@@ -83,16 +83,14 @@ static func evaluate(e: Dictionary, game, qty: int = 1, warehouse := false) -> D
 	if e["kind"] == "build":
 		return _evaluate_build(e, game, res)
 	if warehouse:
-		var local:=evaluate(e,game,qty,false)
-		if int(local.max_qty)>=qty:return local
-		res["source"]="倉庫（仲間が搬入）"
+		res["source"]="倉庫＋作業場（仲間が搬入）"
 	var st: String = e["station"]
 	var maxq := 1000000
 	var maxq_all := 1000000                                     # 倉庫の材料も作業場へ運べば、作れる最大の回数
 	var missing := {}
 	for it in e["in"]:
 		var per: int = int(e["in"][it])
-		var have: int = AutoCraftGuard.available(game,it,null,true) if warehouse else game.workshop_available(it)
+		var have: int = game.procurement_available(it) if warehouse else game.workshop_available(it)
 		var need: int = per * qty
 		var ok: bool = have >= need
 		res["rows"].append({"item": it, "need": need, "have": have, "ok": ok, "in_storage": game.storage.count_of(it)})

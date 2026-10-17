@@ -35,8 +35,6 @@ func gather(kind: String) -> void:
 func craft(id: String) -> void:
 	for setting in main.refill_settings.values(): setting.enabled=false
 	main.request_order(id,1)
-	for r in GameData.RECIPES:
-		main.recipe_priority[r["id"]] = 5 if r["id"] == id else 0
 	var rec := GameData.recipe_by_id(id)
 	var before := st.inventory.counts.duplicate()
 	var count_before: int = main.processor.total_done

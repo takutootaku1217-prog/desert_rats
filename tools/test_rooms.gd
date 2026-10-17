@@ -46,8 +46,7 @@ func _fresh(all_facilities := false, keep_defaults := false) -> void:
 		return
 	main.target_speed = 0.0
 	st.inventory.counts.clear()
-	for k in main.recipe_priority:
-		main.recipe_priority[k] = 0
+	for setting in main.refill_settings.values():setting.enabled=false
 
 
 ## W[0] だけが運搬と加工をする
@@ -286,7 +285,7 @@ func _test_workshop_move() -> void:
 	# 実際に加工する: 手作業（加工設備）と、ワークベンチ
 	_only_hauler()
 	Engine.time_scale = 8.0
-	main.recipe_priority["cook"] = 5
+	main.refill_settings[GameData.Item.FOOD].enabled=true
 	st.add_item(GameData.Item.MEAT, 2)
 	var w0 = W[0]
 	var near := {"n": 0, "far": 0}
@@ -300,8 +299,8 @@ func _test_workshop_move() -> void:
 	var t: float = await _until(cond, 90.0)
 	check(t >= 0.0, "移した加工室で、仲間が調理して食料ができる（%.0f秒）" % t)
 	check(near["n"] > 0 and near["far"] == 0, "仲間は新しい加工設備の場所（下の階）で作業した（作業中 %d回・離れていた %d回）" % [near["n"], near["far"]])
-	main.recipe_priority["cook"] = 0
-	main.recipe_priority["repair_iron"] = 5
+	main.refill_settings[GameData.Item.FOOD].enabled=false
+	main.refill_settings[GameData.Item.REPAIR_KIT].enabled=true
 	st.add_item(GameData.Item.IRON, 1)
 	st.add_item(GameData.Item.WOOD, 1)
 	var kits0: int = st.count_of(GameData.Item.REPAIR_KIT)
