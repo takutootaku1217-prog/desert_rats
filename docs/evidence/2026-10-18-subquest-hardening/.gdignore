@@ -1,0 +1,2 @@
+# GUI screenshot evidence: do not import it as Godot game assets.
+*.png
