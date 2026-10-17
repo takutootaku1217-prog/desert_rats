@@ -18,6 +18,7 @@ var _count: Label
 var _scroll: ScrollContainer
 var _rows := {}                      # Worker -> Button
 var _refresh_revision := 0
+var compact := false                  # 個体詳細では顔＋名前の細い一覧、遠征などの既存用途は従来幅
 const S_RANK := 5                    # S 以上
 
 
@@ -49,6 +50,16 @@ func _init() -> void:
 	_scroll.add_child(_box)
 
 
+## 個体詳細では、部署の常設列をなくして右の情報カードを広く取る。
+## 複数選択・絞り込みの機能は同じ部品のまま残す。
+func set_compact(value: bool) -> void:
+	compact = value
+	custom_minimum_size = Vector2(220 if compact else 290, 0)
+	_box.custom_minimum_size = Vector2(212 if compact else 282, 0)
+	if source.is_valid():
+		refresh()
+
+
 func refresh() -> void:
 	for w in selected.keys():
 		if not is_instance_valid(w):
@@ -65,15 +76,21 @@ func refresh() -> void:
 		var cb := CheckBox.new()
 		cb.button_pressed = selected.has(w)
 		cb.focus_mode = Control.FOCUS_NONE
-		cb.custom_minimum_size = Vector2(34, 40)
+		cb.custom_minimum_size = Vector2(28 if compact else 34, 44 if compact else 40)
 		cb.toggled.connect(func(on): _set_selected(w, on))
 		row.add_child(cb)
 		var number: int = int(number_source.call(w)) if number_source.is_valid() else 0
 		var prefix: String = "No.%02d " % number if number > 0 else ""
-		var b := UIKit.button("%s%s  Lv%d  %s" % [prefix, w.char_name, w.level, w.rank_letter()], func(): set_focus(w))
-		b.custom_minimum_size = Vector2(236, 40)
+		var text := "%s%s" % [prefix, w.char_name] if compact else "%s%s  Lv%d  %s" % [prefix, w.char_name, w.level, w.rank_letter()]
+		var b := UIKit.button(text, func(): set_focus(w))
+		b.custom_minimum_size = Vector2(176 if compact else 236, 44 if compact else 40)
 		b.clip_text = true                   # 長い個体名でも、一覧や管理画面全体の最小幅を広げない
-		b.tooltip_text = b.text              # 一覧で省略される名前は、詳細とツールチップで全文を読める
+		b.tooltip_text = "%s Lv%d %s" % [text, w.level, w.rank_letter()] # 一覧で省略される名前は、詳細とツールチップで全文を読める
+		if compact:
+			b.icon = _portrait_of(w)
+			b.expand_icon = true
+			b.add_theme_constant_override("icon_max_width", 32)
+			b.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		UIKit.style(b, w == focus_worker)
 		row.add_child(b)
 		_rows[w] = b
@@ -88,6 +105,15 @@ func set_focus(w) -> void:
 		UIKit.style(_rows[k], k == w)
 	_ensure_focus_visible()
 	focused.emit(w)
+
+
+func _portrait_of(w) -> Texture2D:
+	var sheet := GameData.tex("res://assets/characters/mouse_%s.png" % w.palette)
+	var atlas := AtlasTexture.new()
+	atlas.atlas = sheet
+	atlas.region = ArtSpec.frame_src(sheet, ArtSpec.WORKER, Worker.F_IDLE0)
+	atlas.filter_clip = true
+	return atlas
 
 
 ## 行の再生成や絞り込みで変わる最小サイズ・スクロール範囲の配置が済んでから合わせる。

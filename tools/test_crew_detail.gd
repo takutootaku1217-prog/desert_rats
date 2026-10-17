@@ -80,13 +80,14 @@ func _run() -> void:
 	check(main.ui.layer == 10 and detail.layer == 27 and detail._overlay.get_parent() == detail, "固定の管理入口は通常HUD、管理画面は他の管理画面より上の別レイヤー")
 	check(main.ui._button.text == "仲間 %d人 (C)" % W.size() and main.ui._button.custom_minimum_size == Vector2(144, 44), "上部HUDは仲間人数を示す144×44pxの固定サイズの管理入口")
 	check(detail._tab_btns.size() == 4 and detail._tab_btns[0].text == "概要" and detail._tab_btns[1].text == "装備・荷物" and detail._tab_btns[2].text == "仕事・能力" and detail._tab_btns[3].text == "部署", "概要・装備・荷物・仕事・能力・部署の用途別タブ")
-	for text in ["個体ランク", "得意分野", "運搬中", "使用中の装備"]:
+	for text in ["個体ランク", "得意:", "運搬中", "使用中の装備"]:
 		check(_has_text(text), "概要に%sがある" % text)
 	check(detail._live["view"]._gauges.size() == 3 and not detail._live["view"]._gauges.has("stamina"), "HP・満腹度・疲労度と精神状態を表示し、スタミナはない")
-	check(_has_text("休憩・食事は自動。必要なら早めに促せます。"), "生活行動は自動で、促しは補助だと案内する")
+	check(detail._live.has("life_eat") and _has_text("生活は自動"), "生活行動は自動で、促しは補助として残す")
+	check(detail._live.has("overview_equipment_slots") and detail._live["overview_equipment_slots"].get_child_count() == 4 and detail._live.has("overview_cargo_items"), "概要の使用中装備と運搬中を画像スロット付きの別カードで表示する")
 	detail._set_tab(1)
 	await _layout()
-	check(_text_has_height("防具：後から追加") and _has_text("採取道具"), "装備・荷物に既存の防具案内と全採取道具枠を残す")
+	check(_has_text("武器") and _has_text("仕事補助") and _has_text("採取道具") and detail._live.has("tool_visual_mine") and detail._live.has("tool_visual_chop"), "装備・荷物に既存の全装備枠を画像付きの分類カードで残す")
 	detail._set_tab(2)
 	await _layout()
 	for text in ["分野ランク", "スキル", "仕事の効率", "仕事の優先度"]:
@@ -109,7 +110,7 @@ func _run() -> void:
 	detail._update_live()
 	check(detail._live["tool_mine"].text.contains(GameData.ITEM_NAMES[GameData.Item.HAMMER]), "外部で道具が変わったとき、詳細の道具名が変わる")
 	check(detail._live["yield_mine"].text.contains("岩場：") and detail._live["yield_mine"].text.contains("鉱床：") and detail._live["yield_mine"].text.contains("個/秒"), "装備後は既存の採取速度を表示する")
-	check(_has_text("端数や袋の上限"), "採取速度と実際の持ち帰り個数の違いを明示する")
+	check(_has_text("実際の持ち帰り数"), "採取速度と実際の持ち帰り個数の違いを明示する")
 
 	print("-- 閲覧対象と画面側の選択の関係 --")
 	detail._picker.set_focus(W[2])
@@ -234,7 +235,7 @@ func _test_life_controls() -> void:
 	check(not return_button.disabled, "個人だけへの帰還指示を受け付けられる")
 	return_button.pressed.emit()
 	check(w.ai.return_request and w.ai.state == old_state and main.follow_target == W[0] and W[0].ai.return_request == false, "帰還指示は表示中の個人だけに安全な区切り待ちとして保存し、全員撤退や選択を変えない")
-	check(return_button.disabled and detail._header["instruction"].text.contains("帰還を指示済み"), "帰還指示の受付中と重複不可を固定ヘッダーに表示する")
+	check(return_button.disabled and detail._header["instruction"].text.contains("帰還指示：受付中"), "帰還指示の受付中と重複不可を固定ヘッダーに表示する")
 	w.ai.return_request = false
 	detail._update_live()
 	var rest_button: Button = detail._live["life_rest"]
@@ -243,7 +244,7 @@ func _test_life_controls() -> void:
 	check(w.ai.life_request == "rest" and W[0].ai.life_request.is_empty(), "休憩の促しは追従中の仲間でなく、表示中の仲間へ届く")
 	check(main.follow_target == W[0] and W[0].selected and detail._worker == w and w.priorities == priorities, "促しで追従・選択・仕事の優先度を変えない")
 	check(w.ai.state == old_state and main.food_claims == claims_before and main.storage.count_of(GameData.Item.FOOD) == food_before, "促しの受理時に作業状態・予約・食料を変更しない")
-	check(rest_button.disabled and not rest_button.tooltip_text.is_empty() and detail._live["life_pending"].visible and detail._live["life_pending"].text.contains("休憩を促しています"), "重複要求を無効にし、保留中の促しと理由を表示する")
+	check(rest_button.disabled and not rest_button.tooltip_text.is_empty() and detail._live["life_pending"].visible and detail._live["life_pending"].text.contains("休憩を促す"), "重複要求を無効にし、保留中の促しと理由を表示する")
 	rest_button.pressed.emit()       # 古いUIイベントが到着した場合も、APIが重複を拒否する。
 	check(w.ai.life_request == "rest" and main.food_claims == claims_before, "重複イベントでも要求や予約を増やさない")
 
@@ -265,7 +266,7 @@ func _test_life_controls() -> void:
 	check(not eat_button.disabled, "食料が使えるようになれば食事ボタンもライブ更新で有効になる")
 	eat_button.pressed.emit()
 	check(w.ai.life_request == "eat" and main.follow_target == W[0] and w.priorities == priorities, "食事の促しも表示中の個体への要求だけを変える")
-	check(eat_button.disabled and detail._live["life_pending"].text.contains("食事を促しています"), "食事の促しも重複を防ぎ、保留内容を表示する")
+	check(eat_button.disabled and detail._live["life_pending"].text.contains("食事を促す"), "食事の促しも重複を防ぎ、保留内容を表示する")
 	w.ai.life_request = ""
 	main._select(W[0])
 	_test_cargo_display(w)
@@ -315,7 +316,10 @@ func _test_hidden_departments() -> void:
 	var depts: Array = W.map(func(w): return w.dept)
 	var points: int = GameData.field_points(W, GameData.Field.DEV)
 	check(GameData.Field.values().has(GameData.Field.DEV) and not GameData.visible_departments().has(GameData.Field.DEV), "開発の定義を残し、表示・配属先から外す")
-	check(not detail._dept_btns.has(GameData.Field.DEV) and detail._dept_btns.size() == GameData.visible_departments().size() + 1, "左の部署一覧に開発部署を表示しない")
+	var filter_has_dev := false
+	for index in detail._filter_select.item_count:
+		filter_has_dev = filter_has_dev or detail._filter_select.get_item_text(index).contains(GameData.FIELD_NAMES[GameData.Field.DEV])
+	check(not filter_has_dev and detail._filter_select.item_count == GameData.visible_departments().size() + 1, "部署フィルターに開発部署を表示しない")
 	check(detail._members(-1).size() == W.size(), "非表示部署の所属者も全員一覧から消えない")
 	var hidden = null
 	for w in W:
@@ -324,7 +328,7 @@ func _test_hidden_departments() -> void:
 	check(hidden != null, "既存の開発所属個体を確認できる")
 	if hidden != null:
 		detail.open_worker(hidden)
-		check(not detail._live.status.text.contains("配属: " + GameData.FIELD_NAMES[GameData.Field.DEV]), "個体の行動状態に非表示の開発部署名を出さない")
+		check(not detail._header["action"].text.contains(GameData.FIELD_NAMES[GameData.Field.DEV]), "個体の行動状態に非表示の開発部署名を出さない")
 		detail._set_tab(2)
 		check(_has_text("開発者") and _has_text("分野ランク"), "開発の個体能力ランクは消さない")
 		for button in _buttons(detail._body):

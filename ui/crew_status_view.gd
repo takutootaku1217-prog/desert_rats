@@ -37,7 +37,9 @@ func setup(size_units: Vector2i = Vector2i(12, 12), font_size: int = 12, show_me
 		add_child(col)
 		col.add_child(g)
 		if show_mental_name:
-			var name_label := UIKit.lbl(String(CrewStatusDB.STAT_NAMES[stat]), font_size, UIKit.C_TEXT, _icon_px)
+			# 疲労度は内部値だが、塗りと数字は余力を表すため、可視ラベルも同じ意味へそろえる。
+			var visible_name := "余力" if stat == "fatigue" else String(CrewStatusDB.STAT_NAMES[stat])
+			var name_label := UIKit.lbl(visible_name, font_size, UIKit.C_TEXT, _icon_px)
 			name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 			col.add_child(name_label)
 		_gauges[stat] = g

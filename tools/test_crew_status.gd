@@ -940,7 +940,7 @@ func _test_step10_detail() -> void:
 			"HP・満腹度・疲労度（余力）が、その仲間の値で出る")
 	check(dv.face().texture == GameData.tex("res://assets/ui/mental_anxious.png"), "精神状態（不安）の顔が出る")
 	check(not _find_text(main.detail._overlay, "元気") and not _find_text(main.detail._overlay, "スタミナ"), "管理画面に元気・スタミナの表示は残っていない")
-	check(main.detail._live["status"].text.contains(w.ai.status_text()), "行動の状態の文字も、そのまま出る")
+	check(main.detail._header["action"].text.contains(w.ai.status_text()) and _find_text(main.detail._body, "余力"), "行動は固定ヘッダー、疲労の可視ラベルは余力で出る")
 	# 別の仲間を選ぶと、その仲間の値に変わる
 	W[1].hp = 15.0
 	main.detail._select(W[1])
