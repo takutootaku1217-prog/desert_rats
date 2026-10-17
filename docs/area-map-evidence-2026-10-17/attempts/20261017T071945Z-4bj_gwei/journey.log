@@ -1,0 +1,42 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+  ok 既存道路だけで最短・迂回の2経路
+  ok 直通なし・循環・未実装地点を拒否
+  ok 経路を受理 ["central_trade", "old_mine"]
+  ok 10秒前に1回だけ立ち寄り通知
+  ok 通知と経路を保存復元
+  ok 停止再開・連続tick・ロードで通知連打なし
+  ok 中間都市は通過・街に入れない
+  ok 次の区間へ進み通過を区別
+  ok 最終目的地は必ず停車
+  ok 最終停車から既存の鉱床へ進める
+  ok 鉱床接近中の地域移動は拒否
+  ok 経路を受理 ["east_sands", "central_trade", "old_mine"]
+  ok 未予約の砂原を通過
+  ok 予約した都市で停車
+  ok 停車予約後の保存・明示再開
+  ok 再開後も最終停車
+  ok 配達ミッションを受注
+  ok 経路を受理 ["south_oasis", "east_sands"]
+  ok 村の自動通過では配達完了しない
+  ok 経路を受理 ["south_oasis", "central_trade"]
+  ok 予約した村の停泊で配達成立
+  ok 村から再開
+  ok 最終都市停泊で報酬受領可能
+  ok 経路を受理 ["east_sands", "central_trade"]
+  ok 確認モードでは各地点停車
+  ok 手動停車を経路再開で解除しない
+  ok 呼戻し方針を解除しない
+  ok 方針を戻して明示再開
+  ok 経路取消は次の地点で停車
+  ok 経路を受理 ["east_sands", "central_trade"]
+  ok 高速・短い残距離でも立ち寄りを受理
+  ok 通知から追加した立ち寄りで停車
+  ok 再開
+  ok 走行中の変更は現在区間を保持して先だけ変更
+  ok 走行途中の経路変更を保存
+  ok 引返しは先の経路を破棄して既存帰還へ
+  ok 引返しは瞬間移動せず同じ道路
+  ok 旧v3は単一区間・自動予約なし
+  ok 到達不能な保存経路を拒否
+== 結果: すべて成功 ==

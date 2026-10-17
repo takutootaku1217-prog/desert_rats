@@ -42,6 +42,7 @@ static func capture(g) -> Dictionary:
 		"director": fields(g.director, DIRECTOR), "quarry": fields(g.quarry, QUARRY), "expedition": fields(g.expedition, EXPEDITION),
 		"party": [], "crew": [], "resources": [], "creatures": [], "enemies": [],
 		"camera": g.camera.position, "follow": g.workers.find(g.follow_target), "scroll": 0.0}
+	d["journey"] = g.journey.snapshot()
 	d["town"] = g.town.snapshot()
 	d["production"] = {"orders":g.production_orders.duplicate(true),"refill":g.refill_settings.duplicate(true),"goals":g.procurement_goals.duplicate(true)}
 	d["operations"] = fields(g.operations,FieldOperations.FIELDS)
@@ -177,6 +178,7 @@ static func validate(d, g) -> bool:
 	if not TownEconomy.valid(d.get("town",{}),g.workers.size()): return false
 	if not ProductionPlan.valid(d.get("production",{})): return false
 	if not WorldTrip.valid(d.get("world"),g): return false
+	if not JourneyPlan.valid(d.get("journey",{}),d.world): return false
 	for k in ["main", "base", "processor", "stock", "inventory", "wasted", "butchered", "capacity", "weight", "director", "quarry", "expedition", "party", "crew", "resources", "creatures", "enemies", "camera", "follow", "scroll"]:
 		if not d.has(k): return false
 	for row in [[d.main,g,MAIN],[d.base,g.base,BASE],[processor_data(d.processor) if d.processor is Dictionary else d.processor,g.processor,PROCESSOR],[d.director,g.director,DIRECTOR],[d.quarry,g.quarry,QUARRY],[d.expedition,g.expedition,EXPEDITION]]:
@@ -352,6 +354,7 @@ static func apply(g, d: Dictionary) -> bool:
 	if not validate(d,g):
 		last_error = "保存内容の形式・数量・参照を検証できません。現在の進行は変更しません。"
 		return false
+	g.journey.restore(d.get("journey",{}))
 	g.town.restore(d.get("town",{}))
 	var plan:Dictionary=d.get("production",{})
 	g.production_orders=plan.get("orders",[]).duplicate(true)

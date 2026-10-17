@@ -34,3 +34,26 @@ static func public_road(id: String) -> bool:
  return ROADS.has(id) and public_region(ROADS[id][0]) and public_region(ROADS[id][1])
 static func name_of(id: String) -> String:
  return REGIONS.get(id,{}).get("name",id)
+
+## 今回は既存4地点だけの小さなエリアマップ。世界概観や新地域は追加しない。
+const NODE_KIND := {"south_oasis":"village","east_sands":"grove","central_trade":"city","old_mine":"mine"}
+const MAP_HINTS := {
+ "south_oasis":"オアシスと村。木材・石・少量の鉄鉱石。",
+ "east_sands":"砂丘と枯れ木の帯。木材と石を採取。",
+ "central_trade":"街道の集まる都市。停泊し、全員帰還後に街へ。",
+ "old_mine":"岩山の坑口。停泊後、採取地点(G)から鉱床へ。",
+}
+static func paths(start:String,goal:String) -> Array:
+ if start==goal or not public_region(start) or not public_region(goal):return []
+ var found:Array=[]
+ _walk(start,goal,[start],found)
+ found.sort_custom(func(a,b):return a.size()<b.size())
+ return found
+static func _walk(at:String,goal:String,visited:Array,found:Array) -> void:
+ if at==goal:
+  var path:=visited.duplicate();path.pop_front();found.append(path);return
+ for id in ROADS:
+  if not public_road(id) or at not in ROADS[id]:continue
+  var next:String=ROADS[id][1] if ROADS[id][0]==at else ROADS[id][0]
+  if next in visited:continue
+  var branch:=visited.duplicate();branch.append(next);_walk(next,goal,branch,found)

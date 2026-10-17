@@ -1,0 +1,20 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 25.0.7-2+deb13u1 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 19.1.7, 256 bits)
+
+OK M入力で地図を開き時間停止
+OK 遠い鉱山を実クリックで選択
+FAIL 実入力で砂原経由の迂回経路
+FAIL 実入力で途中の砂原に予約停車
+OK 各点確認を実入力で有効
+OK 長い経路でも出発ボタンは画面内
+FAIL 出発で閉じて通常画面に戻る
+OK 車体マーカーは実走行の中間位置
+FAIL 10秒前案内は世界を止めない
+FAIL 立ち寄る実入力で予約追加
+OK 案内を押した後に再通知しない
+FAIL 通知で選んだ地点に実際に停車
+OK 予約経路を実クリックで再開
+OK 地図開閉は既存一時停止を保持
+== 結果: 6 件失敗 ==

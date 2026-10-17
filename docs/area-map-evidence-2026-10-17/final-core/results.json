@@ -1,0 +1,1875 @@
+{
+  "schema_version": 1,
+  "run_directory": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k",
+  "started_utc": "2026-10-17T07:26:04.783137+00:00",
+  "metadata": {
+    "platform": "Linux-6.18.55-x86_64-with-glibc2.41",
+    "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+    "python_executable": "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+    "runner_command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+      "tools/run_checks.py",
+      "--suite",
+      "core",
+      "--output-dir",
+      "/tmp/routes-final-core"
+    ],
+    "root": "/workspace/desert_rats",
+    "git_before": {
+      "head": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "rev-parse",
+          "HEAD"
+        ],
+        "returncode": 0,
+        "output": "072b2e46c3faba6ee31787c19cbb9f8de40f8762"
+      },
+      "branch": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "branch",
+          "--show-current"
+        ],
+        "returncode": 0,
+        "output": "main"
+      },
+      "status": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "status",
+          "--porcelain=v1",
+          "--untracked-files=all"
+        ],
+        "returncode": 0,
+        "output": "M AGENTS.md\n M data/world_map.gd\n M scripts/main.gd\n M scripts/save_game.gd\n M scripts/world_trip.gd\n M tools/run_checks.py\n M tools/test_world_scenery.gd\n M ui/world_map_ui.gd\n M \"\\347\\240\\202\\346\\274\\240\\343\\201\\256\\343\\203\\215\\343\\202\\272\\343\\203\\237\\345\\233\\243.gd\"\n?? \"docs/Notion\\345\\217\\202\\347\\205\\247\\347\\264\\242\\345\\274\\225.md\"\n?? scripts/journey_plan.gd\n?? scripts/journey_plan.gd.uid\n?? tools/test_journey.gd\n?? tools/test_journey.gd.uid\n?? tools/test_journey_flow.gd\n?? tools/test_journey_flow.gd.uid\n?? tools/test_journey_ui.gd\n?? tools/test_journey_ui.gd.uid\n?? ui/area_backdrop.gd\n?? ui/area_backdrop.gd.uid\n?? ui/map_point_button.gd\n?? ui/map_point_button.gd.uid\n?? ui/route_notice.gd\n?? ui/route_notice.gd.uid"
+      },
+      "changed_files": [
+        {
+          "path": "AGENTS.md",
+          "sha256": "515be71d32e5967436a10541a50215ca2afacf754f95064caf9d1b3bb0c488be"
+        },
+        {
+          "path": "data/world_map.gd",
+          "sha256": "eaba84122d1cad15f3d274579d2f4ea686b3b6ca0bc655e25faa442ae391ce1c"
+        },
+        {
+          "path": "docs/Notion参照索引.md",
+          "sha256": "b77d60a6c2ce14d367adec4d4b1eee014df9350feb4529085ee531696afa2870"
+        },
+        {
+          "path": "scripts/journey_plan.gd",
+          "sha256": "d46978c24986bedc0898193eb14cca039b1130741e0cbc4d2a61635ff870f747"
+        },
+        {
+          "path": "scripts/journey_plan.gd.uid",
+          "sha256": "2820657eb62311e8e7b0e83f13e47f94e1feb5f246cbc6e266f4fd0101c8f76d"
+        },
+        {
+          "path": "scripts/main.gd",
+          "sha256": "2e97b93423e364062ecd353f8623daba6511ddca974670fe715a7746d753f917"
+        },
+        {
+          "path": "scripts/save_game.gd",
+          "sha256": "8dc4fb3eafbdc8aed5fba9cbb62d6dbd66a1da6ceea47668f54405fa20aa815d"
+        },
+        {
+          "path": "scripts/world_trip.gd",
+          "sha256": "4dedac28ab14480e756f55158dc51c59e85ce265fc2722e5008d0680b54c7619"
+        },
+        {
+          "path": "tools/run_checks.py",
+          "sha256": "cef6527bde7cada49be3350e4025ac0ffcd479ae21c91ffd1e5416b6aa533acf"
+        },
+        {
+          "path": "tools/test_journey.gd",
+          "sha256": "da01f633d01f7bffc45be7caf920c37171219c72fe75de74ffd283baff21415b"
+        },
+        {
+          "path": "tools/test_journey.gd.uid",
+          "sha256": "fbbb0608b2e667d38e4560019b43f3d1bec59cc085969ae1e822316a24f85ec1"
+        },
+        {
+          "path": "tools/test_journey_flow.gd",
+          "sha256": "229915d3eea72c0a7cd0394aa91d24756faa48ce1587449f43ead3a708a03896"
+        },
+        {
+          "path": "tools/test_journey_flow.gd.uid",
+          "sha256": "2be7cb1e2cb7fc1ae41d2ea6b14c1b9675f036da6d63669eb4f4fd422bc5ab1a"
+        },
+        {
+          "path": "tools/test_journey_ui.gd",
+          "sha256": "1f0898079da99d8c90603ebcbe16a42da7beea3deb93cd987fa39cb12269f08e"
+        },
+        {
+          "path": "tools/test_journey_ui.gd.uid",
+          "sha256": "59dd7524a04ab292a5ccafeb89f73ec2c7ee20fecd3c1ba45d1ec5fd2a2298ea"
+        },
+        {
+          "path": "tools/test_world_scenery.gd",
+          "sha256": "ddc41400858482f23843303349f18b896c62b5ff3ee5442838c8fa5ecb4680e5"
+        },
+        {
+          "path": "ui/area_backdrop.gd",
+          "sha256": "099e643e51f49d4d991bb83b6a3e7b4e2108608f7049f5c4b63ecd5ca4b75c39"
+        },
+        {
+          "path": "ui/area_backdrop.gd.uid",
+          "sha256": "c95759285191d4739cc9dd04c13fcc59af7e6405c8d9447b4902e93d336b5526"
+        },
+        {
+          "path": "ui/map_point_button.gd",
+          "sha256": "8f366426f65ad85ad31c11f746f9bcb3b8e1bc9043cf6fe4a7d2f73d510fa3ae"
+        },
+        {
+          "path": "ui/map_point_button.gd.uid",
+          "sha256": "71fcfe22ced3127741d17ab11f33163511d843689f5aede97149ceae2d4b5a78"
+        },
+        {
+          "path": "ui/route_notice.gd",
+          "sha256": "8b2e156a03d1d07633259e31a3664810cb57a6c8722f8cf016723f201c814dcc"
+        },
+        {
+          "path": "ui/route_notice.gd.uid",
+          "sha256": "de3717a699b0f2ddeef374ff1b845a44bab1ae795e0fe2633152de0f3b9255a8"
+        },
+        {
+          "path": "ui/world_map_ui.gd",
+          "sha256": "6f9cbd0ef430702da21371c5ef640c0bb766f3241759919ff9c93cf865291e93"
+        },
+        {
+          "path": "砂漠のネズミ団.gd",
+          "sha256": "2e97b93423e364062ecd353f8623daba6511ddca974670fe715a7746d753f917"
+        }
+      ],
+      "dirty": true
+    },
+    "godot_version": {
+      "command": [
+        "/usr/local/bin/godot",
+        "--version"
+      ],
+      "returncode": 0,
+      "output": "Fontconfig error: No writable cache directories\n4.6.3.stable.official.7d41c59c4"
+    },
+    "suite": "core",
+    "unverified": [
+      "Windows / Godot 4.7.2",
+      "OS-level input",
+      "Audio"
+    ],
+    "scope_note": "order_flow/production_ui, first_cycle_flow/ecosystem, tool_progression/tool_flow, world_*, batch_*, haul_*, facility_packing, packing_flow and startup use the default map; other gameplay checks explicitly use legacy-world-test fixtures. world_endurance runs up to 60 game minutes with defaults, workbench request and optional 5-minute map trips; ordered_* additionally place finite tool and smelting orders; passed means observation integrity, not survival. Only selected checks; core does not cover extra/endurance or all gameplay conditions.",
+    "git_after": {
+      "head": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "rev-parse",
+          "HEAD"
+        ],
+        "returncode": 0,
+        "output": "072b2e46c3faba6ee31787c19cbb9f8de40f8762"
+      },
+      "branch": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "branch",
+          "--show-current"
+        ],
+        "returncode": 0,
+        "output": "main"
+      },
+      "status": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "status",
+          "--porcelain=v1",
+          "--untracked-files=all"
+        ],
+        "returncode": 0,
+        "output": "M AGENTS.md\n M data/world_map.gd\n M scripts/main.gd\n M scripts/save_game.gd\n M scripts/world_trip.gd\n M tools/run_checks.py\n M tools/test_world_scenery.gd\n M ui/world_map_ui.gd\n M \"\\347\\240\\202\\346\\274\\240\\343\\201\\256\\343\\203\\215\\343\\202\\272\\343\\203\\237\\345\\233\\243.gd\"\n?? \"docs/Notion\\345\\217\\202\\347\\205\\247\\347\\264\\242\\345\\274\\225.md\"\n?? scripts/journey_plan.gd\n?? scripts/journey_plan.gd.uid\n?? tools/test_journey.gd\n?? tools/test_journey.gd.uid\n?? tools/test_journey_flow.gd\n?? tools/test_journey_flow.gd.uid\n?? tools/test_journey_ui.gd\n?? tools/test_journey_ui.gd.uid\n?? ui/area_backdrop.gd\n?? ui/area_backdrop.gd.uid\n?? ui/map_point_button.gd\n?? ui/map_point_button.gd.uid\n?? ui/route_notice.gd\n?? ui/route_notice.gd.uid"
+      },
+      "changed_files": [
+        {
+          "path": "AGENTS.md",
+          "sha256": "515be71d32e5967436a10541a50215ca2afacf754f95064caf9d1b3bb0c488be"
+        },
+        {
+          "path": "data/world_map.gd",
+          "sha256": "eaba84122d1cad15f3d274579d2f4ea686b3b6ca0bc655e25faa442ae391ce1c"
+        },
+        {
+          "path": "docs/Notion参照索引.md",
+          "sha256": "b77d60a6c2ce14d367adec4d4b1eee014df9350feb4529085ee531696afa2870"
+        },
+        {
+          "path": "scripts/journey_plan.gd",
+          "sha256": "d46978c24986bedc0898193eb14cca039b1130741e0cbc4d2a61635ff870f747"
+        },
+        {
+          "path": "scripts/journey_plan.gd.uid",
+          "sha256": "2820657eb62311e8e7b0e83f13e47f94e1feb5f246cbc6e266f4fd0101c8f76d"
+        },
+        {
+          "path": "scripts/main.gd",
+          "sha256": "2e97b93423e364062ecd353f8623daba6511ddca974670fe715a7746d753f917"
+        },
+        {
+          "path": "scripts/save_game.gd",
+          "sha256": "8dc4fb3eafbdc8aed5fba9cbb62d6dbd66a1da6ceea47668f54405fa20aa815d"
+        },
+        {
+          "path": "scripts/world_trip.gd",
+          "sha256": "4dedac28ab14480e756f55158dc51c59e85ce265fc2722e5008d0680b54c7619"
+        },
+        {
+          "path": "tools/run_checks.py",
+          "sha256": "cef6527bde7cada49be3350e4025ac0ffcd479ae21c91ffd1e5416b6aa533acf"
+        },
+        {
+          "path": "tools/test_journey.gd",
+          "sha256": "da01f633d01f7bffc45be7caf920c37171219c72fe75de74ffd283baff21415b"
+        },
+        {
+          "path": "tools/test_journey.gd.uid",
+          "sha256": "fbbb0608b2e667d38e4560019b43f3d1bec59cc085969ae1e822316a24f85ec1"
+        },
+        {
+          "path": "tools/test_journey_flow.gd",
+          "sha256": "229915d3eea72c0a7cd0394aa91d24756faa48ce1587449f43ead3a708a03896"
+        },
+        {
+          "path": "tools/test_journey_flow.gd.uid",
+          "sha256": "2be7cb1e2cb7fc1ae41d2ea6b14c1b9675f036da6d63669eb4f4fd422bc5ab1a"
+        },
+        {
+          "path": "tools/test_journey_ui.gd",
+          "sha256": "1f0898079da99d8c90603ebcbe16a42da7beea3deb93cd987fa39cb12269f08e"
+        },
+        {
+          "path": "tools/test_journey_ui.gd.uid",
+          "sha256": "59dd7524a04ab292a5ccafeb89f73ec2c7ee20fecd3c1ba45d1ec5fd2a2298ea"
+        },
+        {
+          "path": "tools/test_world_scenery.gd",
+          "sha256": "ddc41400858482f23843303349f18b896c62b5ff3ee5442838c8fa5ecb4680e5"
+        },
+        {
+          "path": "ui/area_backdrop.gd",
+          "sha256": "099e643e51f49d4d991bb83b6a3e7b4e2108608f7049f5c4b63ecd5ca4b75c39"
+        },
+        {
+          "path": "ui/area_backdrop.gd.uid",
+          "sha256": "c95759285191d4739cc9dd04c13fcc59af7e6405c8d9447b4902e93d336b5526"
+        },
+        {
+          "path": "ui/map_point_button.gd",
+          "sha256": "8f366426f65ad85ad31c11f746f9bcb3b8e1bc9043cf6fe4a7d2f73d510fa3ae"
+        },
+        {
+          "path": "ui/map_point_button.gd.uid",
+          "sha256": "71fcfe22ced3127741d17ab11f33163511d843689f5aede97149ceae2d4b5a78"
+        },
+        {
+          "path": "ui/route_notice.gd",
+          "sha256": "8b2e156a03d1d07633259e31a3664810cb57a6c8722f8cf016723f201c814dcc"
+        },
+        {
+          "path": "ui/route_notice.gd.uid",
+          "sha256": "de3717a699b0f2ddeef374ff1b845a44bab1ae795e0fe2633152de0f3b9255a8"
+        },
+        {
+          "path": "ui/world_map_ui.gd",
+          "sha256": "6f9cbd0ef430702da21371c5ef640c0bb766f3241759919ff9c93cf865291e93"
+        },
+        {
+          "path": "砂漠のネズミ団.gd",
+          "sha256": "2e97b93423e364062ecd353f8623daba6511ddca974670fe715a7746d753f917"
+        }
+      ],
+      "dirty": true
+    }
+  },
+  "scope": [
+    "import",
+    "journey",
+    "journey_ui",
+    "journey_flow",
+    "town",
+    "town_flow",
+    "town_ui",
+    "production_recovery",
+    "production_reservations",
+    "order_flow",
+    "production_ui",
+    "hunt_bounds",
+    "auto_craft_guard",
+    "developer_mode",
+    "developer_enabled",
+    "artscale",
+    "tool_progression",
+    "tool_flow",
+    "first_cycle",
+    "field_operations",
+    "manual_combat",
+    "field_ui",
+    "ecosystem",
+    "first_cycle_flow",
+    "navigation_bar",
+    "batch_crafting",
+    "batch_ui",
+    "batch_flow",
+    "haul_support",
+    "haul_ui",
+    "haul_flow",
+    "facility_packing",
+    "packing_flow",
+    "world_map",
+    "world_flow",
+    "world_boundaries",
+    "world_fauna",
+    "world_scenery",
+    "world_reencounter",
+    "save_game",
+    "save_ui",
+    "inventory_discard",
+    "clarity_ui",
+    "cargo_accounting",
+    "cargo_escape_ui",
+    "progression",
+    "weapon",
+    "weapon_ui",
+    "equipment_ui",
+    "packed_equipment",
+    "quarry",
+    "gather",
+    "cargo",
+    "items",
+    "crew_status",
+    "life_actions",
+    "tool_management",
+    "cargo_reservations",
+    "consumption_loop",
+    "loop_vanilla",
+    "loop_normal",
+    "startup"
+  ],
+  "status": "passed",
+  "first_failure": null,
+  "checks": [
+    {
+      "id": "import",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "--editor",
+        "--import",
+        "--quit"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/import.log",
+      "timeout_seconds": 120,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 6.234,
+      "diagnostic_error_lines": [],
+      "success_marker_found": null
+    },
+    {
+      "id": "journey",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_journey.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/journey.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 7.086,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "journey_ui",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_journey_ui.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/journey_ui.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 2.17,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "journey_flow",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_journey_flow.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/journey_flow.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 3.826,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "town",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_town.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/town.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 3.475,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "town_flow",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_town_flow.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/town_flow.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 6.231,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "town_ui",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_town_ui.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/town_ui.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 2.721,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "production_recovery",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_production_recovery.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/production_recovery.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 8.089,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "production_reservations",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_production_reservations.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/production_reservations.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 3.926,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "order_flow",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_order_flow.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/order_flow.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 12.1,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "production_ui",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_production_ui.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/production_ui.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 5.98,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "hunt_bounds",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_hunt_bounds.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/hunt_bounds.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 1.768,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "auto_craft_guard",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_auto_craft_guard.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/auto_craft_guard.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 1.87,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "developer_mode",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_developer_mode.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/developer_mode.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 1.968,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "developer_enabled",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_developer_mode.gd",
+        "--",
+        "--developer-mode",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/developer_enabled.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 1.97,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "artscale",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_artscale.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/artscale.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 10.795,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "tool_progression",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_tool_progression.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/tool_progression.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 2.976,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "tool_flow",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_tool_flow.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/tool_flow.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 6.138,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "first_cycle",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_first_cycle.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/first_cycle.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 7.089,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "field_operations",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_field_operations.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/field_operations.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 1.972,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "manual_combat",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_manual_combat.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/manual_combat.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 1.869,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "field_ui",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_field_ui.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/field_ui.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 2.723,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "ecosystem",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_ecosystem.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/ecosystem.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 1.768,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "first_cycle_flow",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_first_cycle_flow.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/first_cycle_flow.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 14.458,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "navigation_bar",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_navigation_bar.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/navigation_bar.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 5.682,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "batch_crafting",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_batch_crafting.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/batch_crafting.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 8.289,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "batch_ui",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_batch_ui.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/batch_ui.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 5.533,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "batch_flow",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_batch_flow.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/batch_flow.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 5.23,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "haul_support",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_haul_support.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/haul_support.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 5.236,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "haul_ui",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_haul_ui.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/haul_ui.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 4.174,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "haul_flow",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_haul_flow.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/haul_flow.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 10.901,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "facility_packing",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_facility_packing.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/facility_packing.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 2.321,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "packing_flow",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_packing_flow.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/packing_flow.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 12.299,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "world_map",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_world_map.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/world_map.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 4.178,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "world_flow",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_world_flow.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/world_flow.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 8.184,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "world_boundaries",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_world_boundaries.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/world_boundaries.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 2.973,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "world_fauna",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_world_fauna.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/world_fauna.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 1.972,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "world_scenery",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_world_scenery.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/world_scenery.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 4.828,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "world_reencounter",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_world_reencounter.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/world_reencounter.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 1.869,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "save_game",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_save_game.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/save_game.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 4.027,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "save_ui",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_save_ui.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/save_ui.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 2.723,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "inventory_discard",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_inventory_discard.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/inventory_discard.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 3.474,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "clarity_ui",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_clarity_ui.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/clarity_ui.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 4.81,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "cargo_accounting",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_cargo_accounting.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/cargo_accounting.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 6.13,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "cargo_escape_ui",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_cargo_escape_ui.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/cargo_escape_ui.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 2.138,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "progression",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_progression.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/progression.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 11.85,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "weapon",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_weapon.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/weapon.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 2.172,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "weapon_ui",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_weapon_ui.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/weapon_ui.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 4.38,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "equipment_ui",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_equipment_ui.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/equipment_ui.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 3.474,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "packed_equipment",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_packed_equipment.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/packed_equipment.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 5.983,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "quarry",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_quarry.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/quarry.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 8.741,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "gather",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_gather.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/gather.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 64.032,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "cargo",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_cargo.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/cargo.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 62.647,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "items",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_items.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/items.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 11.119,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "crew_status",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_crew_status.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/crew_status.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 11.54,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "life_actions",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_life_actions.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/life_actions.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 12.4,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "tool_management",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_tool_management.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/tool_management.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 4.377,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "cargo_reservations",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_cargo_reservations.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/cargo_reservations.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 1.769,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "consumption_loop",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_consumption_loop.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/consumption_loop.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 1.769,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "loop_vanilla",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_loop.gd",
+        "--",
+        "32",
+        "2",
+        "12",
+        "500",
+        "0",
+        "vanilla",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/loop_vanilla.log",
+      "timeout_seconds": 300,
+      "requested_game_minutes_per_run": 32,
+      "requested_repetitions": 2,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 47.085,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "loop_normal",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_loop.gd",
+        "--",
+        "28",
+        "2",
+        "12",
+        "500",
+        "0",
+        "normal",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/loop_normal.log",
+      "timeout_seconds": 300,
+      "requested_game_minutes_per_run": 28,
+      "requested_repetitions": 2,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 39.835,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "startup",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "--quit-after",
+        "300"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-final-core/20261017T072604Z-ei6acw8k/startup.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 2.32,
+      "diagnostic_error_lines": [],
+      "success_marker_found": null
+    }
+  ],
+  "elapsed_wall_seconds": 521.747,
+  "finished_utc": "2026-10-17T07:34:46.530676+00:00",
+  "source_changed_during_run": false
+}

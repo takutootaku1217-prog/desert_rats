@@ -1,0 +1,389 @@
+{
+  "schema_version": 1,
+  "run_directory": "/tmp/routes-new/20261017T071945Z-4bj_gwei",
+  "started_utc": "2026-10-17T07:19:45.735777+00:00",
+  "metadata": {
+    "platform": "Linux-6.18.55-x86_64-with-glibc2.41",
+    "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+    "python_executable": "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+    "runner_command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+      "tools/run_checks.py",
+      "--check",
+      "journey",
+      "--check",
+      "journey_flow",
+      "--output-dir",
+      "/tmp/routes-new"
+    ],
+    "root": "/workspace/desert_rats",
+    "git_before": {
+      "head": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "rev-parse",
+          "HEAD"
+        ],
+        "returncode": 0,
+        "output": "072b2e46c3faba6ee31787c19cbb9f8de40f8762"
+      },
+      "branch": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "branch",
+          "--show-current"
+        ],
+        "returncode": 0,
+        "output": "main"
+      },
+      "status": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "status",
+          "--porcelain=v1",
+          "--untracked-files=all"
+        ],
+        "returncode": 0,
+        "output": "M AGENTS.md\n M data/world_map.gd\n M scripts/main.gd\n M scripts/save_game.gd\n M scripts/world_trip.gd\n M tools/run_checks.py\n M ui/world_map_ui.gd\n M \"\\347\\240\\202\\346\\274\\240\\343\\201\\256\\343\\203\\215\\343\\202\\272\\343\\203\\237\\345\\233\\243.gd\"\n?? \"docs/Notion\\345\\217\\202\\347\\205\\247\\347\\264\\242\\345\\274\\225.md\"\n?? scripts/journey_plan.gd\n?? scripts/journey_plan.gd.uid\n?? tools/test_journey.gd\n?? tools/test_journey_flow.gd\n?? tools/test_journey_ui.gd\n?? ui/area_backdrop.gd\n?? ui/area_backdrop.gd.uid\n?? ui/map_point_button.gd\n?? ui/map_point_button.gd.uid\n?? ui/route_notice.gd\n?? ui/route_notice.gd.uid"
+      },
+      "changed_files": [
+        {
+          "path": "AGENTS.md",
+          "sha256": "515be71d32e5967436a10541a50215ca2afacf754f95064caf9d1b3bb0c488be"
+        },
+        {
+          "path": "data/world_map.gd",
+          "sha256": "7744a0dd73ed9809c3922912637d691604845a653b78fb97fed8582b6131cb8b"
+        },
+        {
+          "path": "docs/Notion参照索引.md",
+          "sha256": "680dfc0c0dc65fc306b3864829a0c6d1f41e4f49ac0bdc648b283577b54004de"
+        },
+        {
+          "path": "scripts/journey_plan.gd",
+          "sha256": "fd2029e95104ee9e46e6870e80715acdfe2426c7167c63f447ae0c4613897079"
+        },
+        {
+          "path": "scripts/journey_plan.gd.uid",
+          "sha256": "2820657eb62311e8e7b0e83f13e47f94e1feb5f246cbc6e266f4fd0101c8f76d"
+        },
+        {
+          "path": "scripts/main.gd",
+          "sha256": "2e97b93423e364062ecd353f8623daba6511ddca974670fe715a7746d753f917"
+        },
+        {
+          "path": "scripts/save_game.gd",
+          "sha256": "8dc4fb3eafbdc8aed5fba9cbb62d6dbd66a1da6ceea47668f54405fa20aa815d"
+        },
+        {
+          "path": "scripts/world_trip.gd",
+          "sha256": "4dedac28ab14480e756f55158dc51c59e85ce265fc2722e5008d0680b54c7619"
+        },
+        {
+          "path": "tools/run_checks.py",
+          "sha256": "cef6527bde7cada49be3350e4025ac0ffcd479ae21c91ffd1e5416b6aa533acf"
+        },
+        {
+          "path": "tools/test_journey.gd",
+          "sha256": "0b37e137f6500ea90ff22a7ff896c15e331aeb60e25dc112b1f2d5dc1c51418d"
+        },
+        {
+          "path": "tools/test_journey_flow.gd",
+          "sha256": "85b929df7fb899bbcad87d584c76392e9755989d6a6cfd06fbafafb8496df5f3"
+        },
+        {
+          "path": "tools/test_journey_ui.gd",
+          "sha256": "f5e630fb8b0f5e33f1858a107cd4c84b82d5bd1a080fccbc8be0768f9718002c"
+        },
+        {
+          "path": "ui/area_backdrop.gd",
+          "sha256": "1c0cd62e3c79985d14dc6d86f6c78e1ad03b83ccf296687876b7f9b6252fd813"
+        },
+        {
+          "path": "ui/area_backdrop.gd.uid",
+          "sha256": "c95759285191d4739cc9dd04c13fcc59af7e6405c8d9447b4902e93d336b5526"
+        },
+        {
+          "path": "ui/map_point_button.gd",
+          "sha256": "8f366426f65ad85ad31c11f746f9bcb3b8e1bc9043cf6fe4a7d2f73d510fa3ae"
+        },
+        {
+          "path": "ui/map_point_button.gd.uid",
+          "sha256": "71fcfe22ced3127741d17ab11f33163511d843689f5aede97149ceae2d4b5a78"
+        },
+        {
+          "path": "ui/route_notice.gd",
+          "sha256": "8b2e156a03d1d07633259e31a3664810cb57a6c8722f8cf016723f201c814dcc"
+        },
+        {
+          "path": "ui/route_notice.gd.uid",
+          "sha256": "de3717a699b0f2ddeef374ff1b845a44bab1ae795e0fe2633152de0f3b9255a8"
+        },
+        {
+          "path": "ui/world_map_ui.gd",
+          "sha256": "2bcdb10a28a3638f2fa8fc43ae7076780caccd5ecb5d1742bdd846e5232102d4"
+        },
+        {
+          "path": "砂漠のネズミ団.gd",
+          "sha256": "2e97b93423e364062ecd353f8623daba6511ddca974670fe715a7746d753f917"
+        }
+      ],
+      "dirty": true
+    },
+    "godot_version": {
+      "command": [
+        "/usr/local/bin/godot",
+        "--version"
+      ],
+      "returncode": 0,
+      "output": "Fontconfig error: No writable cache directories\n4.6.3.stable.official.7d41c59c4"
+    },
+    "suite": null,
+    "unverified": [
+      "Windows / Godot 4.7.2",
+      "OS-level input",
+      "Audio"
+    ],
+    "scope_note": "order_flow/production_ui, first_cycle_flow/ecosystem, tool_progression/tool_flow, world_*, batch_*, haul_*, facility_packing, packing_flow and startup use the default map; other gameplay checks explicitly use legacy-world-test fixtures. world_endurance runs up to 60 game minutes with defaults, workbench request and optional 5-minute map trips; ordered_* additionally place finite tool and smelting orders; passed means observation integrity, not survival. Only selected checks; core does not cover extra/endurance or all gameplay conditions.",
+    "git_after": {
+      "head": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "rev-parse",
+          "HEAD"
+        ],
+        "returncode": 0,
+        "output": "072b2e46c3faba6ee31787c19cbb9f8de40f8762"
+      },
+      "branch": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "branch",
+          "--show-current"
+        ],
+        "returncode": 0,
+        "output": "main"
+      },
+      "status": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "status",
+          "--porcelain=v1",
+          "--untracked-files=all"
+        ],
+        "returncode": 0,
+        "output": "M AGENTS.md\n M data/world_map.gd\n M scripts/main.gd\n M scripts/save_game.gd\n M scripts/world_trip.gd\n M tools/run_checks.py\n M ui/world_map_ui.gd\n M \"\\347\\240\\202\\346\\274\\240\\343\\201\\256\\343\\203\\215\\343\\202\\272\\343\\203\\237\\345\\233\\243.gd\"\n?? \"docs/Notion\\345\\217\\202\\347\\205\\247\\347\\264\\242\\345\\274\\225.md\"\n?? scripts/journey_plan.gd\n?? scripts/journey_plan.gd.uid\n?? tools/test_journey.gd\n?? tools/test_journey.gd.uid\n?? tools/test_journey_flow.gd\n?? tools/test_journey_flow.gd.uid\n?? tools/test_journey_ui.gd\n?? tools/test_journey_ui.gd.uid\n?? ui/area_backdrop.gd\n?? ui/area_backdrop.gd.uid\n?? ui/map_point_button.gd\n?? ui/map_point_button.gd.uid\n?? ui/route_notice.gd\n?? ui/route_notice.gd.uid"
+      },
+      "changed_files": [
+        {
+          "path": "AGENTS.md",
+          "sha256": "515be71d32e5967436a10541a50215ca2afacf754f95064caf9d1b3bb0c488be"
+        },
+        {
+          "path": "data/world_map.gd",
+          "sha256": "7744a0dd73ed9809c3922912637d691604845a653b78fb97fed8582b6131cb8b"
+        },
+        {
+          "path": "docs/Notion参照索引.md",
+          "sha256": "680dfc0c0dc65fc306b3864829a0c6d1f41e4f49ac0bdc648b283577b54004de"
+        },
+        {
+          "path": "scripts/journey_plan.gd",
+          "sha256": "fd2029e95104ee9e46e6870e80715acdfe2426c7167c63f447ae0c4613897079"
+        },
+        {
+          "path": "scripts/journey_plan.gd.uid",
+          "sha256": "2820657eb62311e8e7b0e83f13e47f94e1feb5f246cbc6e266f4fd0101c8f76d"
+        },
+        {
+          "path": "scripts/main.gd",
+          "sha256": "2e97b93423e364062ecd353f8623daba6511ddca974670fe715a7746d753f917"
+        },
+        {
+          "path": "scripts/save_game.gd",
+          "sha256": "8dc4fb3eafbdc8aed5fba9cbb62d6dbd66a1da6ceea47668f54405fa20aa815d"
+        },
+        {
+          "path": "scripts/world_trip.gd",
+          "sha256": "4dedac28ab14480e756f55158dc51c59e85ce265fc2722e5008d0680b54c7619"
+        },
+        {
+          "path": "tools/run_checks.py",
+          "sha256": "cef6527bde7cada49be3350e4025ac0ffcd479ae21c91ffd1e5416b6aa533acf"
+        },
+        {
+          "path": "tools/test_journey.gd",
+          "sha256": "0b37e137f6500ea90ff22a7ff896c15e331aeb60e25dc112b1f2d5dc1c51418d"
+        },
+        {
+          "path": "tools/test_journey.gd.uid",
+          "sha256": "fbbb0608b2e667d38e4560019b43f3d1bec59cc085969ae1e822316a24f85ec1"
+        },
+        {
+          "path": "tools/test_journey_flow.gd",
+          "sha256": "85b929df7fb899bbcad87d584c76392e9755989d6a6cfd06fbafafb8496df5f3"
+        },
+        {
+          "path": "tools/test_journey_flow.gd.uid",
+          "sha256": "2be7cb1e2cb7fc1ae41d2ea6b14c1b9675f036da6d63669eb4f4fd422bc5ab1a"
+        },
+        {
+          "path": "tools/test_journey_ui.gd",
+          "sha256": "f5e630fb8b0f5e33f1858a107cd4c84b82d5bd1a080fccbc8be0768f9718002c"
+        },
+        {
+          "path": "tools/test_journey_ui.gd.uid",
+          "sha256": "59dd7524a04ab292a5ccafeb89f73ec2c7ee20fecd3c1ba45d1ec5fd2a2298ea"
+        },
+        {
+          "path": "ui/area_backdrop.gd",
+          "sha256": "1c0cd62e3c79985d14dc6d86f6c78e1ad03b83ccf296687876b7f9b6252fd813"
+        },
+        {
+          "path": "ui/area_backdrop.gd.uid",
+          "sha256": "c95759285191d4739cc9dd04c13fcc59af7e6405c8d9447b4902e93d336b5526"
+        },
+        {
+          "path": "ui/map_point_button.gd",
+          "sha256": "8f366426f65ad85ad31c11f746f9bcb3b8e1bc9043cf6fe4a7d2f73d510fa3ae"
+        },
+        {
+          "path": "ui/map_point_button.gd.uid",
+          "sha256": "71fcfe22ced3127741d17ab11f33163511d843689f5aede97149ceae2d4b5a78"
+        },
+        {
+          "path": "ui/route_notice.gd",
+          "sha256": "8b2e156a03d1d07633259e31a3664810cb57a6c8722f8cf016723f201c814dcc"
+        },
+        {
+          "path": "ui/route_notice.gd.uid",
+          "sha256": "de3717a699b0f2ddeef374ff1b845a44bab1ae795e0fe2633152de0f3b9255a8"
+        },
+        {
+          "path": "ui/world_map_ui.gd",
+          "sha256": "2bcdb10a28a3638f2fa8fc43ae7076780caccd5ecb5d1742bdd846e5232102d4"
+        },
+        {
+          "path": "砂漠のネズミ団.gd",
+          "sha256": "2e97b93423e364062ecd353f8623daba6511ddca974670fe715a7746d753f917"
+        }
+      ],
+      "dirty": true
+    }
+  },
+  "scope": [
+    "import",
+    "journey",
+    "journey_flow"
+  ],
+  "status": "failed",
+  "first_failure": {
+    "id": "journey_flow",
+    "command": [
+      "/usr/local/bin/godot",
+      "--headless",
+      "--path",
+      "/workspace/desert_rats",
+      "--fixed-fps",
+      "60",
+      "-s",
+      "res://tools/test_journey_flow.gd"
+    ],
+    "cwd": "/workspace/desert_rats",
+    "log": "/tmp/routes-new/20261017T071945Z-4bj_gwei/journey_flow.log",
+    "timeout_seconds": 180.0,
+    "requested_game_minutes_per_run": null,
+    "requested_repetitions": null,
+    "status": "failed",
+    "returncode": 1,
+    "elapsed_wall_seconds": 5.489,
+    "diagnostic_error_lines": [
+      "FAIL 街画面が開かない"
+    ],
+    "success_marker_found": false
+  },
+  "checks": [
+    {
+      "id": "import",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "--editor",
+        "--import",
+        "--quit"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-new/20261017T071945Z-4bj_gwei/import.log",
+      "timeout_seconds": 120,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 6.279,
+      "diagnostic_error_lines": [],
+      "success_marker_found": null
+    },
+    {
+      "id": "journey",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_journey.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-new/20261017T071945Z-4bj_gwei/journey.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 5.699,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "journey_flow",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_journey_flow.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/routes-new/20261017T071945Z-4bj_gwei/journey_flow.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "failed",
+      "returncode": 1,
+      "elapsed_wall_seconds": 5.489,
+      "diagnostic_error_lines": [
+        "FAIL 街画面が開かない"
+      ],
+      "success_marker_found": false
+    }
+  ],
+  "elapsed_wall_seconds": 17.47,
+  "finished_utc": "2026-10-17T07:20:03.207269+00:00",
+  "source_changed_during_run": true,
+  "verification_error": "Source changed during run or Git/Godot metadata could not be verified"
+}

@@ -35,14 +35,16 @@ func ready_reason() -> String:
   for target in [w.ai.res,w.ai.prey,w.ai.enemy]:
    if is_instance_valid(target): return "屋外作業の予約解除待ち"
  return ""
-func request(to: String) -> bool:
+func request(to: String, planned := false) -> bool:
  if not active or phase != "stopped" or game.quarry.state != "road" or game.game_over: return false
  var r := WorldMapDB.road_between(region,to)
  if not WorldMapDB.public_road(r): return false
+ if not planned:game.journey.clear()
  origin = region; destination = to; road = r; phase = "departing"
  return true
 func cancel_or_return() -> bool:
  if game.game_over: return false
+ game.journey.clear()
  if phase=="legacy_recall": phase="stopped"; _release_waiters(); return true
  match phase:
   "departing": phase = "stopped"; road = ""; origin = ""; destination = ""
@@ -75,18 +77,22 @@ func tick(dist: float) -> void:
   _archive()
   match phase:
    "departing":
-    direction=1 if WorldMapDB.ROADS[road][0]==origin else -1
-    progress=0.0 if direction==1 else WorldMapDB.LENGTH
-    phase="travel"
+    start_leg()
    "arriving":
     region=destination; phase="stopped"; road=""; origin=""; destination=""
-    game.director.note(WorldMapDB.name_of(region)+"に到着。地図で次の行先を選べます")
+    game.journey.arrived()
+    game.director.note(("通過：" if phase=="travel" else "停車：")+WorldMapDB.name_of(region))
    "turning":
     var previous := origin; origin=destination; destination=previous
     direction *= -1; phase="travel"
   _release_waiters()
   _ensure_location()
  _spawn_visible()
+func start_leg() -> void:
+ direction=1 if WorldMapDB.ROADS[road][0]==origin else -1
+ progress=0.0 if direction==1 else WorldMapDB.LENGTH
+ phase="travel"
+ game.journey.leg_started()
 func status_text() -> String:
  if not active: return "旧形式の街道（地域移行前）"
  if phase=="stopped": return WorldMapDB.name_of(region)+"に停泊中"

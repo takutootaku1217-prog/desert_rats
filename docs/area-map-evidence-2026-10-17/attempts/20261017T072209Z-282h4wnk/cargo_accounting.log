@@ -1,0 +1,9 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+  ok 重量再現と同じ36個運搬
+  ok 倉庫→運搬中→作業場の各フレームで重量344
+  ok 内部返却は空き重量を要求しない
+  ok 内部返却が実AIで完了
+  ok 往復しても重量不変
+  ok 複数材料運搬は鉄1+木材1を一度ずつ数える
+  ok 中断返却で複製・消失なし

@@ -1,0 +1,23 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+DIAGNOSTIC_SEED 501
+HAUL_FLOW 通常初期物資・既定出来事・実AI・定期保存復元。数量注入なし。
+STAGE 27.8s 作業台完成
+STAGE 75.8s 地域到着 east_sands
+STAGE 142.2s 地域到着 central_trade
+STAGE 142.2s 狩猟と獲物回収で皮を確保
+STAGE 142.2s 素材確保 木材
+STAGE 165.6s 作業場へ 木材
+STAGE 165.6s 素材確保 皮
+STAGE 175.0s 作業場へ 皮
+STAGE 227.2s 地域到着 old_mine
+STAGE 258.0s 鉱床到着
+STAGE 312.2s 近場12単位を採取
+STAGE 318.2s 鉱床帰還
+STAGE 338.2s 鉱山入口復帰
+STAGE 338.2s 素材確保 鉄
+STAGE 352.8s 作業場へ 鉄
+STAGE 388.4s フレーム製作・収納
+STAGE 582.2s 地域到着 central_trade
+PROGRESSION {"build_queue":[],"capacity":360,"events":{"attack":0,"chance":0,"escaped":0,"kills":0,"repelled":0,"trouble":2,"weather":3},"game_over":false,"inventory":{"0":0,"1":0,"2":1,"4":5,"5":0,"6":0,"7":9,"8":12,"9":8,"10":1,"12":0,"15":0,"22":0,"23":0,"24":0},"phase":"地域到着 central_trade","quarry":"road","report":{"discarded":{},"food":0,"generated":{"6":12},"nearby":{}},"seconds":582.199999999995,"stages":["作業台完成","地域到着 east_sands","地域到着 central_trade","狩猟と獲物回収で皮を確保","素材確保 木材","作業場へ 木材","素材確保 皮","作業場へ 皮","地域到着 old_mine","鉱床到着","近場12単位を採取","鉱床帰還","鉱山入口復帰","素材確保 鉄","作業場へ 鉄","フレーム製作・収納","地域到着 central_trade","製作→装備→保存→解除→持替え→地域移動を完了"],"weight":152}
+== 結果: すべて成功 ==

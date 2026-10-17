@@ -1,0 +1,11 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+JOURNEY_FLOW seed501・初期物資・既定優先度・出来事あり。資源/速度/耐久の注入なし。時間のみ12倍。
+STAGE 48.0s 砂原へ実走行して予約停車
+STAGE 56.4s 砂原で既定AIが3個以上採取
+STAGE 75.4s 採取した仲間と荷物を帰還
+STAGE 133.6s 都市に最終停車
+STAGE 133.8s 都市で仲間を戻して街へ入る準備
+JOURNEY_FINAL distance=4799.99999999999 gathered=20 fuel=84.7751111111101 crew=3 remaining=[]
+PROGRESSION {"build_queue":[],"capacity":360,"events":{"attack":0,"chance":0,"escaped":0,"kills":0,"repelled":0,"trouble":0,"weather":1},"game_over":false,"inventory":{"0":0,"1":1,"2":1,"4":13,"8":8,"9":8,"10":2},"phase":"都市で仲間を戻して街へ入る準備","quarry":"road","report":{},"seconds":133.800000000001,"stages":["砂原へ実走行して予約停車","砂原で既定AIが3個以上採取","採取した仲間と荷物を帰還","都市に最終停車","都市で仲間を戻して街へ入る準備"],"weight":104}
+== 結果: すべて成功 ==

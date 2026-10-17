@@ -1,0 +1,46 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+FIRST_CYCLE_FLOW 通常開始3人・有限資源・既定出来事・素材/道具/設備注入なし seed=501
+STAGE 27.8s 木のみの作業台
+STAGE 89.6s 木製採掘具→石製採掘具
+ACTION 作業場へ確保 木材 x4
+STAGE 107.2s 鉄道具の柄用木4を先に確保
+ACTION 作業場へ確保 鉄 x1
+STAGE 224.6s tool_pick 材料確保 鉄
+STAGE 224.6s tool_pick 材料確保 木材
+STAGE 238.6s tool_pick 製作回収
+STAGE 240.0s 安全寄りの村で基本鉄採掘具を装備
+ACTION 作業場へ確保 鉄 x1
+STAGE 246.2s tool_iron_axe 材料確保 鉄
+STAGE 246.2s tool_iron_axe 材料確保 木材
+STAGE 264.0s tool_iron_axe 製作回収
+STAGE 265.6s 安全寄りの村で基本鉄斧を装備
+STAGE 338.8s 地域到着 east_sands
+ACTION 作業場へ確保 木材 x2
+STAGE 353.8s haul_frame 材料確保 木材
+ACTION 作業場へ確保 皮 x1
+STAGE 430.2s haul_frame 材料確保 皮
+ACTION 作業場へ確保 鉄 x1
+STAGE 439.6s haul_frame 材料確保 鉄
+STAGE 470.2s haul_frame 製作回収
+STAGE 494.0s 収納箱を製作設置
+STAGE 494.0s 中央交易都市到着
+STAGE 551.8s 鉱山入口到着
+STAGE 571.8s 鉱床到着
+STAGE 584.8s 警戒中も近場採取を継続
+STAGE 612.2s 収納強化1段階
+ACTION 作業場へ確保 背負いフレーム x1
+STAGE 621.8s handcart 材料確保 背負いフレーム
+ACTION 作業場へ確保 木材 x2
+STAGE 631.2s handcart 材料確保 木材
+ACTION 作業場へ確保 鉄 x2
+STAGE 644.0s handcart 材料確保 鉄
+STAGE 678.6s handcart 製作回収
+STAGE 708.0s 2枠加工台完成
+STAGE 708.0s 3人と荷物を呼び戻し
+STAGE 726.8s 奥の生物を目視して危険帰還
+STAGE 732.6s 危険から3人帰還
+FIRST_CYCLE_RESULT capacity=540 cart_limit=8 report=直近 18秒／持帰り なし
+消費 食料0・燃料0.0・修理板1（燃料補給0回）
+PROGRESSION {"build_queue":[],"capacity":540,"events":{"attack":0,"chance":0,"escaped":0,"kills":0,"repelled":0,"site":1,"trouble":3,"weather":4},"game_over":false,"inventory":{"0":0,"1":0,"2":1,"3":1,"4":16,"5":0,"6":7,"7":3,"8":12,"9":8,"10":5,"12":0,"13":0,"15":0,"16":0,"18":0,"22":0,"23":0,"24":0,"25":0},"phase":"危険から3人帰還","quarry":"parked","report":{},"seconds":732.60000000003,"stages":["木のみの作業台","木製採掘具→石製採掘具","鉄道具の柄用木4を先に確保","tool_pick 材料確保 鉄","tool_pick 材料確保 木材","tool_pick 製作回収","安全寄りの村で基本鉄採掘具を装備","tool_iron_axe 材料確保 鉄","tool_iron_axe 材料確保 木材","tool_iron_axe 製作回収","安全寄りの村で基本鉄斧を装備","地域到着 east_sands","haul_frame 材料確保 木材","haul_frame 材料確保 皮","haul_frame 材料確保 鉄","haul_frame 製作回収","収納箱を製作設置","中央交易都市到着","鉱山入口到着","鉱床到着","警戒中も近場採取を継続","収納強化1段階","handcart 材料確保 背負いフレーム","handcart 材料確保 木材","handcart 材料確保 鉄","handcart 製作回収","2枠加工台完成","3人と荷物を呼び戻し","奥の生物を目視して危険帰還","危険から3人帰還"],"weight":239}
+== 結果: すべて成功 ==

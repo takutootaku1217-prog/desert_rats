@@ -1,0 +1,44 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+  ok 無資金・無資源・無燃料から開始
+  ok 勤務受注 0
+  ok 勤務30秒・維持費0・通常加工停止
+  ok 勤務実効収入24
+  ok 近距離配達を受注
+  ok 勤務報酬で食料・燃料を補給
+  ok 依頼不要の自由探索で村へ
+  ok 有限地点から木材3個を正規採取
+  ok 荷物と仲間を帰還して都市へ
+  ok 実走行の配達報酬を受領
+  ok 余剰3個売却
+TOWN_LAP 0 credits 0 -> 34 food_used=0 fuel=16.1111111111111 hull=93.1260000000021 time=98.2000000000009
+  ok 周回ごとの保存復元
+  ok 勤務受注 1
+  ok 勤務30秒・維持費0・通常加工停止
+  ok 勤務実効収入24
+  ok 近距離配達を受注
+  ok 勤務報酬で食料・燃料を補給
+  ok 有料修理
+  ok 依頼不要の自由探索で村へ
+  ok 有限地点から木材3個を正規採取
+  ok 荷物と仲間を帰還して都市へ
+  ok 実走行の配達報酬を受領
+  ok 余剰3個売却
+TOWN_LAP 1 credits 34 -> 65 food_used=0 fuel=32.2222222222209 hull=93.210000000002 time=195.199999999997
+  ok 周回ごとの保存復元
+  ok 勤務受注 2
+  ok 勤務30秒・維持費0・通常加工停止
+  ok 勤務実効収入24
+  ok 勤務報酬で食料・燃料を補給
+  ok 有料修理
+  ok 依頼不要の自由探索で村へ
+  ok 有限地点から木材3個を正規採取
+  ok 荷物と仲間を帰還して都市へ
+  ok 余剰3個売却
+TOWN_LAP 2 credits 65 -> 76 food_used=0 fuel=48.3333333333306 hull=93.224000000002 time=291.999999999992
+  ok 周回ごとの保存復元
+EMPTY_RETURN hull_start=100.0 arrived=true defeat=false elapsed=160.199999999999 hull=88.7860000000034
+  ok 空タンク帰還境界 100.0
+EMPTY_RETURN hull_start=5.0 arrived=false defeat=true elapsed=71.6000000000005 hull=0.0
+  ok 空タンク帰還境界 5.0
+== 結果: すべて成功 ==

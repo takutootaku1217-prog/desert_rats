@@ -49,7 +49,10 @@ func _initialize():
  await verify_stop("central_trade")
  main.map_ui.open();paused=true
  for id in ["south_oasis","east_sands","central_trade","old_mine"]:
-  check(main.map_ui._nodes.has(id) and main.map_ui._nodes[id].text.contains(WorldMapDB.name_of(id)),"地図上の名前を保持 "+id)
+  # 地点はアイコンボタン＋常時表示ラベル。名前が実際に見えることを検査する。
+  var labels:Array=[]
+  if main.map_ui._nodes.has(id):labels=main.map_ui._nodes[id].find_children("*","Label",true,false)
+  check(labels.any(func(label):return label.text==WorldMapDB.name_of(id) and label.is_visible_in_tree() and label.get_global_rect().position.x>=0 and label.get_global_rect().end.x<=1280 and label.get_global_rect().end.y<=720),"地図上の名前を保持 "+id)
  await picture("map")
  main.map_ui.close();paused=false
  finish()

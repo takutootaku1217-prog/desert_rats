@@ -5,6 +5,8 @@ extends Node2D
 ##   移動 → 生物・資源が現れる → 狩猟・採取 → 倉庫へ（獲物は解体）→ 加工（食料・燃料・鉄・修理資材）
 ##   → 消費（仲間が食べる・移動と炉で燃料・時間と移動と加工で傷む）→ 補給・修理で維持 → 移動
 
+var journey := JourneyPlan.new()
+var route_notice: RouteNotice
 var town := TownEconomy.new()
 var town_ui: TownUI
 var world := WorldTrip.new()
@@ -249,6 +251,10 @@ func _ready() -> void:
 	map_ui = WorldMapUI.new()
 	map_ui.game = self
 	add_child(map_ui)
+	journey.setup(self)
+	route_notice=RouteNotice.new()
+	route_notice.game=self
+	add_child(route_notice)
 	town.setup(self)
 	town_ui=TownUI.new()
 	town_ui.game=self
@@ -282,6 +288,7 @@ func _process(delta: float) -> void:
 	scroll_speed = world.speed_limit(scroll_speed, delta)
 	var dist := scroll_speed * delta
 	quarry.tick(dist)
+	journey.tick(delta)
 	world.tick(dist)
 	town.observe()
 	base.burn(dist)
