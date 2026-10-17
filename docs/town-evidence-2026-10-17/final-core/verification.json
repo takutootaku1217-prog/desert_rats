@@ -1,0 +1,10 @@
+{
+  "code_commit": "b199440d94a886bdf8d9ec5624d306e74cdc245e",
+  "checks_passed": 59,
+  "checks_total": 59,
+  "source_changed_during_run": false,
+  "source_asset_files": 665,
+  "source_hashes_match_after_run": true,
+  "screenshot": "docs/town-evidence-2026-10-17/names/town-screen.png",
+  "final_changes": "Evidence and documentation only; executable code and assets unchanged."
+}
