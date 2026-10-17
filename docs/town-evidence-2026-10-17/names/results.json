@@ -1,0 +1,214 @@
+{
+  "schema_version": 1,
+  "run_directory": "/tmp/town-names-check/20261017T045548Z-f08uykfi",
+  "started_utc": "2026-10-17T04:55:48.079829+00:00",
+  "metadata": {
+    "platform": "Linux-6.18.55-x86_64-with-glibc2.41",
+    "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+    "python_executable": "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+    "runner_command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+      "tools/run_checks.py",
+      "--check",
+      "town_ui",
+      "--check",
+      "navigation_bar",
+      "--output-dir",
+      "/tmp/town-names-check"
+    ],
+    "root": "/workspace/desert_rats",
+    "git_before": {
+      "head": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "rev-parse",
+          "HEAD"
+        ],
+        "returncode": 0,
+        "output": "72e5f363cb133672fcb1fb037e5c12d9a7d79e00"
+      },
+      "branch": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "branch",
+          "--show-current"
+        ],
+        "returncode": 0,
+        "output": "main"
+      },
+      "status": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "status",
+          "--porcelain=v1",
+          "--untracked-files=all"
+        ],
+        "returncode": 0,
+        "output": "M \"docs/\\344\\270\\255\\345\\244\\256\\351\\203\\275\\345\\270\\202\\343\\203\\217\\343\\203\\226_\\350\\251\\246\\344\\275\\234\\346\\244\\234\\350\\250\\274_2026-10-17.md\"\n M ui/navigation_bar.gd\n M ui/town_ui.gd"
+      },
+      "changed_files": [
+        {
+          "path": "docs/中央都市ハブ_試作検証_2026-10-17.md",
+          "sha256": "c32e75474c18cbfd2844826d7ce3e09257daa3d944373abd6591cc29b4442b5a"
+        },
+        {
+          "path": "ui/navigation_bar.gd",
+          "sha256": "cd1ea3afc9e2bd0b6051dac472bf01396500f2d7292e17521e44b28e2b69e596"
+        },
+        {
+          "path": "ui/town_ui.gd",
+          "sha256": "2508f623c2c337079b36d4a478bd41359d2f1263d3db67537dbc76e9557663b3"
+        }
+      ],
+      "dirty": true
+    },
+    "godot_version": {
+      "command": [
+        "/usr/local/bin/godot",
+        "--version"
+      ],
+      "returncode": 0,
+      "output": "Fontconfig error: No writable cache directories\n4.6.3.stable.official.7d41c59c4"
+    },
+    "suite": null,
+    "unverified": [
+      "Windows / Godot 4.7.2",
+      "OS-level input",
+      "Audio"
+    ],
+    "scope_note": "order_flow/production_ui, first_cycle_flow/ecosystem, tool_progression/tool_flow, world_*, batch_*, haul_*, facility_packing, packing_flow and startup use the default map; other gameplay checks explicitly use legacy-world-test fixtures. world_endurance runs up to 60 game minutes with defaults, workbench request and optional 5-minute map trips; ordered_* additionally place finite tool and smelting orders; passed means observation integrity, not survival. Only selected checks; core does not cover extra/endurance or all gameplay conditions.",
+    "git_after": {
+      "head": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "rev-parse",
+          "HEAD"
+        ],
+        "returncode": 0,
+        "output": "72e5f363cb133672fcb1fb037e5c12d9a7d79e00"
+      },
+      "branch": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "branch",
+          "--show-current"
+        ],
+        "returncode": 0,
+        "output": "main"
+      },
+      "status": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "status",
+          "--porcelain=v1",
+          "--untracked-files=all"
+        ],
+        "returncode": 0,
+        "output": "M \"docs/\\344\\270\\255\\345\\244\\256\\351\\203\\275\\345\\270\\202\\343\\203\\217\\343\\203\\226_\\350\\251\\246\\344\\275\\234\\346\\244\\234\\350\\250\\274_2026-10-17.md\"\n M ui/navigation_bar.gd\n M ui/town_ui.gd"
+      },
+      "changed_files": [
+        {
+          "path": "docs/中央都市ハブ_試作検証_2026-10-17.md",
+          "sha256": "c32e75474c18cbfd2844826d7ce3e09257daa3d944373abd6591cc29b4442b5a"
+        },
+        {
+          "path": "ui/navigation_bar.gd",
+          "sha256": "cd1ea3afc9e2bd0b6051dac472bf01396500f2d7292e17521e44b28e2b69e596"
+        },
+        {
+          "path": "ui/town_ui.gd",
+          "sha256": "2508f623c2c337079b36d4a478bd41359d2f1263d3db67537dbc76e9557663b3"
+        }
+      ],
+      "dirty": true
+    }
+  },
+  "scope": [
+    "import",
+    "town_ui",
+    "navigation_bar"
+  ],
+  "status": "passed",
+  "first_failure": null,
+  "checks": [
+    {
+      "id": "import",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "--editor",
+        "--import",
+        "--quit"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/town-names-check/20261017T045548Z-f08uykfi/import.log",
+      "timeout_seconds": 120,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 6.186,
+      "diagnostic_error_lines": [],
+      "success_marker_found": null
+    },
+    {
+      "id": "town_ui",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_town_ui.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/town-names-check/20261017T045548Z-f08uykfi/town_ui.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 2.628,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "navigation_bar",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_navigation_bar.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/town-names-check/20261017T045548Z-f08uykfi/navigation_bar.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 4.379,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    }
+  ],
+  "elapsed_wall_seconds": 13.194,
+  "finished_utc": "2026-10-17T04:56:01.274715+00:00",
+  "source_changed_during_run": false
+}

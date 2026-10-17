@@ -26,7 +26,7 @@ func _ready() -> void:
  layer=45;process_mode=Node.PROCESS_MODE_ALWAYS
  _overlay=ColorRect.new();_overlay.color=Color("252e2e");_overlay.set_anchors_preset(Control.PRESET_FULL_RECT);add_child(_overlay)
  _backdrop=TownBackdrop.new();_backdrop.game=game;_backdrop.set_anchors_preset(Control.PRESET_FULL_RECT);_overlay.add_child(_backdrop)
- var title:=UIKit.lbl("中央交易都市  /  停泊区",28,Color("ffdf9a"));title.position=Vector2(30,18);_overlay.add_child(title)
+ var title:=UIKit.lbl("街画面  /  中央交易都市",28,Color("ffdf9a"));title.position=Vector2(30,18);_overlay.add_child(title)
  _summary=UIKit.lbl("",18,Color.WHITE);_summary.position=Vector2(30,58);_overlay.add_child(_summary)
  var close_button:=UIKit.button("拠点へ戻る",close);close_button.position=Vector2(1090,20);close_button.custom_minimum_size=Vector2(160,44);_overlay.add_child(close_button)
  var save:=UIKit.button("保存 / 続きから",func():game.save_ui.open());save.position=Vector2(1080,666);save.custom_minimum_size=Vector2(180,36);_overlay.add_child(save)
