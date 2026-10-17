@@ -5,6 +5,8 @@ extends Node2D
 ##   移動 → 生物・資源が現れる → 狩猟・採取 → 倉庫へ（獲物は解体）→ 加工（食料・燃料・鉄・修理資材）
 ##   → 消費（仲間が食べる・移動と炉で燃料・時間と移動と加工で傷む）→ 補給・修理で維持 → 移動
 
+var town := TownEconomy.new()
+var town_ui: TownUI
 var world := WorldTrip.new()
 var _pack_ticket := {}
 var _pack_nonce := 0
@@ -247,6 +249,10 @@ func _ready() -> void:
 	map_ui = WorldMapUI.new()
 	map_ui.game = self
 	add_child(map_ui)
+	town.setup(self)
+	town_ui=TownUI.new()
+	town_ui.game=self
+	add_child(town_ui)
 	operations.setup(self)
 	navigation = NavigationBar.new()
 	navigation.game = self
@@ -277,6 +283,7 @@ func _process(delta: float) -> void:
 	var dist := scroll_speed * delta
 	quarry.tick(dist)
 	world.tick(dist)
+	town.observe()
 	base.burn(dist)
 	base.wear_by(delta, dist)
 	director.tick(delta, dist)                 # 出来事の進行（予報・発生・終了）
@@ -1196,7 +1203,7 @@ func build_room(slot: String, rtype: String) -> bool:
 
 ## 別の画面を開くとき、ほかの管理画面を閉じる（重ならないように）。keep はいま開く画面。
 func close_other_panels(keep) -> void:
-	for p in [navigation, build_ui, room_ui, policy, detail, expedition_ui, inventory_ui, craft_ui, crew_alerts, quarry_ui, save_ui, map_ui]:
+	for p in [navigation, build_ui, room_ui, policy, detail, expedition_ui, inventory_ui, craft_ui, crew_alerts, quarry_ui, save_ui, map_ui, town_ui]:
 		if p != null and p != keep and p.has_method("close"):
 			p.close()
 

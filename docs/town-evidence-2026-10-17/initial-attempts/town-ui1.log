@@ -1,0 +1,22 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 25.0.7-2+deb13u1 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 19.1.7, 256 bits)
+
+OK 村から街を開けない
+OK 都市で街を開く・時間停止・背後入口を隠す
+OK 背景の市場をクリック
+OK 表示を確認し実入力で購入
+OK 実行連打で二重購入しない
+OK 有料給油を入力で実行
+OK 施設を閉じると街・時間停止を継続
+OK 依頼の実行ボタンが画面内
+OK 勤務表示だけ進行・世界は停止
+OK 中断中は勤務時間を増やさない
+OK 街を閉じて元の進行状態へ
+OK 既存の一時停止は街開閉後も維持
+OK 街から保存画面へ安全に遷移
+FAIL 街で中断した勤務進捗の保存復元
+OK ロード後に勤務は勝手に進行しない
+OK ロード後に明示再開可能
+== 結果: 1 件失敗 ==

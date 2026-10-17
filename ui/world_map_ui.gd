@@ -43,7 +43,7 @@ func _ready() -> void:
  _confirm=UIKit.button("出発して閉じる",_go); detail.add_child(_confirm)
  _cancel=UIKit.button("引き返す / 移動要求を取り消す",_return); detail.add_child(_cancel)
  detail.add_child(UIKit.button("閉じる / 時間を進める",close))
- root.add_child(UIKit.lbl("公開範囲：4地域・4道路。残り6地域、購買・給油・修理改造・中継施設は未実装。",15,UIKit.C_DIM))
+ root.add_child(UIKit.lbl("公開範囲：4地域・4道路。都市停泊後「拠点→街」で給油・修理・市場・ミッション。改造・中継施設は準備中。",15,UIKit.C_DIM))
  root.add_child(UIKit.lbl("暫定設定：道路距離2400（速度60で約40秒）。道中の8採取地点と生物は往復で共有し、再訪で補充しません。",14,UIKit.C_DIM))
  _overlay.hide()
 func open() -> void:

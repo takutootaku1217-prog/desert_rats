@@ -4,7 +4,7 @@ extends RefCounted
 const REGIONS := {
  "south_oasis":{"name":"オアシスの交易村","creature":"hare","open":true,"pos":Vector2(80,300),"tint":Color("f3ead0"),"points":["tree","rock","vein"],"description":"安全寄りの村。木36・石と少量の鉄鉱石4。有限で再訪補充なし。基本の鉄道具を準備できます。"},
  "east_sands":{"name":"東部砂原","creature":"lizard","open":true,"pos":Vector2(440,300),"tint":Color("f4dba8"),"points":["tree","tree","rock"],"description":"砂丘と道標。枯れ木と、皮・骨を得られるトゲトカゲ。"},
- "central_trade":{"name":"中央交易都市","creature":"hump","open":true,"pos":Vector2(230,110),"tint":Color("e5d7c3"),"points":["tree","rock"],"description":"門と天幕が目印。街道には皮・骨・脂肪を得られるコブ獣。店は準備中。"},
+ "central_trade":{"name":"中央交易都市","creature":"hump","open":true,"pos":Vector2(230,110),"tint":Color("e5d7c3"),"points":["tree","rock"],"description":"門と天幕が目印。街道には皮・骨・脂肪を得られるコブ獣。停泊し全員帰還後、拠点メニューから街へ。"},
  "old_mine":{"name":"大鉱山入口","open":true,"pos":Vector2(520,110),"tint":Color("cfcbd1"),"points":[],"description":"危険な鉱山。採取地点に鉄鉱石84。木材を準備し、生物を目視して判断してください。"},
  "west_salt":{"name":"白い塩湖","open":false},
  "poison_marsh":{"name":"毒沼と錬金術の廃墟","open":false},

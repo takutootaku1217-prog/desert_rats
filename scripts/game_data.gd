@@ -286,7 +286,9 @@ static func drops_text(species: String) -> String:
 const FUEL_CAP := 100.0
 ## 燃料1個でタンクに入る量
 const FUEL_ITEMS := {Item.FUEL: 25.0}
-const FUEL_PER_PX := 1.0 / 170.0            # 1px進むごとの消費（速度60で毎秒約0.35）
+const FUEL_STANDARD_SPEED := 60.0
+const FUEL_RANGE_MINUTES := 15.0 # 試作。30.0へ変更して比較可能。暖房・精錬は別。
+const FUEL_PER_PX := FUEL_CAP / (FUEL_STANDARD_SPEED * FUEL_RANGE_MINUTES * 60.0)
 const CRAWL_SPEED := 15.0                   # 燃料切れのときの低速走行（止まると資源が来なくなるため）
 const SPAWN_DIST_MIN := 110.0               # 地面の資源は「進んだ距離」ごとに流れてくる
 const SPAWN_DIST_MAX := 190.0

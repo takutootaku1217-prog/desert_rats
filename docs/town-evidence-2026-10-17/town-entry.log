@@ -1,0 +1,8 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+OK 屋外仲間がいる間は街を開かず帰還待ち
+OK 荷物と仲間の帰還後に初めて入場・停止
+OK 街では帰還状態維持
+OK 閉じると元の屋外方針と時間へ戻す
+ENTRY_WAIT seconds=0.94
+== 結果: すべて成功 ==

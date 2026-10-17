@@ -1,0 +1,12 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+DIAGNOSTIC_SEED 501
+BATCH_FLOW 通常初期物資と出来事、素材注入なし、既存F操作と地域移動/保存。
+STAGE 27.8s 作業台完成
+STAGE 75.8s 地域到着 east_sands
+STAGE 75.8s 既存採取で木材3を確保
+STAGE 93.2s 木材3を作業場へ
+STAGE 175.6s 地域到着 central_trade
+STAGE 175.6s 移動後に3回分を完了回収
+PROGRESSION {"build_queue":[],"capacity":360,"events":{"attack":0,"chance":0,"escaped":0,"kills":0,"repelled":0,"trouble":0,"weather":2},"game_over":false,"inventory":{"0":1,"1":0,"2":0,"3":2,"4":24,"5":0,"6":0,"7":2,"8":12,"9":5,"10":3,"12":0,"15":0,"23":0,"24":0},"phase":"移動後に3回分を完了回収","quarry":"road","report":{},"seconds":235.799999999995,"stages":["作業台完成","地域到着 east_sands","既存採取で木材3を確保","木材3を作業場へ","地域到着 central_trade","移動後に3回分を完了回収"],"weight":186}
+== 結果: すべて成功 ==

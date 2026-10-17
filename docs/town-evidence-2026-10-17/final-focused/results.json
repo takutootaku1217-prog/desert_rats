@@ -1,0 +1,418 @@
+{
+  "schema_version": 1,
+  "run_directory": "/tmp/town-final-check/20261017T045331Z-2ipgruqq",
+  "started_utc": "2026-10-17T04:53:31.264840+00:00",
+  "metadata": {
+    "platform": "Linux-6.18.55-x86_64-with-glibc2.41",
+    "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+    "python_executable": "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+    "runner_command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+      "tools/run_checks.py",
+      "--check",
+      "town",
+      "--check",
+      "town_flow",
+      "--check",
+      "town_ui",
+      "--check",
+      "navigation_bar",
+      "--output-dir",
+      "/tmp/town-final-check"
+    ],
+    "root": "/workspace/desert_rats",
+    "git_before": {
+      "head": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "rev-parse",
+          "HEAD"
+        ],
+        "returncode": 0,
+        "output": "74bc1a6053784c7762195681ee32bcf27553de53"
+      },
+      "branch": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "branch",
+          "--show-current"
+        ],
+        "returncode": 0,
+        "output": "main"
+      },
+      "status": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "status",
+          "--porcelain=v1",
+          "--untracked-files=all"
+        ],
+        "returncode": 0,
+        "output": "M data/world_map.gd\n M scripts/game_data.gd\n M scripts/main.gd\n M scripts/save_game.gd\n M tools/run_checks.py\n M ui/navigation_bar.gd\n M ui/world_map_ui.gd\n M \"\\347\\240\\202\\346\\274\\240\\343\\201\\256\\343\\203\\215\\343\\202\\272\\343\\203\\237\\345\\233\\243.gd\"\n?? data/town.gd\n?? data/town.gd.uid\n?? scripts/town.gd\n?? scripts/town.gd.uid\n?? tools/test_town.gd\n?? tools/test_town.gd.uid\n?? tools/test_town_flow.gd\n?? tools/test_town_flow.gd.uid\n?? tools/test_town_ui.gd\n?? tools/test_town_ui.gd.uid\n?? ui/town_backdrop.gd\n?? ui/town_backdrop.gd.uid\n?? ui/town_ui.gd\n?? ui/town_ui.gd.uid"
+      },
+      "changed_files": [
+        {
+          "path": "data/town.gd",
+          "sha256": "8040946afcaca417378b87d98d447ac346c1f2b3305801cd979a546281690fb4"
+        },
+        {
+          "path": "data/town.gd.uid",
+          "sha256": "3fd7fc4e64b4220645d188659fe51f823d1f63353e035fd24685739801f944cf"
+        },
+        {
+          "path": "data/world_map.gd",
+          "sha256": "40f82b5f4ba50392647bb55866c0035c9da3c1994466807fd1ba951b6e3cb1b6"
+        },
+        {
+          "path": "scripts/game_data.gd",
+          "sha256": "41118a46e50f826462371305524ac03316b6aa5add68bb16aa880aa760f255a4"
+        },
+        {
+          "path": "scripts/main.gd",
+          "sha256": "9f6c6d6c44cfd28e534bc351b39a5d9f116bcfea996cae4905dc0b07dbc12769"
+        },
+        {
+          "path": "scripts/save_game.gd",
+          "sha256": "6a4174de264c69e6eafc7da926011ddcbf6cf294ef29699cda1645e6a2f55b31"
+        },
+        {
+          "path": "scripts/town.gd",
+          "sha256": "f19dac98dfd0217cfa37d00e6c7e4d1b766fe5e0f5e61d7652a383ab870a70fb"
+        },
+        {
+          "path": "scripts/town.gd.uid",
+          "sha256": "3c5512160743079ae537156f92a003075c1e0fb0072c24a2a03458c23fe3ab7b"
+        },
+        {
+          "path": "tools/run_checks.py",
+          "sha256": "f68bab3d74d578cbee30071311f30843fab777d2d579e4acd343ce8aa6eeec26"
+        },
+        {
+          "path": "tools/test_town.gd",
+          "sha256": "37af5f3d84cd914fb436168d9b1c3be9896296f8c968aadf84ccd541e72a46f4"
+        },
+        {
+          "path": "tools/test_town.gd.uid",
+          "sha256": "28f08f372cfde9c4916ac91638bf92ff684086ccd2197ab4e18a2a393d3290d6"
+        },
+        {
+          "path": "tools/test_town_flow.gd",
+          "sha256": "fdf05669faa3148b57382cfdbb4ef3ff0de2d18432731c0d45804d5d3bb74146"
+        },
+        {
+          "path": "tools/test_town_flow.gd.uid",
+          "sha256": "5d0d307d2d34ffb1ff873c08dc343f66fcf54cf7d11f5069e361ac94f373c891"
+        },
+        {
+          "path": "tools/test_town_ui.gd",
+          "sha256": "cc6b567d39d413bebb54a22168ae883ad65cea5e42288b89b697f4b05969da1c"
+        },
+        {
+          "path": "tools/test_town_ui.gd.uid",
+          "sha256": "668fc586a0bb0c932b1b6fbd76b77a9172068e2ffde023e876f233ca3cfa8f25"
+        },
+        {
+          "path": "ui/navigation_bar.gd",
+          "sha256": "6143570bd6a53192fd793357a08fa93cc7b60d7befb22d75043a4352def87b71"
+        },
+        {
+          "path": "ui/town_backdrop.gd",
+          "sha256": "5b98c4c24987795d6a0de6fa736797e8187083357ae0b0187a8d68bd92c1618d"
+        },
+        {
+          "path": "ui/town_backdrop.gd.uid",
+          "sha256": "bdaef6ca0b5e6c5207d2a861f224b3b8bbcef5bd4b858797bc697b0228644542"
+        },
+        {
+          "path": "ui/town_ui.gd",
+          "sha256": "09bf043cbfcf1ecea7ad5ed53484d9f3fae65f0850a2e57c57c26f731491cb04"
+        },
+        {
+          "path": "ui/town_ui.gd.uid",
+          "sha256": "e7cf9258e751f4449b489cc0605917efabc4612cabe9007cf0d93d872c7c9da6"
+        },
+        {
+          "path": "ui/world_map_ui.gd",
+          "sha256": "9d18749fd0e76f80d34ed238242a366994df7722479898660dd31c08674eb6cb"
+        },
+        {
+          "path": "砂漠のネズミ団.gd",
+          "sha256": "9f6c6d6c44cfd28e534bc351b39a5d9f116bcfea996cae4905dc0b07dbc12769"
+        }
+      ],
+      "dirty": true
+    },
+    "godot_version": {
+      "command": [
+        "/usr/local/bin/godot",
+        "--version"
+      ],
+      "returncode": 0,
+      "output": "Fontconfig error: No writable cache directories\n4.6.3.stable.official.7d41c59c4"
+    },
+    "suite": null,
+    "unverified": [
+      "Windows / Godot 4.7.2",
+      "OS-level input",
+      "Audio"
+    ],
+    "scope_note": "order_flow/production_ui, first_cycle_flow/ecosystem, tool_progression/tool_flow, world_*, batch_*, haul_*, facility_packing, packing_flow and startup use the default map; other gameplay checks explicitly use legacy-world-test fixtures. world_endurance runs up to 60 game minutes with defaults, workbench request and optional 5-minute map trips; ordered_* additionally place finite tool and smelting orders; passed means observation integrity, not survival. Only selected checks; core does not cover extra/endurance or all gameplay conditions.",
+    "git_after": {
+      "head": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "rev-parse",
+          "HEAD"
+        ],
+        "returncode": 0,
+        "output": "74bc1a6053784c7762195681ee32bcf27553de53"
+      },
+      "branch": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "branch",
+          "--show-current"
+        ],
+        "returncode": 0,
+        "output": "main"
+      },
+      "status": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "status",
+          "--porcelain=v1",
+          "--untracked-files=all"
+        ],
+        "returncode": 0,
+        "output": "M data/world_map.gd\n M scripts/game_data.gd\n M scripts/main.gd\n M scripts/save_game.gd\n M tools/run_checks.py\n M ui/navigation_bar.gd\n M ui/world_map_ui.gd\n M \"\\347\\240\\202\\346\\274\\240\\343\\201\\256\\343\\203\\215\\343\\202\\272\\343\\203\\237\\345\\233\\243.gd\"\n?? data/town.gd\n?? data/town.gd.uid\n?? scripts/town.gd\n?? scripts/town.gd.uid\n?? tools/test_town.gd\n?? tools/test_town.gd.uid\n?? tools/test_town_flow.gd\n?? tools/test_town_flow.gd.uid\n?? tools/test_town_ui.gd\n?? tools/test_town_ui.gd.uid\n?? ui/town_backdrop.gd\n?? ui/town_backdrop.gd.uid\n?? ui/town_ui.gd\n?? ui/town_ui.gd.uid"
+      },
+      "changed_files": [
+        {
+          "path": "data/town.gd",
+          "sha256": "8040946afcaca417378b87d98d447ac346c1f2b3305801cd979a546281690fb4"
+        },
+        {
+          "path": "data/town.gd.uid",
+          "sha256": "3fd7fc4e64b4220645d188659fe51f823d1f63353e035fd24685739801f944cf"
+        },
+        {
+          "path": "data/world_map.gd",
+          "sha256": "40f82b5f4ba50392647bb55866c0035c9da3c1994466807fd1ba951b6e3cb1b6"
+        },
+        {
+          "path": "scripts/game_data.gd",
+          "sha256": "41118a46e50f826462371305524ac03316b6aa5add68bb16aa880aa760f255a4"
+        },
+        {
+          "path": "scripts/main.gd",
+          "sha256": "9f6c6d6c44cfd28e534bc351b39a5d9f116bcfea996cae4905dc0b07dbc12769"
+        },
+        {
+          "path": "scripts/save_game.gd",
+          "sha256": "6a4174de264c69e6eafc7da926011ddcbf6cf294ef29699cda1645e6a2f55b31"
+        },
+        {
+          "path": "scripts/town.gd",
+          "sha256": "f19dac98dfd0217cfa37d00e6c7e4d1b766fe5e0f5e61d7652a383ab870a70fb"
+        },
+        {
+          "path": "scripts/town.gd.uid",
+          "sha256": "3c5512160743079ae537156f92a003075c1e0fb0072c24a2a03458c23fe3ab7b"
+        },
+        {
+          "path": "tools/run_checks.py",
+          "sha256": "f68bab3d74d578cbee30071311f30843fab777d2d579e4acd343ce8aa6eeec26"
+        },
+        {
+          "path": "tools/test_town.gd",
+          "sha256": "37af5f3d84cd914fb436168d9b1c3be9896296f8c968aadf84ccd541e72a46f4"
+        },
+        {
+          "path": "tools/test_town.gd.uid",
+          "sha256": "28f08f372cfde9c4916ac91638bf92ff684086ccd2197ab4e18a2a393d3290d6"
+        },
+        {
+          "path": "tools/test_town_flow.gd",
+          "sha256": "fdf05669faa3148b57382cfdbb4ef3ff0de2d18432731c0d45804d5d3bb74146"
+        },
+        {
+          "path": "tools/test_town_flow.gd.uid",
+          "sha256": "5d0d307d2d34ffb1ff873c08dc343f66fcf54cf7d11f5069e361ac94f373c891"
+        },
+        {
+          "path": "tools/test_town_ui.gd",
+          "sha256": "cc6b567d39d413bebb54a22168ae883ad65cea5e42288b89b697f4b05969da1c"
+        },
+        {
+          "path": "tools/test_town_ui.gd.uid",
+          "sha256": "668fc586a0bb0c932b1b6fbd76b77a9172068e2ffde023e876f233ca3cfa8f25"
+        },
+        {
+          "path": "ui/navigation_bar.gd",
+          "sha256": "6143570bd6a53192fd793357a08fa93cc7b60d7befb22d75043a4352def87b71"
+        },
+        {
+          "path": "ui/town_backdrop.gd",
+          "sha256": "5b98c4c24987795d6a0de6fa736797e8187083357ae0b0187a8d68bd92c1618d"
+        },
+        {
+          "path": "ui/town_backdrop.gd.uid",
+          "sha256": "bdaef6ca0b5e6c5207d2a861f224b3b8bbcef5bd4b858797bc697b0228644542"
+        },
+        {
+          "path": "ui/town_ui.gd",
+          "sha256": "09bf043cbfcf1ecea7ad5ed53484d9f3fae65f0850a2e57c57c26f731491cb04"
+        },
+        {
+          "path": "ui/town_ui.gd.uid",
+          "sha256": "e7cf9258e751f4449b489cc0605917efabc4612cabe9007cf0d93d872c7c9da6"
+        },
+        {
+          "path": "ui/world_map_ui.gd",
+          "sha256": "9d18749fd0e76f80d34ed238242a366994df7722479898660dd31c08674eb6cb"
+        },
+        {
+          "path": "砂漠のネズミ団.gd",
+          "sha256": "9f6c6d6c44cfd28e534bc351b39a5d9f116bcfea996cae4905dc0b07dbc12769"
+        }
+      ],
+      "dirty": true
+    }
+  },
+  "scope": [
+    "import",
+    "town",
+    "town_flow",
+    "town_ui",
+    "navigation_bar"
+  ],
+  "status": "passed",
+  "first_failure": null,
+  "checks": [
+    {
+      "id": "import",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "--editor",
+        "--import",
+        "--quit"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/town-final-check/20261017T045331Z-2ipgruqq/import.log",
+      "timeout_seconds": 120,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 5.228,
+      "diagnostic_error_lines": [],
+      "success_marker_found": null
+    },
+    {
+      "id": "town",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_town.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/town-final-check/20261017T045331Z-2ipgruqq/town.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 2.32,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "town_flow",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_town_flow.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/town-final-check/20261017T045331Z-2ipgruqq/town_flow.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 5.878,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "town_ui",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_town_ui.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/town-final-check/20261017T045331Z-2ipgruqq/town_ui.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 2.72,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "navigation_bar",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_navigation_bar.gd"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/tmp/town-final-check/20261017T045331Z-2ipgruqq/navigation_bar.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 5.5,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    }
+  ],
+  "elapsed_wall_seconds": 21.648,
+  "finished_utc": "2026-10-17T04:53:52.915040+00:00",
+  "source_changed_during_run": false
+}
