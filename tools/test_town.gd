@@ -53,10 +53,24 @@ func _initialize():
  check(st.current_weight()==weight0+TownDB.DELIVERY_PARCEL_WEIGHT and roundtrip(),"配達荷物の積載会計と往路途中保存")
  check(act("cancel_delivery") and not t.delivery_cargo and is_equal_approx(main.base.fuel,TownDB.DELIVERY_FUEL_ADVANCE),"取消は荷物を消し、前渡し燃料を返金・再発行しない")
  check(act("accept_delivery") and is_equal_approx(main.base.fuel,TownDB.DELIVERY_FUEL_ADVANCE),"取消再受注で前渡し燃料を無限取得できない")
- main.world.region=TownDB.DELIVERY_TO;main.world.phase="stopped";t.observe()
+ main.world.region=TownDB.DELIVERY_TO;main.world.phase="arriving";t.observe()
+ check(t.delivery=="outbound" and t.delivery_cargo and t.field_status_text().contains("停車"),"交易村の通過・到着中は配達未完了で停車引渡しを表示")
+ main.world.phase="stopped";t.observe()
  check(t.delivery=="return" and not t.delivery_cargo and roundtrip(),"目的地停泊で専用荷物だけ配達済みにし保存")
  main.world.region="central_trade";t.observe()
  check(t.delivery=="ready" and act("claim_delivery") and not act("claim_delivery") and t.claimed.delivery==1,"都市帰還後だけ配達報酬を一度受領")
+ await city();t=main.town;main.base.fuel=GameData.FUEL_CAP
+ var full_quote:Dictionary=t.quote("accept_delivery")
+ check(full_quote.ok and full_quote.text.contains("今回 0.0") and t.execute(full_quote) and is_equal_approx(main.base.fuel,GameData.FUEL_CAP) and is_equal_approx(t.delivery_advance_given,0.0),"満タン受注は前渡し済みにせず実授与0を明示")
+ check(act("cancel_delivery"),"満タン受注の取消は前渡し残額を消費しない")
+ main.base.fuel=95.0
+ check(act("accept_delivery") and is_equal_approx(main.base.fuel,100.0) and is_equal_approx(t.delivery_advance_given,5.0) and is_equal_approx(t.delivery_advance_remaining(),5.0),"部分空きでは実際の5だけ前渡しし残額を保持")
+ check(act("cancel_delivery"),"部分前渡しの取消は荷物だけを消し残額は保持")
+ main.base.fuel=90.0
+ check(act("accept_delivery") and is_equal_approx(main.base.fuel,95.0) and is_equal_approx(t.delivery_advance_given,TownDB.DELIVERY_FUEL_ADVANCE),"再受注は残額5だけを渡し前渡し増殖を防ぐ")
+ check(act("cancel_delivery"),"前渡し累計済みの取消を許可")
+ var legacy_advance:=SaveGame.capture(main);legacy_advance.town.erase("delivery_advance_given");legacy_advance.town["delivery_advance_issued"]=true
+ check(SaveGame.apply(main,legacy_advance) and is_equal_approx(t.delivery_advance_given,TownDB.DELIVERY_FUEL_ADVANCE),"旧bool前渡し保存を実授与量へ移行")
  await city();t=main.town;st=main.storage;st.inventory.counts={GameData.Item.FOOD:st.max_weight()}
  check(not act("accept_delivery"),"満載倉庫では預かり荷物の配達受注を拒否")
  check(act("accept_recovery"),"満載でも回収依頼は受注できる（現地で容量待ち）")
@@ -67,6 +81,11 @@ func _initialize():
  await city();t=main.town;st=main.storage;st.inventory.counts.clear()
  check(act("accept_recovery") and t.recovery=="outbound","遺失物回収を受注")
  main.world.region=TownDB.RECOVERY_TO;main.world.phase="stopped";main.operations.set_stance("normal");t.observe()
+ check(TownDB.RECOVERY_POINT.y>=520.0,"recovery parcel is placed on the ground")
+ var recovery_worker=main.workers[0]
+ recovery_worker.position=Vector2(614.0,GameData.LO_Y);recovery_worker.floor_i=1;recovery_worker._climb_dest=null
+ check(t.recovery_job_for(recovery_worker)==1 and t.recovery=="loading" and not main.world.request("central_trade"),"active recovery blocks a regional departure")
+ main.world.cancel_or_return();t.release_recovery_worker(recovery_worker)
  check(t.recovery=="site","指定地点への実停泊で回収待ち")
  check(await until(func():return t.recovery=="loading",20),"仲間が既存の安全判定を通って遺失物へ向かう")
  check(roundtrip() and t.recovery=="loading","仲間が向かう途中の回収を保存復元")
@@ -74,6 +93,19 @@ func _initialize():
  check(st.current_weight()==TownDB.RECOVERY_PARCEL_WEIGHT,"回収荷物は通常素材を増やさず重量だけを使う")
  main.world.region="central_trade";main.world.phase="stopped";t.observe()
  check(t.recovery=="ready" and act("cancel_recovery") and t.recovery=="idle" and st.current_weight()==0,"回収後取消は報酬なし・専用荷物を消し素材を増やさない")
+ await city();t=main.town;st=main.storage;st.inventory.counts.clear()
+ check(act("accept_recovery"),"回収中断ケースの依頼を受注")
+ main.world.region=TownDB.RECOVERY_TO;main.world.phase="stopped";t.observe()
+ var interrupted=main.workers[0];interrupted.position=Vector2(614.0,GameData.LO_Y);interrupted.floor_i=1;interrupted.down=false
+ var started_interrupt:bool=t.recovery_job_for(interrupted)==1 and t.recovery=="loading"
+ interrupted.down=true;t.observe()
+ var injury_released:bool=t.recovery=="site" and t.recovery_worker==-1
+ interrupted.down=false
+ var abandoned_field:bool=t.abandon_recovery_from_field()
+ var departure_after_abandon:bool=main.world.request("central_trade")
+ check(started_interrupt and injury_released and abandoned_field and t.recovery=="idle" and interrupted.ai.return_request and departure_after_abandon,"負傷中断は仲間を残さず現地断念後に帰還でき、別地域で拾わない")
+ main.world.cancel_or_return()
+ await city();t=main.town
  var d:=SaveGame.capture(main);d.erase("town")
  check(SaveGame.apply(main,d) and t.credits==0 and t.delivery=="idle" and t.recovery=="idle","旧v3のtown省略は0 Cr・依頼なし")
  d=SaveGame.capture(main)

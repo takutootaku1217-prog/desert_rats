@@ -169,6 +169,13 @@ def execute(checks: list[tuple[Check, list[str]]], root: Path, output: Path, env
         path = run / "godot-user" / subdir
         path.mkdir(parents=True)
         env[key] = str(path)
+    # Godot uses APPDATA on Windows rather than the XDG variables above.  Keep
+    # diagnostics from sharing or overwriting a player's real user:// saves.
+    if os.name == "nt":
+        path = run / "godot-user"
+        path.mkdir(parents=True, exist_ok=True)
+        env["APPDATA"] = str(path)
+        env["LOCALAPPDATA"] = str(path)
     report = {"schema_version": 1, "run_directory": str(run), "started_utc": datetime.now(timezone.utc).isoformat(),
               "metadata": metadata, "scope": [c.id for c, _ in checks], "status": "running", "first_failure": None,
               "checks": [{"id": c.id, "command": argv, "status": "not_run"} for c, argv in checks]}

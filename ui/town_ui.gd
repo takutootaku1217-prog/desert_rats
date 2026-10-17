@@ -92,6 +92,7 @@ func show_facility(id:String) -> void:
   _row([["木材で受注","accept_supply",GameData.Item.WOOD],["石材で受注","accept_supply",GameData.Item.STONE],["納品・受領","claim_supply",-1],["取消","cancel_supply",-1]])
   _body.add_child(UIKit.lbl("預かり荷物の配達（重量%d） / %d Cr    状態："%[TownDB.DELIVERY_PARCEL_WEIGHT,TownDB.DELIVERY_REWARD]+game.town.delivery_status_text(),16))
   _row([["受注","accept_delivery",-1],["報酬受領","claim_delivery",-1],["取消","cancel_delivery",-1]])
+  _body.add_child(UIKit.lbl("配達は交易村で停車して引渡し。通過だけでは完了しません。",14,UIKit.C_DIM))
   _body.add_child(UIKit.lbl("遺失物回収（重量%d） / %d Cr    状態："%[TownDB.RECOVERY_PARCEL_WEIGHT,TownDB.RECOVERY_REWARD]+game.town.recovery_status_text(),16))
   _row([["受注","accept_recovery",-1],["報酬受領","claim_recovery",-1],["取消","cancel_recovery",-1]])
   if game.town.legacy_help_credit>0:

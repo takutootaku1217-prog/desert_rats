@@ -25,6 +25,12 @@ func _initialize():
  await shot("field-controls")
  await click(named(main.navigation.groups["探索"],"通常・再開"))
  check(main.operations.stance=="normal","画面ボタンで通常再開")
+ main.world.active=true;main.world.region=TownDB.RECOVERY_TO;main.world.phase="stopped";main.quarry.state="road";main.town.recovery="site";main.town.recovery_worker=-1;main.town.observe();await frames()
+ check(main.navigation.mission_status.text.contains("回収待ち") and main.navigation.recovery_cancel.visible and not main.navigation.recovery_cancel.disabled,"現地の探索パネルで回収待ちと断念して帰還を確認できる")
+ main.town.recovery="idle";main.town.delivery="outbound";main.world.region=TownDB.DELIVERY_TO;main.world.phase="arriving";main.world.road="03";main.world.origin="central_trade";main.world.destination=TownDB.DELIVERY_TO;main.world.progress=WorldMapDB.LENGTH;await frames()
+ check(main.navigation.mission_status.text.contains("停車して引渡し"),"交易村の到着中は現地パネルで停車引渡し必要を表示")
+ await shot("mission-status")
+ main.town.delivery="idle";main.world.region="south_oasis";main.world.phase="stopped";main.world.road="";main.world.origin="";main.world.destination=""
  main.navigation.close()
  for id in ["workbench","cargo_rack","storage_upgrade","parallel_bench"]:main.finish_build(id)
  main.build_ui.open();await shot("cycle-upgrades")

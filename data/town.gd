@@ -18,7 +18,9 @@ const DELIVERY_FUEL_ADVANCE := 10.0
 const RECOVERY_TO := "east_sands"
 const RECOVERY_REWARD := 38
 const RECOVERY_PARCEL_WEIGHT := 16
-const RECOVERY_POINT := Vector2(1080.0, GameData.LO_Y)
+## 遺失荷物は下層デッキ上（LO_Y=482）ではなく、既存スロープの先の地上に置く。
+## floor_of_y が 0 になる y=520 以上を使うので、移動は RAMP_TOP/RAMP_FOOT を経由する。
+const RECOVERY_POINT := Vector2(1080.0, GameData.GROUND_Y_MIN + 64.0)
 
 ## 分類は進行の役割。共通プレイヤーLv/経験値やメインの解放条件を作らない。
 const MISSION_CATEGORIES := {

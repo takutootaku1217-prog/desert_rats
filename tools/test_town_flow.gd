@@ -14,12 +14,11 @@ func check(ok:bool,msg:String)->void:
  if not ok:fails+=1
 func boot(seed_id:int)->void:
  if main!=null:
-  root.remove_child(main);main.queue_free();await process_frame
- SaveGame.disabled=true;active_seed=seed_id
- main=load("res://scenes/main.tscn").instantiate();main.set_meta("diagnostic_seed",seed_id);root.add_child(main)
+  root.remove_child(main);main.queue_free();await process_frame;await process_frame
+ SaveGame.disabled=true;active_seed=seed_id;seed(seed_id)
+ main=load("res://scenes/main.tscn").instantiate();main.set_meta("diagnostic_seed",seed_id);root.add_child(main);main.process_mode=Node.PROCESS_MODE_DISABLED
  await process_frame
  # 自動_processを止め、同じ通常値のまま0.2秒ずつ明示的に進める（実時間ではなくゲーム内秒）。
- main.process_mode=Node.PROCESS_MODE_DISABLED
 func tick()->void:
  main._process(STEP)
  for r in main.resources_root.get_children():if not r.is_queued_for_deletion():r._process(STEP)
@@ -36,11 +35,15 @@ func action(a:String,item:int=-1,n:int=1)->bool:
  return main.town.execute(main.town.quote(a,item,n))
 func city_ready(seconds:float=80.0)->bool:
  return await until(func():return main.town.entry_reason()=="",seconds)
-func travel(to:String,seconds:float=220.0)->bool:
+func travel(to:String,seconds:float=420.0)->bool:
  if not main.world.request(to):return false
  return await until(func():return main.world.region==to and main.world.phase=="stopped",seconds)
 func counts()->Dictionary:
- return {"cr":main.town.credits,"fuel":snappedf(main.base.fuel,0.01),"hull":snappedf(main.base.parts[GameData.Part.HULL],0.01),"food":main.storage.count_of(GameData.Item.FOOD),"wood":main.storage.count_of(GameData.Item.WOOD),"stone":main.storage.count_of(GameData.Item.STONE),"elapsed":snappedf(main.director.elapsed,0.1)}
+ return {"cr":main.town.credits,"fuel":snappedf(main.base.fuel,0.01),"parts":parts_snapshot(),"speed_limit":snappedf(main.base.speed_limit(),0.01),"food":main.storage.count_of(GameData.Item.FOOD),"wood":main.storage.count_of(GameData.Item.WOOD),"stone":main.storage.count_of(GameData.Item.STONE),"elapsed":snappedf(main.director.elapsed,0.1)}
+func parts_snapshot()->Dictionary:
+ return {"hull":snappedf(main.base.parts[GameData.Part.HULL],0.01),"drive":snappedf(main.base.parts[GameData.Part.DRIVE],0.01),"machine":snappedf(main.base.parts[GameData.Part.MACHINE],0.01)}
+func all_parts_full()->bool:
+ return GameData.Part.values().all(func(part):return main.base.parts[part]>=99.99)
 func tree_left()->int:
  main.world.sync()
  for row in main.world.locations.get("region:south_oasis",{}).values():
@@ -98,11 +101,35 @@ func setup_cash_only_city() -> void:
   w.priorities[GameData.Job.GATHER]=0;w.priorities[GameData.Job.HUNT]=0
   # 食料を報酬で買って実際に食べるかを見るための、悪化だけを行う検証設定。
   w.hunger=20.0
+ # 報酬金から実際に全3部位を直せるかを測る。813のみ走行装置0=最低速15を再現する。
+ main.base.parts[GameData.Part.HULL]=75.0
+ main.base.parts[GameData.Part.DRIVE]=0.0 if active_seed==813 else 75.0
+ main.base.parts[GameData.Part.MACHINE]=75.0
  main.world._ensure_location()
+ # �͊��t�B�N�X�`���̍�z���Ɏ������g�����Ƀf�f���[�v�̕���񐔗���ōč�������B
+ seed(active_seed)
+func repair_all_to_full() -> Dictionary:
+ var before:=parts_snapshot()
+ var paid:=0
+ var spent:=0
+ var by_part:Dictionary={}
+ for part in GameData.Part.values():
+  while main.base.parts[part]<99.99:
+   var credits_before:int=main.town.credits
+   if not action("repair_cash",part):break
+   paid+=1;spent+=credits_before-main.town.credits
+   by_part[str(part)]=int(by_part.get(str(part),0))+1
+ return {"before":before,"after":parts_snapshot(),"paid":paid,"spent":spent,"by_part":by_part}
 func repair_hull_to_full() -> int:
  var paid:=0
  while main.base.parts[GameData.Part.HULL]<100.0:
   if not action("repair_cash",GameData.Part.HULL):break
+  paid+=1
+ return paid
+func repair_part_to_full(part:int) -> int:
+ var paid:=0
+ while main.base.parts[part]<99.99:
+  if not action("repair_cash",part):break
   paid+=1
  return paid
 
@@ -111,6 +138,7 @@ func cash_only_repeat(seed_id:int) -> Dictionary:
  await boot(seed_id);setup_cash_only_city()
  var t=main.town
  var before:=counts()
+ if active_seed==813:check(is_equal_approx(main.base.speed_limit(),GameData.CRAWL_SPEED),"cash-only seed 813: drive=0 records the 15-speed crawl before repair")
  check(cash_route_depleted() and ordinary_field_total()==0 and main.total_gathered==0 and main.total_hunted==0,"cash-only seed %d: 対象3地域・道路03/04の木石鉱を全枯渇、通常素材0"%seed_id)
  check(main.workers.all(func(w):return w.priorities[GameData.Job.GATHER]==0 and w.priorities[GameData.Job.HUNT]==0),"cash-only seed %d: 採取・狩猟の通常素材取得を除外"%seed_id)
  var ate_before:int=main.total_eaten
@@ -128,12 +156,27 @@ func cash_only_repeat(seed_id:int) -> Dictionary:
   var before_recovery:int=t.credits
   check(action("accept_recovery") and await travel("east_sands") and await until(func():return t.recovery=="return",240.0),"cash-only %d周目: 通常素材なしで仲間が遺失物を回収"%[lap+1])
   check(await travel("central_trade") and await city_ready() and action("claim_recovery") and t.credits==before_recovery+TownDB.RECOVERY_REWARD,"cash-only %d周目: 回収報酬38 Crを受領"%[lap+1])
+  if lap==0:
+   var drive_paid:int=repair_part_to_full(GameData.Part.DRIVE)
+   check(drive_paid>0 and main.base.speed_limit()>GameData.CRAWL_SPEED,"cash-only seed %d: first reward repairs the disabled drive and restores speed"%seed_id)
   weather_seen=weather_seen or int(main.director.stats.get("weather",0))>0
   check(ordinary_field_total()==0 and main.total_gathered==0 and main.total_hunted==0,"cash-only %d周目: 採取・狩猟の通常素材収入なし"%[lap+1])
  repair_hull_to_full()
+ var final_repair:Dictionary=repair_all_to_full()
+ check(final_repair.paid>0 and final_repair.spent>0 and all_parts_full() and main.base.speed_limit()>GameData.CRAWL_SPEED,"cash-only seed %d: rewards purchase every required part repair and restore speed"%seed_id)
+ print("SUBQUEST_REPAIR seed=",active_seed," final=",final_repair," speed_limit=",main.base.speed_limit())
  check(not main.game_over and main.base.parts[GameData.Part.HULL]>=75.0 and main.storage.count_of(GameData.Item.FOOD)>=0 and t.claimed.delivery==3 and t.claimed.recovery==3,"cash-only seed %d: 購入品で3配達+3回収を維持"%seed_id)
  log_run("cash_only_repeat",before,{"claimed":t.claimed.duplicate(true),"ordinary_total":ordinary_field_total(),"gathered":main.total_gathered,"hunted":main.total_hunted,"eaten":main.total_eaten,"weather":main.director.stats.get("weather",0),"route_depleted":cash_route_depleted()})
- return {"weather":weather_seen,"credits":t.credits,"fuel":main.base.fuel,"eaten":main.total_eaten}
+ return {"weather":weather_seen,"credits":t.credits,"fuel":snappedf(main.base.fuel,0.01),"parts":parts_snapshot(),"speed_limit":snappedf(main.base.speed_limit(),0.01),"eaten":main.total_eaten,"claimed":t.claimed.duplicate(true)}
+
+func cash_only_suite(seeds:Array,label:String) -> Dictionary:
+ var results:Dictionary={}
+ for seed_id in seeds:
+  results[str(seed_id)]=await cash_only_repeat(int(seed_id))
+ print("SUBQUEST_ORDER label=",label," results=",results)
+ return results
+func cash_only_same_result(a:Dictionary,b:Dictionary) -> bool:
+ return a.credits==b.credits and is_equal_approx(a.fuel,b.fuel) and a.parts==b.parts and is_equal_approx(a.speed_limit,b.speed_limit) and a.eaten==b.eaten and a.claimed==b.claimed
 
 ## 前渡しを使った未受領依頼を取り消した場合も、燃料を増やして再受注できないことを確認する。
 func advance_cancel_case() -> void:
@@ -221,11 +264,28 @@ func zero_city_restart()->void:
  log_run("zero_city_restart",before,{"claim":main.town.claimed.duplicate(true),"depletion_fixture":true})
 
 func _initialize()->void:
+ var args:=OS.get_cmdline_user_args()
+ for seed_id in [811,812,813]:
+  if ("--cash-only-single-%d"%seed_id) in args:
+   await cash_only_suite([seed_id],"single_%d"%seed_id)
+   if main!=null:root.remove_child(main);main.queue_free()
+   print("== result: %s =="%("all passed" if fails==0 else "%d failed"%fails));quit(1 if fails else 0)
+   return
+ if "--cash-only-reverse" in args:
+  await cash_only_suite([813,812,811],"reverse")
+  if main!=null:root.remove_child(main);main.queue_free()
+  print("== result: %s =="%("all passed" if fails==0 else "%d failed"%fails));quit(1 if fails else 0)
+  return
  if "--cash-only" in OS.get_cmdline_user_args():
   var weather_any:=false
+  var forward:Dictionary={}
   for seed_id in [811,812,813]:
    var result:Dictionary=await cash_only_repeat(seed_id)
+   forward[str(seed_id)]=result
    weather_any=weather_any or result.weather
+  var reverse:Dictionary=await cash_only_suite([813,812,811],"reverse_after_batch")
+  for seed_id in [811,812,813]:
+   check(cash_only_same_result(forward[str(seed_id)],reverse[str(seed_id)]),"cash-only order independent seed %d: credits/fuel/parts/speed match"%seed_id)
   check(weather_any,"cash-only: 複数seedで悪天候を含む走行でも前渡し開始から報酬循環")
   await advance_cancel_case()
   await cold_advance_case()
@@ -241,9 +301,11 @@ func _initialize()->void:
  await exhausted_restart()
  await zero_city_restart()
  var weather_any:=false
+ var forward:Dictionary=await cash_only_suite([811,812,813],"forward_core")
+ for seed_id in [811,812,813]:weather_any=weather_any or forward[str(seed_id)].weather
+ var reverse:Dictionary=await cash_only_suite([813,812,811],"reverse_core")
  for seed_id in [811,812,813]:
-  var result:Dictionary=await cash_only_repeat(seed_id)
-  weather_any=weather_any or result.weather
+  check(cash_only_same_result(forward[str(seed_id)],reverse[str(seed_id)]),"cash-only core order independent seed %d: credits/fuel/parts/speed match"%seed_id)
  check(weather_any,"cash-only: 複数seedで悪天候を含む走行でも前渡し開始から報酬循環")
  await advance_cancel_case()
  await cold_advance_case()

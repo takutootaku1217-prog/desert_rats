@@ -8,6 +8,7 @@ var _ctl: Control
 var _lv := {"sandstorm": 0.0, "heatwave": 0.0, "coldsnap": 0.0}     # 各天候の濃さ 0〜1
 var _grains: Array = []          # 砂・雪の粒 {p: Vector2, v: Vector2, s: float}
 var _t := 0.0
+var _rng := RandomNumberGenerator.new()
 
 const MAX_GRAINS := 160
 const FADE_PER_SEC := 0.45
@@ -43,7 +44,7 @@ func _process(delta: float) -> void:
 	# 粒の数は、砂嵐（砂）と寒波（雪）の濃さで決まる
 	var want := int(MAX_GRAINS * maxf(_lv["sandstorm"], _lv["coldsnap"]))
 	while _grains.size() < want:
-		_grains.append({"p": Vector2(randf_range(0, 1280), randf_range(0, 720)), "v": Vector2.ZERO, "s": randf_range(0.6, 1.4)})
+		_grains.append({"p": Vector2(_rng.randf_range(0, 1280), _rng.randf_range(0, 720)), "v": Vector2.ZERO, "s": _rng.randf_range(0.6, 1.4)})
 	while _grains.size() > want:
 		_grains.pop_back()
 	var sand: float = _lv["sandstorm"]
@@ -54,8 +55,8 @@ func _process(delta: float) -> void:
 			g["v"] = Vector2(-30.0 * g["s"], 70.0 * g["s"])                                     # ゆっくり降る雪
 		g["p"] += g["v"] * delta
 		if g["p"].x < -20.0 or g["p"].y > 740.0:
-			g["p"] = Vector2(1300.0 + randf_range(0, 80), randf_range(0, 720)) if sand >= _lv["coldsnap"] \
-					else Vector2(randf_range(0, 1300), -10.0)
+			g["p"] = Vector2(1300.0 + _rng.randf_range(0, 80), _rng.randf_range(0, 720)) if sand >= _lv["coldsnap"] \
+					else Vector2(_rng.randf_range(0, 1300), -10.0)
 	_ctl.queue_redraw()
 
 

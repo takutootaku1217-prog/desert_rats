@@ -99,6 +99,7 @@ func _run() -> void:
 	_test_life_controls()
 	_test_tool_controls()
 	_test_policy_entry()
+	_test_mission_cargo()
 
 	print("-- 道具の現在値を、画面を閉じずに更新する --")
 	detail._set_tab(1)
@@ -210,6 +211,20 @@ func _run() -> void:
 	detail._picker.set_focus(W[0])
 	check(detail._tab == 0 and detail._worker == W[0] and detail._live.has("view"), "部署タブからメンバーを選ぶと、概要を表示する")
 
+
+func _test_mission_cargo() -> void:
+	var w = W[0]
+	main.town.recovery = "loading"
+	main.town.recovery_worker = main.workers.find(w)
+	w.ai._set_state(CharacterAI.State.MISSION_RECOVERY_MOVE)
+	detail.open_worker(w);detail._update_live()
+	check(detail._live["cargo_summary"].text.contains("遺失物") and detail._live["cargo_detail"].text.contains("専用荷物"), "依頼中の仲間パネルは回収地点へ向かう専用荷物を表示")
+	main.town.recovery = "carried"
+	w.ai._set_state(CharacterAI.State.MISSION_RECOVERY_RETURN)
+	detail._update_live()
+	check(detail._live["cargo_summary"].text.contains("運搬") and detail._live["cargo_detail"].text.contains(str(TownDB.RECOVERY_PARCEL_WEIGHT)), "依頼中の仲間パネルは回収荷物の帰還運搬を表示")
+	main.town.recovery = "idle";main.town.recovery_worker = -1
+	w.ai._set_state(CharacterAI.State.SEARCH)
 
 func _test_life_controls() -> void:
 	print("-- 個体への促しはAIへ伝え、選択や仕事を直接変更しない --")

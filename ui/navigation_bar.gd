@@ -9,7 +9,9 @@ var buttons := {}
 var groups := {}
 var selected := ""
 var field_status: Label
+var mission_status: Label
 var return_result: Label
+var recovery_cancel: Button
 
 func _ready() -> void:
  layer = 14
@@ -50,6 +52,7 @@ func _ready() -> void:
  _group("探索",[["採取地点 (G)",game.quarry_ui.open],["遠征 (X)",game.expedition_ui.open]])
  var field_group:VBoxContainer=groups["探索"]
  field_status=UIKit.lbl("",15);field_group.add_child(field_status)
+ mission_status=UIKit.lbl("",13,Color("ffe2a5"));mission_status.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;mission_status.custom_minimum_size.x=470;field_group.add_child(mission_status)
  var controls:=HBoxContainer.new();field_group.add_child(controls)
  for entry in [["通常・再開","normal"],["後退（警戒）","alert"],["撤退・呼戻し","recall"]]:
   var mode:String=entry[1]
@@ -58,6 +61,8 @@ func _ready() -> void:
  var hint:=UIKit.lbl("警戒は近場の採取を継続。撤退は荷物を持って帰還。仲間を選び生物を右クリックすると明示攻撃（近距離のみ）。",13,UIKit.C_DIM)
  hint.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;hint.custom_minimum_size.x=470;field_group.add_child(hint)
  return_result=UIKit.lbl("",13);return_result.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;return_result.custom_minimum_size.x=470;field_group.add_child(return_result)
+ recovery_cancel=UIKit.button("回収を断念して帰還",func():game.town.abandon_recovery_from_field())
+ recovery_cancel.custom_minimum_size=Vector2(220,36);field_group.add_child(recovery_cancel)
  _group("拠点",[["街に入る",game.town_ui.request_open],["建設 (B)",game.build_ui.open],["部屋 (R)",game.room_ui.open],["製作 (F)",game.craft_ui.open],["内外装",func(): activate("内外装")]])
  _group("内外装",[["外装 (O)",func(): game.base_view.set_mode(BaseView.Mode.EXTERIOR)],["内装 (I)",func(): game.base_view.set_mode(BaseView.Mode.INTERIOR)],["戻る",func(): activate("拠点")]])
  _group("物資",[["倉庫 (Tab)",game.inventory_ui.open],["製作 (F)",game.craft_ui.open]])
@@ -105,6 +110,10 @@ func _process(_delta:float) -> void:
  if modal or game.game_over: close()
  if popup.visible: _position_popup()
  if field_status!=null: field_status.text=game.operations.status_text()
+ if mission_status!=null: mission_status.text=game.town.field_status_text()
+ if recovery_cancel!=null:
+  recovery_cancel.visible=game.town.recovery in ["site","loading"]
+  recovery_cancel.disabled=not game.town.recovery_site_ok()
  if return_result!=null: return_result.text=game.operations.result_text()
  buttons["仲間"].tooltip_text="仲間 %d人 (C)"%game.workers.size()
  buttons["物資"].modulate=Color("ffb078") if game.hungry or game.storage.weight_ratio()>=0.9 else Color.WHITE

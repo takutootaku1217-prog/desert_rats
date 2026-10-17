@@ -44,6 +44,12 @@ func _initialize():
  check(not ops.can_depart(w,Vector2(1080,680)),"待機時間が過ぎても同じ敵へ自動再出撃しない")
  w.hp=100;clear_enemies();ops.set_stance("normal")
  check(not w.ai.danger_hold,"プレイヤーの通常・再開で危険待機解除")
+ var ground_threat=enemy_at("sand_stalker",730)
+ w.ai.retreating=false;w.ai.danger_hold=false;w.floor_i=1;w.position=Vector2(700,GameData.LO_Y)
+ var deck_route_ok:bool=ground_threat.threatens(w) and ops.can_depart(w,Vector2(1080,GameData.GROUND_Y_MIN+64.0))
+ w.floor_i=0;w.position=Vector2(700,680)
+ check(deck_route_ok and not ops.can_depart(w,Vector2(1080,GameData.GROUND_Y_MIN+64.0)),"地上敵は甲板の回収役を止めず、地上へ降りた担当者だけを止める")
+ clear_enemies()
  var breaker=enemy_at("hull_breaker",980);hull=main.base.parts[GameData.Part.HULL]
  breaker._tick_ecology(1.1)
  check(main.base.parts[GameData.Part.HULL]<hull,"穿孔種は車体も攻撃する")

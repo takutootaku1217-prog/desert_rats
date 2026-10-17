@@ -11,6 +11,7 @@ extends CanvasLayer
 var game
 var _state: Label
 var _speed: Label
+var _mission: Label
 var _gauges := {}            # key -> IconGauge
 var _weight: IconGauge       # 積載重量（= _gauges["weight"]。診断ツールが読む）
 var _stock: StockGrid
@@ -52,6 +53,10 @@ func _ready() -> void:
 	_speed = UIKit.lbl("", 13, Color("cfe6ff"))
 	_speed.mouse_filter = Control.MOUSE_FILTER_STOP
 	head.add_child(_speed)
+	_mission = UIKit.lbl("", 12, Color("ffe2a5"))
+	_mission.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_mission.custom_minimum_size.x = W - 18
+	v.add_child(_mission)
 	# 2段目: アイコンゲージ
 	var gh := HBoxContainer.new()
 	gh.add_theme_constant_override("separation", 4)
@@ -118,6 +123,8 @@ func _process(_d: float) -> void:
 			col = Color("b9f3b9")
 	_state.text = "拠点: " + move
 	_state.add_theme_color_override("font_color", col)
+	_mission.text = game.town.field_status_text()
+	_mission.visible = game.town.delivery != "idle" or game.town.recovery != "idle"
 	_speed.text = "速度 %d / %d ↑↓" % [int(game.scroll_speed), int(game.target_speed)]
 	_speed.tooltip_text = "速度 / 目標（↑↓キーで目標の速度を変える）"
 	# 2段目: 拠点HP（外装の耐久）。走行装置・加工設備の耐久はHUDに出さない。

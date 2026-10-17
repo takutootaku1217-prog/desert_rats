@@ -27,6 +27,8 @@ func key() -> String:
 func recalling() -> bool:
  return phase=="legacy_recall" or (active and phase in ["departing","arriving","turning"])
 func ready_reason() -> String:
+ if region==TownDB.RECOVERY_TO and game.town.recovery in ["site","loading","carried"]:
+  return "回収依頼が未完了：現地で完了または断念を選んでください"
  if game.quarry.hostile(): return "襲撃・敵への対処が終わるまで待機"
  if game.expedition.state == "running": return "遠征隊の帰還待ち"
  if not game.quarry.loose.is_empty(): return "鉱床の残置品が未回収"
@@ -37,6 +39,7 @@ func ready_reason() -> String:
  return ""
 func request(to: String, planned := false) -> bool:
  if not active or phase != "stopped" or game.quarry.state != "road" or game.game_over: return false
+ if region==TownDB.RECOVERY_TO and game.town.recovery_blocks_departure(): return false
  var r := WorldMapDB.road_between(region,to)
  if not WorldMapDB.public_road(r): return false
  if not planned:game.journey.clear()

@@ -45,9 +45,11 @@ func can_depart(w,position: Vector2) -> bool:
  if stance=="recall" or w.ai.retreating or w.ai.danger_hold or game.director.elapsed<w.ai.safe_after:return false
  if stance=="alert" and position.distance_to(GameData.RAMP_FOOT)>NEAR_DISTANCE:return false
  # 自分から見える距離だけ。敵一覧をHUDへ公開しない。
- for e in game.enemies_root.get_children():
-  if not e.dead and e.threatens(w) and w.position.distance_to(e.position)<NOTICE_DISTANCE:
-   return false
+ # 地上の敵は地上の仲間だけを止める。デッキ上の水平移動やスロープへの接近を、垂直距離の銀で不当に禁止しない。
+ if w.floor_i==0:
+  for e in game.enemies_root.get_children():
+   if GameData.floor_of_y(e.position.y)==0 and not e.dead and e.threatens(w) and w.position.distance_to(e.position)<NOTICE_DISTANCE:
+    return false
  return true
 func status_text() -> String:
  return "%s　帰還 %d/%d人・危険待機%d人" % [{"normal":"通常","alert":"警戒：近場優先","recall":"撤退：呼戻し中"}[stance],returned_count(),game.workers.size(),game.workers.filter(func(w):return w.ai.danger_hold).size()]
