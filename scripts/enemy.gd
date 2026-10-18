@@ -82,7 +82,7 @@ func take_damage(amount: float, attacker = null) -> void:
 
 
 func is_attacking() -> bool:
-	if ecological: return present and (target_index >= 0 or (behavior()=="hull" and absf(position.x-GameData.RAMP_FOOT.x)<90.0))
+	if ecological: return present and (target_index >= 0 or (behavior().begins_with("hull") and absf(position.x-hull_attack_point().x)<90.0))
 	return position.x <= hold_x + 2.0
 
 
@@ -99,7 +99,7 @@ func _process(delta: float) -> void:
 		_atk_timer -= delta
 		if _atk_timer <= 0.0:
 			_atk_timer = 1.0
-			game.base.take_damage(damage * game.director.hull_dmg_mult())
+			game.base.take_damage(damage * game.director.hull_dmg_mult(), position.x)
 			_hit_nearby_worker()
 	queue_redraw()
 
@@ -125,7 +125,11 @@ func behavior() -> String:
 	return EventDB.ENEMIES[kind].get("behavior","hull")
 
 func territory() -> float:
-	return 600.0 if behavior()=="hull" else TERRITORY
+	return 600.0 if behavior().begins_with("hull") else TERRITORY
+
+
+func hull_attack_point() -> Vector2:
+	return game.base.rear_engine_attack_point() if behavior()=="hull_rear" else GameData.RAMP_FOOT
 
 func threatens(w) -> bool:
 	if dead or is_queued_for_deletion(): return false
@@ -161,8 +165,8 @@ func _tick_ecology(delta: float) -> void:
 	if target!=null:
 		# 仲間が車内へ入ったらその位置へ潜り込まない。入口で短く探す。
 		destination=target.position.x if target.floor_i==0 else GameData.RAMP_FOOT.x
-	elif behavior()=="hull" and absf(GameData.RAMP_FOOT.x-position.x)<=SIGHT and absf(GameData.RAMP_FOOT.x-home_x)<=territory():
-		destination=GameData.RAMP_FOOT.x
+	elif behavior().begins_with("hull") and absf(hull_attack_point().x-position.x)<=SIGHT and absf(hull_attack_point().x-home_x)<=territory():
+		destination=hull_attack_point().x
 	elif search_left>0: destination=position.x
 	position.x=move_toward(position.x,destination,run_speed*delta)
 	_atk_timer-=delta
@@ -170,8 +174,8 @@ func _tick_ecology(delta: float) -> void:
 		_atk_timer=1.0
 		if target!=null and target.floor_i==0 and position.distance_to(target.position)<float(EventDB.ENEMIES[kind].get("hit_reach",HIT_REACH)):
 			CrewStatus.damage(target,CrewStatusDB.RAID_HIT_HP,CrewStatusDB.RAID_HIT_STRESS)
-		elif behavior()=="hull" and absf(position.x-GameData.RAMP_FOOT.x)<65.0:
-			game.base.take_damage(damage*game.director.hull_dmg_mult())
+		elif behavior().begins_with("hull") and absf(position.x-hull_attack_point().x)<65.0:
+			game.base.take_damage(damage*game.director.hull_dmg_mult(), position.x)
 	queue_redraw()
 
 func herbivore() -> bool:

@@ -146,7 +146,7 @@ func _process(_d: float) -> void:
 	_leak.visible = b.engine_leaking()
 	if _leak.visible:
 		_leak.text = "\u30a8\u30f3\u30b8\u30f3\u71c3\u6599\u6f0f\u308c: %.3f/\u79d2 (\u6e1b\u901f\u3067\u6e1b\u5c11\u30fb\u505c\u6b62\u4e2d\u3082\u7d99\u7d9a)" % leak_rate
-		_leak.tooltip_text = "DRIVE %d / 100\n\u73fe\u5730\u4fee\u7406\u304c\u5b8c\u4e86\u3059\u308b\u307e\u3067\u6f0f\u308c\u307e\u3059\u3002" % int(b.condition(GameData.Part.DRIVE))
+		_leak.tooltip_text = "\u5f8c\u90e8\u88ab\u5f3e\u84c4\u7a4d %.1f / 100\nDRIVE %d / 100\n\u73fe\u5730\u4fee\u7406\u304c\u5b8c\u4e86\u3059\u308b\u307e\u3067\u6f0f\u308c\u307e\u3059\u3002" % [b.rear_engine_damage, int(b.condition(GameData.Part.DRIVE))]
 	var cond: float = b.condition(GameData.Part.HULL)
 	_set_gauge("hull", cond, 100.0, str(int(cond)), "拠点HP %d / 100%s" % [int(cond), "（不調）" if cond < GameData.PART_BAD else ""])
 	_set_gauge("fuel", b.fuel, GameData.FUEL_CAP, str(int(b.fuel / GameData.FUEL_CAP * 100.0)), "燃料 %d / %d" % [int(b.fuel), int(GameData.FUEL_CAP)])

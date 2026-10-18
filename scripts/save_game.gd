@@ -9,7 +9,7 @@ static var disabled := false
 const MAIN := ["target_speed", "scroll_speed", "room_layout", "total_rooms_built", "recipe_priority", "gather_policy", "hunt_policy", "blueprints", "total_gathered", "total_hunted", "total_eaten", "tool_auto", "_tool_clock", "build_queue", "total_built", "total_wasted", "_waste_note_at", "_spawn_dist", "_creature_dist", "wave", "kills", "_wave_timer", "transfer_queue", "craft_queue", "total_transferred", "total_crafted_by_hand", "_feed_clock"]
 const WORKER := ["char_name", "palette", "priorities", "carrying", "carcass_cargo", "carrying_species", "carry_source", "carry_n", "carry_bonus", "weapon", "work_support", "tools", "speed", "target", "position", "slot_offset", "hp", "hunger", "fatigue", "stress", "calm", "mental", "down", "floor_i", "facing", "level", "gender", "ranks", "skills", "dept", "away", "bed_index", "_climb_dest", "_climb_floor", "_climb_kind"]
 const AI := ["state", "timer", "haul_item", "haul_recipe", "repair_part", "gather_ev", "bag_limit", "bag_frac", "eat_wait", "xfer_item", "xfer_dir", "current_job", "life_request", "process_slot", "safe_after", "retreating", "danger_hold", "manual_attack", "return_request", "manual_job"]
-const BASE := ["built", "max_hp", "hp", "fuel", "parts", "total_refuel", "total_repair"]
+const BASE := ["built", "max_hp", "hp", "fuel", "parts", "rear_engine_damage", "total_refuel", "total_repair"]
 const PROCESSOR := ["orders", "current", "progress", "output", "batch_output", "total_done", "waiting_fuel"]
 const DIRECTOR := ["active", "forecast", "default_stance", "log", "elapsed", "distance", "stats", "enabled", "_next_in"]
 const QUARRY := ["state", "left", "near_only", "remaining", "progress", "visit_generated", "visit_nearby", "visit_discarded", "last_report", "_food_start", "discarded", "loose", "saved_speed", "visits"]
@@ -167,6 +167,14 @@ static func ai_data(row: Dictionary) -> Dictionary:
 	if not result.has("manual_job"): result.manual_job = -1
 	return result
 
+
+## 旧セーブには、通常の DRIVE 損傷と分離した後部被弾蓄積がない。
+## 0 を補完して、単に DRIVE が低い旧セーブを燃料漏れ扱いにしない。
+static func base_data(row: Dictionary) -> Dictionary:
+	var result := row.duplicate(true)
+	if not result.has("rear_engine_damage"): result.rear_engine_damage = 0.0
+	return result
+
 static func extra_data(d: Dictionary) -> Dictionary:
 	return d.get("processor_extra", {"orders":[],"current":{},"progress":0.0,"output":[],"batch_output":false,"total_done":0,"waiting_fuel":false})
 
@@ -183,8 +191,9 @@ static func validate(d, g) -> bool:
 	if not JourneyPlan.valid(d.get("journey",{}),d.world): return false
 	for k in ["main", "base", "processor", "stock", "inventory", "wasted", "butchered", "capacity", "weight", "director", "quarry", "expedition", "party", "crew", "resources", "creatures", "enemies", "camera", "follow", "scroll"]:
 		if not d.has(k): return false
-	for row in [[d.main,g,MAIN],[d.base,g.base,BASE],[processor_data(d.processor) if d.processor is Dictionary else d.processor,g.processor,PROCESSOR],[d.director,g.director,DIRECTOR],[d.quarry,g.quarry,QUARRY],[d.expedition,g.expedition,EXPEDITION]]:
+	for row in [[d.main,g,MAIN],[base_data(d.base) if d.base is Dictionary else d.base,g.base,BASE],[processor_data(d.processor) if d.processor is Dictionary else d.processor,g.processor,PROCESSOR],[d.director,g.director,DIRECTOR],[d.quarry,g.quarry,QUARRY],[d.expedition,g.expedition,EXPEDITION]]:
 		if not shape(row[0],row[1],row[2]): return false
+	var base_row: Dictionary = base_data(d.base)
 	for k in ["party", "crew", "resources", "creatures", "enemies"]:
 		if not d[k] is Array: return false
 	if d.crew.size() != g.workers.size() or not d.camera is Vector2 or not d.follow is int or d.follow < -1 or d.follow >= d.crew.size(): return false
@@ -201,17 +210,18 @@ static func validate(d, g) -> bool:
 		if not counts(v): return false
 	if Rooms.sanitize(d.main.room_layout) != d.main.room_layout: return false
 	var capacity := 0
-	for id in d.base.built:
-		if not FacilityDB.has(id) or not d.base.built[id] is Array: return false
+	for id in base_row.built:
+		if not FacilityDB.has(id) or not base_row.built[id] is Array: return false
 		var seen := []
-		for slot in d.base.built[id]:
+		for slot in base_row.built[id]:
 			if not slot is int or slot < 0 or slot >= FacilityDB.max_of(id) or slot in seen: return false
 			seen.append(slot)
 		capacity += seen.size() * int(FacilityDB.def(id).get("capacity_bonus",0))
-	if d.capacity != capacity or d.base.fuel < 0 or d.base.fuel > GameData.FUEL_CAP: return false
-	if d.base.parts.size() != GameData.Part.size(): return false
-	for k in d.base.parts:
-		if k not in GameData.Part.values() or typeof(d.base.parts[k]) not in [TYPE_FLOAT,TYPE_INT] or d.base.parts[k] < 0 or d.base.parts[k] > 100: return false
+	if d.capacity != capacity or base_row.fuel < 0 or base_row.fuel > GameData.FUEL_CAP: return false
+	if base_row.parts.size() != GameData.Part.size(): return false
+	for k in base_row.parts:
+		if k not in GameData.Part.values() or typeof(base_row.parts[k]) not in [TYPE_FLOAT,TYPE_INT] or base_row.parts[k] < 0 or base_row.parts[k] > 100: return false
+	if typeof(base_row.rear_engine_damage) not in [TYPE_FLOAT,TYPE_INT] or base_row.rear_engine_damage < 0 or base_row.rear_engine_damage > 100: return false
 	if d.has("operations"):
 		if not shape(d.operations,g.operations,FieldOperations.FIELDS) or d.operations.stance not in ["normal","alert","recall"] or d.operations.fuel_spent<0: return false
 		if not counts(d.operations.delivered): return false
@@ -378,7 +388,7 @@ static func apply(g, d: Dictionary) -> bool:
 	g.cancel_facility_pack()
 	put(g.world,WorldTrip.normalized(d.world),WorldTrip.FIELDS)
 	put(g.operations,d.get("operations",fields(FieldOperations.new(),FieldOperations.FIELDS)),FieldOperations.FIELDS)
-	put(g,d.main,MAIN); put(g.base,d.base,BASE); put(g.processor,processor_data(d.processor),PROCESSOR)
+	put(g,d.main,MAIN); put(g.base,base_data(d.base),BASE); put(g.processor,processor_data(d.processor),PROCESSOR)
 	g.storage.inventory.counts = d.inventory.duplicate(true)
 	g.storage.wasted = d.wasted.duplicate(true)
 	g.storage.total_butchered = d.butchered

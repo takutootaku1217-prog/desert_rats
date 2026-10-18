@@ -250,7 +250,7 @@ func _test_life_controls() -> void:
 	check(not return_button.disabled, "個人だけへの帰還指示を受け付けられる")
 	return_button.pressed.emit()
 	check(w.ai.return_request and w.ai.state == old_state and main.follow_target == W[0] and W[0].ai.return_request == false, "帰還指示は表示中の個人だけに安全な区切り待ちとして保存し、全員撤退や選択を変えない")
-	check(return_button.disabled and detail._header["instruction"].text.contains("帰還指示：受付中"), "帰還指示の受付中と重複不可を固定ヘッダーに表示する")
+	check(not return_button.disabled and return_button.text == "退却を解除" and detail._header["instruction"].text.contains("帰還指示：受付中"), "帰還指示の受付中を固定ヘッダーに表示し、重複でなく解除操作を出す")
 	w.ai.return_request = false
 	detail._update_live()
 	var rest_button: Button = detail._live["life_rest"]

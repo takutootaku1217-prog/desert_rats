@@ -26,6 +26,8 @@ var refuel_reserved := false             # 補給に向かっている仲間が�
 var total_refuel := 0                    # 補給した回数（確認用）
 ## 耐久度（0〜100）。車体・走行装置・加工設備。
 var parts := {GameData.Part.HULL: 100.0, GameData.Part.DRIVE: 100.0, GameData.Part.MACHINE: 100.0}
+## 後部への敵攻撃だけを記録する、DRIVE 耐久とは別の漏れ原因。旧セーブは 0 として読む。
+var rear_engine_damage := 0.0
 var repair_reserved := {}                # Part -> 修理に向かっている Worker
 var total_repair := 0                    # 修理した回数（確認用）
 var view_exterior := false               # true なら外から見る（外装）。false なら中を見る（内装の断面図）。切り替えは BaseView
@@ -201,16 +203,16 @@ func burn(distance: float) -> void:
 	consume_fuel(distance * GameData.FUEL_PER_PX * game.director.burn_mult())
 
 
-## DRIVE damage below the leak threshold drains fuel even while stopped.
-## At lower speeds the leak costs less, but it is never fully stopped until repaired.
+## 後部被弾の蓄積がしきい値に達すると燃料が漏れる。通常の DRIVE 摩耗や前方被弾はここへ接続しない。
+## 低速ほど少なく、停止中も修理まで完全には止まらない。
 func engine_leaking() -> bool:
-	return condition(GameData.Part.DRIVE) < GameData.ENGINE_LEAK_DAMAGE_THRESHOLD
+	return rear_engine_damage >= GameData.REAR_ENGINE_LEAK_DAMAGE_THRESHOLD
 
 
 func engine_leak_rate(speed: float) -> float:
 	if not engine_leaking():
 		return 0.0
-	var damage_ratio := clampf((GameData.ENGINE_LEAK_DAMAGE_THRESHOLD - condition(GameData.Part.DRIVE)) / GameData.ENGINE_LEAK_DAMAGE_THRESHOLD, 0.0, 1.0)
+	var damage_ratio := clampf((rear_engine_damage - GameData.REAR_ENGINE_LEAK_DAMAGE_THRESHOLD) / (100.0 - GameData.REAR_ENGINE_LEAK_DAMAGE_THRESHOLD), 0.0, 1.0)
 	var severity := lerpf(0.35, 1.0, damage_ratio)
 	var speed_ratio := maxf(GameData.ENGINE_LEAK_IDLE_MULT, maxf(0.0, speed) / GameData.FUEL_STANDARD_SPEED)
 	return GameData.ENGINE_LEAK_PER_SEC_AT_FULL_SPEED * severity * speed_ratio
@@ -240,6 +242,41 @@ func wear(part: int, amount: float) -> void:
 func wear_by(delta: float, distance: float) -> void:
 	wear(GameData.Part.HULL, GameData.HULL_WEAR_PER_SEC * delta)
 	wear(GameData.Part.DRIVE, GameData.DRIVE_WEAR_PER_PX * distance)
+
+
+## 被弾だけの車体ローカル3区分。進行方向や world.direction、移動／クリック判定には依存しない。
+func rear_engine_impact_x_max() -> float:
+	return GameData.HULL_POS.x + GameData.BASE_IMPACT_REAR_LOCAL_X_MAX * ArtSpec.UNIT_PX
+
+
+func rear_engine_attack_point() -> Vector2:
+	return Vector2(GameData.HULL_POS.x + GameData.REAR_ENGINE_ATTACK_LOCAL_X * ArtSpec.UNIT_PX, GameData.GROUND_Y_MIN + 40.0)
+
+
+func impact_zone(impact_x: float) -> int:
+	if not is_finite(impact_x):
+		return GameData.ImpactZone.OUTSIDE
+	var local_x := (impact_x - GameData.HULL_POS.x) / ArtSpec.UNIT_PX
+	if local_x < 0.0 or local_x > GameData.BASE_IMPACT_FRONT_LOCAL_X_MAX:
+		return GameData.ImpactZone.OUTSIDE
+	if local_x <= GameData.BASE_IMPACT_REAR_LOCAL_X_MAX:
+		return GameData.ImpactZone.REAR
+	if local_x <= GameData.BASE_IMPACT_CENTER_LOCAL_X_MAX:
+		return GameData.ImpactZone.CENTER
+	return GameData.ImpactZone.FRONT
+
+
+func is_rear_engine_impact(impact_x: float) -> bool:
+	return impact_zone(impact_x) == GameData.ImpactZone.REAR
+
+
+func record_rear_engine_damage(amount: float, impact_x: float) -> void:
+	if amount <= 0.0 or not is_rear_engine_impact(impact_x):
+		return
+	var was_leaking := engine_leaking()
+	rear_engine_damage = minf(100.0, rear_engine_damage + amount)
+	if not was_leaking and engine_leaking():
+		game.director.note("後部エンジン損傷: 燃料漏れ発生。減速で減るが、修理まで止まらない")
 
 
 ## 修理が必要で、まだ誰も向かっていない部位のうち、いちばん傷んでいるもの（なければ -1）。
@@ -272,8 +309,16 @@ func part_point(part: int) -> Vector2:
 	return Vector2(760.0, GameData.LO_Y)               # 車体（搬入口まわりの壁）
 
 
+func repair_amount(part: int, amount: float) -> float:
+	var restored := minf(maxf(0.0, amount), 100.0 - parts[part])
+	parts[part] += restored
+	if part == GameData.Part.DRIVE:
+		rear_engine_damage = maxf(0.0, rear_engine_damage - restored)
+	return restored
+
+
 func repair(part: int) -> void:
-	parts[part] = minf(100.0, parts[part] + GameData.REPAIR_AMOUNT)
+	repair_amount(part, GameData.REPAIR_AMOUNT)
 	repair_reserved.erase(part)
 	total_repair += 1
 
@@ -292,18 +337,16 @@ func repair_point() -> Vector2:
 	return Vector2(700.0, GameData.LO_Y)
 
 
-func take_damage(amount: float) -> void:
+func take_damage(amount: float, impact_x := INF) -> void:
 	# 敵の攻撃は車体に当たる（車体の耐久度が0になると拠点は動かなくなる）
-	# Enemy attacks damage both the hull and engine-side DRIVE; only the latter can leak fuel.
-	var drive_before := condition(GameData.Part.DRIVE)
+	# 敵の攻撃は HULL と DRIVE を傷めるが、燃料漏れ原因は後部の被弾蓄積だけに分離する。
 	parts[GameData.Part.HULL] = maxf(0.0, parts[GameData.Part.HULL] - amount)
 	parts[GameData.Part.DRIVE] = maxf(0.0, parts[GameData.Part.DRIVE] - amount)
+	record_rear_engine_damage(amount, impact_x)
 	# Damage may force a lower target speed. Repair intentionally does not restore it.
 	if game.target_speed > speed_limit():
 		game.target_speed = speed_limit()
 		game.director.note("\u30a8\u30f3\u30b8\u30f3\u640d\u50b7: \u76ee\u6a19\u901f\u5ea6\u3092\u4f4e\u4e0b\u3002\u4fee\u7406\u5f8c\u3082\u901f\u5ea6\u306f\u624b\u52d5\u3067\u623b\u3059")
-	if drive_before >= GameData.ENGINE_LEAK_DAMAGE_THRESHOLD and engine_leaking():
-		game.director.note("エンジン損傷: 燃料漏れ発生。減速で減るが、修理まで止まらない")
 	hit_timer = 0.25
 
 
