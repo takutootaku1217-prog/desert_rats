@@ -272,7 +272,7 @@ func tick(delta: float) -> void:
 	# ordinary storage state was released. Never leave that owned field cargo
 	# stranded in an idle/search state; unload only after the worker is safely
 	# back at the base.
-	if game.operations.stance == "recall" and not ch.recall_exempt and ch.floor_i != 0 and ch._climb_dest == null and ch.carrying >= 0 and state in [State.IDLE, State.SEARCH]:
+	if game.operations.stance == "recall" and not ch.recall_exempt and ch.floor_i != 0 and ch._climb_dest == null and ch.carrying >= 0 and ch.carry_source in [Inventory.SOURCE_ENVIRONMENT, Inventory.SOURCE_HUNT, Inventory.SOURCE_ENEMY_DROP] and state in [State.IDLE, State.SEARCH]:
 		ch.unload_owned()
 		return
 	if manual_attack and (state not in [State.COMBAT_MOVE,State.COMBAT] or not _enemy_valid()):manual_attack=false
@@ -1174,7 +1174,7 @@ func _recall_tick(delta: float) -> bool:
 		if state == State.GATHER:
 			_finish_trip()
 			return false
-		if forced_return:
+		if return_request:
 			# An automatic or group withdrawal must not continue a transfer toward
 			# a field destination. Keep the owned cargo and return it to the base.
 			_release_task()
