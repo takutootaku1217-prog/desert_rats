@@ -258,13 +258,22 @@ func tick(delta: float) -> void:
 	if ch.down:
 		return
 	var rescue_carrier: bool = game.rescue != null and game.rescue.is_carrier(ch)
-	# The automatic low-HP withdrawal is an interruption rule for a rescue
-	# carrier. Other workers retain their established low-HP rest behavior.
-	if rescue_carrier and ch.hp <= CrewStatusDB.MAX_HP * 0.30 and not return_request:
+	# HP30% is an outdoor safety boundary for every worker. Deck-side recovery
+	# remains the established low-HP rest behavior, while field work returns.
+	var outside_base: bool = ch.floor_i == 0 or ch._climb_dest != null
+	var low_hp_outdoors: bool = outside_base and ch.hp <= CrewStatusDB.MAX_HP * 0.30
+	if low_hp_outdoors and not return_request:
 		return_request = true
-	if rescue_carrier and (return_request or game.operations.stance == "recall" or ch.hp <= CrewStatusDB.MAX_HP * 0.30):
+	if rescue_carrier and (return_request or (game.operations.stance == "recall" and not ch.recall_exempt) or low_hp_outdoors):
 		game.rescue.cancel_carrier(ch)
 	if game.rescue != null and game.rescue.carrier_tick(ch, delta):
+		return
+	# A recalled worker can complete the ramp transition on deck after the
+	# ordinary storage state was released. Never leave that owned field cargo
+	# stranded in an idle/search state; unload only after the worker is safely
+	# back at the base.
+	if game.operations.stance == "recall" and not ch.recall_exempt and ch.floor_i != 0 and ch._climb_dest == null and ch.carrying >= 0 and state in [State.IDLE, State.SEARCH]:
+		ch.unload_owned()
 		return
 	if manual_attack and (state not in [State.COMBAT_MOVE,State.COMBAT] or not _enemy_valid()):manual_attack=false
 	if manual_attack and (ch.hp<FieldOperations.RECOVER_HP or _urgent_life_need()):begin_retreat()
@@ -286,7 +295,7 @@ func tick(delta: float) -> void:
 	# A personal withdrawal is an explicit, persistent order. It can interrupt
 	# meals and field repairs; group recall retains its existing safe boundaries.
 	var personal_withdrawal: bool = return_request and (ch.floor_i == 0 or ch._climb_dest != null or state in [State.IDLE, State.SEARCH, State.NOTICE, State.MOVE_TO_RESOURCE, State.GATHER, State.MOVE_TO_STORAGE, State.STORE, State.HAUL_TAKE, State.HAUL_MOVE, State.MOVE_TO_MACHINE, State.PROCESS, State.XFER_TAKE, State.XFER_MOVE, State.REFUEL_TAKE, State.REFUEL_MOVE, State.REFUEL, State.HUNT_MOVE, State.HUNT_ATTACK, State.COMBAT_MOVE, State.COMBAT, State.MISSION_RECOVERY_MOVE, State.MISSION_RECOVERY_LOAD, State.MISSION_RECOVERY_RETURN, State.REPAIR_TAKE, State.REPAIR_MOVE, State.REPAIR, State.EAT_TAKE, State.EAT, State.REST_MOVE, State.REST, State.REST_HERE])
-	var group_recall: bool = (retreating or game.operations.stance == "recall") and (ch.floor_i == 0 or ch._climb_dest != null or state in [State.NOTICE,State.MOVE_TO_RESOURCE,State.GATHER,State.HUNT_MOVE,State.HUNT_ATTACK,State.COMBAT_MOVE,State.COMBAT,State.MISSION_RECOVERY_MOVE,State.MISSION_RECOVERY_LOAD,State.MISSION_RECOVERY_RETURN])
+	var group_recall: bool = (retreating or (game.operations.stance == "recall" and not ch.recall_exempt)) and (ch.floor_i == 0 or ch._climb_dest != null or state in [State.NOTICE,State.MOVE_TO_RESOURCE,State.GATHER,State.HUNT_MOVE,State.HUNT_ATTACK,State.COMBAT_MOVE,State.COMBAT,State.MISSION_RECOVERY_MOVE,State.MISSION_RECOVERY_LOAD,State.MISSION_RECOVERY_RETURN])
 	if personal_withdrawal or group_recall:
 		if _recall_tick(delta): return
 	if state == State.RETURN_BASE and not game.world.recalling() and not game.quarry.recalling() and not return_request and ch.floor_i != 0:
@@ -1148,6 +1157,7 @@ func on_priority_changed() -> void:
 func _recall_tick(delta: float) -> bool:
 	# Direct withdrawal overrides a meal or repair. Group recall is intentionally
 	# left at its established safe boundary so existing shipments can finish.
+	var forced_return: bool = return_request or retreating or (game.operations.stance == "recall" and not ch.recall_exempt)
 	if return_request and state in [State.REPAIR_TAKE, State.REPAIR_MOVE, State.REPAIR, State.EAT_TAKE, State.EAT, State.REST_MOVE, State.REST, State.REST_HERE, State.REFUEL_TAKE, State.REFUEL_MOVE, State.REFUEL]:
 		if ch.carrying >= 0:
 			ch.unload_owned()
@@ -1158,19 +1168,32 @@ func _recall_tick(delta: float) -> bool:
 		ch.move_to_target(delta)
 		return true
 	if ch.carrying >= 0:
+		# A gathered field bag already has a complete, tested delivery path. Finish
+		# that transition before the withdrawal redirect so its cargo accounting and
+		# outing report remain exact.
 		if state == State.GATHER:
 			_finish_trip()
+			return false
+		if forced_return:
+			# An automatic or group withdrawal must not continue a transfer toward
+			# a field destination. Keep the owned cargo and return it to the base.
+			_release_task()
+			current_job = -1
+			_set_state(State.RETURN_BASE)
+			ch.target = game.storage.access_point() + ch.slot_offset
+			if ch.move_to_target(delta): ch.unload_owned()
+			return true
 		return false
 	if ch.down or _is_rest_state() or _is_eat_state():
 		return false
 	if state != State.RETURN_BASE:
 		_release_task()
-		if not return_request and not (retreating and ch.floor_i==0) and _try_life_need():
+		if not forced_return and _try_life_need():
 			return true
 		current_job = -1
 		_set_state(State.RETURN_BASE)
 	# 待機が長引いたときも空腹や疲労を無視しない。
-	if not return_request and not (retreating and ch.floor_i==0) and _try_life_need():
+	if not forced_return and _try_life_need():
 		return true
 	ch.target = game.storage.access_point() + ch.slot_offset
 	ch.move_to_target(delta)

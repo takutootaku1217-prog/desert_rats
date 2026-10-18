@@ -302,6 +302,10 @@ func _build_detail_header(right: VBoxContainer) -> void:
 	returning.custom_minimum_size = Vector2(150, 32)
 	actions.add_child(returning)
 	_header["return"] = returning
+	var exempt := UIKit.button("Group recall: included", _toggle_recall_exempt)
+	exempt.custom_minimum_size = Vector2(150, 28)
+	actions.add_child(exempt)
+	_header["recall_exempt"] = exempt
 	var rescue := UIKit.button("Rescue action", _request_rescue)
 	rescue.custom_minimum_size = Vector2(150, 32)
 	actions.add_child(rescue)
@@ -607,6 +611,11 @@ func _request_return() -> void:
 			_worker.ai.request_return()
 	_update_live()
 
+
+func _toggle_recall_exempt() -> void:
+	if is_instance_valid(_worker) and game.workers.has(_worker):
+		_worker.recall_exempt = not _worker.recall_exempt
+	_update_live()
 
 func _request_rescue() -> void:
 	if not is_instance_valid(_worker) or not game.workers.has(_worker): return
@@ -1071,6 +1080,9 @@ func _update_header(w) -> void:
 	returning.tooltip_text = return_reason if not return_reason.is_empty() else "この仲間だけに帰還を指示します。全員撤退は行いません。"
 	if w.ai.return_request:
 		returning.tooltip_text = "\u9000\u5374\u3092\u89e3\u9664\u3057\u3001\u5e30\u9084\u5f8c\u306e\u6b21\u306e\u5b89\u5168\u306a\u6642\u70b9\u304b\u3089\u81ea\u5f8b\u884c\u52d5\u306b\u623b\u3057\u307e\u3059\u3002"
+	var exempt: Button = _header["recall_exempt"]
+	exempt.text = "Group recall: excluded" if w.recall_exempt else "Group recall: included"
+	exempt.tooltip_text = "This crew member ignores the group recall; individual return and low-HP outdoor withdrawal still apply."
 	var rescue: Button = _header["rescue"]
 	if w.down:
 		var rec: Dictionary = game.rescue.record_for(w)

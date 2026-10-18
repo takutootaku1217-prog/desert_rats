@@ -247,6 +247,12 @@ func _test_life_controls() -> void:
 	var food_before: int = main.storage.count_of(GameData.Item.FOOD)
 	var claims_before: int = main.food_claims
 	var return_button: Button = detail._header["return"]
+	var exclusion_button: Button = detail._header["recall_exempt"]
+	check(exclusion_button.text == "Group recall: included" and not w.recall_exempt, "group-recall inclusion is shown in the worker detail controls")
+	exclusion_button.pressed.emit()
+	check(w.recall_exempt and exclusion_button.text == "Group recall: excluded", "worker detail can persistently exclude this worker from group recall")
+	exclusion_button.pressed.emit()
+	check(not w.recall_exempt and exclusion_button.text == "Group recall: included", "worker detail can include this worker in group recall again")
 	check(not return_button.disabled, "個人だけへの帰還指示を受け付けられる")
 	return_button.pressed.emit()
 	check(w.ai.return_request and w.ai.state == old_state and main.follow_target == W[0] and W[0].ai.return_request == false, "帰還指示は表示中の個人だけに安全な区切り待ちとして保存し、全員撤退や選択を変えない")

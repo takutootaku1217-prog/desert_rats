@@ -50,6 +50,14 @@ func _initialize() -> void:
 	carrier.position = Vector2(720, GameData.LO_Y)
 	injured.position = Vector2(920, GameData.LO_Y)
 	check(main.rescue.assign(carrier, injured), "deck-side rescue can be assigned for return interruption")
+	carrier.ai.return_request = true
+	carrier.ai.tick(0.1)
+	check(carrier.ai.rescue_target < 0 and carrier.ai.state == CharacterAI.State.RETURN_BASE and int(main.rescue.record_for(injured).get("carrier", -1)) < 0, "individual return interruption cancels rescue and enters the normal return state")
+	carrier.ai.cancel_return()
+	carrier.hp = CrewStatusDB.MAX_HP
+	carrier.floor_i = 0
+	injured.floor_i = 0
+	check(main.rescue.assign(carrier, injured), "rescue can be reassigned for the automatic HP interruption")
 	carrier.hp = CrewStatusDB.MAX_HP * 0.30
 	carrier.ai.return_request = false
 	carrier.ai.tick(0.1)
@@ -101,6 +109,73 @@ func _initialize() -> void:
 		if not w.down: CrewStatus.damage(w, 999.0)
 	main.rescue.tick(0.1)
 	check(main.rescue.prompt != null and main.rescue.prompt.visible, "all-down checkpoint restart prompt appears immediately")
+	await fresh()
+	for w in main.workers: w.set_process(false)
+	var recalled = main.workers[0]
+	var excluded = main.workers[1]
+	recalled.floor_i = 0
+	excluded.floor_i = 0
+	recalled.position = Vector2(850, GameData.LO_Y)
+	excluded.position = Vector2(900, GameData.LO_Y)
+	recalled.ai._set_state(CharacterAI.State.SEARCH)
+	excluded.ai._set_state(CharacterAI.State.SEARCH)
+	excluded.recall_exempt = true
+	var saved_exclusion := SaveGame.capture(main)
+	excluded.recall_exempt = false
+	check(SaveGame.apply(main, saved_exclusion) and main.workers[1].recall_exempt, "group-recall exclusion persists through a saved run")
+	recalled = main.workers[0]
+	excluded = main.workers[1]
+	for w in [recalled, excluded]:
+		w.set_process(false)
+		w.floor_i = 0
+		w.hp = CrewStatusDB.MAX_HP
+		w.ai.return_request = false
+		recalled.ai._set_state(CharacterAI.State.SEARCH)
+		excluded.ai._set_state(CharacterAI.State.SEARCH)
+	var ongoing = GatherPoint.new()
+	ongoing.setup(main, "tree")
+	ongoing.position = Vector2(1100, GameData.LO_Y)
+	main.resources_root.add_child(ongoing)
+	ongoing.claimed_by = excluded
+	excluded.ai.res = ongoing
+	excluded.ai._set_state(CharacterAI.State.MOVE_TO_RESOURCE)
+	main.operations.set_stance("recall")
+	recalled.ai.tick(0.1)
+	excluded.ai.tick(0.1)
+	check(recalled.ai.state == CharacterAI.State.RETURN_BASE and excluded.ai.state == CharacterAI.State.MOVE_TO_RESOURCE and excluded.ai.res == ongoing and ongoing.claimed_by == excluded, "group recall returns included crew while an excluded crew member keeps the assigned gathering instruction")
+	check(excluded.ai.request_return(), "an excluded crew member can still receive an individual return order")
+	excluded.ai.tick(0.1)
+	check(excluded.ai.state == CharacterAI.State.RETURN_BASE, "individual return remains effective while group recall excludes that crew member")
+	excluded.ai.cancel_return()
+	excluded.ai._set_state(CharacterAI.State.SEARCH)
+	CrewStatus.damage(recalled, 999.0)
+	check(main.rescue.assign(excluded, recalled), "an excluded crew member can be explicitly assigned as a rescue carrier during group recall")
+	excluded.ai.tick(0.1)
+	check(excluded.ai.rescue_target == main.rescue.worker_index(recalled) and main.rescue.is_carrier(excluded), "group recall does not cancel an excluded carrier on the next AI tick")
+	excluded.hp = CrewStatusDB.MAX_HP * 0.30
+	excluded.ai.tick(0.1)
+	check(excluded.ai.return_request and excluded.ai.state == CharacterAI.State.RETURN_BASE, "30 percent outdoor withdrawal overrides group-recall exclusion")
+	main.operations.set_stance("normal")
+	await fresh()
+	for w in main.workers: w.set_process(false)
+	var field_worker = main.workers[0]
+	field_worker.floor_i = 0
+	field_worker.position = Vector2(900, GameData.LO_Y)
+	for state in [CharacterAI.State.MOVE_TO_RESOURCE, CharacterAI.State.GATHER, CharacterAI.State.HUNT_MOVE, CharacterAI.State.HUNT_ATTACK, CharacterAI.State.MISSION_RECOVERY_MOVE, CharacterAI.State.XFER_MOVE, CharacterAI.State.COMBAT_MOVE]:
+		field_worker.hp = CrewStatusDB.MAX_HP * 0.30
+		field_worker.ai.return_request = false
+		field_worker.ai.manual_attack = state == CharacterAI.State.COMBAT_MOVE
+		field_worker.ai._set_state(state)
+		field_worker.ai.tick(0.1)
+		check(field_worker.ai.return_request and field_worker.ai.state == CharacterAI.State.RETURN_BASE, "30 percent outdoor withdrawal interrupts %s" % CharacterAI.STATE_TEXT[state])
+		field_worker.ai.cancel_return()
+		field_worker.ai._set_state(CharacterAI.State.SEARCH)
+	field_worker.floor_i = 1
+	field_worker.hp = CrewStatusDB.MAX_HP * 0.30
+	field_worker.ai.return_request = false
+	field_worker.ai._set_state(CharacterAI.State.REST)
+	field_worker.ai.tick(0.1)
+	check(not field_worker.ai.return_request and field_worker.ai.state == CharacterAI.State.REST, "deck-side low-HP rest is not converted into an outdoor withdrawal")
 	print("== RESULT: %s ==" % ("ALL PASSED" if fails == 0 else "%d FAILED" % fails))
 	quit(1 if fails > 0 else 0)
 

@@ -19,7 +19,12 @@ func _initialize():
  ops.set_stance("recall");w.ai.tick(0.2)
  check(point.remaining==10 and is_equal_approx(point.work,0.43) and w.carry_n==2,"撤退で採取残量・未完進捗・取得済み袋を保全")
  check(snapshot_ok(),"撤退中の袋と進捗を保存復元")
- check(await until(func():return ops.returned_count()==3,180),"全員と荷物が帰還し置去りなし")
+ var all_returned := await until(func():return ops.returned_count()==3,180)
+ if not all_returned:
+  for i in main.workers.size():
+   var member=main.workers[i]
+   print("FIELD_RETURN_DEBUG index=%d state=%d return=%s exempt=%s hp=%.1f cargo=%d n=%d pos=%s floor=%d res=%s prey=%s" % [i,member.ai.state,member.ai.return_request,member.recall_exempt,member.hp,member.carrying,member.carry_n,member.position,member.floor_i,member.ai.res,member.ai.prey])
+ check(all_returned,"全員と荷物が帰還し置去りなし")
  ops.tick()
  check(main.storage.count_of(GameData.Item.WOOD)==before+2 and ops.last_report.items.get(GameData.Item.WOOD,0)==2,"持帰りは倉庫到着した実取得2個だけ")
  ops.start_outing();ops.outside_seen=true

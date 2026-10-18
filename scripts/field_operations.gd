@@ -21,7 +21,7 @@ func set_stance(value: String) -> bool:
  if value not in ["normal","alert","recall"] or game.game_over: return false
  stance=value
  for w in game.workers:
-  if value in ["alert","recall"] and w.ai.state in [CharacterAI.State.COMBAT_MOVE,CharacterAI.State.COMBAT]:w.ai.begin_retreat()
+  if value in ["alert","recall"] and not w.recall_exempt and w.ai.state in [CharacterAI.State.COMBAT_MOVE,CharacterAI.State.COMBAT]:w.ai.begin_retreat()
   if value=="normal" and w.hp>=RECOVER_HP:w.ai.danger_hold=false
   if w.ai.state==CharacterAI.State.RETURN_BASE and w.floor_i!=0: w.ai._set_state(CharacterAI.State.SEARCH)
  return true
@@ -42,7 +42,7 @@ func tick() -> void:
   last_report={"items":delivered.duplicate(),"seconds":game.director.elapsed-baseline.time,"food":game.total_eaten-baseline.food,"fuel":fuel_spent-baseline.fuel,"refuel":game.base.total_refuel-baseline.refuel,"repair":game.base.total_repair-baseline.repair}
   outing=false
 func can_depart(w,position: Vector2) -> bool:
- if stance=="recall" or w.ai.retreating or w.ai.danger_hold or game.director.elapsed<w.ai.safe_after:return false
+ if (stance=="recall" and not w.recall_exempt) or w.ai.retreating or w.ai.danger_hold or game.director.elapsed<w.ai.safe_after:return false
  if stance=="alert" and position.distance_to(GameData.RAMP_FOOT)>NEAR_DISTANCE:return false
  # 自分から見える距離だけ。敵一覧をHUDへ公開しない。
  # 地上の敵は地上の仲間だけを止める。デッキ上の水平移動やスロープへの接近を、垂直距離の銀で不当に禁止しない。

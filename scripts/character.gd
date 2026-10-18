@@ -55,6 +55,7 @@ var attacking := false        # 戦闘用（work と同じ見た目）
 var sleeping := false          # ベッドで眠っている
 var resting := false           # ベッドがなく、その場で簡易休憩している（回復は遅い）
 var bed_index := -1
+var recall_exempt := false
 
 var _climb_dest = null        # 階をまたぐ移動の途中（Vector2）
 var _climb_floor := 1
