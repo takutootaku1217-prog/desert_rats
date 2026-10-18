@@ -37,6 +37,19 @@ func _initialize():
 	check(b.down and b.weapon == ITEM and not main.unequip_weapon(b), "HP0は死亡でなく戦闘不能。装備を失わず変更を拒否")
 	check(main.storage.current_weight() == weight, "戦闘不能でも装備重量は消えない")
 	CrewStatus._tick_hp(b, 1000)
+	check(b.down and b.weapon == ITEM, "removed natural revival leaves the armed worker recoverable")
+	# Bring the armed worker back through the real rescue carrier path before
+	# exercising the existing combat assertions below.
+	a.position = Vector2(700, GameData.LO_Y)
+	a.floor_i = 0
+	b.position = Vector2(900, GameData.LO_Y)
+	b.floor_i = 0
+	check(main.rescue.assign(a, b), "downed armed crew accepts an explicit rescue carrier")
+	for n in 1200:
+		main.rescue.carrier_tick(a, 0.1)
+		if not b.down: break
+	check(not b.down and b.weapon == ITEM and b.ai.post_rescue_wait, "rescue return revives and retains the same weapon")
+	main.rescue.resume(b)
 	check(not b.down and b.weapon == ITEM, "復帰して同じ武器を保持")
 	# 既存迎撃AIで同一個体・同一能力・同一敵への1秒の攻撃を比較。
 	var e := Enemy.new()
