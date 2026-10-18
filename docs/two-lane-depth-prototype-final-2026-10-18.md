@@ -11,10 +11,15 @@ Start Godot with the user argument `two-lane-depth-prototype` to enable it. Norm
 starts, every other region, roads, the moving-base map loop, and interior movement
 keep their existing one-line coordinates.
 
-The outdoor strip has exactly two readable resting lanes: back `Y=625` and front
-`Y=680` (55 px apart). Characters may move diagonally between any two points in
+The outdoor strip has exactly two readable resting lanes: back `Y=570` and front
+`Y=625` (55 px apart). Characters may move diagonally between any two points in
 this shallow strip; there is no crossing X, bridge, third lane, free planar
 movement, terrain-obstacle system, or 3D movement.
+
+At 1280x720, the NavigationBar begins at screen Y=650. The front anchor's feet
+are therefore 19 px above it, rather than hidden by the HUD. Selection uses the
+InputEvent coordinate after camera conversion, and a regression sends a real
+Viewport mouse event through `_unhandled_input` (not `_pick_worker_at` directly).
 
 The existing ramp remains the only route between outdoors and the base. Resources,
 fauna, and ecological enemies generated at `south_oasis` use the two anchors.
@@ -32,6 +37,11 @@ test fixtures are preserved.
   closed. Pursuit moves directly through the strip at the current X.
 - A personal return crosses the strip, uses the ramp, and does not resume combat
   or gathering.
+- Normal startup, roads, and other regions remain outside the strip even though
+  the opt-in metadata exists in the running Main scene.
+- Save/restore preserves a middle-of-band Y, a ramp-in-progress worker, and an
+  indoor worker; it clamps old outside-Y WorldTrip records only at `south_oasis`
+  and leaves a non-target region unchanged.
 
 ## Verification and evidence
 
@@ -44,8 +54,28 @@ Windows Godot `4.7.2.stable.official.ed1daf0bf`, isolated APPDATA:
 
 Result: `DEPTH_ROLLOUT_OK`.
 
-Full core regression also passed without source changes (selected checks):
-`C:\Users\user\AppData\Local\Temp\desert-rats-two-lane-prototype-final-core\20261018T045859Z-8myedi15\results.json`.
+Run the explicit scope checks separately (the first one intentionally has no
+prototype argument):
+
+```powershell
+& '<Godot console exe>' --headless --path . --fixed-fps 60 `
+  -s res://tools/test_two_lane_scope_isolation.gd
+& '<Godot console exe>' --headless --path . --fixed-fps 60 `
+  -s res://tools/test_two_lane_scope_isolation.gd -- two-lane-depth-prototype
+```
+
+Both results: `TWO_LANE_SCOPE_OK`.
+
+Focused isolated-APPDATA regression passed with `source_changed_during_run=false`:
+`C:\Users\user\AppData\Local\Temp\desert-rats-two-lane-hud-scope-final\20261018T051855Z-0q2wzg64\results.json`
+(`import`, both scope modes, live integration, legacy `save_game`, `world_flow`).
+`world_map`, `world_boundaries`, `world_fauna`, `world_scenery`, and
+`world_reencounter` were also run from the normal map in bounded batches.
+
+The all-core command begins successfully but this host terminates its process at
+about 30 seconds while `town_flow` starts, before Godot's own per-check timeout.
+It is therefore **not** reported as a completed core result; rerun core from the
+committed branch in a host without that session limit.
 
 Renderer captures use the Intel Iris Xe OpenGL Compatibility renderer (not
 headless; no OS-input video):

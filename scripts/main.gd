@@ -91,10 +91,12 @@ var _over_layer: CanvasLayer
 const SPAWN_X := 1330.0
 const SPAWN_Y_MIN := GameData.GROUND_Y_MIN + 4.0
 const SPAWN_Y_MAX := GameData.GROUND_Y_MAX - 4.0
-## Normal map outdoor space: a shallow continuous strip with two readable
-## front/back resting lanes. Interior floors keep their existing coordinates.
-const OUTDOOR_DEPTH_BACK_Y := 625.0
-const OUTDOOR_DEPTH_FRONT_Y := 680.0
+## Optional south_oasis prototype: a shallow continuous strip with two readable
+## front/back resting lanes. Normal maps and interior floors keep their existing coordinates.
+## The optional south_oasis strip remains above the 720p navigation bar
+## (which starts at y=650), while retaining a 55px continuous depth band.
+const OUTDOOR_DEPTH_BACK_Y := 570.0
+const OUTDOOR_DEPTH_FRONT_Y := 625.0
 
 const WORKER_DEFS := [
 	{"name": "ネズ吉", "palette": "grey",
@@ -1505,8 +1507,9 @@ func _unhandled_input(event: InputEvent) -> void:
 					get_viewport().set_input_as_handled()
 					return
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		var click_world := get_global_mouse_position()    # カメラが動いても正しい世界座標になる（event.position は画面座標のまま）
-		var best = _pick_worker_at(click_world)
+		# Use this event's screen coordinate instead of the OS cursor.  This is
+		# camera-aware and permits a real Viewport-input regression check.
+		var best = _pick_worker_at(get_canvas_transform().affine_inverse() * event.position)
 		if best != null:
 			_select(best)
 	elif event is InputEventKey and event.pressed:

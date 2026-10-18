@@ -1147,16 +1147,13 @@ and stash `09e6de75e16a7e695b1c47d88650189dadf5f979` remain untouched.
 > Full core passed without source changes:
 > `C:\Users\user\AppData\Local\Temp\desert-rats-two-lane-prototype-final-core\20261018T045859Z-8myedi15\results.json`.
 
-The normal-map depth strip remains exactly two continuous front/back lanes, 55 px
-wide, with movement at every X and no crossing coordinate. Its final anchors are
-world Y=625 (back) and Y=680 (front). The first 570/625 placement changed the
-fixed-FPS first-cycle production rhythm enough to starve the storage-box build of
-iron, although it did not change resource amounts. Translating the same-width band
-to the legacy outdoor neighbourhood restores that flow without changing the map,
-routes, rewards, resource counts, or the lane count. The fixed-FPS `first_cycle_flow`
-and `two_lane_live_integration` passes were repeated after this correction; the
-comparison and live-render PNG evidence was regenerated with the Intel Iris Xe
-Compatibility renderer. Full core validation follows from this isolated branch.
+This normal-map-wide 625/680 rollout is superseded and must not be used for
+verification. The accepted trial is opt-in (`two-lane-depth-prototype`) and scoped
+to `region:south_oasis` only: world Y=570 (back) and Y=625 (front), with 55 px
+continuous movement at any X. Normal startup, roads, other regions, map travel,
+interiors, and saved coordinates keep their former behavior. See the final record
+for the required no-argument scope guard plus the flag-enabled integration command:
+`docs/two-lane-depth-prototype-final-2026-10-18.md`.
 
 Notion was rechecked through `docs/Notion参照索引.md`. World 1's autonomous gather/haul/return is
 adopted; the delivery-loop page was still a planning proposal (last edited 2026-10-13), with reward

@@ -50,7 +50,7 @@ func _add_vein() -> GatherPoint:
 	point.setup(main, "vein")
 	point.max_amount = 1
 	point.remaining = 1
-	point.position = Vector2(1140.0, 676.0)
+	point.position = Vector2(1140.0, 621.0)
 	main.resources_root.add_child(point)
 	return point
 
@@ -66,13 +66,13 @@ func _initialize() -> void:
 	var back_worker = main.workers[1]
 	var front_worker = main.workers[2]
 	gatherer.floor_i = 0
-	gatherer.position = Vector2(940.0, 625.0)
+	gatherer.position = Vector2(940.0, 570.0)
 	gatherer.tools = {"mine": GameData.Item.HAMMER}
 	gatherer.priorities[GameData.Job.GATHER] = 5
 	back_worker.floor_i = 0
-	back_worker.position = Vector2(770.0, 625.0)
+	back_worker.position = Vector2(770.0, 570.0)
 	front_worker.floor_i = 0
-	front_worker.position = Vector2(770.0, 680.0)
+	front_worker.position = Vector2(770.0, 625.0)
 	main._select(front_worker)
 	_add_vein()
 	for _frame in 3:
@@ -80,10 +80,10 @@ func _initialize() -> void:
 	await _capture(dir, "live-depth-gather")
 	gatherer.stop_work()
 	gatherer.floor_i = 0
-	gatherer.position = Vector2(930.0, 625.0)
+	gatherer.position = Vector2(930.0, 570.0)
 	var enemy := Enemy.new()
 	enemy.setup(main, 120.0)
-	enemy.position = Vector2(930.0, 680.0)
+	enemy.position = Vector2(930.0, 625.0)
 	main.enemies_root.add_child(enemy)
 	main._select(gatherer)
 	gatherer.ai.order_attack(enemy)

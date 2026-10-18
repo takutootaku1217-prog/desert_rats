@@ -336,6 +336,10 @@ func _cross_ground_lanes(target_lane: int, step: float, config: Dictionary) -> b
 func _ground_depth_strip_config() -> Dictionary:
 	if game == null or not is_instance_valid(game) or not game.has_meta("ground_depth_strip_config"):
 		return {}
+	# Metadata is scoped to a single trial location.  Keep roads, other regions,
+	# ramps, and interior movement on their existing unrestricted paths.
+	if game.world == null or not game.world.depth_strip_active():
+		return {}
 	var config = game.get_meta("ground_depth_strip_config")
 	if not (config is Dictionary) or not bool(config.get("enabled", false)):
 		return {}

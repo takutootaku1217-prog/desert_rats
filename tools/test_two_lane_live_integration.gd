@@ -2,8 +2,8 @@ extends "res://tools/test_quarry.gd"
 ## 通常 Main / Worker / CharacterAI に限定した、連続奥行き帯の小規模接続試験。
 ## 固定線・固定横断路ではない。通常マップ全体にはまだ展開しない。
 
-const BACK_Y := 625.0
-const FRONT_Y := 680.0
+const BACK_Y := 570.0
+const FRONT_Y := 625.0
 
 
 func _configure_depth_strip() -> void:
@@ -55,6 +55,7 @@ func _initialize() -> void:
 	await _world_locations_quarry_and_save()
 	await _gather_and_haul()
 	await _combat_return_and_selection()
+	await _viewport_hud_selection()
 	if fails == 0:
 		print("DEPTH_ROLLOUT_OK")
 	print("== result: %s ==" % ("all passed" if fails == 0 else "%d failures" % fails))
@@ -89,10 +90,14 @@ func _world_locations_quarry_and_save() -> void:
 	await fresh()
 	_configure_depth_strip()
 	var snapshot := SaveGame.capture(main)
+	var middle_y := 597.5
+	var row_index := 0
 	for records in snapshot.world.locations.values():
 		for row in records.values():
-			row.data.position.y = 680.0
-			row.initial_data.position.y = 680.0
+			var source_y := middle_y if row_index == 0 else 680.0
+			row.data.position.y = source_y
+			row.initial_data.position.y = source_y
+			row_index += 1
 	for row in snapshot.resources:
 		if row.quarry_id == "":
 			row.resource.position.y = 680.0
@@ -100,16 +105,47 @@ func _world_locations_quarry_and_save() -> void:
 		row.position.y = 680.0
 	for row in snapshot.enemies:
 		row.position.y = 680.0
-	for row in snapshot.crew:
-		if row.worker.floor_i == 0:
-			row.worker.position.y = 680.0
+	var slope_pos := Vector2(948.0, 516.0)
+	snapshot.crew[0].worker.floor_i = 0
+	snapshot.crew[0].worker.position = slope_pos
+	snapshot.crew[0].worker.target = GameData.RAMP_TOP
+	snapshot.crew[0].worker._climb_dest = GameData.RAMP_TOP
+	snapshot.crew[0].worker._climb_floor = 1
+	snapshot.crew[0].worker._climb_kind = "ramp"
+	var interior_pos := Vector2(640.0, GameData.LO_Y)
+	snapshot.crew[1].worker.floor_i = 1
+	snapshot.crew[1].worker.position = interior_pos
+	snapshot.crew[1].worker.target = interior_pos
 	check(SaveGame.apply(main, snapshot), "older continuous outdoor Y values load without changing save format")
-	var restored_lanes := true
+	var restored_strip_values := true
+	var middle_preserved := false
 	for records in main.world.locations.values():
 		for row in records.values():
-			restored_lanes = restored_lanes and _lane_y(row.data.position.y) and _lane_y(row.initial_data.position.y)
-	restored_lanes = restored_lanes and main.workers.filter(func(worker): return worker.floor_i == 0).all(func(worker): return worker.position.y >= BACK_Y and worker.position.y <= FRONT_Y)
-	check(restored_lanes, "loaded outdoor records normalize to the depth strip while interior floors retain their saved positions")
+			restored_strip_values = restored_strip_values and row.data.position.y >= BACK_Y and row.data.position.y <= FRONT_Y and row.initial_data.position.y >= BACK_Y and row.initial_data.position.y <= FRONT_Y
+			middle_preserved = middle_preserved or (is_equal_approx(row.data.position.y, middle_y) and is_equal_approx(row.initial_data.position.y, middle_y))
+	check(restored_strip_values and middle_preserved, "save restore retains an in-band middle Y and clamps legacy outside-Y WorldTrip records")
+	check(main.workers[0].position == slope_pos and main.workers[0]._climb_dest == GameData.RAMP_TOP, "save restore preserves a worker partway through the existing ramp")
+	check(main.workers[1].floor_i == 1 and main.workers[1].position == interior_pos, "save restore preserves interior worker coordinates")
+	await fresh()
+	_configure_depth_strip()
+	var outside_snapshot := SaveGame.capture(main)
+	outside_snapshot.world.region = "east_sands"
+	outside_snapshot.world.phase = "stopped"
+	outside_snapshot.world.road = ""
+	outside_snapshot.world.origin = ""
+	outside_snapshot.world.destination = ""
+	outside_snapshot.world.locations["region:east_sands"] = outside_snapshot.world.locations["region:south_oasis"]
+	outside_snapshot.world.locations.erase("region:south_oasis")
+	for records in outside_snapshot.world.locations.values():
+		for row in records.values():
+			row.data.position.y = 680.0
+			row.initial_data.position.y = 680.0
+	check(SaveGame.apply(main, outside_snapshot), "non-target-region save restores without schema changes")
+	var outside_preserved := true
+	for records in main.world.locations.values():
+		for row in records.values():
+			outside_preserved = outside_preserved and is_equal_approx(row.data.position.y, 680.0) and is_equal_approx(row.initial_data.position.y, 680.0)
+	check(not main.world.depth_strip_active() and outside_preserved, "non-target-region save values are not normalized by the south_oasis prototype")
 
 
 func _gather_and_haul() -> void:
@@ -187,3 +223,34 @@ func _combat_return_and_selection() -> void:
 	for _frame in 8:
 		await _step_live()
 	check(is_equal_approx(enemy.hp, hp_after_first_hit) and not worker.ai.manual_attack and worker.ai.return_request, "individual return does not resume combat or gathering")
+
+
+func _viewport_hud_selection() -> void:
+	await fresh()
+	_configure_depth_strip()
+	var back_worker = main.workers[1]
+	var front_worker = main.workers[2]
+	for worker in [back_worker, front_worker]:
+		worker.stop_work()
+		worker.floor_i = 0
+		worker.target = worker.position
+	back_worker.position = Vector2(780.0, BACK_Y)
+	front_worker.position = Vector2(780.0, FRONT_Y)
+	main._select(back_worker)
+	var hud_rect: Rect2 = main.navigation.bar.get_global_rect()
+	check(front_worker.position.y + 6.0 < hud_rect.position.y, "front anchor and feet remain above the 720p navigation bar")
+	var click := InputEventMouseButton.new()
+	click.button_index = MOUSE_BUTTON_LEFT
+	click.pressed = true
+	# InputEvent coordinates are viewport/screen coordinates; choose a point in
+	# the front sprite and transform the intended world click through the camera.
+	click.position = main.get_canvas_transform() * Vector2(front_worker.position.x, front_worker.position.y - 18.0)
+	click.global_position = click.position
+	# fresh() pauses gameplay processing for deterministic tests. Re-enable this
+	# scene briefly so Viewport routing reaches _unhandled_input normally.
+	main.process_mode = Node.PROCESS_MODE_INHERIT
+	main.get_viewport().push_input(click, true)
+	await process_frame
+	await process_frame
+	main.process_mode = Node.PROCESS_MODE_DISABLED
+	check(main.follow_target == front_worker, "Viewport left-click selects the front worker without direct _pick_worker_at use")

@@ -31,7 +31,7 @@ func depth_strip_active() -> bool:
  return location=="" or location==key()
 func clamp_outdoor_y(y:float) -> float:
  var config:=_depth_config()
- return clampf(y,float(config.back_y),float(config.front_y)) if not config.is_empty() else y
+ return clampf(y,float(config.back_y),float(config.front_y)) if depth_strip_active() else y
 func outdoor_depth_y(index:int) -> float:
  var config:=_depth_config()
  if config.is_empty():return GameData.GROUND_Y_MIN
