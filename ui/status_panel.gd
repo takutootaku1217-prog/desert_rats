@@ -142,11 +142,24 @@ func _process(_d: float) -> void:
 	# 2段目: 拠点HP（外装の耐久）。走行装置・加工設備の耐久はHUDに出さない。
 	(_gauges["hull"] as BaseHPGauge).update_appearance(game)
 	_speed.tooltip_text = "\u901f\u5ea6 / \u76ee\u6a19(\u4e0a\u4e0b\u30ad\u30fc\u3067\u5909\u66f4)\u3002\u30a8\u30f3\u30b8\u30f3\u4fee\u7406\u5f8c\u3082\u901f\u5ea6\u306f\u624b\u52d5\u3067\u623b\u3057\u307e\u3059\u3002"
+	var tank_state: String = b.fuel_tank_state()
+	_leak.visible = true
+	if tank_state == "normal":
+		_leak.text = "燃料タンク：正常"
+		_leak.tooltip_text = "後部被弾蓄積 0.0 / 100\n燃料タンクは正常です。"
+		_leak.add_theme_color_override("font_color", Color("9ad7a0"))
+	elif tank_state == "damaged":
+		_leak.text = "燃料タンク：損傷（後部被弾蓄積 %.1f）" % b.rear_engine_damage
+		_leak.tooltip_text = "後部被弾蓄積 %.1f / 100\n漏れは発生していません。DRIVE 修理で回復します。" % b.rear_engine_damage
+		_leak.add_theme_color_override("font_color", Color("ffcf70"))
 	var leak_rate: float = b.engine_leak_rate(game.scroll_speed)
-	_leak.visible = b.engine_leaking()
-	if _leak.visible:
+	if b.engine_leaking():
+		_leak.add_theme_color_override("font_color", Color("ff8a70"))
 		_leak.text = "\u30a8\u30f3\u30b8\u30f3\u71c3\u6599\u6f0f\u308c: %.3f/\u79d2 (\u6e1b\u901f\u3067\u6e1b\u5c11\u30fb\u505c\u6b62\u4e2d\u3082\u7d99\u7d9a)" % leak_rate
 		_leak.tooltip_text = "\u5f8c\u90e8\u88ab\u5f3e\u84c4\u7a4d %.1f / 100\nDRIVE %d / 100\n\u73fe\u5730\u4fee\u7406\u304c\u5b8c\u4e86\u3059\u308b\u307e\u3067\u6f0f\u308c\u307e\u3059\u3002" % [b.rear_engine_damage, int(b.condition(GameData.Part.DRIVE))]
+	if tank_state == "leaking":
+		_leak.text = "燃料タンク：漏れ %.3f/秒（減速で減少・停止中も継続）" % leak_rate
+		_leak.tooltip_text = "後部被弾蓄積 %.1f / 100\nDRIVE %d / 100\n現地修理が完了するまで漏れます。" % [b.rear_engine_damage, int(b.condition(GameData.Part.DRIVE))]
 	var cond: float = b.condition(GameData.Part.HULL)
 	_set_gauge("hull", cond, 100.0, str(int(cond)), "拠点HP %d / 100%s" % [int(cond), "（不調）" if cond < GameData.PART_BAD else ""])
 	_set_gauge("fuel", b.fuel, GameData.FUEL_CAP, str(int(b.fuel / GameData.FUEL_CAP * 100.0)), "燃料 %d / %d" % [int(b.fuel), int(GameData.FUEL_CAP)])

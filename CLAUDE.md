@@ -1092,6 +1092,16 @@ HUD/仲間詳細PNGを成功生成した。Computer Useがネイティブウィ�
 
 暫定しきい値は30。現地・都市・即時応急の各修理は実際に回復した`DRIVE`量だけ蓄積を減らし、速度復帰は従来どおり手動のままとした。`rear_engine_damage`を保存し、旧セーブでフィールドが無い場合は0を補完するので、単に`DRIVE`が低い旧セーブは漏れない。クラウドGodot 4.6.3で重点回帰を実行し、Windows実機でのこの修正の検証は未実施として最終報告で分離する。
 
+### 2026-10-18 Fuel-tank status wording (isolated worktree)
+
+The existing rear-only `rear_engine_damage` is now presented as Fuel tank: normal,
+damaged, or leaking. It adds neither a second durability value nor a HUD gauge;
+the status-panel line replaces the old leak-only wording. Existing rear-hit,
+DRIVE-repair, and save compatibility behavior is unchanged. Isolated Windows
+Godot 4.7.2 `trouble_loop`, `save_game`, `save_ui`, and `clarity_ui` passed:
+`C:\Users\user\AppData\Local\Temp\desert-rats-fuel-tank-status-targeted-2\20261018T032251Z-ztdfo_lu\results.json`.
+Details: `docs/fuel-tank-status-coverage-2026-10-18.md`.
+
 ### 2026-10-18 Repeatable subquests and reward-triggered outdoor replenishment (isolated worktree)
 
 Quarry follow-up: a successful repeatable-mission reward also saves a quarry pending flag and restores

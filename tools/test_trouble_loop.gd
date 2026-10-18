@@ -145,6 +145,8 @@ func leak_loop() -> void:
 	var b = main.base
 	var rear_x: float = b.rear_engine_attack_point().x
 	var threshold: float = GameData.REAR_ENGINE_LEAK_DAMAGE_THRESHOLD
+	main.status._process(0.1)
+	check(b.fuel_tank_state() == "normal" and main.status._leak.visible and main.status._leak.text.contains("燃料タンク：正常"), "no rear hit presents a normal fuel-tank status without a new gauge")
 	# 通常走行の摩耗だけでは、DRIVEが低くなっても漏れ原因を作らない。
 	b.wear_by(0.0, 20000.0)
 	check(b.condition(GameData.Part.DRIVE) < 70.0 and is_equal_approx(b.rear_engine_damage, 0.0) and not b.engine_leaking(), "normal travel wear lowers DRIVE without creating a fuel leak")
@@ -171,9 +173,13 @@ func leak_loop() -> void:
 	# 後部被弾はしきい値未満では漏れず、跨いだ時だけ発生する。
 	b.take_damage(threshold - 1.0, rear_x)
 	check(is_equal_approx(b.rear_engine_damage, threshold - 1.0) and not b.engine_leaking(), "rear hits below the provisional threshold do not leak")
+	main.status._process(0.1)
+	check(b.fuel_tank_state() == "damaged" and main.status._leak.text.contains("燃料タンク：損傷"), "sub-threshold rear hits present a damaged fuel-tank status")
 	b.take_damage(1.0, rear_x)
 	var at_threshold: float = b.engine_leak_rate(GameData.FUEL_STANDARD_SPEED)
 	check(b.engine_leaking() and at_threshold > 0.0, "rear hit crossing the threshold starts a fuel leak")
+	main.status._process(0.1)
+	check(b.fuel_tank_state() == "leaking" and main.status._leak.text.contains("燃料タンク：漏れ"), "threshold crossing presents a leaking fuel-tank status")
 	b.take_damage(10.0, rear_x)
 	check(b.rear_engine_damage > threshold and b.engine_leak_rate(GameData.FUEL_STANDARD_SPEED) > at_threshold, "continued rear hits accumulate and raise the leak rate")
 	# 車体の向きは画面ローカルで固定。経路を反転しても後部判定は入れ替わらない。
@@ -196,7 +202,13 @@ func leak_loop() -> void:
 	b.repair(GameData.Part.DRIVE)
 	b.repair(GameData.Part.DRIVE)
 	b.repair(GameData.Part.DRIVE)
-	check(not b.engine_leaking() and main.target_speed == 40.0, "repairs reduce rear accumulation until the leak stops without restoring speed automatically")
+	main.status._process(0.1)
+	check(not b.engine_leaking() and b.fuel_tank_state() == "damaged" and main.status._leak.text.contains("燃料タンク：損傷") and main.target_speed == 40.0, "repairs reduce rear accumulation from leak to damage without restoring speed automatically")
+	b.parts[GameData.Part.DRIVE] = 75.0
+	b.rear_engine_damage = GameData.REPAIR_AMOUNT
+	b.repair(GameData.Part.DRIVE)
+	main.status._process(0.1)
+	check(is_zero_approx(b.rear_engine_damage) and b.fuel_tank_state() == "normal" and main.status._leak.text.contains("燃料タンク：正常"), "repair recovery returns the tank display to normal")
 	# 応急即時修理も同じ蓄積を回復する。
 	await fresh()
 	b = main.base

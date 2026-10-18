@@ -209,6 +209,14 @@ func engine_leaking() -> bool:
 	return rear_engine_damage >= GameData.REAR_ENGINE_LEAK_DAMAGE_THRESHOLD
 
 
+## This is a presentation state derived solely from rear_engine_damage; it
+## intentionally does not introduce another durability pool.
+func fuel_tank_state() -> String:
+	if engine_leaking():
+		return "leaking"
+	return "damaged" if rear_engine_damage > 0.0 else "normal"
+
+
 func engine_leak_rate(speed: float) -> float:
 	if not engine_leaking():
 		return 0.0
