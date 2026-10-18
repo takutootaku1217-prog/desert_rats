@@ -44,6 +44,9 @@ Windows Godot `4.7.2.stable.official.ed1daf0bf`, isolated APPDATA:
 
 Result: `DEPTH_ROLLOUT_OK`.
 
+Full core regression also passed without source changes (selected checks):
+`C:\Users\user\AppData\Local\Temp\desert-rats-two-lane-prototype-final-core\20261018T045859Z-8myedi15\results.json`.
+
 Renderer captures use the Intel Iris Xe OpenGL Compatibility renderer (not
 headless; no OS-input video):
 

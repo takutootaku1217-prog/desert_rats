@@ -1144,6 +1144,8 @@ and stash `09e6de75e16a7e695b1c47d88650189dadf5f979` remain untouched.
 > for `south_oasis` only. Normal starts, roads, other regions, the moving-base map
 > loop, interiors, and existing saves keep their prior coordinates. See
 > `docs/two-lane-depth-prototype-final-2026-10-18.md` for final verification.
+> Full core passed without source changes:
+> `C:\Users\user\AppData\Local\Temp\desert-rats-two-lane-prototype-final-core\20261018T045859Z-8myedi15\results.json`.
 
 The normal-map depth strip remains exactly two continuous front/back lanes, 55 px
 wide, with movement at every X and no crossing coordinate. Its final anchors are
