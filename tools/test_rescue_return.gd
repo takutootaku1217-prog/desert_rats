@@ -181,6 +181,26 @@ func _initialize() -> void:
 	field_worker.ai._set_state(CharacterAI.State.REST)
 	field_worker.ai.tick(0.1)
 	check(not field_worker.ai.return_request and field_worker.ai.state == CharacterAI.State.REST, "deck-side low-HP rest is not converted into an outdoor withdrawal")
+	# This is intentionally a normal-AI interruption regression, separate from
+	# the component-level carrier_tick transport checks above.  During a full
+	# group return, an included carrier must release the rescue reservation and
+	# enter the ordinary RETURN_BASE state instead of remaining in rescue AI.
+	await fresh()
+	for w in main.workers: w.set_process(false)
+	injured = main.workers[0]
+	carrier = main.workers[1]
+	injured.floor_i = 0
+	carrier.floor_i = 0
+	injured.position = Vector2(920, GameData.LO_Y)
+	carrier.position = Vector2(760, GameData.LO_Y)
+	injured.ai._set_state(CharacterAI.State.SEARCH)
+	carrier.ai._set_state(CharacterAI.State.SEARCH)
+	CrewStatus.damage(injured, 999.0)
+	check(main.rescue.assign(carrier, injured), "group-return rescue fixture assigns an ordinary carrier")
+	main.operations.set_stance("recall")
+	carrier.ai.tick(0.1)
+	check(carrier.ai.state == CharacterAI.State.RETURN_BASE and carrier.ai.rescue_target < 0 and int(main.rescue.record_for(injured).get("carrier", -1)) < 0, "group recall cancels an included carrier through normal AI return handling")
+	main.operations.set_stance("normal")
 	print("== RESULT: %s ==" % ("ALL PASSED" if fails == 0 else "%d FAILED" % fails))
 	quit(1 if fails > 0 else 0)
 

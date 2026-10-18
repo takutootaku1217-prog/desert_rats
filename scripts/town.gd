@@ -44,7 +44,15 @@ func entry_reason() -> String:
  if not location_ok(): return "中央都市に停泊すると利用できます"
  return game.world.ready_reason()
 func available(item:int) -> int:
- return maxi(0,AutoCraftGuard.available(game,item)-int(ProductionPlan.held_for_orders(game).get(item,0)))
+ var held:int=int(ProductionPlan.held_for_orders(game).get(item,0))
+ # The active supply contract gets first claim on its own inputs. Automatic
+ # crafting is blocked by AutoCraftGuard; market sales are guarded separately.
+ if supply=="accepted" and item==supply_item:held=maxi(0,held-supply_count)
+ return maxi(0,AutoCraftGuard.available(game,item)-held)
+## Kept as an explicit query for UI or callers that need contract-priority
+## availability; `available()` implements the same calculation for the claim.
+func supply_available() -> int:
+ return available(supply_item)
 func snapshot() -> Dictionary: return SaveGame.fields(self,FIELDS)
 
 ## v3の旧town項目（街内勤務）を、新しい3依頼へ移す。未受領の旧勤務は一度だけ明示受領できる。
@@ -216,6 +224,8 @@ func evaluate(action:String,item:int,n:int) -> Dictionary:
  var q:Dictionary={"action":action,"item":item,"n":n,"ok":false,"reason":entry_reason(),"cost":0,"amount":0.0,"text":""}
  if q.reason!="":return q
  if n<1 or n>99:q.reason="数量は1〜99";return q
+ if action=="sell" and supply=="accepted" and item==supply_item and AutoCraftGuard.available(game,item)-supply_count<n:
+  q.reason="Accepted supply cargo is reserved";return q
  var before:int=game.storage.count_of(item)
  match action:
   "buy","sell":
@@ -299,15 +309,15 @@ func execute(q:Dictionary) -> bool:
   "accept_supply":
    var offer:Dictionary=TownDB.SUPPLY_OFFERS[q.item]
    supply="accepted";supply_item=q.item;supply_count=offer.count;supply_reward=offer.reward
-  "claim_supply":game.storage.inventory.take_n(supply_item,supply_count);supply="idle";claimed.supply+=1;game.quarry.schedule_mission_replenishment()
+  "claim_supply":game.storage.inventory.take_n(supply_item,supply_count);supply="idle";claimed.supply+=1;game.quarry.schedule_mission_replenishment();game.world.schedule_mission_replenishment()
   "accept_delivery":
    delivery="outbound";delivery_cargo=true
    var issued:float=minf(delivery_advance_remaining(),GameData.FUEL_CAP-game.base.fuel)
    if issued>0.0:
     game.base.fuel+=issued;delivery_advance_given+=issued
-  "claim_delivery":delivery="idle";delivery_cargo=false;delivery_advance_given=0.0;claimed.delivery+=1;game.quarry.schedule_mission_replenishment()
+  "claim_delivery":delivery="idle";delivery_cargo=false;delivery_advance_given=0.0;claimed.delivery+=1;game.quarry.schedule_mission_replenishment();game.world.schedule_mission_replenishment()
   "accept_recovery":recovery="outbound";recovery_worker=-1
-  "claim_recovery":recovery="idle";recovery_worker=-1;claimed.recovery+=1;game.quarry.schedule_mission_replenishment()
+  "claim_recovery":recovery="idle";recovery_worker=-1;claimed.recovery+=1;game.quarry.schedule_mission_replenishment();game.world.schedule_mission_replenishment()
   "claim_legacy_help":legacy_help_credit=0
   "cancel_supply":supply="idle"
   "cancel_delivery":delivery="idle";delivery_cargo=false # 前渡しフラグは完了まで保持し、取消再受注で燃料を増やさない。

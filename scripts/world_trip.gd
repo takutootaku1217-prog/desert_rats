@@ -12,9 +12,13 @@ var progress := 0.0 # 道路のa端からの座標。復路でも燃料用の走
 var direction := 1
 var locations := {} # location -> {entity-id: {type,data,anchor,spent}}
 var ecosystem_epoch := {}
+## A claimed town reward renews one subsequently visited normal-world region.
+## It is saved so claiming, quitting, and returning later cannot lose or repeat
+## the renewal.
+var reward_replenish_pending := false
 const FAUNA_RETURN_SECONDS := 120.0
 var next_id := 0
-const FIELDS := ["active","region","phase","road","origin","destination","progress","direction","locations","next_id","ecosystem_epoch"]
+const FIELDS := ["active","region","phase","road","origin","destination","progress","direction","locations","next_id","ecosystem_epoch","reward_replenish_pending"]
 
 func setup(g) -> void:
  game = g
@@ -48,6 +52,35 @@ func request(to: String, planned := false) -> bool:
  if not planned:game.journey.clear()
  origin = region; destination = to; road = r; phase = "departing"
  return true
+
+func schedule_mission_replenishment() -> void:
+ reward_replenish_pending=true
+
+## Do not create new IDs. Reset only the stored normal-world entities for the
+## region just reached; _spawn_visible then materializes each existing ID once.
+## This never runs at the town where the reward was claimed, so no entity can
+## respawn instantly at the current location.
+func _apply_reward_replenishment() -> void:
+ if not reward_replenish_pending:return
+ for id in locations.get(key(),{}):
+  var row:Dictionary=locations[key()][id]
+  match row.type:
+   "gather":
+    row.spent=false
+    row.data.remaining=row.data.max_amount
+    row.data.work=0.0
+   "resource":
+    row.spent=false
+   "creature":
+    row.spent=false
+    row.data.dead=false
+    row.data.hp=row.data.max_hp
+    row.data._fleeing=false
+    row.data._wander=0.0
+    row.data._wander_t=1.0
+    row.erase("return_at")
+ reward_replenish_pending=false
+
 func cancel_or_return() -> bool:
  if game.game_over: return false
  game.journey.clear()
@@ -87,6 +120,8 @@ func tick(dist: float) -> void:
    "arriving":
     region=destination; phase="stopped"; road=""; origin=""; destination=""
     game.journey.arrived()
+    _ensure_location()
+    _apply_reward_replenishment()
     game.director.note(("通過：" if phase=="travel" else "停車：")+WorldMapDB.name_of(region))
    "turning":
     var previous := origin; origin=destination; destination=previous
@@ -260,6 +295,7 @@ func request_legacy_region() -> bool:
 static func normalized(d: Dictionary) -> Dictionary:
  var result:=d.duplicate(true)
  if not result.has("ecosystem_epoch"):result.ecosystem_epoch={}
+ if not result.has("reward_replenish_pending"):result.reward_replenish_pending=false
  return result
 static func valid(d, g) -> bool:
  if not d is Dictionary:return false

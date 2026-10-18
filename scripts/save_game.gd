@@ -14,6 +14,8 @@ const SLOT_CHECKPOINT := "checkpoint"
 const DEFAULT_RESTART_LOSS := {"credits_ratio": 0.10, "credits_fixed": 0}
 ## 将来の救助タイマー用。現段階では AI を動かさず、保存形式だけを予約する。
 const RESCUE_DEFAULT := {"version": 1, "incapacitated": {}, "all_down_elapsed": 0.0}
+const MIN_SAVED_CREW := 3
+const MAX_SAVED_CREW := 5
 static var last_error := ""
 static var disabled := false
 static var new_run_requested := false
@@ -243,7 +245,6 @@ static func rescue_valid(d: Dictionary) -> bool:
 static func validate(d, g) -> bool:
 	if not d is Dictionary or not safe(d) or d.get("version") != VERSION: return false
 	if not rescue_valid(rescue_data(d)): return false
-	if not TownEconomy.valid(d.get("town",{}),g.workers.size()): return false
 	if not ProductionPlan.valid(d.get("production",{})): return false
 	if not WorldTrip.valid(d.get("world"),g): return false
 	if not JourneyPlan.valid(d.get("journey",{}),d.world): return false
@@ -254,7 +255,11 @@ static func validate(d, g) -> bool:
 	var base_row: Dictionary = base_data(d.base)
 	for k in ["party", "crew", "resources", "creatures", "enemies"]:
 		if not d[k] is Array: return false
-	if d.crew.size() != g.workers.size() or not d.camera is Vector2 or not d.follow is int or d.follow < -1 or d.follow >= d.crew.size(): return false
+	# A saved run may predate the current new-game crew default. Validate against
+	# the worker schema, then apply() reconstructs exactly this roster first.
+	if d.crew.size() < MIN_SAVED_CREW or d.crew.size() > MAX_SAVED_CREW or g.workers.is_empty(): return false
+	if not TownEconomy.valid(d.get("town",{}),d.crew.size()): return false
+	if not d.camera is Vector2 or not d.follow is int or d.follow < -1 or d.follow >= d.crew.size(): return false
 	if not d.scroll is float: return false
 	for key in d.main.recipe_priority:
 		if not key is String or GameData.recipe_by_id(key).is_empty() or not d.main.recipe_priority[key] is int or d.main.recipe_priority[key] < 0 or d.main.recipe_priority[key] > 5: return false
@@ -324,9 +329,10 @@ static func validate(d, g) -> bool:
 	var recovery_move_count := 0
 	var recovery_return_count := 0
 	var town_state:Dictionary = TownEconomy.normalized(d.get("town",{}))
+	var template_worker = g.workers[0]
 	for i in d.crew.size():
 		var row = d.crew[i]
-		if not row is Dictionary or not row.get("worker") is Dictionary or not shape(worker_data(row.worker),g.workers[i],WORKER) or not shape(ai_data(row.ai) if row.get("ai") is Dictionary else row.get("ai"),g.workers[i].ai,AI): return false
+		if not row is Dictionary or not row.get("worker") is Dictionary or not shape(worker_data(row.worker),template_worker,WORKER) or not shape(ai_data(row.ai) if row.get("ai") is Dictionary else row.get("ai"),template_worker.ai,AI): return false
 		var w: Dictionary = worker_data(row.worker)
 		var a: Dictionary = ai_data(row.ai)
 		if a.state not in CharacterAI.State.values() or w.floor_i not in [0,1,2] or w._climb_floor not in [0,1,2]: return false
@@ -435,6 +441,9 @@ static func _entities_valid(d, resource, gather, creature, enemy) -> bool:
 static func apply(g, d: Dictionary) -> bool:
 	if not validate(d,g):
 		last_error = "保存内容の形式・数量・参照を検証できません。現在の進行は変更しません。"
+		return false
+	if not g.restore_roster_for_snapshot(d.crew.size()):
+		last_error = "Saved crew roster could not be reconstructed. Current progress was not restored."
 		return false
 	g.journey.restore(d.get("journey",{}))
 	g.town.restore(d.get("town",{}))
@@ -563,6 +572,18 @@ static func continue_progress(g, d: Dictionary) -> bool:
 	if not apply(g, d): return false
 	active_checkpoint = paired
 	run_selected = true
+	return true
+
+## A backup belongs to the same progress lineage only when both its run and
+## roster match the primary save. This avoids treating a later New Game as a
+## fallback for an older three-person run (or the reverse).
+static func backup_matches_progress(primary: Dictionary, backup: Dictionary) -> bool:
+	if primary.is_empty() or backup.is_empty() or snapshot_run_id(primary) != snapshot_run_id(backup):
+		last_error = "Backup belongs to a different run."
+		return false
+	if not primary.get("crew") is Array or not backup.get("crew") is Array or primary.crew.size() != backup.crew.size():
+		last_error = "Backup crew count does not match the current progress."
+		return false
 	return true
 
 static func restart_from_checkpoint(g, policy: Dictionary = DEFAULT_RESTART_LOSS, path: String = CHECKPOINT_PATH) -> bool:

@@ -130,13 +130,19 @@ func execute() -> void:
 			var ok := SaveGame.write_progress(game,true,path)
 			_text.text = "保存しました。" if ok else SaveGame.last_error
 		"load", "backup":
-			var source := _progress_source_path() + (".bak" if action == "backup" else "")
-			var d := SaveGame.read_slot(source, SaveGame.SLOT_PROGRESS) if _progress_source_path() == path else SaveGame.read(source)
+			var base_source := _progress_source_path()
+			var source := base_source + (".bak" if action == "backup" else "")
+			var d := SaveGame.read_slot(source, SaveGame.SLOT_PROGRESS) if base_source == path else SaveGame.read(source)
 			if d.is_empty():
 				_text.text = SaveGame.last_error
 				_legacy.visible = SaveGame.last_error.begins_with("旧version2")
 				_legacy_path = source
 				return
+			if action == "backup":
+				var primary := SaveGame.read_slot(base_source, SaveGame.SLOT_PROGRESS) if base_source == path else SaveGame.read(base_source)
+				if not SaveGame.backup_matches_progress(primary, d):
+					_text.text = SaveGame.last_error
+					return
 			if not SaveGame.continue_progress(game,d):
 				_text.text = SaveGame.last_error
 				return

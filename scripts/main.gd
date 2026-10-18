@@ -94,11 +94,11 @@ const SPAWN_X := 1330.0
 const SPAWN_Y_MIN := GameData.GROUND_Y_MIN + 4.0
 const SPAWN_Y_MAX := GameData.GROUND_Y_MAX - 4.0
 
-## New runs begin with five generalists. Recruiting is intentionally not a
+## New runs begin with the measured four-person crew. Recruiting is intentionally not a
 ## feature of this stage. Existing saved runs retain the crew size captured in
 ## their own snapshot so this change does not silently add a member to a
 ## player's in-progress run.
-const DEFAULT_INITIAL_WORKERS := 5
+const DEFAULT_INITIAL_WORKERS := 4
 const MIN_INITIAL_WORKERS := 3
 const MAX_INITIAL_WORKERS := 5
 const WORKER_DEFS := [
@@ -305,7 +305,7 @@ func _initial_worker_count(force_new: bool) -> int:
 		return clampi(int(get_meta("diagnostic_crew_count")), MIN_INITIAL_WORKERS, MAX_INITIAL_WORKERS)
 	# Save-disabled fixtures are historical three-person test cases, not a new
 	# player run. Their roster must stay explicit so balancing regressions remain
-	# comparable while the actual new-game path uses five people.
+	# comparable while the actual new-game path uses the measured four-person crew.
 	if SaveGame.disabled:
 		return MIN_INITIAL_WORKERS
 	if force_new:
@@ -316,6 +316,44 @@ func _initial_worker_count(force_new: bool) -> int:
 		if saved_count >= MIN_INITIAL_WORKERS and saved_count <= MAX_INITIAL_WORKERS:
 			return saved_count
 	return DEFAULT_INITIAL_WORKERS
+
+## A progress snapshot owns its roster size. New Game may have a newer default,
+## so Continue rebuilds the live fixture before saved worker fields are applied.
+## This is deliberately limited to historical 3--5 person rosters; it is not
+## a recruitment system.
+func restore_roster_for_snapshot(count: int) -> bool:
+	if count < MIN_INITIAL_WORKERS or count > MAX_INITIAL_WORKERS:
+		return false
+	if workers.size() == count:
+		return true
+	var workers_root := ground_sort.get_node_or_null("Workers")
+	if workers_root == null:
+		return false
+	for worker in workers:
+		workers_root.remove_child(worker)
+		worker.queue_free()
+	workers.clear()
+	for i in count:
+		var d: Dictionary = WORKER_DEFS[i]
+		var worker := Worker.new()
+		worker.setup(self, d["name"], d["palette"], d["prio"], i, d["profile"])
+		worker.position = Vector2(GameData.STORAGE_X - 120.0 + i * 90.0, GameData.LO_Y)
+		workers_root.add_child(worker)
+		workers.append(worker)
+	# The management panels keep an array reference, rather than a roster copy.
+	# Close any detail bound to a removed worker and retarget the existing HUDs.
+	if detail != null:
+		detail.close()
+	if ui != null:
+		ui.workers = workers
+		ui._update_count()
+	if crew_alerts != null:
+		crew_alerts.close()
+		crew_alerts.workers = workers
+		crew_alerts._register_workers()
+		crew_alerts._signature = ""
+	_select(workers[0])
+	return true
 
 func _ensure_initial_checkpoint(force_new := false) -> void:
 	if not SaveGame.ensure_initial_checkpoint(self, force_new):

@@ -16,5 +16,11 @@ static func available(g, item:int, claimant = null, _allow_build_buffer := false
 static func allows(g,r:Dictionary,claimant = null) -> bool:
  if r.get("automatic",false) and not ProductionPlan.urgent(g,r.out) and not ProductionPlan.spares_orders(g,r,claimant):return false
  for item in r["in"]:
-  if available(g,item,claimant,true)<int(r["in"][item]):return false
+  # An accepted supply contract is player-owned cargo, not spare crafting
+  # input. Keep its exact requirement available until it is claimed/cancelled;
+  # TownEconomy.available remains the authority that verifies the claim.
+  var town_reserve:=0
+  if g.town!=null and g.town.supply=="accepted" and g.town.supply_item==item:
+   town_reserve=g.town.supply_count
+  if available(g,item,claimant,true)-town_reserve<int(r["in"][item]):return false
  return true
