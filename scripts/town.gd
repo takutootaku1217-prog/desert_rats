@@ -295,7 +295,7 @@ func execute(q:Dictionary) -> bool:
    game.base.fuel+=q.amount;game.base.total_refuel+=1
   "repair_cash","repair_item":
    if q.action=="repair_item":game.storage.inventory.take(GameData.Item.REPAIR_KIT)
-   game.base.parts[q.item]+=q.amount;game.base.total_repair+=1
+   game.base.repair_amount(q.item,q.amount);game.base.total_repair+=1
   "accept_supply":
    var offer:Dictionary=TownDB.SUPPLY_OFFERS[q.item]
    supply="accepted";supply_item=q.item;supply_count=offer.count;supply_reward=offer.reward

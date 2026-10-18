@@ -41,7 +41,8 @@ func _initialize():
  main.base.parts[0]=99
  check(act("repair_cash",0) and main.base.parts[0]==100 and t.credits==98,"修理端数1・1 Cr・上限")
  main.base.parts[1]=70
- check(act("repair_item",1) and main.base.parts[1]==95 and st.count_of(GameData.Item.REPAIR_KIT)==0,"修理板1個で25回復")
+ main.base.rear_engine_damage=GameData.REAR_ENGINE_LEAK_DAMAGE_THRESHOLD
+ check(act("repair_item",1) and main.base.parts[1]==95 and is_equal_approx(main.base.rear_engine_damage,5.0) and not main.base.engine_leaking() and st.count_of(GameData.Item.REPAIR_KIT)==0,"都市の修理板はDRIVEと後部被弾蓄積を25回復")
  main.base.refuel_reserved=true
  check(not act("fuel_cash"),"仲間の給油予約中はサービス拒否")
  main.base.refuel_reserved=false;main.base.repair_reserved[1]=true

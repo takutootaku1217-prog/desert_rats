@@ -306,9 +306,18 @@ const MACHINE_WEAR_PER_SEC := 0.35          # 加工設備: 加工している�
 const PART_BAD := 30.0                      # これ未満で不調（効果が半分）
 const REPAIR_BELOW := 75.0                  # これ未満なら修理に向かう
 const REPAIR_AMOUNT := 25.0
-## Enemy damage to DRIVE starts a fuel leak. These are documented tuning values.
-## Stopping reduces, but does not eliminate, the leak.
-const ENGINE_LEAK_DAMAGE_THRESHOLD := 70.0
+## 被弾判定は車体ローカルの後・中央・前の3区分。移動経路やクリック選択とは別の役割。
+## 境界は調整用の仮値。後方 u3/l3（x=8..69）の外板までを後部、以降を中央／前部とする。
+enum ImpactZone { REAR, CENTER, FRONT, OUTSIDE }
+const BASE_IMPACT_REAR_LOCAL_X_MAX := 70.0
+const BASE_IMPACT_CENTER_LOCAL_X_MAX := 140.0
+const BASE_IMPACT_FRONT_LOCAL_X_MAX := 248.0 # ArtSpec.HULL.x と対応する車体全長
+## 燃料漏れは、後部の敵攻撃だけで蓄積する独立損傷で判定する。
+## 通常走行の DRIVE 摩耗、中央／前方被弾、故障イベントでは増えない。数値は調整用の仮値。
+const REAR_ENGINE_LEAK_DAMAGE_THRESHOLD := 30.0
+## world.direction や後退状態は使わない。
+const REAR_ENGINE_ATTACK_LOCAL_X := 55.0
+## 停止しても漏れは残るが、減速ほど小さい。
 const ENGINE_LEAK_PER_SEC_AT_FULL_SPEED := 0.045
 const ENGINE_LEAK_IDLE_MULT := 0.25
 

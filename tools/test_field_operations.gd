@@ -50,9 +50,10 @@ func _initialize():
  w.floor_i=0;w.position=Vector2(700,680)
  check(deck_route_ok and not ops.can_depart(w,Vector2(1080,GameData.GROUND_Y_MIN+64.0)),"地上敵は甲板の回収役を止めず、地上へ降りた担当者だけを止める")
  clear_enemies()
- var breaker=enemy_at("hull_breaker",980);hull=main.base.parts[GameData.Part.HULL]
- breaker._tick_ecology(1.1)
- check(main.base.parts[GameData.Part.HULL]<hull,"穿孔種は車体も攻撃する")
+ var breaker=enemy_at("hull_breaker",main.base.rear_engine_attack_point().x+120.0);hull=main.base.parts[GameData.Part.HULL]
+ var rear_damage:float=main.base.rear_engine_damage
+ for i in 4:breaker._tick_ecology(1.1)
+ check(main.base.parts[GameData.Part.HULL]<hull and main.base.rear_engine_damage>rear_damage,"穿孔種は既存AIで車体後部へ到達し、後部被弾を蓄積する")
  clear_enemies();var neutral=enemy_at("dust_guard",730)
  w.floor_i=0;w.position=Vector2(700,680);w.hp=100;w.ai.retreating=false
  hull=main.base.parts[GameData.Part.HULL];neutral._tick_ecology(1.1)
