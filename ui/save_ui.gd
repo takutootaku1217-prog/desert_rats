@@ -21,7 +21,7 @@ func _has_progress() -> bool:
 	return SaveGame.exists(path) or SaveGame.exists(legacy_path)
 
 func _checkpoint_loss_text(source: String) -> String:
-	var d := SaveGame.read_slot(source, SaveGame.SLOT_CHECKPOINT)
+	var d := SaveGame.checkpoint_for_current_run(game, source)
 	if d.is_empty(): return "チェックポイントを読めません: " + SaveGame.last_error
 	var town: Dictionary = TownEconomy.normalized(d.get("town", {}))
 	var loss := SaveGame.restart_loss(int(town.credits), SaveGame.DEFAULT_RESTART_LOSS)
@@ -122,7 +122,7 @@ func execute() -> void:
 		return
 	match action:
 		"save":
-			var ok := SaveGame.write(game,path,true,SaveGame.SLOT_PROGRESS)
+			var ok := SaveGame.write_progress(game,true,path)
 			_text.text = "保存しました。" if ok else SaveGame.last_error
 		"load", "backup":
 			var source := _progress_source_path() + (".bak" if action == "backup" else "")
@@ -132,7 +132,7 @@ func execute() -> void:
 				_legacy.visible = SaveGame.last_error.begins_with("旧version2")
 				_legacy_path = source
 				return
-			if not SaveGame.apply(game,d):
+			if not SaveGame.continue_progress(game,d):
 				_text.text = SaveGame.last_error
 				return
 			game.game_over = false

@@ -88,6 +88,36 @@ func _initialize():
 	main.town.credits = 999
 	check(SaveGame.restart_from_checkpoint(main, SaveGame.DEFAULT_RESTART_LOSS) and main.save_run_id == "new-run" and main.town.credits == 16, "new game cannot restart into old run " + SaveGame.last_error)
 
+	# Progress owns a same-run checkpoint pair.  A later New Game can replace the
+	# global checkpoint without making Continue A restart into run B (or B.bak).
+	_clear(SaveGame.PROGRESS_PATH)
+	_clear(SaveGame.CHECKPOINT_PATH)
+	SaveGame.active_checkpoint.clear()
+	main.save_run_id = "run-a"
+	main.town.credits = 80
+	check(SaveGame.write_checkpoint(main, true), "run A checkpoint write")
+	main.town.credits = 31
+	check(SaveGame.write_progress(main, true), "run A paired progress write")
+	var run_a_progress := SaveGame.read_slot(SaveGame.PROGRESS_PATH, SaveGame.SLOT_PROGRESS)
+	check(not run_a_progress.is_empty() and SaveGame.snapshot_run_id(run_a_progress.paired_checkpoint) == "run-a", "progress retains its same-run checkpoint")
+	SaveGame.active_checkpoint.clear()
+	main.save_run_id = "run-b"
+	main.town.credits = 50
+	check(SaveGame.ensure_initial_checkpoint(main, true), "new run B checkpoint write")
+	var run_b_checkpoint := SaveGame.read_slot(SaveGame.CHECKPOINT_PATH, SaveGame.SLOT_CHECKPOINT)
+	var run_a_backup := SaveGame.read_slot(SaveGame.CHECKPOINT_PATH + ".bak", SaveGame.SLOT_CHECKPOINT)
+	check(SaveGame.snapshot_run_id(run_b_checkpoint) == "run-b" and SaveGame.snapshot_run_id(run_a_backup) == "run-a", "new run rotates but does not re-label checkpoint backup")
+	check(not SaveGame.restart_from_checkpoint(main, SaveGame.DEFAULT_RESTART_LOSS, SaveGame.CHECKPOINT_PATH + ".bak") and main.town.credits == 50, "foreign checkpoint backup is rejected")
+	var primary_before_boot := FileAccess.get_file_as_bytes(SaveGame.CHECKPOINT_PATH)
+	var backup_before_boot := FileAccess.get_file_as_bytes(SaveGame.CHECKPOINT_PATH + ".bak")
+	main.save_run_id = "ordinary-boot-one"
+	check(SaveGame.ensure_initial_checkpoint(main, false), "ordinary boot preserves checkpoint")
+	main.save_run_id = "ordinary-boot-two"
+	check(SaveGame.ensure_initial_checkpoint(main, false) and FileAccess.get_file_as_bytes(SaveGame.CHECKPOINT_PATH) == primary_before_boot and FileAccess.get_file_as_bytes(SaveGame.CHECKPOINT_PATH + ".bak") == backup_before_boot, "two ordinary boots preserve checkpoint and backup")
+	check(SaveGame.continue_progress(main, run_a_progress), "continue run A restores paired selection")
+	main.town.credits = 0
+	check(SaveGame.restart_from_checkpoint(main, SaveGame.DEFAULT_RESTART_LOSS) and main.save_run_id == "run-a" and main.town.credits == 72, "continue run A restarts from A checkpoint, not run B")
+
 	# 途中書き込みが失敗しても、既存の progress と backup を維持する。
 	var before := FileAccess.get_file_as_bytes(PROGRESS)
 	DirAccess.make_dir_absolute(PROGRESS + ".bak.tmp")
