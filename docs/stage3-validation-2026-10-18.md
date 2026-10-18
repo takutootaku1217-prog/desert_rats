@@ -92,4 +92,4 @@ For the normal world, verify a reward claim persists a pending renewal, has no i
 - `source_changed_during_run: false`
 - 実行時 HEAD（前後）: `ca3b27f931cdd96eafc59bb59fb32bb86344744f`
 
-コミット SHA と remote SHA は、最終ソース改訂をコミット・push 後に追記する。
+公開したブランチ HEAD と GitHub の同一 SHA は、タスク完了時のハンドオフで報告する。
