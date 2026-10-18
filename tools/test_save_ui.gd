@@ -73,6 +73,32 @@ func _initialize():
 	await click(button_named(ui,"バックアップから再開"))
 	await click(ui._confirm)
 	check(main.storage.count_of(GameData.Item.WOOD) == initial,"バックアップ再開")
+	# A valid progress backup is the recovery source when its paired primary is
+	# unreadable or absent. Exercise the real SaveUI path, rather than only the
+	# comparison helper, so a primary-read failure cannot block recovery again.
+	main.storage.store_owned(GameData.Item.WOOD, 5)
+	var corrupt_progress := FileAccess.open(ui.path, FileAccess.WRITE); corrupt_progress.store_string("broken"); corrupt_progress.close()
+	ui.ask("backup")
+	ui.execute()
+	check(main.storage.count_of(GameData.Item.WOOD) == initial, "SaveUI recovers a valid progress backup after primary corruption")
+	main.storage.store_owned(GameData.Item.WOOD, 6)
+	DirAccess.remove_absolute(ui.path)
+	ui.ask("backup")
+	ui.execute()
+	check(main.storage.count_of(GameData.Item.WOOD) == initial, "SaveUI recovers a valid progress backup when the primary is missing")
+	# A readable primary remains an authority boundary: a normal backup from a
+	# different run must not replace it just because the backup is valid itself.
+	var primary_snapshot := SaveGame.capture(main)
+	primary_snapshot.main.save_run_id = "save-ui-primary-run"
+	var foreign_backup := primary_snapshot.duplicate(true)
+	foreign_backup.main.save_run_id = "save-ui-foreign-run"
+	check(SaveGame.write(main, ui.path, true, SaveGame.SLOT_PROGRESS, primary_snapshot) and SaveGame.write(main, ui.path + ".bak", true, SaveGame.SLOT_PROGRESS, foreign_backup), "paired primary and foreign backup fixtures write")
+	main.storage.store_owned(GameData.Item.WOOD, 9)
+	var before_foreign_backup := SaveGame.capture(main)
+	ui.ask("backup")
+	ui.execute()
+	check(SaveGame.capture(main) == before_foreign_backup and ui._text.text.contains("different run"), "SaveUI rejects a readable primary paired with another run backup")
+	check(SaveGame.continue_progress(main, primary_snapshot), "restores the baseline fixture after foreign backup rejection")
 	# The checkpoint confirmation reports the exact configured test loss, and its
 	# backup route is independently usable after primary corruption.
 	main.town.credits = 49
@@ -93,6 +119,7 @@ func _initialize():
 	# Exercise the actual SaveUI continuation route with only the legacy save.
 	check(SaveGame.write(main, ui.legacy_path, true), "legacy progress write")
 	DirAccess.remove_absolute(ui.path)
+	DirAccess.remove_absolute(ui.path + ".bak")
 	main.storage.store_owned(GameData.Item.WOOD, 11)
 	ui.ask("load")
 	ui.execute()

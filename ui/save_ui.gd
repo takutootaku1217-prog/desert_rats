@@ -15,10 +15,13 @@ var _legacy_path := ""
 var _was_paused := false
 
 func _progress_source_path() -> String:
-	return path if SaveGame.exists(path) else legacy_path
+	# A lone separated-slot backup is still a recoverable progress source. Do
+	# not fall through to the legacy slot merely because its damaged/missing
+	# primary is absent; execute("backup") needs this base path to find .bak.
+	return path if SaveGame.exists(path) or SaveGame.exists(path + ".bak") else legacy_path
 
 func _has_progress() -> bool:
-	return SaveGame.exists(path) or SaveGame.exists(legacy_path)
+	return SaveGame.exists(path) or SaveGame.exists(path + ".bak") or SaveGame.exists(legacy_path) or SaveGame.exists(legacy_path + ".bak")
 
 func _checkpoint_loss_text(source: String) -> String:
 	var d := SaveGame.checkpoint_for_current_run(game, source)

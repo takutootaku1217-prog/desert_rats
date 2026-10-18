@@ -42,6 +42,7 @@ CHECKS = {c.id: c for c in [
     Check("rescue_return", ("-s", "res://tools/test_rescue_return.gd"), "== RESULT: ALL PASSED =="),
     Check("save_roster_restore", ("-s", "res://tools/test_save_roster_restore.gd"), "== RESULT: ALL PASSED =="),
     Check("world_reward_replenish", ("-s", "res://tools/test_world_reward_replenish.gd"), "== RESULT: ALL PASSED =="),
+    Check("world_carcass_replenish", ("-s", "res://tools/test_world_carcass_replenish.gd"), "== RESULT: ALL PASSED ==", 600),
     Check("sortie_economy_4", ("-s", "res://tools/test_sortie_economy.gd", "--", "--crew-count", "4"), "== RESULT: ALL PASSED ==", 900),
     Check("sortie_economy_5", ("-s", "res://tools/test_sortie_economy.gd", "--", "--crew-count", "5"), "== RESULT: ALL PASSED ==", 900),
     *(diagnostic(n, "== 結果: 0 件失敗 ==") for n in ("cargo_reservations", "consumption_loop")),
@@ -62,7 +63,7 @@ CHECKS = {c.id: c for c in [
 ]}
 SUITES = {
     "core": ["journey", "journey_ui", "journey_flow", "town", "town_flow", "town_ui", "production_recovery", "production_reservations", "order_flow", "production_ui", "hunt_bounds", "auto_craft_guard", "developer_mode", "developer_enabled", "artscale", "tool_progression", "tool_flow", "first_cycle", "field_operations", "manual_combat", "field_ui", "ecosystem", "first_cycle_flow", "navigation_bar", "batch_crafting", "batch_ui", "batch_flow", "haul_support", "haul_ui", "haul_flow", "facility_packing", "packing_flow", "world_map", "world_flow", "world_boundaries", "world_fauna", "world_scenery", "world_reencounter", "save_game", "save_ui", "inventory_discard", "clarity_ui", "cargo_accounting", "cargo_escape_ui", "progression", "weapon", "weapon_ui", "equipment_ui", "packed_equipment", "quarry", "gather", "cargo", "items", "crew_status", "life_actions", "tool_management",
-    "cargo_reservations", "consumption_loop", "trouble_loop", "rescue_return", "save_roster_restore", "world_reward_replenish", "sortie_economy_4", "sortie_economy_5", "loop_vanilla", "loop_normal", "startup"],
+    "cargo_reservations", "consumption_loop", "trouble_loop", "rescue_return", "save_roster_restore", "world_reward_replenish", "world_carcass_replenish", "sortie_economy_4", "sortie_economy_5", "loop_vanilla", "loop_normal", "startup"],
     "endurance": [f"world_endurance_{seed}_{mode}" for seed in (501, 502, 503) for mode in ("stay", "route", "ordered_stay", "ordered_route")],
     "extra": ["loop_manual", "loop_events"],
     "layout": ["rooms", "view", "camera", "artscale", "quarry", "quarry_rear", "consumption_loop"],

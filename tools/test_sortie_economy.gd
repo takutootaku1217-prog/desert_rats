@@ -16,6 +16,7 @@ var fails := 0
 var legs: Array = []
 var sales: Array = []
 var maintenance_reference := {}
+var case_started_elapsed := 0.0
 
 func check(ok: bool, message: String) -> void:
 	print("  %s %s" % ["ok" if ok else "FAIL", message])
@@ -84,7 +85,7 @@ func visible_gather_points() -> Array:
 func snapshot() -> Dictionary:
 	var inventory: Dictionary = main.storage.inventory.counts.duplicate(true)
 	var stock: Dictionary = main.processor.stock.counts.duplicate(true)
-	return {"credits": main.town.credits, "inventory": inventory, "stock": stock, "tradable_asset_value": market_value(inventory) + market_value(stock), "fuel": snappedf(main.base.fuel, 0.01), "food": main.storage.count_of(GameData.Item.FOOD), "repair_kits": main.storage.count_of(GameData.Item.REPAIR_KIT), "eaten": main.total_eaten, "refuel_actions": main.base.total_refuel, "repair_actions": main.base.total_repair, "parts": part_snapshot(), "gathered": main.total_gathered, "upgrades": upgrades(), "orders": main.production_orders.duplicate(true), "craft_queue": main.craft_queue.duplicate(true), "processor_orders": main.processor.orders.duplicate(true), "transfer_queue": main.transfer_queue.duplicate(true), "procurement_goals": main.procurement_goals.duplicate(true), "visible_gather_points": visible_gather_points(), "crew": crew_snapshot(), "world": {"region": main.world.region, "phase": main.world.phase}}
+	return {"elapsed_seconds": snappedf(main.director.elapsed, 0.01), "credits": main.town.credits, "inventory": inventory, "stock": stock, "tradable_asset_value": market_value(inventory) + market_value(stock), "fuel": snappedf(main.base.fuel, 0.01), "food": main.storage.count_of(GameData.Item.FOOD), "repair_kits": main.storage.count_of(GameData.Item.REPAIR_KIT), "eaten": main.total_eaten, "refuel_actions": main.base.total_refuel, "repair_actions": main.base.total_repair, "parts": part_snapshot(), "gathered": main.total_gathered, "upgrades": upgrades(), "orders": main.production_orders.duplicate(true), "craft_queue": main.craft_queue.duplicate(true), "processor_orders": main.processor.orders.duplicate(true), "transfer_queue": main.transfer_queue.duplicate(true), "procurement_goals": main.procurement_goals.duplicate(true), "visible_gather_points": visible_gather_points(), "crew": crew_snapshot(), "world": {"region": main.world.region, "phase": main.world.phase}}
 
 func entity_ids_unique() -> bool:
 	var ids := {}
@@ -155,6 +156,14 @@ func maintain_same_level() -> Dictionary:
 	var reached: bool = after.fuel >= float(target.fuel) - 0.01 and after.food >= int(target.food) and after.repair_kits >= int(target.repair_kits) and after.parts.hull >= float(target.parts.hull) - 0.01 and after.parts.drive >= float(target.parts.drive) - 0.01 and after.parts.machine >= float(target.parts.machine) - 0.01
 	return {"target": {"fuel": target.fuel, "food": target.food, "repair_kits": target.repair_kits, "parts": target.parts}, "reached": reached, "purchases": purchases, "cash_cost": int(before.credits) - int(after.credits), "before": before, "after": after}
 
+func assert_maintenance_state(label: String, state: Dictionary) -> void:
+	var target: Dictionary = maintenance_reference
+	check(state.fuel >= float(target.fuel) - 0.01, label + " retains the common fuel level")
+	check(state.food >= int(target.food), label + " retains the common food level")
+	check(state.repair_kits >= int(target.repair_kits), label + " retains the common repair-kit level")
+	check(state.parts.hull >= float(target.parts.hull) - 0.01 and state.parts.drive >= float(target.parts.drive) - 0.01 and state.parts.machine >= float(target.parts.machine) - 0.01, label + " restores every base part to the common durability level")
+	check(state.crew.all(func(worker): return not worker.down and not worker.away), label + " has no down or absent crew")
+
 func make_cargo_room(weight: int, label: String) -> bool:
 	for item in [GameData.Item.MEAT, GameData.Item.BONE, GameData.Item.FAT, GameData.Item.STONE, GameData.Item.IRON_ORE, GameData.Item.WOOD]:
 		while not main.town.cargo_room(weight) and main.town.available(item) > 0:
@@ -165,7 +174,7 @@ func make_cargo_room(weight: int, label: String) -> bool:
 
 func record_sortie(rows: Array, name: String, before: Dictionary, maintenance: Dictionary) -> void:
 	var after: Dictionary = maintenance.after
-	rows.append({"name": name, "credits_delta_before_maintenance": int(maintenance.before.credits) - int(before.credits), "maintenance_cash_cost": maintenance.cash_cost, "credits_delta_after_maintenance": int(after.credits) - int(before.credits), "fuel_consumed_net": snappedf(float(before.fuel) - float(after.fuel), 0.01), "food_consumed": int(after.eaten) - int(before.eaten), "repair_actions": int(after.repair_actions) - int(before.repair_actions), "asset_value_delta": int(after.tradable_asset_value) - int(before.tradable_asset_value), "maintenance": maintenance, "start": before, "end": after})
+	rows.append({"name": name, "elapsed_start_seconds": snappedf(float(before.elapsed_seconds) - case_started_elapsed, 0.01), "elapsed_end_seconds": snappedf(float(after.elapsed_seconds) - case_started_elapsed, 0.01), "credits_delta_before_maintenance": int(maintenance.before.credits) - int(before.credits), "maintenance_cash_cost": maintenance.cash_cost, "credits_delta_after_maintenance": int(after.credits) - int(before.credits), "fuel_consumed_net": snappedf(float(before.fuel) - float(after.fuel), 0.01), "food_consumed": int(after.eaten) - int(before.eaten), "repair_actions": int(after.repair_actions) - int(before.repair_actions), "asset_value_delta": int(after.tradable_asset_value) - int(before.tradable_asset_value), "maintenance": maintenance, "start": before, "end": after})
 
 func checkpoint_fixture(economic_snapshot: Dictionary) -> Dictionary:
 	const COPY_PATH := "user://economy-checkpoint-copy.json"
@@ -181,6 +190,7 @@ func checkpoint_fixture(economic_snapshot: Dictionary) -> Dictionary:
 func run_case(crew_count: int) -> Dictionary:
 	await boot(crew_count)
 	legs.clear(); sales.clear(); maintenance_reference = {}
+	case_started_elapsed = main.director.elapsed
 	var initial := snapshot()
 	queue_progression()
 	check(await wait_for(func(): return worker_has_tool(GameData.Item.HAMMER), 420.0), "normal starting-region AI completes the required hammer without a resource grant")
@@ -189,10 +199,12 @@ func run_case(crew_count: int) -> Dictionary:
 	maintenance_reference = snapshot()
 	var first_maintenance := maintain_same_level()
 	check(first_maintenance.reached, "initial town visit can establish the maintenance reference level")
-	var prelude := {"start": initial, "town_reference": first_maintenance.after, "credits_delta": int(first_maintenance.after.credits) - int(initial.credits), "food_consumed": int(first_maintenance.after.eaten) - int(initial.eaten), "legs": legs.duplicate(true)}
+	assert_maintenance_state("preparation return", first_maintenance.after)
+	var prelude := {"start": initial, "town_reference": first_maintenance.after, "credits_delta": int(first_maintenance.after.credits) - int(initial.credits), "food_consumed": int(first_maintenance.after.eaten) - int(initial.eaten), "elapsed_seconds": snappedf(float(first_maintenance.after.elapsed_seconds) - case_started_elapsed, 0.01), "legs": legs.duplicate(true)}
 	var sorties: Array = []
 
 	var before := snapshot()
+	assert_maintenance_state("sortie 1 departure", before)
 	check(make_cargo_room(TownDB.DELIVERY_PARCEL_WEIGHT, "delivery"), "normal town inventory makes room for delivery parcel")
 	check(city_action("accept_delivery"), "sortie 1 accepts normal delivery")
 	check(await travel(TownDB.DELIVERY_TO, "sortie-1-delivery-outbound"), "sortie 1 reaches its delivery destination")
@@ -202,9 +214,11 @@ func run_case(crew_count: int) -> Dictionary:
 	queue_progression()
 	var maintenance := maintain_same_level()
 	check(maintenance.reached, "sortie 1 returns to the common maintenance level")
+	assert_maintenance_state("sortie 1 return", maintenance.after)
 	record_sortie(sorties, "delivery", before, maintenance)
 
 	before = snapshot()
+	assert_maintenance_state("sortie 2 departure", before)
 	check(city_action("accept_supply", GameData.Item.WOOD), "sortie 2 accepts normal supply")
 	gathered_before = main.total_gathered
 	check(await travel("south_oasis", "sortie-2-supply-outbound"), "sortie 2 reaches normal supply region")
@@ -214,12 +228,15 @@ func run_case(crew_count: int) -> Dictionary:
 	check(await wait_for(func(): return main.storage.count_of(GameData.Item.HAUL_FRAME) > 0 or main.has_facility("storage_upgrade"), 240.0), "first hauling or storage improvement is crafted by two claimed sorties")
 	queue_progression()
 	check(first_improvement(), "first hauling or storage improvement is equipped or installed through normal crew action")
+	var first_improvement_elapsed := snappedf(main.director.elapsed - case_started_elapsed, 0.01)
 	check(await city_ready(), "early-upgrade work returns the crew to normal city actions")
 	maintenance = maintain_same_level()
 	check(maintenance.reached, "sortie 2 returns to the common maintenance level")
+	assert_maintenance_state("sortie 2 return", maintenance.after)
 	record_sortie(sorties, "supply", before, maintenance)
 
 	before = snapshot()
+	assert_maintenance_state("sortie 3 departure", before)
 	check(make_cargo_room(TownDB.RECOVERY_PARCEL_WEIGHT, "recovery"), "normal town inventory makes room for recovery parcel")
 	check(city_action("accept_recovery"), "sortie 3 accepts normal recovery")
 	var old_gather: Dictionary = main.gather_policy.duplicate(true)
@@ -237,11 +254,12 @@ func run_case(crew_count: int) -> Dictionary:
 	check(await travel("central_trade", "sortie-3-recovery-return") and await city_ready() and city_action("claim_recovery"), "sortie 3 returns and claims reward")
 	maintenance = maintain_same_level()
 	check(maintenance.reached, "sortie 3 returns to the common maintenance level")
+	assert_maintenance_state("sortie 3 return", maintenance.after)
 	record_sortie(sorties, "recovery", before, maintenance)
 
 	var economic_final := snapshot()
 	var checkpoint := checkpoint_fixture(SaveGame.capture(main))
-	var result := {"seed": SEED_VALUE, "crew_count": crew_count, "preparation": prelude, "travel_legs": legs, "sorties": sorties, "city_sales": sales, "initial": initial, "economic_final": economic_final, "first_improvement": economic_final.upgrades, "checkpoint_fixture_separate": checkpoint}
+	var result := {"seed": SEED_VALUE, "crew_count": crew_count, "preparation": prelude, "elapsed_seconds_to_first_improvement": first_improvement_elapsed, "elapsed_seconds_total": snappedf(main.director.elapsed - case_started_elapsed, 0.01), "travel_legs": legs, "sorties": sorties, "city_sales": sales, "initial": initial, "economic_final": economic_final, "first_improvement": economic_final.upgrades, "checkpoint_fixture_separate": checkpoint}
 	print("SORTIE_ECONOMY_JSON " + JSON.stringify(result))
 	check(legs.size() == 7, "all preparation and three-sortie map legs are recorded with no hidden trips")
 	check(sorties.size() == 3 and sorties.all(func(row): return row.maintenance.reached), "all three sorties include complete return-to-target maintenance accounting")

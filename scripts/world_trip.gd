@@ -69,8 +69,6 @@ func _apply_reward_replenishment() -> void:
     row.spent=false
     row.data.remaining=row.data.max_amount
     row.data.work=0.0
-   "resource":
-    row.spent=false
    "creature":
     row.spent=false
     row.data.dead=false

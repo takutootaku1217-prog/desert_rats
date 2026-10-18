@@ -574,11 +574,19 @@ static func continue_progress(g, d: Dictionary) -> bool:
 	run_selected = true
 	return true
 
-## A backup belongs to the same progress lineage only when both its run and
-## roster match the primary save. This avoids treating a later New Game as a
-## fallback for an older three-person run (or the reverse).
+## A readable primary must agree with its backup on both run and roster.  If
+## the primary is missing or damaged, the already-validated backup is the
+## recovery source by definition: rejecting it would make the backup unusable
+## precisely in the failure it exists to recover.  A readable different run is
+## still never accepted as the current run's fallback.
 static func backup_matches_progress(primary: Dictionary, backup: Dictionary) -> bool:
-	if primary.is_empty() or backup.is_empty() or snapshot_run_id(primary) != snapshot_run_id(backup):
+	if backup.is_empty():
+		last_error = "Backup could not be read."
+		return false
+	if primary.is_empty():
+		last_error = ""
+		return true
+	if snapshot_run_id(primary) != snapshot_run_id(backup):
 		last_error = "Backup belongs to a different run."
 		return false
 	if not primary.get("crew") is Array or not backup.get("crew") is Array or primary.crew.size() != backup.crew.size():

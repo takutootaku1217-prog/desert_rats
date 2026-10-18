@@ -76,6 +76,95 @@ py tools\run_checks.py --godot $godot --suite core
 
 ## Claude への検証プロンプト
 
+## Follow-up review corrections (2026-10-18)
+
+This section overrides conflicting wording in the earlier validation record.
+
+- **Roster wording corrected.** `test_save_roster_restore.gd` first captures a
+  historical three-person snapshot, then explicitly opens a five-person
+  *diagnostic* new-game fixture and restores it to three workers. It does not
+  start from the four-person production default. Fresh player New Game remains
+  four workers; the five-person fixture exists only to prove cross-roster
+  recovery.
+- **Backup recovery corrected.** A readable backup now restores when the
+  separated primary is missing or damaged. A readable primary paired with a
+  different run, or with a different crew count under the same run id, remains
+  rejected. `test_save_ui.gd` covers the two UI recovery paths, while
+  `test_save_roster_restore.gd` covers the same-run crew mismatch boundary.
+- **Contract reservations corrected.** An accepted supply contract now wins
+  over unstarted logical production orders, but `HAUL_TAKE` and queued transfer
+  reservations remain unavailable. `test_town.gd` covers six physical wood
+  against ten logical wood reservations, then the real haul and transfer cases.
+- **Normal-world renewal narrowed.** Mission reward replenishment now touches
+  only fixed gather points and fixed creatures. It does not unspend dynamic
+  `ResourceNode` records such as historic carcasses. The two-cycle
+  `test_world_carcass_replenish.gd` performs normal HUNT_ATTACK, carcass pickup,
+  delivery reward, and revisit twice; only the fixed creature returns, historic
+  carcasses remain spent, and drop totals do not grow on revisit.
+
+### Re-measured normal three-sortie economy
+
+Seed 641, normal starting stock/funds, ordinary order/travel/gather/reward/town
+paths, and no material or credit grants were used. The harness now asserts at
+every departure and return: fuel, food, repair kits, all base-part durability,
+and no down/away crew. `elapsed_seconds_to_first_improvement` includes the
+ordinary preparation wait (up to 420 simulated seconds) rather than starting
+at the first mission.
+
+| crew | final Cr | first improvement | total elapsed | final supplies | base durability | crew |
+| ---: | ---: | ---: | ---: | --- | --- | --- |
+| 4 | 52 | 308.8 s | 364.0 s | fuel 100, food 12, repair kits 6 | hull 96.63, drive 100, machine 98.95 | all present, none down |
+| 5 | 44 | 445.0 s | 500.0 s | fuel 100, food 12, repair kits 6 | hull 95.07, drive 100, machine 99.72 | all present, none down |
+
+The four-person default remains the provisional adopted setting for this
+fixture. Per-sortie before-maintenance / maintenance / after-maintenance cash
+is recorded in the JSON: 4-person `32/18/+14`, `24/17/+7`, `38/7/+31`; 5-person
+`32/17/+15`, `24/25/-1`, `38/8/+30`.
+
+Follow-up isolated evidence:
+
+```text
+C:\Users\user\AppData\Local\Temp\desert-rats-stage3-followup-targeted\20261018T173246Z-vwyg06or\results.json
+  import, save_ui, town, world_reward_replenish, world_carcass_replenish: passed
+  source_changed_during_run: false
+
+C:\Users\user\AppData\Local\Temp\desert-rats-economy-scheduled\20261018T173334Z-peyvrvtn\results.json
+  import, sortie_economy_4, sortie_economy_5: passed
+  source_changed_during_run: false
+```
+
+### Updated Claude review prompt
+
+```text
+Review the newest gpt/rescue-return-loop HEAD of desert_rats. Fresh player New
+Game defaults to four workers. Do not describe test_save_roster_restore as
+four-to-three: it explicitly captures a historical 3-worker snapshot, opens a
+diagnostic 5-worker fixture, then verifies Continue, checkpoint-only Restart,
+and v2 migration reconstruct exactly 3 workers.
+
+Run save_ui and verify that (1) a damaged or missing separated primary recovers
+from a valid backup, (2) a same-run crew-count mismatch is rejected, and (3) a
+readable primary from another run never falls back to that backup. Run town and
+verify an accepted six-unit supply contract can claim six physical wood despite
+ten unstarted logical wood reservations, while a real HAUL_TAKE reservation and
+a queued transfer still prevent the claim.
+
+Run world_reward_replenish and world_carcass_replenish on the normal map.
+The latter must perform two real HUNT_ATTACK -> dynamic carcass pickup ->
+delivery reward -> revisit cycles. Confirm only the fixed creature returns;
+historic carcass rows remain spent and revisits add no hunt drops. Cancellation
+must not schedule renewal and current-location arrival must not spawn instantly.
+Keep legacy quarry validation distinct: use `--fixed-fps 60 -- legacy-world-test`.
+
+Run sortie_economy_4 and sortie_economy_5. Both must use seed 641, normal stock
+and funds, no grants, three ordinary sorties, a separate checkpoint fixture,
+and seven recorded map legs. Check the departure/return maintenance assertions,
+the JSON elapsed seconds to first improvement (including preparation), and the
+four-worker result of 52 Cr versus five-worker 44 Cr. Finally run the complete
+core suite from the reviewed commit and report source_changed_during_run
+separately from native OS-level UI-input coverage.
+```
+
 ```text
 Review the newest gpt/rescue-return-loop HEAD of desert_rats. Treat the old 54/66 Cr, five-worker conclusion as superseded. New games now default to four workers; existing 3--5 worker saves must reconstruct their saved roster before Apply/Continue, including checkpoint-only and v2 saves, while a same-run backup with a mismatched crew size is rejected.
 

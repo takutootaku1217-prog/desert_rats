@@ -32,6 +32,34 @@ func _initialize():
  check(act("sell",GameData.Item.WOOD,2),"余剰だけ売却")
  main.request_transfer(GameData.Item.WOOD,2,"to_workshop")
  check(t.available(GameData.Item.WOOD)==0 and not act("sell",GameData.Item.WOOD),"運搬予約と注文保護を売らない")
+ # An accepted contract outranks unstarted logical orders. Five distinct queued
+ # recipes hold ten wood on paper, but the six physical wood remain available to
+ # the six-unit contract until a worker or transfer actually reserves them.
+ await city();t=main.town;st=main.storage
+ st.inventory.counts={GameData.Item.WOOD:6}
+ check(act("accept_supply",GameData.Item.WOOD),"contract-priority fixture accepts supply")
+ var logical_ids := ["tool_wood_pick", "tool_wood_axe", "tool_axe", "tool_pick", "tool_iron_axe"]
+ var queued := 0
+ for id in logical_ids: queued += main.request_order(id,1)
+ check(queued==logical_ids.size() and int(ProductionPlan.held_for_orders(main).get(GameData.Item.WOOD,0))==10,"multiple queued orders create ten logical wood reservations")
+ check(t.supply_available()==6 and act("claim_supply") and st.count_of(GameData.Item.WOOD)==0,"contract claim outranks multiple unstarted logical reservations")
+ # Concrete HAUL_TAKE and transfer claims remain protected; the contract must
+ # wait until those real reservations settle or are cancelled.
+ await city();t=main.town;st=main.storage
+ main.finish_build("workbench")
+ st.inventory.counts={GameData.Item.WOOD:6}
+ # Start a real craft reservation before accepting the contract.  An already
+ # accepted contract correctly prevents a *new* automatic craft from taking
+ # its cargo, while an existing HAUL_TAKE must still block the claim.
+ var queued_haul:int = main.request_order("tool_wood_pick",1)
+ var started_haul:bool = main.workers[0].ai._try_start(GameData.Job.HAUL)
+ var accepted_haul:bool = act("accept_supply",GameData.Item.WOOD)
+ check(accepted_haul and queued_haul==1 and started_haul,"physical haul-reservation fixture starts through the normal order path")
+ check(main.workers[0].ai.state==CharacterAI.State.HAUL_TAKE and t.supply_available()==4 and not act("claim_supply"),"HAUL_TAKE material remains protected from contract priority")
+ await city();t=main.town;st=main.storage
+ st.inventory.counts={GameData.Item.WOOD:6}
+ check(act("accept_supply",GameData.Item.WOOD) and main.request_transfer(GameData.Item.WOOD,1,"to_workshop")==1,"physical transfer-reservation fixture queues normally")
+ check(t.supply_available()==5 and not act("claim_supply"),"queued transfer material remains protected from contract priority")
  await city();t=main.town;st=main.storage;t.credits=100
  main.base.fuel=98
  check(act("fuel_cash") and main.base.fuel==100 and t.credits==99,"端数給油2だけ回復・1 Cr・上限")

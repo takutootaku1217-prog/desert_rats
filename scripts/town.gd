@@ -44,11 +44,14 @@ func entry_reason() -> String:
  if not location_ok(): return "中央都市に停泊すると利用できます"
  return game.world.ready_reason()
 func available(item:int) -> int:
+ var physical:int=AutoCraftGuard.available(game,item)
+ # The active supply contract gets first claim over orders that have not taken
+ # anything yet.  `physical` still excludes HAUL_TAKE, queued transfers and
+ # other concrete reservations, so a contract cannot consume material that has
+ # actually been claimed or moved; it merely outranks unstarted order intent.
+ if supply=="accepted" and item==supply_item:return physical
  var held:int=int(ProductionPlan.held_for_orders(game).get(item,0))
- # The active supply contract gets first claim on its own inputs. Automatic
- # crafting is blocked by AutoCraftGuard; market sales are guarded separately.
- if supply=="accepted" and item==supply_item:held=maxi(0,held-supply_count)
- return maxi(0,AutoCraftGuard.available(game,item)-held)
+ return maxi(0,physical-held)
 ## Kept as an explicit query for UI or callers that need contract-priority
 ## availability; `available()` implements the same calculation for the claim.
 func supply_available() -> int:

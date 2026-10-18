@@ -25,3 +25,31 @@
 - Final stage 3 core (2026-10-18): isolated Windows Godot 4.7.2 core passed 68/68 from `ca3b27f931cdd96eafc59bb59fb32bb86344744f`, with `source_changed_during_run: false`. Result: `C:\Users\user\AppData\Local\Temp\desert-rats-stage3-final-core\20261018T164351Z-e3k7wmm9\results.json`. The temporary Task Scheduler job used for the long run was removed afterwards.
 
 - Publication (2026-10-18): the validated implementation was committed and pushed on `gpt/rescue-return-loop`; the final branch/remote SHA match is reported in the task handoff. Protected user-local `.appdata-test/` remains untracked and untouched.
+
+- Follow-up review correction (2026-10-18): `test_save_roster_restore.gd` is
+  explicitly a historic 3-worker snapshot -> diagnostic 5-worker scene ->
+  restored 3-worker scene regression. It is not evidence that the production
+  New Game path starts at four before restoring three; the actual fresh default
+  remains four. SaveUI now accepts a valid backup when its primary is missing or
+  damaged, while preserving readable-primary different-run and crew-mismatch
+  rejection. `test_save_ui.gd` covers UI recovery and
+  `test_save_roster_restore.gd` covers the crew-mismatch boundary.
+
+- Follow-up review correction (2026-10-18): supply contracts now outrank only
+  unstarted logical orders; concrete `HAUL_TAKE` and queued transfer claims
+  remain protected. Normal-world reward renewal no longer revives dynamic
+  resource rows. `test_town.gd`, `test_world_reward_replenish.gd`, and the new
+  two-cycle real-hunt `test_world_carcass_replenish.gd` passed in isolated
+  APPDATA/LOCALAPPDATA. The carcass test proves historic corpses stay spent and
+  cannot add drops after each revisit.
+
+- Economy re-measurement (2026-10-18): the 4/5-worker seed-641 three-sortie
+  tests passed with maintenance assertions at every departure and return. Four
+  workers ended at 52 Cr, reached the first hauling/storage improvement at
+  308.8 simulated seconds, and completed at 364.0 seconds; five workers ended
+  at 44 Cr, reached it at 445.0 seconds, and completed at 500.0 seconds. Both
+  retained fuel 100, food 12, repair kits 6, non-depleted base parts, and no
+  down/away crew. Evidence:
+  `C:\Users\user\AppData\Local\Temp\desert-rats-economy-scheduled\20261018T173334Z-peyvrvtn\results.json`
+  (`source_changed_during_run: false`). A final complete core run remains due
+  from the final follow-up commit.
