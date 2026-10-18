@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/two_lane_prototype.gd" id="1_two_lane"]
+
+[node name="TwoLanePrototype" type="Node2D"]
+script = ExtResource("1_two_lane")
