@@ -14,6 +14,10 @@ func city() -> void:
   SaveGame.apply(main,_city_save)
 func act(a:String,it:int=-1,n:int=1) -> bool:
  return main.town.execute(main.town.quote(a,it,n))
+func visit_region(id:String) -> void:
+ main.world._archive()
+ main.world.region=id;main.world.phase="stopped";main.world.road="";main.world.origin="";main.world.destination="";main.world.progress=0.0
+ main.world._ensure_location();main.world._spawn_visible()
 func _initialize():
  await city()
  var t=main.town;var st=main.storage
@@ -107,6 +111,50 @@ func _initialize():
  check(started_interrupt and injury_released and abandoned_field and t.recovery=="idle" and interrupted.ai.return_request and departure_after_abandon,"負傷中断は仲間を残さず現地断念後に帰還でき、別地域で拾わない")
  main.world.cancel_or_return()
  await city();t=main.town
+ # Reward claims only reserve an outdoor refill.  The current city stays untouched
+ # until it is left and visited again; a remote location is restored once before
+ # its next spawn, including a killed creature, without duplicating live nodes.
+ visit_region("south_oasis")
+ var south_key:="region:south_oasis"
+ var south_rows:Dictionary=main.world.locations[south_key]
+ var depleted:=0
+ var killed:=false
+ for row in south_rows.values():
+  if row.type=="gather":row.spent=true;row.data.remaining=0;row.data.work=0.0;depleted+=1
+  elif row.type=="creature":row.spent=true;row.data.dead=true;row.data.hp=0.0;killed=true
+ visit_region("central_trade")
+ st=main.storage;st.inventory.counts={GameData.Item.WOOD:TownDB.SUPPLY_OFFERS[GameData.Item.WOOD].count}
+ var cycle_before:int=main.world.replenishment_cycle
+ check(act("accept_supply",GameData.Item.WOOD) and act("claim_supply") and main.world.replenishment_cycle==cycle_before+1,"supply reward schedules exactly one replenishment cycle")
+ check(main.world.replenishment_pending.has(south_key) and main.world.replenishment_pending.has("region:central_trade") and south_rows.values().any(func(row):return row.type=="gather" and row.spent),"reward keeps the current place and remote ledger depleted until their next visit")
+ var pending_save:=SaveGame.capture(main)
+ check(SaveGame.apply(main,pending_save) and main.world.replenishment_pending==pending_save.world.replenishment_pending,"pending replenishment survives save/load before travel")
+ var cycle_after_claim:int=main.world.replenishment_cycle
+ check(not act("claim_supply") and main.world.replenishment_cycle==cycle_after_claim,"duplicate reward claim cannot schedule another replenishment")
+ visit_region("south_oasis")
+ var restored:=0
+ var creature_restored:=false
+ for row in main.world.locations[south_key].values():
+  if row.type=="gather":
+   if not row.spent and int(row.data.remaining)==int(row.data.max_amount) and is_zero_approx(float(row.data.work)):restored+=1
+  elif row.type=="creature":creature_restored=not row.spent and not row.data.dead and is_equal_approx(float(row.data.hp),float(row.data.max_hp))
+ var nodes_before:int=main.resources_root.get_child_count()+main.creatures_root.get_child_count()+main.enemies_root.get_child_count()
+ main.world._spawn_visible()
+ var nodes_after:int=main.resources_root.get_child_count()+main.creatures_root.get_child_count()+main.enemies_root.get_child_count()
+ check(depleted>0 and killed and restored==depleted and creature_restored and not main.world.replenishment_pending.has(south_key) and nodes_after==nodes_before,"next visit restores fixed resource maxima and one living creature per saved row")
+ check(main.world.replenishment_pending.has("region:central_trade"),"claim location remains pending after leaving, not respawned during the claim")
+ visit_region("central_trade")
+ check(not main.world.replenishment_pending.has("region:central_trade"),"claim location is replenished only on its later visit")
+ var repeat_cycle:int=main.world.replenishment_cycle
+ check(act("accept_supply",GameData.Item.STONE) and act("cancel_supply") and main.world.replenishment_cycle==repeat_cycle,"supply can be reaccepted/cancelled without an extra refill")
+ check(act("accept_delivery"),"delivery can be reaccepted after a previous reward")
+ t.delivery="ready";t.delivery_cargo=false
+ check(act("claim_delivery") and t.delivery=="idle" and main.world.replenishment_cycle==repeat_cycle+1,"delivery reward returns to repeatable idle state and schedules once")
+ check(act("accept_delivery") and act("cancel_delivery") and main.world.replenishment_cycle==repeat_cycle+1 and t.mission_cargo_weight()==0,"delivery retry/cancel does not duplicate mission cargo or refill")
+ check(act("accept_recovery"),"recovery can be reaccepted after a previous reward")
+ t.recovery="ready";t.recovery_worker=-1
+ check(act("claim_recovery") and t.recovery=="idle" and main.world.replenishment_cycle==repeat_cycle+2,"recovery reward returns to repeatable idle state and schedules once")
+ check(act("accept_recovery") and act("cancel_recovery") and main.world.replenishment_cycle==repeat_cycle+2,"recovery retry/cancel does not schedule a refill")
  var d:=SaveGame.capture(main);d.erase("town")
  check(SaveGame.apply(main,d) and t.credits==0 and t.delivery=="idle" and t.recovery=="idle","旧v3のtown省略は0 Cr・依頼なし")
  d=SaveGame.capture(main)

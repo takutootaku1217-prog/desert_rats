@@ -1092,6 +1092,29 @@ HUD/仲間詳細PNGを成功生成した。Computer Useがネイティブウィ�
 
 暫定しきい値は30。現地・都市・即時応急の各修理は実際に回復した`DRIVE`量だけ蓄積を減らし、速度復帰は従来どおり手動のままとした。`rear_engine_damage`を保存し、旧セーブでフィールドが無い場合は0を補完するので、単に`DRIVE`が低い旧セーブは漏れない。クラウドGodot 4.6.3で重点回帰を実行し、Windows実機でのこの修正の検証は未実施として最終報告で分離する。
 
+### 2026-10-18 Repeatable subquests and reward-triggered outdoor replenishment (isolated worktree)
+
+Workspace: `C:\Users\user\Documents\Codex\2026-10-18\task-3\desert_rats`; branch:
+`gpt/prototype-ground-two-lanes`; starting HEAD:
+`0c92c7f59fbd5d00c4760e7419bcde2fbcfb6939`. The original PC checkout, `main`, existing saves,
+and stash `09e6de75e16a7e695b1c47d88650189dadf5f979` remain untouched.
+
+Notion was rechecked through `docs/Notion参照索引.md`. World 1's autonomous gather/haul/return is
+adopted; the delivery-loop page was still a planning proposal (last edited 2026-10-13), with reward
+details undecided. The current user direction therefore governs this implementation.
+
+Only successful `claim_supply`, `claim_delivery`, and `claim_recovery` schedule a persisted world
+replenishment. A quote ticket is consumed before execution, so repeat clicks cannot reschedule it.
+Acceptance, cancellation, partial progress, and mission-only cargo do not replenish. Current-location
+nodes remain unchanged; a pending location is reset immediately before its next safe spawn. GatherPoint
+amounts return to their stored maxima; spent Creature/Enemy rows return once with their initial HP/state.
+ResourceNode drops/carcasses and mission cargo never respawn.
+
+Windows Godot 4.7.2 with isolated APPDATA passed `town`, `town_flow`, `world_map`, `world_flow`,
+`world_fauna`, `world_reencounter`, `save_game`, and `save_progression`; final core passed **63/63**
+without source changes: `C:\Users\user\AppData\Local\Temp\desert-rats-repeatable-core\20261018T025555Z-4ntxwck9\results.json`.
+Evidence and limits: `docs/繰り返しサブクエスト_補充検証_2026-10-18.md`.
+
 ### 2026-10-18 2レーン相当・連続奥行き帯の小規模試作（隔離worktree）
 
 作業先は `C:\Users\user\Documents\Codex\2026-10-18\task-3\desert_rats`、ブランチは

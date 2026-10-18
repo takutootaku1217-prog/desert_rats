@@ -219,9 +219,13 @@ func normal_cycle(seed_id:int)->void:
  check(action("accept_supply",GameData.Item.WOOD),"木材6個の調達納品を受注")
  check(await travel("south_oasis"),"納品素材を求めて通常ルートを実走行")
  var got_wood:bool=await until(func():return main.storage.count_of(GameData.Item.WOOD)>=TownDB.SUPPLY_OFFERS[GameData.Item.WOOD].count,260.0)
+ # Restored field nodes may be active again after a reward.  Leave through the
+ # normal recall path so an in-progress gather target cannot hold departure.
+ main.operations.set_stance("recall")
  check(got_wood,"既定優先度の仲間が有限採取場から木材6個を実採取")
  check(await travel("central_trade") and await city_ready(),"採取物を持ち帰り中央都市へ実帰還")
  check(action("claim_supply") and t.claimed.supply==1,"予約外の手持ち木材だけを納品し調達報酬を受領")
+ main.operations.set_stance("normal")
  log_run("supply",supply_before,{"gathered_wood":TownDB.SUPPLY_OFFERS[GameData.Item.WOOD].count,"initial":initial})
  var recovery_before:=counts()
  check(action("accept_recovery") and t.recovery=="outbound","遺失物回収を受注")

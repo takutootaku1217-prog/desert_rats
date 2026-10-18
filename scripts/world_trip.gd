@@ -12,9 +12,13 @@ var progress := 0.0 # 道路のa端からの座標。復路でも燃料用の走
 var direction := 1
 var locations := {} # location -> {entity-id: {type,data,anchor,spent}}
 var ecosystem_epoch := {}
+## 報酬を受け取った時だけ付く、場所ごとの再補充予約。
+## 現在地のノードには触れず、次にその場所を生成する直前にだけ消費する。
+var replenishment_cycle := 0
+var replenishment_pending := {} # location -> positive cycle number
 const FAUNA_RETURN_SECONDS := 120.0
 var next_id := 0
-const FIELDS := ["active","region","phase","road","origin","destination","progress","direction","locations","next_id","ecosystem_epoch"]
+const FIELDS := ["active","region","phase","road","origin","destination","progress","direction","locations","next_id","ecosystem_epoch","replenishment_cycle","replenishment_pending"]
 
 func setup(g) -> void:
  game = g
@@ -130,6 +134,10 @@ func remember(n,spent := false) -> void:
  var old: Dictionary=locations[key()].get(n.world_id,{})
  row["anchor"]=old.get("anchor",_anchor(n.position.x)) if n is ResourceNode and game.quarry.state=="road" else _anchor(n.position.x)
  row["spent"]=spent
+ # 同じ世界IDの最初の状態だけを残す。報酬で戻すのはこの雛形までで、
+ # 途中で落ちた通常のResourceNodeや依頼専用の荷物は雛形化しない。
+ row["initial_data"]=old.get("initial_data",row.data.duplicate(true))
+ row["initial_anchor"]=old.get("initial_anchor",row.anchor)
  if n is Creature:
   row["home_anchor"]=old.get("home_anchor",WorldMapDB.LENGTH*0.5 if key().begins_with("road:") else 1170.0)
   if old.has("return_at"): row["return_at"]=old.return_at
@@ -163,6 +171,46 @@ func sync() -> void:
   if not n.is_queued_for_deletion(): remember(n)
 func consume(n) -> void:
  remember(n,true)
+
+## 3件の繰り返しサブ依頼で、報酬を確定した一度だけ呼ぶ。
+## 補充は時間経過ではなく、この予約を次回入場時に消費して行う。
+func schedule_mission_replenishment() -> int:
+ if not active:return replenishment_cycle
+ replenishment_cycle+=1
+ for location in locations:
+  replenishment_pending[location]=replenishment_cycle
+ return replenishment_cycle
+
+func _location_has_live_nodes(location:String) -> bool:
+ if location!=key():return false
+ return _all_nodes().any(func(n):return not n.is_queued_for_deletion())
+
+func _restore_replenished_row(row:Dictionary) -> void:
+ # ResourceNodeは死骸や途中で落とした物も含むため、通常の採取源ではない。
+ # 補充対象は初期配置のGatherPointと、生存/撃破を保存するCreature/Enemyだけに限定する。
+ if row.type not in ["gather","creature","enemy"]:return
+ var initial:Dictionary=row.get("initial_data",{}).duplicate(true)
+ if not initial.is_empty():row.data=initial
+ row.anchor=float(row.get("initial_anchor",row.anchor))
+ row.spent=false
+ match row.type:
+  "gather":
+   row.data.remaining=int(row.data.max_amount)
+   row.data.work=0.0
+  "creature":
+   row.data.dead=false;row.data.hp=float(row.data.max_hp)
+   row.data._fleeing=false;row.data._wander=0.0;row.data._wander_t=0.0
+   row.erase("return_at")
+  "enemy":
+   row.data.dead=false;row.data.hp=float(row.data.max_hp)
+   row.data.target_index=-1;row.data.provoked_index=-1;row.data.lost_for=0.0;row.data.search_left=0.0;row.data.peaceful_until=0.0
+
+func _apply_pending_replenishment(location:String) -> void:
+ if not replenishment_pending.has(location) or not locations.has(location):return
+ # 画面上の相手・予約中の採取物を置換しない。現在地は出発後の次回入場まで保留する。
+ if _location_has_live_nodes(location):return
+ for row in locations[location].values():_restore_replenished_row(row)
+ replenishment_pending.erase(location)
 func project_resource(n) -> bool:
  if not active or game.quarry.state!="road" or n.world_id=="" or n.has_meta("quarry_id"): return false
  var row: Dictionary=locations.get(key(),{}).get(n.world_id,{})
@@ -174,6 +222,7 @@ func _archive() -> void:
   if n.has_meta("quarry_id"): continue
   n.get_parent().remove_child(n); n.queue_free()
 func _ensure_location() -> void:
+ _apply_pending_replenishment(key())
  if locations.has(key()): return
  locations[key()]={}
  var kinds: Array=WorldMapDB.REGIONS[region].points
@@ -257,6 +306,8 @@ func request_legacy_region() -> bool:
 static func normalized(d: Dictionary) -> Dictionary:
  var result:=d.duplicate(true)
  if not result.has("ecosystem_epoch"):result.ecosystem_epoch={}
+ if not result.has("replenishment_cycle"):result.replenishment_cycle=0
+ if not result.has("replenishment_pending"):result.replenishment_pending={}
  return result
 static func valid(d, g) -> bool:
  if not d is Dictionary:return false
@@ -267,6 +318,7 @@ static func valid(d, g) -> bool:
  if d.phase=="legacy_recall" and d.active: return false
  if d.phase in ["departing","travel","arriving","turning"]:
   if not WorldMapDB.public_road(d.road) or WorldMapDB.road_between(d.origin,d.destination)!=d.road: return false
+ if not d.replenishment_cycle is int or d.replenishment_cycle<0 or not d.replenishment_pending is Dictionary:return false
  var ids:={}
  for location in d.locations:
   if not location is String: return false
@@ -293,12 +345,19 @@ static func valid(d, g) -> bool:
     "enemy": node=Enemy.new(); names=SaveGame.ENEMY
     _: return false
    var ok:bool=SaveGame.shape(SaveGame.enemy_data(row.data) if row.type=="enemy" else row.data,node,names) and row.data.get("world_id")==id
+   if row.has("initial_anchor") and (typeof(row.initial_anchor) not in [TYPE_FLOAT,TYPE_INT] or not is_finite(float(row.initial_anchor))):ok=false
+   if row.has("initial_data"):
+    if not row.initial_data is Dictionary or not SaveGame.shape(SaveGame.enemy_data(row.initial_data) if row.type=="enemy" else row.initial_data,node,names) or row.initial_data.get("world_id")!=id:ok=false
    node.free()
    if not ok: return false
    if row.type=="gather" and (not GatherDB.POINTS.has(row.data.kind) or row.data.remaining<0 or row.data.remaining>row.data.max_amount or row.data.work<0): return false
    if row.type in ["resource","gather"] and row.data.item not in GameData.Item.values(): return false
    if row.type=="creature" and not GameData.CREATURES.has(row.data.species): return false
    if row.type=="enemy" and not EventDB.ENEMIES.has(row.data.kind): return false
+ for location in d.replenishment_pending:
+  if not location is String or not d.locations.has(location):return false
+  var cycle=d.replenishment_pending[location]
+  if not cycle is int or cycle<1 or cycle>d.replenishment_cycle:return false
  return true
 
 ## 保存台帳と表示中の実体は一つの所有者。重複ID・消費済み実体の復活を拒否。

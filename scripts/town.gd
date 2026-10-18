@@ -158,6 +158,12 @@ func abandon_recovery_from_field() -> bool:
 func delivery_status_text() -> String:return {"idle":"未受注","outbound":"%sへ配達中"%WorldMapDB.name_of(TownDB.DELIVERY_TO),"return":"都市へ帰還","ready":"報酬未受領"}.get(delivery,delivery)
 func recovery_status_text() -> String:return {"idle":"未受注","outbound":"%sへ向かう"%recovery_target_text(),"site":"現地で仲間が回収待ち","loading":"仲間が遺失物へ移動中","carried":"仲間が拠点へ運搬中","return":"都市へ帰還","ready":"報酬未受領"}.get(recovery,recovery)
 
+## Only successful reward claims call this. execute clears its ticket first, so a
+## duplicate click or replayed quote cannot schedule another replenishment.
+func _claim_repeatable_mission(id:String) -> void:
+ claimed[id]=int(claimed.get(id,0))+1
+ game.world.schedule_mission_replenishment()
+
 func observe() -> void:
  if delivery=="outbound" and game.world.region==TownDB.DELIVERY_TO and game.world.phase=="stopped":
   delivery="return";delivery_cargo=false
@@ -299,15 +305,18 @@ func execute(q:Dictionary) -> bool:
   "accept_supply":
    var offer:Dictionary=TownDB.SUPPLY_OFFERS[q.item]
    supply="accepted";supply_item=q.item;supply_count=offer.count;supply_reward=offer.reward
-  "claim_supply":game.storage.inventory.take_n(supply_item,supply_count);supply="idle";claimed.supply+=1
+  "claim_supply":
+   game.storage.inventory.take_n(supply_item,supply_count);supply="idle";_claim_repeatable_mission("supply")
   "accept_delivery":
    delivery="outbound";delivery_cargo=true
    var issued:float=minf(delivery_advance_remaining(),GameData.FUEL_CAP-game.base.fuel)
    if issued>0.0:
     game.base.fuel+=issued;delivery_advance_given+=issued
-  "claim_delivery":delivery="idle";delivery_cargo=false;delivery_advance_given=0.0;claimed.delivery+=1
+  "claim_delivery":
+   delivery="idle";delivery_cargo=false;delivery_advance_given=0.0;_claim_repeatable_mission("delivery")
   "accept_recovery":recovery="outbound";recovery_worker=-1
-  "claim_recovery":recovery="idle";recovery_worker=-1;claimed.recovery+=1
+  "claim_recovery":
+   recovery="idle";recovery_worker=-1;_claim_repeatable_mission("recovery")
   "claim_legacy_help":legacy_help_credit=0
   "cancel_supply":supply="idle"
   "cancel_delivery":delivery="idle";delivery_cargo=false # 前渡しフラグは完了まで保持し、取消再受注で燃料を増やさない。
