@@ -299,15 +299,15 @@ func execute(q:Dictionary) -> bool:
   "accept_supply":
    var offer:Dictionary=TownDB.SUPPLY_OFFERS[q.item]
    supply="accepted";supply_item=q.item;supply_count=offer.count;supply_reward=offer.reward
-  "claim_supply":game.storage.inventory.take_n(supply_item,supply_count);supply="idle";claimed.supply+=1
+  "claim_supply":game.storage.inventory.take_n(supply_item,supply_count);supply="idle";claimed.supply+=1;game.quarry.schedule_mission_replenishment()
   "accept_delivery":
    delivery="outbound";delivery_cargo=true
    var issued:float=minf(delivery_advance_remaining(),GameData.FUEL_CAP-game.base.fuel)
    if issued>0.0:
     game.base.fuel+=issued;delivery_advance_given+=issued
-  "claim_delivery":delivery="idle";delivery_cargo=false;delivery_advance_given=0.0;claimed.delivery+=1
+  "claim_delivery":delivery="idle";delivery_cargo=false;delivery_advance_given=0.0;claimed.delivery+=1;game.quarry.schedule_mission_replenishment()
   "accept_recovery":recovery="outbound";recovery_worker=-1
-  "claim_recovery":recovery="idle";recovery_worker=-1;claimed.recovery+=1
+  "claim_recovery":recovery="idle";recovery_worker=-1;claimed.recovery+=1;game.quarry.schedule_mission_replenishment()
   "claim_legacy_help":legacy_help_credit=0
   "cancel_supply":supply="idle"
   "cancel_delivery":delivery="idle";delivery_cargo=false # 前渡しフラグは完了まで保持し、取消再受注で燃料を増やさない。
