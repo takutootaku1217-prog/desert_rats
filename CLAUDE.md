@@ -1092,6 +1092,30 @@ HUD/仲間詳細PNGを成功生成した。Computer Useがネイティブウィ�
 
 暫定しきい値は30。現地・都市・即時応急の各修理は実際に回復した`DRIVE`量だけ蓄積を減らし、速度復帰は従来どおり手動のままとした。`rear_engine_damage`を保存し、旧セーブでフィールドが無い場合は0を補完するので、単に`DRIVE`が低い旧セーブは漏れない。クラウドGodot 4.6.3で重点回帰を実行し、Windows実機でのこの修正の検証は未実施として最終報告で分離する。
 
+### 2026-10-18 Continuous two-lane-width normal-map rollout (isolated worktree)
+
+The ordinary WorldTrip map now uses a shallow continuous outdoor depth strip rather
+than fixed crossings: back/front anchors are world Y=570/625 (55 px), and every X
+can move continuously between them. All public regions and roads, quarry resources,
+default CharacterAI targets, ecological movement, dynamic drops, and restored
+outdoor records are contained in the strip. Existing interior floor/ramp positions
+are retained, as are legacy-world-test fixtures. The save schema is unchanged:
+in-band positions stay continuous; only exterior resource/fauna/enemy positions
+outside the strip clamp to it. A city action no longer waits on an indoor crew's
+unstarted target after a location archive.
+
+Evidence is in `docs/2レーン連続奥行き帯_通常屋外展開_検証記録_2026-10-18.md` and
+`docs/two-lane-world-rollout-evidence-2026-10-18/`. Isolated Windows Godot 4.7.2
+passed import, `test_two_lane_live_integration`, `test_world_flow`,
+`test_world_boundaries`, `test_world_fauna`, `test_world_reencounter`, legacy
+`test_save_game`, and the exhausted normal-map delivery/recovery subcase. The full
+core suite must be rerun after committing because this host terminates one command
+at ~30 seconds; no failing core regression remains in the focused coverage.
+
+Workspace: `C:\Users\user\Documents\Codex\2026-10-18\task-3\desert_rats`; branch
+`gpt/prototype-ground-two-lanes`; original PC checkout, `main`, saves, and stash
+`09e6de75e16a7e695b1c47d88650189dadf5f979` were not changed.
+
 ### 2026-10-18 Fuel-tank status wording (isolated worktree)
 
 The existing rear-only `rear_engine_damage` is now presented as Fuel tank: normal,

@@ -45,9 +45,9 @@ func _initialize():
  check(main.world.next_id==ids,"生成済み地域への草食獣の追加・補充なし")
  for kind in ["paraceratherium","dune_horn"]:
   for e in main.enemies_root.get_children():main.enemies_root.remove_child(e);e.free()
-  var e:=Enemy.new();e.setup_kind(main,kind);e.ecological=true;e.position=Vector2(650,680);e.home_x=650;main.enemies_root.add_child(e)
+  var e:=Enemy.new();e.setup_kind(main,kind);e.ecological=true;e.position=Vector2(650,625);e.home_x=650;main.enemies_root.add_child(e)
   var w=main.workers[0];var other=main.workers[1]
-  w.floor_i=0;w.position=Vector2(620,680);w.hp=100;other.floor_i=0;other.position=Vector2(640,680);other.hp=100
+  w.floor_i=0;w.position=Vector2(620,625);w.hp=100;other.floor_i=0;other.position=Vector2(640,625);other.hp=100
   var hull:float=main.base.parts[GameData.Part.HULL]
   for i in 20:e._tick_ecology(0.2)
   check(w.hp==100 and other.hp==100 and e.target_index==-1 and not e.threatens(w),kind+" 未挑発は中立・自動標的にならない")

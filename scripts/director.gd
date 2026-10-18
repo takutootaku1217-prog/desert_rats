@@ -163,6 +163,8 @@ func enemy_killed(e) -> void:
 			r.item = it
 			r.position = e.position + Vector2(randf_range(-30, 30), randf_range(-10, 10))
 			r.position.y = clampf(r.position.y, game.SPAWN_Y_MIN, game.SPAWN_Y_MAX)
+			if game.world.depth_strip_active():
+				r.position.y = game.world.clamp_outdoor_y(r.position.y)
 			game.resources_root.call_deferred("add_child", r)
 
 
@@ -332,6 +334,8 @@ func _apply_instant(id: String, d: Dictionary) -> void:
 				r.game = game
 				r.item = items[_weighted(ws2)]
 				r.position = Vector2(game.SPAWN_X + i * 60.0, randf_range(game.SPAWN_Y_MIN + 4.0, game.SPAWN_Y_MAX - 4.0))
+				if game.world.depth_strip_active():
+					r.position.y = game.world.clamp_outdoor_y(r.position.y)
 				game.resources_root.add_child(r)
 			_log(d["text"])
 		"ruins_small", "ruins_large":

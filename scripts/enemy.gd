@@ -161,14 +161,21 @@ func _tick_ecology(delta: float) -> void:
 			var w=game.workers[i]
 			if _visible_worker(w) and (behavior()!="neutral" or provoked_index==i):
 				target_index=i;target=w;break
-	var destination:=home_x
+	var destination:=Vector2(home_x,position.y)
 	if target!=null:
 		# 仲間が車内へ入ったらその位置へ潜り込まない。入口で短く探す。
-		destination=target.position.x if target.floor_i==0 else GameData.RAMP_FOOT.x
+		if target.floor_i==0:
+			destination=Vector2(target.position.x,game.world.clamp_outdoor_y(target.position.y))
+		else:
+			destination.x=GameData.RAMP_FOOT.x
 	elif behavior().begins_with("hull") and absf(hull_attack_point().x-position.x)<=SIGHT and absf(hull_attack_point().x-home_x)<=territory():
-		destination=hull_attack_point().x
-	elif search_left>0: destination=position.x
-	position.x=move_toward(position.x,destination,run_speed*delta)
+		destination.x=hull_attack_point().x
+	elif search_left>0:
+		destination.x=position.x
+	if game.world.depth_strip_active():
+		position=position.move_toward(destination,run_speed*delta)
+	else:
+		position.x=move_toward(position.x,destination.x,run_speed*delta)
 	_atk_timer-=delta
 	if _atk_timer<=0:
 		_atk_timer=1.0

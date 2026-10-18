@@ -32,7 +32,6 @@ func _clear(parent: Node) -> void:
 
 
 func _configure() -> void:
-	main.set_meta("ground_depth_strip_config", {"enabled": true, "back_y": 570.0, "front_y": 625.0})
 	main.process_mode = Node.PROCESS_MODE_DISABLED
 	main.director.enabled = false
 	main.target_speed = 0.0

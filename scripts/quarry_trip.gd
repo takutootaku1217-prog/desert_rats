@@ -152,7 +152,8 @@ func _arrive() -> void:
 	state = "parked"
 	game.scroll_speed = 0.0
 	visits += 1
-	for d in QuarryDB.POINTS:
+	for i in QuarryDB.POINTS.size():
+		var d: Dictionary = QuarryDB.POINTS[i]
 		var p := GatherPoint.new()
 		# 固定地点を訪れるたびに残量を抽選し直さない。
 		p.game = game
@@ -162,11 +163,20 @@ func _arrive() -> void:
 		p.remaining = remaining[d["id"]]
 		p.work = float(progress.get(d["id"], 0.0))
 		p.position = d["pos"]
+		if game.world.depth_strip_active():
+			p.position.y = game.world.outdoor_depth_y(i)
 		p.set_meta("quarry_id", d["id"])
 		p.set_meta("quarry_group", d["group"])
 		game.resources_root.add_child(p)
 		points.append(p)
 	game.director.note("%sに停車。周囲の生物を目視し、危険なら呼戻し。食料・天候・車体消耗にも注意" % QuarryDB.NAME)
+
+func depth_position(pos: Vector2, quarry_id: String) -> Vector2:
+	var result := pos
+	if not game.world.active or not game.world.depth_strip_active():
+		return result
+	result.y = game.world.clamp_outdoor_y(result.y)
+	return result
 
 func allowed_resource(r) -> bool:
 	return not r.has_meta("quarry_id") or not near_only or r.get_meta("quarry_group") == "近場"

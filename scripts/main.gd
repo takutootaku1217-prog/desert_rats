@@ -91,6 +91,10 @@ var _over_layer: CanvasLayer
 const SPAWN_X := 1330.0
 const SPAWN_Y_MIN := GameData.GROUND_Y_MIN + 4.0
 const SPAWN_Y_MAX := GameData.GROUND_Y_MAX - 4.0
+## Normal map outdoor space: a shallow continuous strip with two readable
+## front/back resting lanes. Interior floors keep their existing coordinates.
+const OUTDOOR_DEPTH_BACK_Y := 570.0
+const OUTDOOR_DEPTH_FRONT_Y := 625.0
 
 const WORKER_DEFS := [
 	{"name": "ネズ吉", "palette": "grey",
@@ -117,6 +121,10 @@ func _ready() -> void:
 		seed(int(get_meta("diagnostic_seed")))
 	else:
 		randomize()
+	# The normal WorldTrip map uses the continuous depth strip. Legacy test
+	# fixtures intentionally retain their former free ground range.
+	if not OS.get_cmdline_user_args().has("legacy-world-test"):
+		set_meta("ground_depth_strip_config", {"enabled": true, "back_y": OUTDOOR_DEPTH_BACK_Y, "front_y": OUTDOOR_DEPTH_FRONT_Y})
 	director = Director.new()       # 出来事（base や仲間より先に作る。倍率を読まれるため）
 	director.setup(self)
 	quarry.setup(self)
@@ -613,11 +621,14 @@ func keep_outside(item: int, n: int, pos: Vector2) -> void:
 	if quarry.sheltered():
 		quarry.keep_overflow(item, n)
 	else:
+		var outdoor_pos := pos
+		if world.depth_strip_active():
+			outdoor_pos.y = world.clamp_outdoor_y(outdoor_pos.y)
 		for i in n:
 			var r := ResourceNode.new()
 			r.game = self
 			r.item = item
-			r.position = pos
+			r.position = outdoor_pos
 			resources_root.add_child(r)
 	director.note("積載上限: %s×%dを外に残しました" % [GameData.ITEM_NAMES[item], n])
 
@@ -1386,6 +1397,8 @@ func on_creature_killed(c) -> void:
 	r.item = GameData.Item.CARCASS
 	r.species = c.species
 	r.position = c.position
+	if world.depth_strip_active():
+		r.position.y = world.clamp_outdoor_y(r.position.y)
 	resources_root.add_child(r)
 	last_carcass = r
 
@@ -1428,6 +1441,8 @@ func _spawn_resource_at(item: int, pos: Vector2) -> void:
 	r.game = self
 	r.item = item
 	r.position = pos
+	if world.depth_strip_active():
+		r.position.y = world.clamp_outdoor_y(r.position.y)
 	resources_root.call_deferred("add_child", r)
 
 

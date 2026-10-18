@@ -394,6 +394,7 @@ static func apply(g, d: Dictionary) -> bool:
 	g.procurement_goals=plan.get("goals",{}).duplicate(true)
 	g.cancel_facility_pack()
 	put(g.world,WorldTrip.normalized(d.world),WorldTrip.FIELDS)
+	g.world.normalize_outdoor_depth()
 	put(g.operations,d.get("operations",fields(FieldOperations.new(),FieldOperations.FIELDS)),FieldOperations.FIELDS)
 	put(g,d.main,MAIN); put(g.base,base_data(d.base),BASE); put(g.processor,processor_data(d.processor),PROCESSOR)
 	g.storage.inventory.counts = d.inventory.duplicate(true)
@@ -423,13 +424,18 @@ static func apply(g, d: Dictionary) -> bool:
 		if not row.gather.is_empty(): put(r,row.gather,GATHER)
 		if row.quarry_id != "":
 			r.set_meta("quarry_id",row.quarry_id); r.set_meta("quarry_group",row.quarry_group)
+			r.position = g.quarry.depth_position(r.position,row.quarry_id)
 			g.quarry.points.append(r)
+		else:
+			g.world.normalize_outdoor_node(r)
 		g.resources_root.add_child(r); resources.append(r)
 	for row in d.creatures:
 		var c := Creature.new(); c.game = g; put(c,row,CREATURE)
+		g.world.normalize_outdoor_node(c)
 		g.creatures_root.add_child(c); creatures.append(c)
 	for row in d.enemies:
 		var e := Enemy.new(); e.game = g; put(e,enemy_data(row),ENEMY)
+		g.world.normalize_outdoor_node(e)
 		g.enemies_root.add_child(e); enemies.append(e)
 	for i in d.crew.size():
 		var w = g.workers[i]; var row: Dictionary = d.crew[i]

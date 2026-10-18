@@ -722,13 +722,13 @@ func _can_reach(r) -> bool:
 func _res_target() -> Vector2:
 	# 資源の少し手前（拠点側）。地面の範囲に収める。
 	var p: Vector2 = res.position + Vector2(-40, 0)
-	p.y = clampf(p.y, GameData.GROUND_Y_MIN, GameData.GROUND_Y_MAX)
+	p.y = game.world.clamp_outdoor_y(p.y) if ch.floor_i == 0 else clampf(p.y, GameData.GROUND_Y_MIN, GameData.GROUND_Y_MAX)
 	return p
 
 
 func _prey_target() -> Vector2:
 	var p: Vector2 = prey.position + Vector2(-30, 0)
-	p.y = clampf(p.y, GameData.GROUND_Y_MIN, GameData.GROUND_Y_MAX)
+	p.y = game.world.clamp_outdoor_y(p.y) if ch.floor_i == 0 else clampf(p.y, GameData.GROUND_Y_MIN, GameData.GROUND_Y_MAX)
 	return p
 
 

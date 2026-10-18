@@ -20,6 +20,35 @@ const FAUNA_RETURN_SECONDS := 120.0
 var next_id := 0
 const FIELDS := ["active","region","phase","road","origin","destination","progress","direction","locations","next_id","ecosystem_epoch","replenishment_cycle","replenishment_pending"]
 
+func _depth_config() -> Dictionary:
+ if game==null or not is_instance_valid(game) or not game.has_meta("ground_depth_strip_config"):return {}
+ var config=game.get_meta("ground_depth_strip_config")
+ return config if config is Dictionary and bool(config.get("enabled",false)) else {}
+func depth_strip_active() -> bool:return not _depth_config().is_empty()
+func clamp_outdoor_y(y:float) -> float:
+ var config:=_depth_config()
+ return clampf(y,float(config.back_y),float(config.front_y)) if not config.is_empty() else y
+func outdoor_depth_y(index:int) -> float:
+ var config:=_depth_config()
+ if config.is_empty():return GameData.GROUND_Y_MIN
+ return float(config.front_y) if index%2 else float(config.back_y)
+func _depth_index(id:String,fallback:int) -> int:
+ var suffix:=id.trim_prefix("entity_")
+ return int(suffix) if suffix.is_valid_int() else fallback
+func _normalize_depth_data(row:Dictionary,index:int) -> void:
+ for key in ["data","initial_data"]:
+  if row.get(key) is Dictionary and row[key].get("position") is Vector2:
+   row[key].position.y=clamp_outdoor_y(row[key].position.y)
+func normalize_outdoor_depth() -> void:
+ if not active or not depth_strip_active():return
+ for location in locations:
+  var fallback:=0
+  for id in locations[location]:
+   _normalize_depth_data(locations[location][id],_depth_index(id,fallback));fallback+=1
+func normalize_outdoor_node(n,fallback:=0) -> void:
+ if not active or not depth_strip_active() or n==null or not (n.get("position") is Vector2):return
+ n.position.y=clamp_outdoor_y(n.position.y)
+
 func setup(g) -> void:
  game = g
  # 旧ループの診断だけ明示的に互換経路を使う。通常の起動は必ず地図モード。
@@ -39,6 +68,13 @@ func ready_reason() -> String:
  for w in game.workers:
   if w.away or w.floor_i == 0 or w._climb_dest != null or w.carrying >= 0 or not w.carry_bonus.is_empty() or game.town.recovery_carried_by(w): return "仲間と荷物の帰還・荷卸し待ち"
   for target in [w.ai.res,w.ai.prey,w.ai.enemy]:
+   # Indoor crews can have just selected a newly spawned outdoor target.
+   # Departure will archive it before they leave, so an unstarted plan must
+   # not block an otherwise ready city action.
+   if w.floor_i != 0 and w._climb_dest == null: continue
+   # Archived outdoor nodes remain reference-valid until the deferred free.
+   # They cannot be resumed, so they should not block city actions.
+   if is_instance_valid(target) and target.is_queued_for_deletion(): continue
    if is_instance_valid(target): return "屋外作業の予約解除待ち"
  return ""
 func request(to: String, planned := false) -> bool:
@@ -223,6 +259,7 @@ func _archive() -> void:
   n.get_parent().remove_child(n); n.queue_free()
 func _ensure_location() -> void:
  _apply_pending_replenishment(key())
+ normalize_outdoor_depth()
  if locations.has(key()): return
  locations[key()]={}
  var kinds: Array=WorldMapDB.REGIONS[region].points
@@ -234,21 +271,21 @@ func _ensure_location() -> void:
   var anchor := i*WorldMapDB.LENGTH/float(count) if travelling else 1070.0+i*90.0
   if not travelling and region=="south_oasis" and p.kind=="tree": p.max_amount=36;p.remaining=36
   if not travelling and region=="south_oasis" and p.kind=="vein": p.max_amount=4;p.remaining=4
-  p.position=Vector2(_x(anchor),630.0+(i%3)*20.0)
+  p.position=Vector2(_x(anchor),outdoor_depth_y(i) if depth_strip_active() else 630.0+(i%3)*20.0)
   remember(p); locations[key()][p.world_id].anchor=anchor; p.free()
  # 既存の野生生物も有限枠。出入りで新しい獲物を配らない。
  if region!="old_mine" or travelling:
   var species:String=("lizard" if road in ["01","04"] else "hump") if travelling else WorldMapDB.REGIONS[region].get("creature","hare")
   var c:=Creature.new(); c.setup(game,species)
   var anchor:=WorldMapDB.LENGTH*0.5 if travelling else 1170.0
-  c.position=Vector2(_x(anchor),680)
+  c.position=Vector2(_x(anchor),outdoor_depth_y(count) if depth_strip_active() else 680.0)
   remember(c); locations[key()][c.world_id].anchor=anchor; c.free()
  # 固定個体枠。死亡後は補充しない。120秒ごとに生きている個体の滞在範囲だけ変化。
  if not travelling:
   var roster:Array={"south_oasis":[],"east_sands":["dust_guard","dune_horn"],"central_trade":["paraceratherium"],"old_mine":["sand_stalker","hull_breaker","dust_guard"]}.get(region,[])
   for i in roster.size():
    var e:=Enemy.new();e.setup_kind(game,roster[i]);e.ecological=true
-   e.position=Vector2(1080.0 if e.herbivore() else 350.0+i*160.0,680);e.home_x=e.position.x
+   e.position=Vector2(1080.0 if e.herbivore() else 350.0+i*160.0,outdoor_depth_y(count+i+1) if depth_strip_active() else 680.0);e.home_x=e.position.x
    remember(e);e.free()
  ecosystem_epoch[key()]=floori(game.director.elapsed/120.0)
 
@@ -294,6 +331,7 @@ func _spawn_visible() -> void:
   n.game=game
   SaveGame.put(n,row.data,row.data.keys())
   n.position.x=x
+  normalize_outdoor_node(n,_depth_index(id,0))
   parent.add_child(n)
 
 func request_legacy_region() -> bool:

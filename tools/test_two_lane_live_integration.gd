@@ -7,11 +7,9 @@ const FRONT_Y := 625.0
 
 
 func _configure_depth_strip() -> void:
-	main.set_meta("ground_depth_strip_config", {
-		"enabled": true,
-		"back_y": BACK_Y,
-		"front_y": FRONT_Y,
-	})
+	check(main.world.depth_strip_active(), "normal map starts with the continuous depth strip")
+	var config: Dictionary = main.get_meta("ground_depth_strip_config")
+	check(is_equal_approx(float(config.back_y), BACK_Y) and is_equal_approx(float(config.front_y), FRONT_Y), "normal map uses the documented back/front depth anchors")
 	main.target_speed = 0.0
 	main.tool_auto = false
 	main.gather_policy = {GameData.Item.WOOD: 0, GameData.Item.STONE: 0, GameData.Item.IRON_ORE: 5}
@@ -53,11 +51,73 @@ func _sample_depth_motion(worker, xs: Array) -> bool:
 
 
 func _initialize() -> void:
-	print("-- continuous two-lane-width depth strip: live Main/AI --")
+	print("-- continuous two-lane-width depth strip: normal map rollout --")
+	await _world_locations_quarry_and_save()
 	await _gather_and_haul()
 	await _combat_return_and_selection()
+	if fails == 0:
+		print("DEPTH_ROLLOUT_OK")
 	print("== result: %s ==" % ("all passed" if fails == 0 else "%d failures" % fails))
 	quit(1 if fails else 0)
+
+
+func _location(region: String, road := "") -> void:
+	main.world._archive()
+	main.world.region = region
+	main.world.road = road
+	main.world.progress = 0.0
+	main.world.direction = 1
+	main.world.phase = "stopped" if road == "" else "travel"
+	main.world.origin = "" if road == "" else WorldMapDB.ROADS[road][0]
+	main.world.destination = "" if road == "" else WorldMapDB.ROADS[road][1]
+	main.world._ensure_location()
+
+
+func _lane_y(y: float) -> bool:
+	return is_equal_approx(y, BACK_Y) or is_equal_approx(y, FRONT_Y)
+
+
+func _world_locations_quarry_and_save() -> void:
+	await fresh()
+	_configure_depth_strip()
+	for region in WorldMapDB.REGIONS:
+		if WorldMapDB.public_region(region):
+			_location(region)
+	for road in WorldMapDB.ROADS:
+		if WorldMapDB.public_road(road):
+			_location(WorldMapDB.ROADS[road][0], road)
+	var all_rows_in_lanes := true
+	for records in main.world.locations.values():
+		for row in records.values():
+			all_rows_in_lanes = all_rows_in_lanes and _lane_y(row.data.position.y) and _lane_y(row.initial_data.position.y)
+	check(all_rows_in_lanes, "all normal regions and public roads assign resources, fauna, and ecological enemies to the two outdoor depth anchors")
+	main.world._archive()
+	main.quarry._arrive()
+	check(main.quarry.points.size() == QuarryDB.POINTS.size() and main.quarry.points.all(func(point): return _lane_y(point.position.y)), "quarry resources use the same two depth anchors")
+	await fresh()
+	_configure_depth_strip()
+	var snapshot := SaveGame.capture(main)
+	for records in snapshot.world.locations.values():
+		for row in records.values():
+			row.data.position.y = 680.0
+			row.initial_data.position.y = 680.0
+	for row in snapshot.resources:
+		if row.quarry_id == "":
+			row.resource.position.y = 680.0
+	for row in snapshot.creatures:
+		row.position.y = 680.0
+	for row in snapshot.enemies:
+		row.position.y = 680.0
+	for row in snapshot.crew:
+		if row.worker.floor_i == 0:
+			row.worker.position.y = 680.0
+	check(SaveGame.apply(main, snapshot), "older continuous outdoor Y values load without changing save format")
+	var restored_lanes := true
+	for records in main.world.locations.values():
+		for row in records.values():
+			restored_lanes = restored_lanes and _lane_y(row.data.position.y) and _lane_y(row.initial_data.position.y)
+	restored_lanes = restored_lanes and main.workers.filter(func(worker): return worker.floor_i == 0).all(func(worker): return worker.position.y >= BACK_Y and worker.position.y <= FRONT_Y)
+	check(restored_lanes, "loaded outdoor records normalize to the depth strip while interior floors retain their saved positions")
 
 
 func _gather_and_haul() -> void:
@@ -106,6 +166,15 @@ func _combat_return_and_selection() -> void:
 	main.enemies_root.add_child(enemy)
 	var full_hp: float = enemy.hp
 	check(main._pick_worker_at(Vector2(780.0, BACK_Y)) == back_worker and main._pick_worker_at(Vector2(780.0, FRONT_Y)) == front_worker, "same-X back/front workers are chosen by visible depth")
+	var tracker := Enemy.new()
+	tracker.setup_kind(main, "dust_guard")
+	tracker.ecological = true
+	tracker.position = Vector2(850.0, BACK_Y)
+	tracker.home_x = tracker.position.x
+	tracker.target_index = main.workers.find(front_worker)
+	main.enemies_root.add_child(tracker)
+	tracker._process(0.2)
+	check(tracker.position.y > BACK_Y and tracker.position.y < FRONT_Y, "ecological pursuit enters the target depth at its current X instead of a fixed crossing")
 	check(worker.ai.order_attack(enemy), "normal CharacterAI accepts a cross-depth attack order")
 	await _step_live()
 	var started_through_depth: bool = worker.position.y > BACK_Y + 2.0 and worker.position.y < FRONT_Y - 2.0
