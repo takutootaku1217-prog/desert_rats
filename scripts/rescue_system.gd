@@ -126,6 +126,7 @@ func _finish_delivery(carrier, target, r: Dictionary) -> void:
 	else:
 		target.down = false
 		target.hp = maxf(target.hp, SIMPLE_TREAT_HP)
+		target.unload_owned()
 		target.ai._set_state(CharacterAI.State.SEARCH)
 
 func revive_at_city(w) -> bool:

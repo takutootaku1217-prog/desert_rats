@@ -31,6 +31,12 @@ func _initialize():
  b.away=true; check(not main.unequip_work_support(b),"遠征中は変更拒否"); b.away=false
  CrewStatus.damage(b,1000)
  check(b.down and b.work_support==ITEM and not main.unequip_work_support(b),"戦闘不能でも保持・変更拒否")
+ check(main.rescue.assign(a,b),"manual rescue designation accepts a full support carrier")
+ for n in 100:
+  main.rescue.carrier_tick(a,0.1)
+  if not b.down: break
+ check(not b.down and b.hp>=RescueSystem.SIMPLE_TREAT_HP,"rescue return replaces natural revival")
+ main.rescue.resume(a);main.rescue.resume(b)
  CrewStatus._tick_hp(b,1000); check(not b.down and b.work_support==ITEM,"復帰で同一装備保持（死亡削除なし）")
  check(main.unequip_work_support(b),"復帰後に解除")
  var old:=SaveGame.capture(main)
@@ -52,8 +58,14 @@ func _initialize():
  a.set_priority(GameData.Job.HAUL,0);main.cancel_transfers()
  check(a.carry_n==5 and a.work_support==ITEM,"優先度変更/残注文取消でも現在の5個保持")
  CrewStatus.damage(a,1000)
- check(a.down and a.work_support==ITEM and main.storage.count_of(GameData.Item.WOOD)==10 and main.storage.current_weight()==weight,"運搬中戦闘不能でも10個全量と装備重量を保全")
+ check(a.down and a.work_support==ITEM and a.carry_n==5 and main.storage.count_of(GameData.Item.WOOD)==5 and main.storage.current_weight()==weight,"downed hauler retains five personal cargo; reservation is released without duplication")
  CrewStatus._tick_hp(a,1000)
+ check(main.rescue.assign(b,a),"second manual rescue designation succeeds after reservation release")
+ for n in 1000:
+  main.rescue.carrier_tick(b,0.1)
+  if not a.down: break
+ check(not a.down and a.carrying<0 and main.storage.count_of(GameData.Item.WOOD)==10,"rescue reaches base, unloads retained cargo once, and avoids loss or duplication")
+ main.rescue.resume(a);main.rescue.resume(b)
  check(not a.down and a.work_support==ITEM and roundtrip(),"戦闘不能から復帰・保存再開で装備を保持")
  var bare:int=await compare_transfer(false,false)
  var armed:int=await compare_transfer(true,false)
@@ -61,9 +73,15 @@ func _initialize():
  check(bare==5 and armed==3 and changed==5,"同じ15個の実運搬: 基本5便→装備3便。1便目5個で解除後は次から3個")
  print("BENEFIT 15 wood: bare=",bare," framed=",armed," midtrip_off=",changed)
  await fresh()
+ SaveGame.select_current_run() # Explicitly choose the new neutral run before manual fixture input.
  main.target_speed=0; park_fixture()
  a=main.workers[0];main.storage.store_owned(ITEM,1);main.equip_work_support(a)
+ main.storage.store_owned(GameData.Item.HAMMER,1);main.manage_tools()
  a.priorities[GameData.Job.GATHER]=5
+ main.manage_tools()
+ main.rescue.resume(a)
+ var mine_tool:int=int(a.tools.get("mine",-1))
+ check(mine_tool in GatherDB.TOOLS and GatherDB.slot_of_tool(mine_tool)=="mine","existing tool-management assigns a valid mining tool")
  check(await until(func():return a.ai.res is GatherPoint,50),"実AIで採取予約")
  var limit:int=a.ai.bag_limit
  check(limit==5 and a.ai.res.reserved==5,"採取予約は装備者5個")
