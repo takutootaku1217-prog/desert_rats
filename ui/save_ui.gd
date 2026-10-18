@@ -87,7 +87,9 @@ func close() -> void:
 	if not is_open(): return
 	# Closing the neutral resume choice means the player deliberately begins a
 	# fresh run from the current scene; foreign checkpoints must not be adopted.
-	if not SaveGame.run_selected: SaveGame.select_current_run()
+	if not SaveGame.run_selected:
+		SaveGame.select_current_run()
+		if not SaveGame.write_checkpoint(game, true): game.director.note("初期チェックポイントを保存できませんでした: " + SaveGame.last_error)
 	_overlay.hide()
 	_action = ""
 	get_tree().paused = _was_paused
