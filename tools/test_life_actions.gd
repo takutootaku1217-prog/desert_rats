@@ -78,6 +78,9 @@ func _reset(w) -> void:
 	w._climb_dest = null
 	w.ai.eat_wait = 0.0
 	w.ai.timer = 0.0
+	w.ai.return_request = false
+	w.ai.rescue_target = -1
+	w.ai.post_rescue_wait = false
 	w.ai._set_state(CharacterAI.State.SEARCH)
 
 

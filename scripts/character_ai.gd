@@ -257,9 +257,12 @@ func tick(delta: float) -> void:
 		return
 	if ch.down:
 		return
-	if ch.hp <= CrewStatusDB.MAX_HP * 0.30 and not return_request:
+	var rescue_carrier: bool = game.rescue != null and game.rescue.is_carrier(ch)
+	# The automatic low-HP withdrawal is an interruption rule for a rescue
+	# carrier. Other workers retain their established low-HP rest behavior.
+	if rescue_carrier and ch.hp <= CrewStatusDB.MAX_HP * 0.30 and not return_request:
 		return_request = true
-	if game.rescue != null and game.rescue.is_carrier(ch) and (return_request or game.operations.stance == "recall" or ch.hp <= CrewStatusDB.MAX_HP * 0.30):
+	if rescue_carrier and (return_request or game.operations.stance == "recall" or ch.hp <= CrewStatusDB.MAX_HP * 0.30):
 		game.rescue.cancel_carrier(ch)
 	if game.rescue != null and game.rescue.carrier_tick(ch, delta):
 		return
@@ -282,7 +285,7 @@ func tick(delta: float) -> void:
 		return
 	# A personal withdrawal is an explicit, persistent order. It can interrupt
 	# meals and field repairs; group recall retains its existing safe boundaries.
-	var personal_withdrawal: bool = return_request and (ch.floor_i == 0 or ch._climb_dest != null or state in [State.NOTICE, State.MOVE_TO_RESOURCE, State.GATHER, State.MOVE_TO_STORAGE, State.STORE, State.HAUL_TAKE, State.HAUL_MOVE, State.MOVE_TO_MACHINE, State.PROCESS, State.XFER_TAKE, State.XFER_MOVE, State.REFUEL_TAKE, State.REFUEL_MOVE, State.REFUEL, State.HUNT_MOVE, State.HUNT_ATTACK, State.COMBAT_MOVE, State.COMBAT, State.MISSION_RECOVERY_MOVE, State.MISSION_RECOVERY_LOAD, State.MISSION_RECOVERY_RETURN, State.REPAIR_TAKE, State.REPAIR_MOVE, State.REPAIR, State.EAT_TAKE, State.EAT, State.REST_MOVE, State.REST, State.REST_HERE])
+	var personal_withdrawal: bool = return_request and (ch.floor_i == 0 or ch._climb_dest != null or state in [State.IDLE, State.SEARCH, State.NOTICE, State.MOVE_TO_RESOURCE, State.GATHER, State.MOVE_TO_STORAGE, State.STORE, State.HAUL_TAKE, State.HAUL_MOVE, State.MOVE_TO_MACHINE, State.PROCESS, State.XFER_TAKE, State.XFER_MOVE, State.REFUEL_TAKE, State.REFUEL_MOVE, State.REFUEL, State.HUNT_MOVE, State.HUNT_ATTACK, State.COMBAT_MOVE, State.COMBAT, State.MISSION_RECOVERY_MOVE, State.MISSION_RECOVERY_LOAD, State.MISSION_RECOVERY_RETURN, State.REPAIR_TAKE, State.REPAIR_MOVE, State.REPAIR, State.EAT_TAKE, State.EAT, State.REST_MOVE, State.REST, State.REST_HERE])
 	var group_recall: bool = (retreating or game.operations.stance == "recall") and (ch.floor_i == 0 or ch._climb_dest != null or state in [State.NOTICE,State.MOVE_TO_RESOURCE,State.GATHER,State.HUNT_MOVE,State.HUNT_ATTACK,State.COMBAT_MOVE,State.COMBAT,State.MISSION_RECOVERY_MOVE,State.MISSION_RECOVERY_LOAD,State.MISSION_RECOVERY_RETURN])
 	if personal_withdrawal or group_recall:
 		if _recall_tick(delta): return

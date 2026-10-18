@@ -50,9 +50,10 @@ func _initialize() -> void:
 	carrier.position = Vector2(720, GameData.LO_Y)
 	injured.position = Vector2(920, GameData.LO_Y)
 	check(main.rescue.assign(carrier, injured), "deck-side rescue can be assigned for return interruption")
-	carrier.ai.return_request = true
+	carrier.hp = CrewStatusDB.MAX_HP * 0.30
+	carrier.ai.return_request = false
 	carrier.ai.tick(0.1)
-	check(carrier.ai.rescue_target < 0 and carrier.ai.state == CharacterAI.State.RETURN_BASE and int(main.rescue.record_for(injured).get("carrier", -1)) < 0, "return interruption cancels rescue and enters the normal return state")
+	check(carrier.ai.return_request and carrier.ai.rescue_target < 0 and carrier.ai.state == CharacterAI.State.RETURN_BASE and int(main.rescue.record_for(injured).get("carrier", -1)) < 0, "automatic 30% HP return cancels rescue and enters the normal return state")
 	CrewStatus.damage(injured, 999.0)
 	var r: Dictionary = main.rescue.record_for(injured)
 	r.left = 0.05

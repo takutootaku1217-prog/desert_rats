@@ -347,6 +347,9 @@ func _reset(w) -> void:
 	w.ai.state = CharacterAI.State.SEARCH
 	w.ai.timer = 100.0
 	w.ai.eat_wait = 0.0
+	w.ai.return_request = false
+	w.ai.rescue_target = -1
+	w.ai.post_rescue_wait = false
 
 
 func _tick(w, secs: float, state: int = CharacterAI.State.SEARCH, sleeping := false) -> void:
