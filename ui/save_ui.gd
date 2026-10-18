@@ -85,6 +85,9 @@ func open() -> void:
 
 func close() -> void:
 	if not is_open(): return
+	# Closing the neutral resume choice means the player deliberately begins a
+	# fresh run from the current scene; foreign checkpoints must not be adopted.
+	if not SaveGame.run_selected: SaveGame.select_current_run()
 	_overlay.hide()
 	_action = ""
 	get_tree().paused = _was_paused
@@ -145,6 +148,7 @@ func execute() -> void:
 			if converted.is_empty() or not SaveGame.apply(game,converted):
 				_text.text="移行できません。元ファイルは変更していません。"+SaveGame.last_error
 				return
+			SaveGame.select_current_run()
 			_legacy.hide(); _was_paused=false; game.game_over=false
 			if is_instance_valid(game._over_layer): game._over_layer.queue_free()
 			_text.text="旧保存を読み込みました。元ファイルは未変更です。地域未配置の場合は地図を開いて移行を確認してください。"
