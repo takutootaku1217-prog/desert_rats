@@ -25,6 +25,9 @@ func _initialize() -> void:
 	carrier.carrying = GameData.Item.STONE
 	check(main.rescue.assign(carrier, injured), "manual carrier designation succeeds even with carrier cargo")
 	check(not main.rescue.assign(spare, injured), "duplicate carrier reservation is rejected")
+	var waiting_before_pickup: float = float(main.rescue.record_for(injured).left)
+	main.rescue.tick(5.0)
+	check(float(main.rescue.record_for(injured).left) < waiting_before_pickup, "assigned-but-not-picked-up rescue timer keeps counting")
 	for n in 500:
 		main.rescue.carrier_tick(carrier, 0.1)
 		if int(main.rescue.record_for(injured).get("carrier", -1)) >= 0 and bool(main.rescue.record_for(injured).get("carried", false)): break
@@ -46,6 +49,12 @@ func _initialize() -> void:
 	main.rescue.incapacitated[main.rescue.worker_index(injured)] = r
 	main.rescue.tick(1.0)
 	check(bool(main.rescue.record_for(injured).get("expired", false)), "expired crew stay as recoverable records")
+	injured.carrying = GameData.Item.WOOD
+	main.rescue.assign(spare, injured)
+	for n in 1200:
+		main.rescue.carrier_tick(spare, 0.1)
+		if bool(main.rescue.record_for(injured).get("at_base", false)): break
+	check(injured.carrying < 0 and bool(main.rescue.record_for(injured).get("at_base", false)), "expired rescue unloads cargo at base so city revival travel remains available")
 	check(not main.rescue.revive_at_city(injured), "city revival rejects missing city/funds without charging")
 	await fresh()
 	injured = main.workers[0]

@@ -67,6 +67,9 @@ func assign(carrier, target) -> bool:
 	if ti < 0 or ci < 0 or not incapacitated.has(ti) or is_carrier(carrier): return false
 	var r: Dictionary = incapacitated[ti]
 	if int(r.get("carrier", -1)) >= 0: return false
+	# Rescue is an explicit override: release ordinary reservations first, but
+	# preserve any personal cargo/equipment before taking the dedicated carry slot.
+	carrier.stop_work_for_rescue()
 	r.carrier = ci
 	r.carried = false
 	incapacitated[ti] = r
@@ -120,6 +123,7 @@ func _finish_delivery(carrier, target, r: Dictionary) -> void:
 	carrier.ai._set_state(CharacterAI.State.IDLE)
 	target.ai.post_rescue_wait = true
 	target.ai.return_request = false
+	target.unload_owned()
 	if expired:
 		incapacitated[ti] = {"left": 0.0, "carried": false, "carrier": -1, "expired": true, "at_base": true}
 		target.ai._set_state(CharacterAI.State.DOWN)
@@ -155,7 +159,8 @@ func tick(delta: float) -> void:
 		if w.down: down_count += 1
 	for i in incapacitated.keys():
 		var r: Dictionary = incapacitated[i]
-		if bool(r.get("expired", false)) or int(r.get("carrier", -1)) >= 0: continue
+		# The wait ends only once the carrier has actually picked the target up.
+		if bool(r.get("expired", false)) or bool(r.get("carried", false)): continue
 		r.left = maxf(0.0, float(r.get("left", WAIT_SECONDS)) - delta)
 		if r.left <= 0.0: r.expired = true
 		incapacitated[i] = r
@@ -170,6 +175,12 @@ func snapshot() -> Dictionary:
 func restore(data: Dictionary) -> void:
 	incapacitated = data.get("incapacitated", {}).duplicate(true)
 	all_down_elapsed = float(data.get("all_down_elapsed", 0.0))
+	# Older save payloads had no rescue records. A downed worker must never be
+	# left permanently unrecoverable merely because natural revival was removed.
+	for w in game.workers:
+		var wi := worker_index(w)
+		if w.down and not incapacitated.has(wi):
+			incapacitated[wi] = {"left": WAIT_SECONDS, "carried": false, "carrier": -1, "expired": false, "at_base": false}
 	for i in incapacitated:
 		var r: Dictionary = incapacitated[i]
 		var ci := int(r.get("carrier", -1))

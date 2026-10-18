@@ -257,6 +257,10 @@ func tick(delta: float) -> void:
 		return
 	if ch.down:
 		return
+	if ch.hp <= CrewStatusDB.MAX_HP * 0.30 and not return_request:
+		return_request = true
+	if game.rescue != null and game.rescue.is_carrier(ch) and (return_request or game.operations.stance == "recall" or ch.hp <= CrewStatusDB.MAX_HP * 0.30):
+		game.rescue.cancel_carrier(ch)
 	if game.rescue != null and game.rescue.carrier_tick(ch, delta):
 		return
 	if manual_attack and (state not in [State.COMBAT_MOVE,State.COMBAT] or not _enemy_valid()):manual_attack=false

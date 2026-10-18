@@ -121,6 +121,18 @@ func stop_work_for_rescue() -> void:
 	a.return_request = false
 	a.manual_job = -1
 	if a.state == CharacterAI.State.HAUL_MOVE and not a.haul_recipe.is_empty():
+		# HAUL_MOVE holds the complete recipe in haul_recipe while carrying only
+		# its lead item. Move every reserved input into personal ownership before
+		# releasing the reservation so an incapacitated worker cannot lose it.
+		for it in a.haul_recipe["in"]:
+			var n: int = int(a.haul_recipe["in"][it])
+			if carrying < 0:
+				carrying = it
+				carry_n = n
+			elif carrying == it:
+				carry_n += n
+			else:
+				carry_bonus[it] = int(carry_bonus.get(it, 0)) + n
 		game.processor.cancel_reservation(a.haul_recipe)
 		a.haul_recipe = {}
 	if a.state in [CharacterAI.State.REFUEL_MOVE, CharacterAI.State.REFUEL]: game.base.refuel_reserved = false
