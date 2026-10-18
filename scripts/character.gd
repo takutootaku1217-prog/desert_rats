@@ -59,7 +59,7 @@ var bed_index := -1
 var _climb_dest = null        # 階をまたぐ移動の途中（Vector2）
 var _climb_floor := 1
 var _climb_kind := ""
-var _ground_lane_target := -1 # Fixed ground-lane test only; inactive on normal maps.
+var _ground_lane_target := -1 # Legacy fixed-crossing helper; not enabled by the current trial.
 var ground_lane_crossings := 0
 var ground_lane_last_crossing_x := INF
 var _t := 0.0
@@ -260,6 +260,11 @@ func move_to_target(delta: float) -> bool:
 	var tf := GameData.floor_of_y(target.y)
 	# 固定地上レーンは、通常マップには存在しない試験用の任意設定。
 	# 設定のない既存マップは従来どおり自由な地上座標を使う。
+	var depth_config := _ground_depth_strip_config()
+	if floor_i == 0 and tf == 0 and not depth_config.is_empty():
+		var depth_target := target
+		depth_target.y = clampf(depth_target.y, float(depth_config.back_y), float(depth_config.front_y))
+		return _step_toward(depth_target, step)
 	var lane_config := _ground_lane_config()
 	if floor_i == 0 and not lane_config.is_empty():
 		var requested_lane := 0 if tf != 0 else _ground_lane_index(target.y, lane_config)
@@ -293,6 +298,9 @@ func move_to_target(delta: float) -> bool:
 ## 地上の固定2レーン試験を有効にするメタデータ。
 ## { enabled, back_y, front_y, crossing_x } の4項目を Main に設定した時だけ使う。
 func _ground_lane_config() -> Dictionary:
+	# The fixed-crossing experiment is retired.  Continuous depth uses the
+	# separate ground_depth_strip_config above, so this path cannot activate.
+	return {}
 	if game == null or not is_instance_valid(game) or not game.has_meta("ground_lane_config"):
 		return {}
 	var config = game.get_meta("ground_lane_config")
@@ -321,6 +329,26 @@ func _cross_ground_lanes(target_lane: int, step: float, config: Dictionary) -> b
 	if absf(position.y - current_y) > 4.0:
 		return _step_toward(Vector2(position.x, current_y), step)
 	return _step_toward(Vector2(crossing_x, current_y), step)
+
+
+## Current trial only: a shallow, continuous outdoor depth strip.  It has no
+## crossings; any X coordinate may move diagonally between the back and front.
+func _ground_depth_strip_config() -> Dictionary:
+	if game == null or not is_instance_valid(game) or not game.has_meta("ground_depth_strip_config"):
+		return {}
+	var config = game.get_meta("ground_depth_strip_config")
+	if not (config is Dictionary) or not bool(config.get("enabled", false)):
+		return {}
+	return config
+
+
+func ground_depth_strip_active() -> bool:
+	return not _ground_depth_strip_config().is_empty()
+
+
+func ground_depth_strip_can_melee(other_position: Vector2, reach: float) -> bool:
+	# Movement, visual depth, click choice, and attack reach remain separate.
+	return position.distance_to(other_position) <= reach
 
 
 func _step_toward(p: Vector2, step: float) -> bool:

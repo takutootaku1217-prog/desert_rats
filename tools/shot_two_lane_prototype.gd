@@ -16,13 +16,14 @@ func _initialize() -> void:
 	root.add_child(prototype)
 	await process_frame
 	await process_frame
-	prototype.reset("one")
+	prototype.reset()
 	await create_timer(7.0).timeout
-	await capture(dir, "one-lane")
-	prototype.reset("two")
-	await create_timer(7.0).timeout
-	await capture(dir, "two-lanes")
+	await capture(dir, "continuous-depth-gather")
+	prototype.reset()
+	prototype.model.start_chase(0)
+	await create_timer(2.0).timeout
+	await capture(dir, "continuous-depth-chase")
 	prototype.start_retreat_test()
 	await create_timer(2.0).timeout
-	await capture(dir, "two-lanes-retreat")
+	await capture(dir, "continuous-depth-retreat")
 	quit()

@@ -603,6 +603,9 @@ func tick(delta: float) -> void:
 				return
 			ch.target = enemy.position + Vector2(-30, 0)
 			ch.move_to_target(delta)
+			if ch.ground_depth_strip_active() and not ch.ground_depth_strip_can_melee(enemy.position, 46.0):
+				_set_state(State.COMBAT_MOVE)
+				return
 			ch.attacking = true
 			enemy.take_damage(ATTACK_DPS * ch.skill_mult(GameData.Job.COMBAT) * ch.weapon_mult() * delta, ch)
 			ch.fatigue = minf(CrewStatusDB.MAX_FATIGUE, ch.fatigue + CrewStatusDB.FATIGUE_COMBAT_GAIN * delta)

@@ -1,17 +1,16 @@
 extends "res://tools/test_quarry.gd"
-## 独立表示モデルではなく、既存Main / Worker / CharacterAIを使う固定2レーンの最小接続試験。
+## 通常 Main / Worker / CharacterAI に限定した、連続奥行き帯の小規模接続試験。
+## 固定線・固定横断路ではない。通常マップ全体にはまだ展開しない。
 
-const BACK_Y := 600.0
-const FRONT_Y := 680.0
-const CROSSING_X := 820.0
+const BACK_Y := 570.0
+const FRONT_Y := 625.0
 
 
-func _configure_fixed_lanes() -> void:
-	main.set_meta("ground_lane_config", {
+func _configure_depth_strip() -> void:
+	main.set_meta("ground_depth_strip_config", {
 		"enabled": true,
 		"back_y": BACK_Y,
 		"front_y": FRONT_Y,
-		"crossing_x": CROSSING_X,
 	})
 	main.target_speed = 0.0
 	main.tool_auto = false
@@ -24,10 +23,6 @@ func _configure_fixed_lanes() -> void:
 
 func _step_live() -> void:
 	await step()
-
-
-func _flat_crossing_seen(worker, required_crossings: int) -> bool:
-	return worker.ground_lane_crossings >= required_crossings and is_equal_approx(worker.ground_lane_last_crossing_x, CROSSING_X)
 
 
 func _until_live(done: Callable, seconds: float) -> bool:
@@ -43,62 +38,91 @@ func _add_front_vein() -> GatherPoint:
 	point.setup(main, "vein")
 	point.max_amount = 1
 	point.remaining = 1
-	point.position = Vector2(1140.0, FRONT_Y)
+	point.position = Vector2(1140.0, FRONT_Y - 4.0)
 	main.resources_root.add_child(point)
 	return point
 
 
+func _sample_depth_motion(worker, xs: Array) -> bool:
+	if worker.floor_i != 0:
+		return false
+	if worker.position.y <= BACK_Y + 4.0 or worker.position.y >= FRONT_Y - 4.0:
+		return false
+	xs.append(worker.position.x)
+	return true
+
+
 func _initialize() -> void:
-	print("-- 固定2レーン: 既存Worker/CharacterAI接続 --")
+	print("-- continuous two-lane-width depth strip: live Main/AI --")
 	await _gather_and_haul()
-	await _combat_and_personal_return()
-	print("== 結果: %s ==" % ("すべて成功" if fails == 0 else "%d件失敗" % fails))
+	await _combat_return_and_selection()
+	print("== result: %s ==" % ("all passed" if fails == 0 else "%d failures" % fails))
 	quit(1 if fails else 0)
 
 
 func _gather_and_haul() -> void:
 	await fresh()
-	_configure_fixed_lanes()
+	_configure_depth_strip()
 	var worker = main.workers[0]
 	worker.tools = {"mine": GameData.Item.HAMMER}
 	worker.priorities[GameData.Job.GATHER] = 5
 	var point := _add_front_vein()
 	var before: int = main.storage.count_of(GameData.Item.IRON_ORE)
 	var reservation_seen := false
-	for _frame in 60:
+	var mid_depth_seen := false
+	var mid_depth_xs: Array = []
+	for _frame in 300:
 		reservation_seen = reservation_seen or (point.claimed_by == worker and point.reserved >= 1)
-		if reservation_seen:
+		mid_depth_seen = _sample_depth_motion(worker, mid_depth_xs) or mid_depth_seen
+		if main.storage.count_of(GameData.Item.IRON_ORE) == before + 1 and worker.floor_i != 0 and worker.carrying < 0:
 			break
 		await _step_live()
-	check(reservation_seen, "既存CharacterAIが手前レーンの鉱脈を予約する")
-	var stored := await _until_live(func(): return main.storage.count_of(GameData.Item.IRON_ORE) == before + 1 and worker.floor_i != 0 and worker.carrying < 0, 60.0)
-	check(stored, "既存Workerが採取・在庫搬送・拠点スロープ帰還・荷卸しまで完走する")
-	check(main.operations.delivered.get(GameData.Item.IRON_ORE, 0) == 1, "既存FieldOperationsの持帰り集計に採取物が入る")
-	check(_flat_crossing_seen(worker, 2), "往復とも固定Xの平地横断路だけでレーンを移る")
+	check(reservation_seen, "normal CharacterAI reserves a front-depth vein")
+	check(main.storage.count_of(GameData.Item.IRON_ORE) == before + 1 and worker.floor_i != 0 and worker.carrying < 0, "normal Worker gathers, moves through the strip, uses the existing ramp and unloads")
+	check(main.operations.delivered.get(GameData.Item.IRON_ORE, 0) == 1, "normal FieldOperations receives returned gather cargo")
+	var depth_span := 0.0
+	if not mid_depth_xs.is_empty():
+		depth_span = mid_depth_xs.max() - mid_depth_xs.min()
+	check(mid_depth_seen and depth_span > 30.0, "depth changes at multiple X positions, not at a fixed crossing")
+	check(not main.get_meta("ground_depth_strip_config").has("crossing_x"), "depth strip config contains no crossing or bridge point")
 
 
-func _combat_and_personal_return() -> void:
+func _combat_return_and_selection() -> void:
 	await fresh()
-	_configure_fixed_lanes()
+	_configure_depth_strip()
 	var worker = main.workers[0]
+	var back_worker = main.workers[1]
+	var front_worker = main.workers[2]
 	worker.floor_i = 0
 	worker.position = Vector2(930.0, BACK_Y)
 	worker.target = worker.position
+	back_worker.floor_i = 0
+	back_worker.position = Vector2(780.0, BACK_Y)
+	front_worker.floor_i = 0
+	front_worker.position = Vector2(780.0, FRONT_Y)
 	var enemy := Enemy.new()
 	enemy.setup(main, 120.0)
 	enemy.position = Vector2(930.0, FRONT_Y)
 	main.enemies_root.add_child(enemy)
 	var full_hp: float = enemy.hp
-	check(worker.ai.order_attack(enemy), "既存CharacterAIが別レーンの敵を追跡指示として受ける")
-	for _frame in 4:
-		await _step_live()
-	check(is_equal_approx(enemy.hp, full_hp) and worker.ai.state == CharacterAI.State.COMBAT_MOVE, "同じXでも別レーンへの近接攻撃は即時命中しない")
+	check(main._pick_worker_at(Vector2(780.0, BACK_Y)) == back_worker and main._pick_worker_at(Vector2(780.0, FRONT_Y)) == front_worker, "same-X back/front workers are chosen by visible depth")
+	check(worker.ai.order_attack(enemy), "normal CharacterAI accepts a cross-depth attack order")
+	await _step_live()
+	var started_through_depth: bool = worker.position.y > BACK_Y + 2.0 and worker.position.y < FRONT_Y - 2.0
+	check(is_equal_approx(enemy.hp, full_hp) and worker.ai.state == CharacterAI.State.COMBAT_MOVE and started_through_depth, "same-X opponent is not hit before closing depth distance")
 	var hit := await _until_live(func(): return enemy.hp < full_hp, 20.0)
-	check(hit and _flat_crossing_seen(worker, 1), "実CharacterAIは横断路を通ってから近接攻撃する")
+	check(hit and worker.position.distance_to(enemy.position) <= 46.0, "melee hit uses physical distance after direct depth travel")
 	var hp_after_first_hit: float = enemy.hp
-	check(worker.ai.request_return(), "既存Workerへ個人退却を指示できる")
-	var returned := await _until_live(func(): return worker.floor_i != 0 and worker.ai.return_request and worker.ai.state == CharacterAI.State.RETURN_BASE, 30.0)
-	check(returned and _flat_crossing_seen(worker, 2), "個人退却は平地横断路と既存拠点スロープを経由する")
+	check(worker.ai.request_return(), "individual return can be requested during depth-strip combat")
+	var return_mid_depth_seen := false
+	var returned := false
+	for _frame in 150:
+		return_mid_depth_seen = _sample_depth_motion(worker, []) or return_mid_depth_seen
+		if worker.floor_i != 0 and worker.ai.return_request and worker.ai.state == CharacterAI.State.RETURN_BASE:
+			returned = true
+			break
+		await _step_live()
+	check(returned and return_mid_depth_seen, "individual return crosses the continuous strip then uses the existing base ramp")
 	for _frame in 8:
 		await _step_live()
-	check(is_equal_approx(enemy.hp, hp_after_first_hit) and not worker.ai.manual_attack and worker.ai.return_request, "個人退却中に既存AIが再攻撃・再採取へ戻らない")
+	check(is_equal_approx(enemy.hp, hp_after_first_hit) and not worker.ai.manual_attack and worker.ai.return_request, "individual return does not resume combat or gathering")
