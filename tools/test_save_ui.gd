@@ -8,8 +8,10 @@ func _initialize():
 	for w in main.workers: w.set_process(false)
 	var ui = main.save_ui
 	ui.path = "user://save-ui-test.json"
+	ui.legacy_path = "user://save-ui-legacy.json"
 	for suffix in ["", ".bak", ".damaged"]:
 		if SaveGame.exists(ui.path+suffix): DirAccess.remove_absolute(ui.path+suffix)
+		if SaveGame.exists(ui.legacy_path+suffix): DirAccess.remove_absolute(ui.legacy_path+suffix)
 	var initial: int = main.storage.count_of(GameData.Item.WOOD)
 	await click(main.navigation.buttons["メニュー"])
 	await click(button_named(main.navigation,"保存 / 続きから"))
@@ -36,6 +38,37 @@ func _initialize():
 	await click(button_named(ui,"バックアップから再開"))
 	await click(ui._confirm)
 	check(main.storage.count_of(GameData.Item.WOOD) == initial,"バックアップ再開")
+	# The checkpoint confirmation reports the exact configured test loss, and its
+	# backup route is independently usable after primary corruption.
+	main.town.credits = 49
+	check(SaveGame.write(main, ui.checkpoint_path, true, SaveGame.SLOT_CHECKPOINT), "UI checkpoint write")
+	main.town.credits = 0
+	ui.ask("checkpoint")
+	check(ui._text.text.contains("4"), "checkpoint confirmation displays exact ten percent loss")
+	ui.execute()
+	check(main.town.credits == 45, "UI checkpoint restart applies truncating ten percent loss")
+	main.town.credits = 77
+	check(SaveGame.write(main, ui.checkpoint_path, true, SaveGame.SLOT_CHECKPOINT), "UI checkpoint backup source")
+	main.town.credits = 88
+	check(SaveGame.write(main, ui.checkpoint_path, true, SaveGame.SLOT_CHECKPOINT), "UI checkpoint backup rotation")
+	var checkpoint_primary := FileAccess.open(ui.checkpoint_path, FileAccess.WRITE); checkpoint_primary.store_string("broken"); checkpoint_primary.close()
+	ui.ask("checkpoint_backup")
+	ui.execute()
+	check(main.town.credits == 70, "UI checkpoint backup restart works after primary corruption")
+	# Exercise the actual SaveUI continuation route with only the legacy save.
+	check(SaveGame.write(main, ui.legacy_path, true), "legacy progress write")
+	DirAccess.remove_absolute(ui.path)
+	main.storage.store_owned(GameData.Item.WOOD, 11)
+	ui.ask("load")
+	ui.execute()
+	check(main.storage.count_of(GameData.Item.WOOD) == initial, "SaveUI continues from legacy save when separated slot is absent")
+	# A present separated slot is authoritative, including when it is damaged.
+	main.storage.store_owned(GameData.Item.WOOD, 4)
+	var before_separated_failure := SaveGame.capture(main)
+	var separated := FileAccess.open(ui.path,FileAccess.WRITE); separated.store_string("broken"); separated.close()
+	ui.ask("load")
+	ui.execute()
+	check(SaveGame.capture(main) == before_separated_failure, "damaged separated progress never falls back to legacy")
 	var f := FileAccess.open(ui.path,FileAccess.WRITE); f.store_string("broken"); f.close()
 	var before := SaveGame.capture(main)
 	await click(button_named(ui,"続きから"))
@@ -49,6 +82,8 @@ func _initialize():
 	await click(button_named(ui,"ニューゲーム"))
 	await click(ui._confirm)
 	main = current_scene
+	var new_game_checkpoint := SaveGame.read_slot("user://checkpoint.json", SaveGame.SLOT_CHECKPOINT)
+	check(not new_game_checkpoint.is_empty() and new_game_checkpoint.main.save_run_id == main.save_run_id, "New Game replaces the previous run checkpoint")
 	check(is_instance_valid(main) and main.storage.count_of(GameData.Item.WOOD) == 0 and not paused,"確認後に新規ゲームへ移行")
 	check(FileAccess.get_file_as_string("user://save-ui-test.json") == "broken","新規開始しても保存を勝手に削除しない")
 	print("== 結果: %s ==" % ("すべて成功" if fails == 0 else "%d 件失敗" % fails))

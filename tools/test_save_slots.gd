@@ -50,6 +50,44 @@ func _initialize():
 	check(SaveGame.restart_from_checkpoint(main, {"credits_fixed": 7}, CHECKPOINT), "repeat restart")
 	check(main.town.credits == 33, "restart loss is non-cumulative")
 
+	# Approved test policy: ten percent of checkpoint credits, truncating, no debt,
+	# and no resource loss.  Restarts always re-read the untouched checkpoint.
+	main.town.credits = 49
+	main.storage.store_owned(GameData.Item.WOOD, 3)
+	var wood_at_checkpoint: int = main.storage.count_of(GameData.Item.WOOD)
+	check(SaveGame.write(main, CHECKPOINT, true, SaveGame.SLOT_CHECKPOINT), "ratio checkpoint write")
+	main.town.credits = 0
+	main.storage.inventory.counts.clear()
+	check(SaveGame.restart_from_checkpoint(main, SaveGame.DEFAULT_RESTART_LOSS, CHECKPOINT), "ratio restart")
+	check(main.town.credits == 45 and main.storage.count_of(GameData.Item.WOOD) == wood_at_checkpoint, "10 percent truncates and leaves resources intact")
+	main.town.credits = 0
+	check(SaveGame.restart_from_checkpoint(main, SaveGame.DEFAULT_RESTART_LOSS, CHECKPOINT) and main.town.credits == 45, "ratio loss is non-cumulative")
+	main.town.credits = 0
+	check(SaveGame.write(main, CHECKPOINT, true, SaveGame.SLOT_CHECKPOINT), "zero-credit checkpoint write")
+	check(SaveGame.restart_from_checkpoint(main, SaveGame.DEFAULT_RESTART_LOSS, CHECKPOINT) and main.town.credits == 0, "zero credits never creates debt")
+
+	# A checkpoint has its own backup restore path.
+	main.town.credits = 77
+	check(SaveGame.write(main, CHECKPOINT, true, SaveGame.SLOT_CHECKPOINT), "checkpoint backup source write")
+	main.town.credits = 88
+	check(SaveGame.write(main, CHECKPOINT, true, SaveGame.SLOT_CHECKPOINT), "checkpoint backup rotation write")
+	var broken_checkpoint := FileAccess.open(CHECKPOINT, FileAccess.WRITE)
+	broken_checkpoint.store_string("broken")
+	broken_checkpoint.close()
+	check(SaveGame.restart_from_checkpoint(main, SaveGame.DEFAULT_RESTART_LOSS, CHECKPOINT + ".bak") and main.town.credits == 70, "checkpoint backup restores after primary corruption")
+
+	# A confirmed New Game must replace a previous run's checkpoint without
+	# deleting the separate progress save.
+	_clear(SaveGame.CHECKPOINT_PATH)
+	main.save_run_id = "old-run"
+	main.town.credits = 123
+	check(SaveGame.write_checkpoint(main, true), "old run checkpoint write")
+	main.save_run_id = "new-run"
+	main.town.credits = 17
+	check(SaveGame.ensure_initial_checkpoint(main, true), "new game refreshes checkpoint " + SaveGame.last_error)
+	main.town.credits = 999
+	check(SaveGame.restart_from_checkpoint(main, SaveGame.DEFAULT_RESTART_LOSS) and main.save_run_id == "new-run" and main.town.credits == 16, "new game cannot restart into old run " + SaveGame.last_error)
+
 	# 途中書き込みが失敗しても、既存の progress と backup を維持する。
 	var before := FileAccess.get_file_as_bytes(PROGRESS)
 	DirAccess.make_dir_absolute(PROGRESS + ".bak.tmp")

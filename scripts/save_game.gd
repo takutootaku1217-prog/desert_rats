@@ -10,13 +10,14 @@ const CHECKPOINT_PATH := "user://checkpoint.json"
 const SLOT_PROGRESS := "progress"
 const SLOT_CHECKPOINT := "checkpoint"
 ## 正式な損失量・対象は未決。再開処理はこの差し替え可能なポリシーだけを見る。
-## 固定値はテスト用で、既定 0 は現在のゲームバランスを変更しない。
-const DEFAULT_RESTART_LOSS := {"credits_fixed": 0}
+## 10% は承認済みテスト方針であり、正式バランス決定前にここを差し替える。
+const DEFAULT_RESTART_LOSS := {"credits_ratio": 0.10, "credits_fixed": 0}
 ## 将来の救助タイマー用。現段階では AI を動かさず、保存形式だけを予約する。
 const RESCUE_DEFAULT := {"version": 1, "incapacitated": {}, "all_down_elapsed": 0.0}
 static var last_error := ""
 static var disabled := false
-const MAIN := ["target_speed", "scroll_speed", "room_layout", "total_rooms_built", "recipe_priority", "gather_policy", "hunt_policy", "blueprints", "total_gathered", "total_hunted", "total_eaten", "tool_auto", "_tool_clock", "build_queue", "total_built", "total_wasted", "_waste_note_at", "_spawn_dist", "_creature_dist", "wave", "kills", "_wave_timer", "transfer_queue", "craft_queue", "total_transferred", "total_crafted_by_hand", "_feed_clock"]
+static var new_run_requested := false
+const MAIN := ["target_speed", "scroll_speed", "save_run_id", "room_layout", "total_rooms_built", "recipe_priority", "gather_policy", "hunt_policy", "blueprints", "total_gathered", "total_hunted", "total_eaten", "tool_auto", "_tool_clock", "build_queue", "total_built", "total_wasted", "_waste_note_at", "_spawn_dist", "_creature_dist", "wave", "kills", "_wave_timer", "transfer_queue", "craft_queue", "total_transferred", "total_crafted_by_hand", "_feed_clock"]
 const WORKER := ["char_name", "palette", "priorities", "carrying", "carcass_cargo", "carrying_species", "carry_source", "carry_n", "carry_bonus", "weapon", "work_support", "tools", "speed", "target", "position", "slot_offset", "hp", "hunger", "fatigue", "stress", "calm", "mental", "down", "floor_i", "facing", "level", "gender", "ranks", "skills", "dept", "away", "bed_index", "_climb_dest", "_climb_floor", "_climb_kind"]
 const AI := ["state", "timer", "haul_item", "haul_recipe", "repair_part", "gather_ev", "bag_limit", "bag_frac", "eat_wait", "xfer_item", "xfer_dir", "current_job", "life_request", "process_slot", "safe_after", "retreating", "danger_hold", "manual_attack", "return_request", "manual_job"]
 const BASE := ["built", "max_hp", "hp", "fuel", "parts", "rear_engine_damage", "total_refuel", "total_repair"]
@@ -159,6 +160,11 @@ static func processor_data(row: Dictionary) -> Dictionary:
 	if not result.has("batch_output"): result["batch_output"] = false
 	return result
 
+static func main_data(row: Dictionary) -> Dictionary:
+	var result := row.duplicate(true)
+	if not result.has("save_run_id"): result.save_run_id = "legacy"
+	return result
+
 static func enemy_data(row: Dictionary) -> Dictionary:
 	var result:=row.duplicate(true)
 	var defaults:={"ecological":false,"present":true,"home_x":0.0,"target_index":-1,"provoked_index":-1,"lost_for":0.0,"search_left":0.0,"peaceful_until":0.0}
@@ -227,7 +233,7 @@ static func validate(d, g) -> bool:
 	if not JourneyPlan.valid(d.get("journey",{}),d.world): return false
 	for k in ["main", "base", "processor", "stock", "inventory", "wasted", "butchered", "capacity", "weight", "director", "quarry", "expedition", "party", "crew", "resources", "creatures", "enemies", "camera", "follow", "scroll"]:
 		if not d.has(k): return false
-	for row in [[d.main,g,MAIN],[base_data(d.base) if d.base is Dictionary else d.base,g.base,BASE],[processor_data(d.processor) if d.processor is Dictionary else d.processor,g.processor,PROCESSOR],[d.director,g.director,DIRECTOR],[quarry_data(d.quarry) if d.quarry is Dictionary else d.quarry,g.quarry,QUARRY],[d.expedition,g.expedition,EXPEDITION]]:
+	for row in [[main_data(d.main) if d.main is Dictionary else d.main,g,MAIN],[base_data(d.base) if d.base is Dictionary else d.base,g.base,BASE],[processor_data(d.processor) if d.processor is Dictionary else d.processor,g.processor,PROCESSOR],[d.director,g.director,DIRECTOR],[quarry_data(d.quarry) if d.quarry is Dictionary else d.quarry,g.quarry,QUARRY],[d.expedition,g.expedition,EXPEDITION]]:
 		if not shape(row[0],row[1],row[2]): return false
 	var base_row: Dictionary = base_data(d.base)
 	for k in ["party", "crew", "resources", "creatures", "enemies"]:
@@ -424,7 +430,7 @@ static func apply(g, d: Dictionary) -> bool:
 	g.cancel_facility_pack()
 	put(g.world,WorldTrip.normalized(d.world),WorldTrip.FIELDS)
 	put(g.operations,d.get("operations",fields(FieldOperations.new(),FieldOperations.FIELDS)),FieldOperations.FIELDS)
-	put(g,d.main,MAIN); put(g.base,base_data(d.base),BASE); put(g.processor,processor_data(d.processor),PROCESSOR)
+	put(g,main_data(d.main),MAIN); put(g.base,base_data(d.base),BASE); put(g.processor,processor_data(d.processor),PROCESSOR)
 	g.storage.inventory.counts = d.inventory.duplicate(true)
 	g.storage.wasted = d.wasted.duplicate(true)
 	g.storage.total_butchered = d.butchered
@@ -496,16 +502,22 @@ static func apply(g, d: Dictionary) -> bool:
 
 ## チェックポイントは常にファイル上の元スナップショットから復元するため、同じ再開を
 ## 何度選んでも損失は積み上がらない。正式バランスは後で policy を差し替える。
+static func restart_loss(credits: int, policy: Dictionary = DEFAULT_RESTART_LOSS) -> int:
+	var ratio := float(policy.get("credits_ratio", 0.0))
+	var fixed := int(policy.get("credits_fixed", 0))
+	if credits < 0 or ratio < 0.0 or fixed < 0: return -1
+	return mini(credits, int(floor(float(credits) * ratio)) + fixed)
+
 static func restart_from_checkpoint(g, policy: Dictionary = DEFAULT_RESTART_LOSS, path: String = CHECKPOINT_PATH) -> bool:
 	var d := read_slot(path, SLOT_CHECKPOINT)
 	if d.is_empty(): return false
 	var restored := d.duplicate(true)
-	var fixed := int(policy.get("credits_fixed", 0))
-	if fixed < 0:
+	var town_state: Dictionary = TownEconomy.normalized(restored.get("town", {}))
+	var loss := restart_loss(int(town_state.credits), policy)
+	if loss < 0:
 		last_error = "再開ペナルティの指定が不正です。"
 		return false
-	var town_state: Dictionary = TownEconomy.normalized(restored.get("town", {}))
-	town_state.credits = maxi(0, int(town_state.credits) - fixed)
+	town_state.credits = int(town_state.credits) - loss
 	restored.town = town_state
 	return apply(g, restored)
 
@@ -558,11 +570,18 @@ static func read_progress() -> Dictionary:
 	if exists(PROGRESS_PATH): return read_slot(PROGRESS_PATH, SLOT_PROGRESS)
 	return read(PATH)
 
-static func ensure_initial_checkpoint(g) -> bool:
-	if disabled or exists(CHECKPOINT_PATH): return true
+static func ensure_initial_checkpoint(g, force_new := false) -> bool:
+	if disabled: return true
+	if not force_new and (exists(PROGRESS_PATH) or exists(PATH)): return true
+	if exists(CHECKPOINT_PATH):
+		var existing := read_slot(CHECKPOINT_PATH, SLOT_CHECKPOINT)
+		if not existing.is_empty() and validate(existing, g):
+			var prior_main: Dictionary = main_data(existing.main)
+			if prior_main.get("save_run_id", "legacy") == g.get("save_run_id"):
+				return true
 	# 旧単一セーブは read_progress() から継続でき、元ファイルを変更しない。
 	# 新しい checkpoint は現在起動中の初期状態から作る。
-	return write_checkpoint(g, false)
+	return write_checkpoint(g, true)
 
 static func read(path: String = PATH, allow_legacy := false) -> Dictionary:
 	last_error = ""

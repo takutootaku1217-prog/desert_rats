@@ -19,6 +19,7 @@ var save_ui: SaveUI
 
 var target_speed := 60.0          # プレイヤーが決める目標速度（↑↓キー）
 var scroll_speed := 60.0          # 実際の速度。燃料切れ・走行装置の故障で遅くなる
+var save_run_id := ""
 var storage: BaseStorage
 var processor: BaseProcessor
 var base: MobileBase
@@ -112,6 +113,9 @@ const WORKER_DEFS := [
 
 
 func _ready() -> void:
+	var force_new_checkpoint := SaveGame.new_run_requested
+	SaveGame.new_run_requested = false
+	if save_run_id == "": save_run_id = "%d-%d" % [Time.get_unix_time_from_system(), Time.get_ticks_usec()]
 	# 診断が明示した場合だけ、初期生成から同じ乱数列を使う。通常起動は従来どおり。
 	if has_meta("diagnostic_seed"):
 		seed(int(get_meta("diagnostic_seed")))
@@ -263,10 +267,10 @@ func _ready() -> void:
 	navigation = NavigationBar.new()
 	navigation.game = self
 	add_child(navigation)
-	call_deferred("_ensure_initial_checkpoint")
+	call_deferred("_ensure_initial_checkpoint", force_new_checkpoint)
 
-func _ensure_initial_checkpoint() -> void:
-	if not SaveGame.ensure_initial_checkpoint(self):
+func _ensure_initial_checkpoint(force_new := false) -> void:
+	if not SaveGame.ensure_initial_checkpoint(self, force_new):
 		director.note("初期チェックポイントを保存できませんでした: " + SaveGame.last_error)
 
 

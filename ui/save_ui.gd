@@ -5,6 +5,7 @@ static var skip_start_once := false
 var game
 var path := SaveGame.PROGRESS_PATH
 var checkpoint_path := SaveGame.CHECKPOINT_PATH
+var legacy_path := SaveGame.PATH
 var _overlay: ColorRect
 var _text: Label
 var _confirm: Button
@@ -12,6 +13,20 @@ var _action := ""
 var _legacy: Button
 var _legacy_path := ""
 var _was_paused := false
+
+func _progress_source_path() -> String:
+	return path if SaveGame.exists(path) else legacy_path
+
+func _has_progress() -> bool:
+	return SaveGame.exists(path) or SaveGame.exists(legacy_path)
+
+func _checkpoint_loss_text(source: String) -> String:
+	var d := SaveGame.read_slot(source, SaveGame.SLOT_CHECKPOINT)
+	if d.is_empty(): return "チェックポイントを読めません: " + SaveGame.last_error
+	var town: Dictionary = TownEconomy.normalized(d.get("town", {}))
+	var loss := SaveGame.restart_loss(int(town.credits), SaveGame.DEFAULT_RESTART_LOSS)
+	if loss < 0: return "再開ペナルティ設定が不正です。"
+	return "所持クレジット %d の10%%（%d）を失います。資源は失いません。" % [int(town.credits), loss]
 
 func _ready() -> void:
 	layer = 60
@@ -48,12 +63,13 @@ func _ready() -> void:
 	box.add_child(UIKit.button("途中から続ける", func(): ask("load")))
 	box.add_child(UIKit.button("出撃前からやり直す", func(): ask("checkpoint")))
 	_legacy.hide()
+	box.add_child(UIKit.button("出撃前バックアップからやり直す", func(): ask("checkpoint_backup")))
 	_confirm = UIKit.button("実行する",execute)
 	box.add_child(_confirm)
 	box.add_child(UIKit.button("キャンセル / ゲームへ戻る",close))
 	_overlay.hide()
 	# 起動時に自動ロード/自動上書きしない。保存がある場合だけ選択画面で停止。
-	if not skip_start_once and DisplayServer.get_name() != "headless" and not SaveGame.disabled and SaveGame.exists(path): open.call_deferred()
+	if not skip_start_once and DisplayServer.get_name() != "headless" and not SaveGame.disabled and (_has_progress() or SaveGame.exists(checkpoint_path)): open.call_deferred()
 	skip_start_once = false
 
 func open() -> void:
@@ -79,8 +95,10 @@ func is_open() -> bool:
 func ask(action: String) -> void:
 	_action = action
 	_confirm.show()
-	if action == "checkpoint":
+	if action == "checkpoint" or action == "checkpoint_backup":
 		_text.text = "出撃前のチェックポイントからやり直しますか？ 現在の進行は破棄されます。ペナルティ量は未設定のため、現段階では資金を失いません。"
+		var checkpoint_source := checkpoint_path + (".bak" if action == "checkpoint_backup" else "")
+		_text.text = "出撃前チェックポイントからやり直しますか？ 現在の進行は破棄されます。\n" + _checkpoint_loss_text(checkpoint_source) + "\n繰り返しても、出撃前状態を基準にするため損失は累積しません。"
 		return
 	match action:
 		"save": _text.text = ("既存の保存を現在の進行で上書きします。直前の有効な保存はバックアップへ残します。" if SaveGame.exists(path) else "現在の進行を最初の保存として記録します。") + "\n旧version2は .legacy-v2、破損・その他の旧形式は .damaged に保全します。\n実行しますか？"
@@ -92,8 +110,9 @@ func execute() -> void:
 	var action := _action
 	_action = ""
 	_confirm.hide()
-	if action == "checkpoint":
-		if not SaveGame.restart_from_checkpoint(game, SaveGame.DEFAULT_RESTART_LOSS, checkpoint_path):
+	if action == "checkpoint" or action == "checkpoint_backup":
+		var checkpoint_source := checkpoint_path + (".bak" if action == "checkpoint_backup" else "")
+		if not SaveGame.restart_from_checkpoint(game, SaveGame.DEFAULT_RESTART_LOSS, checkpoint_source):
 			_text.text = SaveGame.last_error
 			return
 		game.game_over = false
@@ -106,11 +125,12 @@ func execute() -> void:
 			var ok := SaveGame.write(game,path,true,SaveGame.SLOT_PROGRESS)
 			_text.text = "保存しました。" if ok else SaveGame.last_error
 		"load", "backup":
-			var d := SaveGame.read_slot(path + (".bak" if action == "backup" else ""), SaveGame.SLOT_PROGRESS)
+			var source := _progress_source_path() + (".bak" if action == "backup" else "")
+			var d := SaveGame.read_slot(source, SaveGame.SLOT_PROGRESS) if _progress_source_path() == path else SaveGame.read(source)
 			if d.is_empty():
 				_text.text = SaveGame.last_error
 				_legacy.visible = SaveGame.last_error.begins_with("旧version2")
-				_legacy_path = path + (".bak" if action=="backup" else "")
+				_legacy_path = source
 				return
 			if not SaveGame.apply(game,d):
 				_text.text = SaveGame.last_error
@@ -129,6 +149,7 @@ func execute() -> void:
 			if is_instance_valid(game._over_layer): game._over_layer.queue_free()
 			_text.text="旧保存を読み込みました。元ファイルは未変更です。地域未配置の場合は地図を開いて移行を確認してください。"
 		"new":
+			SaveGame.new_run_requested = true
 			skip_start_once = true
 			get_tree().paused = false
 			get_tree().reload_current_scene()
