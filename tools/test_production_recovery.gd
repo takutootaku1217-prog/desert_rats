@@ -7,6 +7,7 @@ func _initialize():
  await goals()
  await interruptions()
  await haul_rescue_cargo()
+ await personal_return_haul_cargo()
  print("== 結果: %s =="%("すべて成功" if fails==0 else "%d 件失敗"%fails));quit(1 if fails else 0)
 func haul_rescue_cargo():
  # HAUL_MOVE's `carrying` field is only a lead-item marker. Interrupt a real
@@ -40,6 +41,30 @@ func haul_rescue_cargo():
   main.rescue.carrier_tick(rescue_carrier,0.1)
   if not hauler.down:break
  check(not hauler.down and main.storage.count_of(WOOD)==2 and main.storage.count_of(IRON)==1,"rescue delivery returns each interrupted haul material once")
+
+func personal_return_haul_cargo():
+ # Individual/HP withdrawal must use the complete HAUL_MOVE recipe, not its
+ # visual lead-item marker. Exercise the actual outdoor-to-deck return path.
+ await setup();main.finish_build("workbench")
+ main.storage.inventory.counts={}
+ main.request_order("tool_pick",1)
+ main.storage.inventory.counts={WOOD:2,IRON:1}
+ var hauler=main.workers[0]
+ hauler.priorities[GameData.Job.HAUL]=5
+ check(hauler.ai._try_start(GameData.Job.HAUL),"personal return accepts a multi-material haul")
+ hauler.position=main.storage.access_point()+hauler.slot_offset
+ hauler.floor_i=1
+ hauler.ai.tick(0.2)
+ check(hauler.ai.state==CharacterAI.State.HAUL_MOVE and main.processor.incoming.size()==1,"personal return starts from a real reserved HAUL_MOVE")
+ hauler.floor_i=0
+ hauler.position=Vector2(920,GameData.LO_Y)
+ check(hauler.ai.request_return(),"outdoor hauler accepts the individual return command")
+ hauler.ai.tick(0.2)
+ check(hauler.ai.state==CharacterAI.State.RETURN_BASE and hauler.carrying>=0 and main.processor.incoming.is_empty(),"individual return moves every reserved input into owned cargo and releases the reservation")
+ check(await until(func():return not hauler.ai.return_request and hauler.ai.state==CharacterAI.State.SEARCH and hauler.carrying<0,180),"individual return reaches deck storage and completes the command")
+ check(main.storage.count_of(WOOD)==2 and main.storage.count_of(IRON)==1 and main.processor.incoming.is_empty(),"individual return restores each haul input exactly once with no stale reservation")
+ hauler.ai.tick(0.2)
+ check(hauler.ai.state in [CharacterAI.State.HAUL_TAKE,CharacterAI.State.HAUL_MOVE,CharacterAI.State.SEARCH],"released individual return permits the pending haul to be considered again")
 
 func allocation():
  await setup();main.finish_build("workbench");main.refill_settings=ProductionPlan.defaults()

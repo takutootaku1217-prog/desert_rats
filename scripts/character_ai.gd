@@ -294,7 +294,7 @@ func tick(delta: float) -> void:
 		return
 	# A personal withdrawal is an explicit, persistent order. It can interrupt
 	# meals and field repairs; group recall retains its existing safe boundaries.
-	var personal_withdrawal: bool = return_request and (ch.floor_i == 0 or ch._climb_dest != null or state in [State.IDLE, State.SEARCH, State.NOTICE, State.MOVE_TO_RESOURCE, State.GATHER, State.MOVE_TO_STORAGE, State.STORE, State.HAUL_TAKE, State.HAUL_MOVE, State.MOVE_TO_MACHINE, State.PROCESS, State.XFER_TAKE, State.XFER_MOVE, State.REFUEL_TAKE, State.REFUEL_MOVE, State.REFUEL, State.HUNT_MOVE, State.HUNT_ATTACK, State.COMBAT_MOVE, State.COMBAT, State.MISSION_RECOVERY_MOVE, State.MISSION_RECOVERY_LOAD, State.MISSION_RECOVERY_RETURN, State.REPAIR_TAKE, State.REPAIR_MOVE, State.REPAIR, State.EAT_TAKE, State.EAT, State.REST_MOVE, State.REST, State.REST_HERE])
+	var personal_withdrawal: bool = return_request and (ch.floor_i == 0 or ch._climb_dest != null or state in [State.IDLE, State.SEARCH, State.NOTICE, State.MOVE_TO_RESOURCE, State.GATHER, State.MOVE_TO_STORAGE, State.STORE, State.HAUL_TAKE, State.HAUL_MOVE, State.MOVE_TO_MACHINE, State.PROCESS, State.XFER_TAKE, State.XFER_MOVE, State.REFUEL_TAKE, State.REFUEL_MOVE, State.REFUEL, State.HUNT_MOVE, State.HUNT_ATTACK, State.COMBAT_MOVE, State.COMBAT, State.MISSION_RECOVERY_MOVE, State.MISSION_RECOVERY_LOAD, State.MISSION_RECOVERY_RETURN, State.REPAIR_TAKE, State.REPAIR_MOVE, State.REPAIR, State.EAT_TAKE, State.EAT, State.REST_MOVE, State.REST, State.REST_HERE, State.RETURN_BASE])
 	var group_recall: bool = (retreating or (game.operations.stance == "recall" and not ch.recall_exempt)) and (ch.floor_i == 0 or ch._climb_dest != null or state in [State.NOTICE,State.MOVE_TO_RESOURCE,State.GATHER,State.HUNT_MOVE,State.HUNT_ATTACK,State.COMBAT_MOVE,State.COMBAT,State.MISSION_RECOVERY_MOVE,State.MISSION_RECOVERY_LOAD,State.MISSION_RECOVERY_RETURN])
 	if personal_withdrawal or group_recall:
 		if _recall_tick(delta): return
@@ -1177,11 +1177,14 @@ func _recall_tick(delta: float) -> bool:
 		if return_request:
 			# An automatic or group withdrawal must not continue a transfer toward
 			# a field destination. Keep the owned cargo and return it to the base.
-			_release_task()
+			# The normal release helper does not own HAUL_MOVE's full recipe. Reuse
+			# the rescue-safe transfer so every reserved input becomes personal cargo
+			# before the reservation is cleared, then keep the return order active.
+			ch.stop_work_for_rescue()
+			return_request = true
 			current_job = -1
 			_set_state(State.RETURN_BASE)
-			ch.target = game.storage.access_point() + ch.slot_offset
-			if ch.move_to_target(delta): ch.unload_owned()
+			_finish_personal_return(delta)
 			return true
 		return false
 	if ch.down or _is_rest_state() or _is_eat_state():
@@ -1196,9 +1199,22 @@ func _recall_tick(delta: float) -> bool:
 	if not forced_return and _try_life_need():
 		return true
 	ch.target = game.storage.access_point() + ch.slot_offset
-	ch.move_to_target(delta)
+	if return_request:
+		_finish_personal_return(delta)
+	else:
+		ch.move_to_target(delta)
 		# 個人指示の到着だけを解除する。全員撤退・危険退避の待機は既存どおり保持する。
 	return true
+
+
+func _finish_personal_return(delta: float) -> void:
+	ch.target = game.storage.access_point() + ch.slot_offset
+	if ch.move_to_target(delta):
+		if ch.carrying >= 0:
+			ch.unload_owned()
+		return_request = false
+		current_job = -1
+		_set_state(State.SEARCH)
 
 
 func store_now() -> bool:
