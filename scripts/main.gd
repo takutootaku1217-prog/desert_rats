@@ -115,7 +115,11 @@ const WORKER_DEFS := [
 func _ready() -> void:
 	var force_new_checkpoint := SaveGame.new_run_requested
 	SaveGame.new_run_requested = false
-	if force_new_checkpoint: SaveGame.active_checkpoint.clear()
+	if force_new_checkpoint:
+		SaveGame.active_checkpoint.clear()
+		SaveGame.run_selected = true
+	else:
+		SaveGame.run_selected = not (SaveGame.exists(SaveGame.CHECKPOINT_PATH) or SaveGame.exists(SaveGame.PROGRESS_PATH) or SaveGame.exists(SaveGame.PATH))
 	if save_run_id == "": save_run_id = "%d-%d" % [Time.get_unix_time_from_system(), Time.get_ticks_usec()]
 	# 診断が明示した場合だけ、初期生成から同じ乱数列を使う。通常起動は従来どおり。
 	if has_meta("diagnostic_seed"):

@@ -84,6 +84,26 @@ func _initialize():
 	main = current_scene
 	var new_game_checkpoint := SaveGame.read_slot("user://checkpoint.json", SaveGame.SLOT_CHECKPOINT)
 	check(not new_game_checkpoint.is_empty() and new_game_checkpoint.main.save_run_id == main.save_run_id, "New Game replaces the previous run checkpoint")
+	# A checkpoint-only application restart remains neutral until its explicit UI
+	# restart is confirmed; that confirmation adopts the verified checkpoint run.
+	for save_path in [SaveGame.PROGRESS_PATH, SaveGame.PATH]:
+		for suffix in ["", ".bak"]:
+			if SaveGame.exists(save_path + suffix): DirAccess.remove_absolute(save_path + suffix)
+	SaveGame.active_checkpoint.clear()
+	SaveGame.run_selected = true
+	main.save_run_id = "checkpoint-only-run"
+	main.town.credits = 64
+	check(SaveGame.write_checkpoint(main, true), "checkpoint-only city state write")
+	var checkpoint_only_bytes := FileAccess.get_file_as_bytes(SaveGame.CHECKPOINT_PATH)
+	root.get_tree().reload_current_scene()
+	await frames()
+	main = current_scene
+	ui = main.save_ui
+	check(not SaveGame.run_selected and main.save_run_id != "checkpoint-only-run", "checkpoint-only restart starts neutral")
+	ui.ask("checkpoint")
+	check(not SaveGame.run_selected, "checkpoint confirmation preview does not adopt a run")
+	ui.execute()
+	check(SaveGame.run_selected and main.save_run_id == "checkpoint-only-run" and main.town.credits == 58 and FileAccess.get_file_as_bytes(SaveGame.CHECKPOINT_PATH) == checkpoint_only_bytes, "checkpoint-only UI restart restores city state and adopts its run")
 	check(is_instance_valid(main) and main.storage.count_of(GameData.Item.WOOD) == 0 and not paused,"確認後に新規ゲームへ移行")
 	check(FileAccess.get_file_as_string("user://save-ui-test.json") == "broken","新規開始しても保存を勝手に削除しない")
 	print("== 結果: %s ==" % ("すべて成功" if fails == 0 else "%d 件失敗" % fails))

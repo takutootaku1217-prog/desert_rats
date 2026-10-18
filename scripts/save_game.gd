@@ -20,6 +20,9 @@ static var new_run_requested := false
 ## The paired checkpoint selected by an explicit Continue.  It prevents another
 ## run's global checkpoint (or its backup) being used after a progress restore.
 static var active_checkpoint := {}
+## A normal boot with existing saves is neutral until the player explicitly
+## Continues or restarts from a checkpoint.  Only then may its run ID be adopted.
+static var run_selected := true
 const MAIN := ["target_speed", "scroll_speed", "save_run_id", "room_layout", "total_rooms_built", "recipe_priority", "gather_policy", "hunt_policy", "blueprints", "total_gathered", "total_hunted", "total_eaten", "tool_auto", "_tool_clock", "build_queue", "total_built", "total_wasted", "_waste_note_at", "_spawn_dist", "_creature_dist", "wave", "kills", "_wave_timer", "transfer_queue", "craft_queue", "total_transferred", "total_crafted_by_hand", "_feed_clock"]
 const WORKER := ["char_name", "palette", "priorities", "carrying", "carcass_cargo", "carrying_species", "carry_source", "carry_n", "carry_bonus", "weapon", "work_support", "tools", "speed", "target", "position", "slot_offset", "hp", "hunger", "fatigue", "stress", "calm", "mental", "down", "floor_i", "facing", "level", "gender", "ranks", "skills", "dept", "away", "bed_index", "_climb_dest", "_climb_floor", "_climb_kind"]
 const AI := ["state", "timer", "haul_item", "haul_recipe", "repair_part", "gather_ev", "bag_limit", "bag_frac", "eat_wait", "xfer_item", "xfer_dir", "current_job", "life_request", "process_slot", "safe_after", "retreating", "danger_hold", "manual_attack", "return_request", "manual_job"]
@@ -519,9 +522,19 @@ static func snapshot_run_id(d: Dictionary) -> String:
 static func current_run_id(g) -> String:
 	return str(g.get("save_run_id"))
 
-static func checkpoint_for_current_run(g, path: String = CHECKPOINT_PATH) -> Dictionary:
+static func checkpoint_for_current_run(g, path: String = CHECKPOINT_PATH, adopt_neutral := false) -> Dictionary:
 	var run_id := current_run_id(g)
 	var d := read_slot(path, SLOT_CHECKPOINT)
+	if not run_selected:
+		if d.is_empty(): return {}
+		if not validate(d, g):
+			last_error = "チェックポイントを検証できません。現在の進行は変更しません。"
+			return {}
+		if adopt_neutral:
+			g.save_run_id = snapshot_run_id(d)
+			run_selected = true
+			active_checkpoint.clear()
+		return d
 	if not d.is_empty() and snapshot_run_id(d) == run_id: return d
 	if active_checkpoint is Dictionary and not active_checkpoint.is_empty() and snapshot_run_id(active_checkpoint) == run_id:
 		return active_checkpoint.duplicate(true)
@@ -538,10 +551,11 @@ static func continue_progress(g, d: Dictionary) -> bool:
 	var paired := paired_checkpoint(d, g)
 	if not apply(g, d): return false
 	active_checkpoint = paired
+	run_selected = true
 	return true
 
 static func restart_from_checkpoint(g, policy: Dictionary = DEFAULT_RESTART_LOSS, path: String = CHECKPOINT_PATH) -> bool:
-	var d := checkpoint_for_current_run(g, path)
+	var d := checkpoint_for_current_run(g, path, true)
 	if d.is_empty(): return false
 	var restored := d.duplicate(true)
 	var town_state: Dictionary = TownEconomy.normalized(restored.get("town", {}))
@@ -677,7 +691,7 @@ static func write(g, path: String = PATH, overwrite := false, slot := "", snapsh
 static func write_progress(g, overwrite := false, path: String = PROGRESS_PATH) -> bool:
 	var progress := capture(g)
 	var paired := checkpoint_for_current_run(g)
-	if not paired.is_empty(): progress["paired_checkpoint"] = paired
+	if not paired.is_empty() and snapshot_run_id(paired) == snapshot_run_id(progress): progress["paired_checkpoint"] = paired
 	return write(g, path, overwrite, SLOT_PROGRESS, progress)
 
 static func write_checkpoint(g, overwrite := true) -> bool:
