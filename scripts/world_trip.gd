@@ -24,7 +24,11 @@ func _depth_config() -> Dictionary:
  if game==null or not is_instance_valid(game) or not game.has_meta("ground_depth_strip_config"):return {}
  var config=game.get_meta("ground_depth_strip_config")
  return config if config is Dictionary and bool(config.get("enabled",false)) else {}
-func depth_strip_active() -> bool:return not _depth_config().is_empty()
+func depth_strip_active() -> bool:
+ var config:=_depth_config()
+ if config.is_empty():return false
+ var location:=String(config.get("location",""))
+ return location=="" or location==key()
 func clamp_outdoor_y(y:float) -> float:
  var config:=_depth_config()
  return clampf(y,float(config.back_y),float(config.front_y)) if not config.is_empty() else y
@@ -41,10 +45,11 @@ func _normalize_depth_data(row:Dictionary,index:int) -> void:
    row[key].position.y=clamp_outdoor_y(row[key].position.y)
 func normalize_outdoor_depth() -> void:
  if not active or not depth_strip_active():return
- for location in locations:
-  var fallback:=0
-  for id in locations[location]:
-   _normalize_depth_data(locations[location][id],_depth_index(id,fallback));fallback+=1
+ var location:=key()
+ if not locations.has(location):return
+ var fallback:=0
+ for id in locations[location]:
+  _normalize_depth_data(locations[location][id],_depth_index(id,fallback));fallback+=1
 func normalize_outdoor_node(n,fallback:=0) -> void:
  if not active or not depth_strip_active() or n==null or not (n.get("position") is Vector2):return
  n.position.y=clamp_outdoor_y(n.position.y)

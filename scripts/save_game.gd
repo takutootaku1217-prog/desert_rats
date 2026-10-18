@@ -426,16 +426,16 @@ static func apply(g, d: Dictionary) -> bool:
 			r.set_meta("quarry_id",row.quarry_id); r.set_meta("quarry_group",row.quarry_group)
 			r.position = g.quarry.depth_position(r.position,row.quarry_id)
 			g.quarry.points.append(r)
-		else:
+		elif r.world_id != "":
 			g.world.normalize_outdoor_node(r)
 		g.resources_root.add_child(r); resources.append(r)
 	for row in d.creatures:
 		var c := Creature.new(); c.game = g; put(c,row,CREATURE)
-		g.world.normalize_outdoor_node(c)
+		if c.world_id != "": g.world.normalize_outdoor_node(c)
 		g.creatures_root.add_child(c); creatures.append(c)
 	for row in d.enemies:
 		var e := Enemy.new(); e.game = g; put(e,enemy_data(row),ENEMY)
-		g.world.normalize_outdoor_node(e)
+		if e.world_id != "": g.world.normalize_outdoor_node(e)
 		g.enemies_root.add_child(e); enemies.append(e)
 	for i in d.crew.size():
 		var w = g.workers[i]; var row: Dictionary = d.crew[i]

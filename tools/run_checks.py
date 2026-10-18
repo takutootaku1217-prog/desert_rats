@@ -39,7 +39,7 @@ def diagnostic(name: str, marker: str = "== 結果: すべて成功 ==") -> Chec
 CHECKS = {c.id: c for c in [
     Check("import", ("--editor", "--import", "--quit"), timeout=120),
     *(diagnostic(n) for n in ("journey", "journey_ui", "journey_flow", "town", "town_flow", "town_ui", "production_recovery", "production_reservations", "order_flow", "production_ui", "hunt_bounds", "auto_craft_guard", "developer_mode", "quarry", "gather", "cargo", "items", "crew_status", "life_actions", "tool_management", "rooms", "view", "camera", "artscale", "packed_equipment", "equipment_ui", "weapon", "weapon_ui", "cargo_accounting", "cargo_escape_ui", "progression", "clarity_ui", "inventory_discard", "save_game", "save_ui", "save_progression", "world_map", "world_flow", "world_boundaries", "world_fauna", "world_scenery", "world_reencounter", "seed_initialization", "tool_progression", "tool_flow", "first_cycle", "field_operations", "manual_combat", "trouble_loop", "field_ui", "ecosystem", "first_cycle_flow", "navigation_bar", "batch_crafting", "batch_ui", "batch_flow", "haul_support", "haul_ui", "haul_flow", "facility_packing", "packing_flow", "crew_detail", "build")),
-	Check("two_lane_live_integration", ("-s", "res://tools/test_two_lane_live_integration.gd"), "DEPTH_ROLLOUT_OK"),
+	Check("two_lane_live_integration", ("-s", "res://tools/test_two_lane_live_integration.gd", "--", "two-lane-depth-prototype"), "DEPTH_ROLLOUT_OK"),
     *(diagnostic(n, "== 結果: 0 件失敗 ==") for n in ("cargo_reservations", "consumption_loop")),
     Check("loop_vanilla", ("-s", "res://tools/test_loop.gd", "--", "32", "2", "12", "500", "0", "vanilla"),
           "== 結果: 問題なし ==", 300, 32, 2),

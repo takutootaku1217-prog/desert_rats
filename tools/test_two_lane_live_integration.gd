@@ -7,9 +7,9 @@ const FRONT_Y := 680.0
 
 
 func _configure_depth_strip() -> void:
-	check(main.world.depth_strip_active(), "normal map starts with the continuous depth strip")
+	check(main.world.depth_strip_active(), "prototype harvest location starts with the continuous depth strip")
 	var config: Dictionary = main.get_meta("ground_depth_strip_config")
-	check(is_equal_approx(float(config.back_y), BACK_Y) and is_equal_approx(float(config.front_y), FRONT_Y), "normal map uses the documented back/front depth anchors")
+	check(is_equal_approx(float(config.back_y), BACK_Y) and is_equal_approx(float(config.front_y), FRONT_Y) and String(config.location) == "region:south_oasis", "prototype uses the documented back/front anchors at south_oasis")
 	main.target_speed = 0.0
 	main.tool_auto = false
 	main.gather_policy = {GameData.Item.WOOD: 0, GameData.Item.STONE: 0, GameData.Item.IRON_ORE: 5}
@@ -51,7 +51,7 @@ func _sample_depth_motion(worker, xs: Array) -> bool:
 
 
 func _initialize() -> void:
-	print("-- continuous two-lane-width depth strip: normal map rollout --")
+	print("-- continuous two-lane-width depth strip: south_oasis prototype --")
 	await _world_locations_quarry_and_save()
 	await _gather_and_haul()
 	await _combat_return_and_selection()
@@ -80,20 +80,12 @@ func _lane_y(y: float) -> bool:
 func _world_locations_quarry_and_save() -> void:
 	await fresh()
 	_configure_depth_strip()
-	for region in WorldMapDB.REGIONS:
-		if WorldMapDB.public_region(region):
-			_location(region)
-	for road in WorldMapDB.ROADS:
-		if WorldMapDB.public_road(road):
-			_location(WorldMapDB.ROADS[road][0], road)
+	_location("south_oasis")
 	var all_rows_in_lanes := true
 	for records in main.world.locations.values():
 		for row in records.values():
 			all_rows_in_lanes = all_rows_in_lanes and _lane_y(row.data.position.y) and _lane_y(row.initial_data.position.y)
-	check(all_rows_in_lanes, "all normal regions and public roads assign resources, fauna, and ecological enemies to the two outdoor depth anchors")
-	main.world._archive()
-	main.quarry._arrive()
-	check(main.quarry.points.size() == QuarryDB.POINTS.size() and main.quarry.points.all(func(point): return _lane_y(point.position.y)), "quarry resources use the same two depth anchors")
+	check(all_rows_in_lanes, "south_oasis resources and fauna use the two outdoor depth anchors")
 	await fresh()
 	_configure_depth_strip()
 	var snapshot := SaveGame.capture(main)

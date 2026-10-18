@@ -1140,6 +1140,11 @@ and stash `09e6de75e16a7e695b1c47d88650189dadf5f979` remain untouched.
 
 ### 2026-10-18 Final two-lane depth-band coordinate correction (isolated worktree)
 
+> Scope correction (final): this task is now an opt-in `two-lane-depth-prototype`
+> for `south_oasis` only. Normal starts, roads, other regions, the moving-base map
+> loop, interiors, and existing saves keep their prior coordinates. See
+> `docs/two-lane-depth-prototype-final-2026-10-18.md` for final verification.
+
 The normal-map depth strip remains exactly two continuous front/back lanes, 55 px
 wide, with movement at every X and no crossing coordinate. Its final anchors are
 world Y=625 (back) and Y=680 (front). The first 570/625 placement changed the

@@ -121,10 +121,10 @@ func _ready() -> void:
 		seed(int(get_meta("diagnostic_seed")))
 	else:
 		randomize()
-	# The normal WorldTrip map uses the continuous depth strip. Legacy test
-	# fixtures intentionally retain their former free ground range.
-	if not OS.get_cmdline_user_args().has("legacy-world-test"):
-		set_meta("ground_depth_strip_config", {"enabled": true, "back_y": OUTDOOR_DEPTH_BACK_Y, "front_y": OUTDOOR_DEPTH_FRONT_Y})
+	# This is an opt-in prototype. The normal map stays on its existing
+	# one-line layout unless the comparison flag is supplied.
+	if OS.get_cmdline_user_args().has("two-lane-depth-prototype"):
+		set_meta("ground_depth_strip_config", {"enabled": true, "back_y": OUTDOOR_DEPTH_BACK_Y, "front_y": OUTDOOR_DEPTH_FRONT_Y, "location": "region:south_oasis"})
 	director = Director.new()       # 出来事（base や仲間より先に作る。倍率を読まれるため）
 	director.setup(self)
 	quarry.setup(self)
