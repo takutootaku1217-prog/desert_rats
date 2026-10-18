@@ -124,6 +124,11 @@ func stop_work_for_rescue() -> void:
 		# HAUL_MOVE holds the complete recipe in haul_recipe while carrying only
 		# its lead item. Move every reserved input into personal ownership before
 		# releasing the reservation so an incapacitated worker cannot lose it.
+		# HAUL_MOVE's carrying value is only a visual lead-item marker; it is
+		# already represented by haul_recipe and must not be counted twice.
+		carrying = -1
+		carry_n = 1
+		carry_bonus.clear()
 		for it in a.haul_recipe["in"]:
 			var n: int = int(a.haul_recipe["in"][it])
 			if carrying < 0:

@@ -86,7 +86,14 @@ func cancel_carrier(carrier) -> void:
 			r.carrier = -1
 			r.carried = false
 			incapacitated[i] = r
-	if carrier != null and carrier.ai != null: carrier.ai.rescue_target = -1
+	if carrier != null and carrier.ai != null:
+		carrier.ai.rescue_target = -1
+		# A cancelled deck-side rescue must leave the dedicated rescue states.
+		# Otherwise a return/recall has no ordinary state case to take over and
+		# the carrier can remain inert at the interruption point.
+		if not carrier.down and carrier.ai.state in [CharacterAI.State.RESCUE_MOVE, CharacterAI.State.RESCUE_CARRY]:
+			carrier.ai._set_state(CharacterAI.State.RETURN_BASE)
+			carrier.target = game.storage.access_point() + carrier.slot_offset
 
 func carrier_tick(carrier, delta: float) -> bool:
 	var ti: int = carrier.ai.rescue_target

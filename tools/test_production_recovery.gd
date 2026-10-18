@@ -6,7 +6,41 @@ func _initialize():
  await workshop_orders()
  await goals()
  await interruptions()
+ await haul_rescue_cargo()
  print("== 結果: %s =="%("すべて成功" if fails==0 else "%d 件失敗"%fails));quit(1 if fails else 0)
+func haul_rescue_cargo():
+ # HAUL_MOVE's `carrying` field is only a lead-item marker. Interrupt a real
+ # two-material haul through the down/rescue path and verify each input exists
+ # once (including after a real save/apply) before it is returned to storage.
+ await setup();main.finish_build("workbench")
+ main.storage.inventory.counts={}
+ main.request_order("tool_pick",1)
+ main.storage.inventory.counts={WOOD:2,IRON:1}
+ var hauler=main.workers[0]
+ var rescue_carrier=main.workers[1]
+ hauler.priorities[GameData.Job.HAUL]=5
+ check(hauler.ai._try_start(GameData.Job.HAUL),"two-material haul begins before rescue interruption")
+ hauler.position=main.storage.access_point()+hauler.slot_offset
+ hauler.floor_i=1
+ hauler.ai.tick(0.2)
+ check(hauler.ai.state==CharacterAI.State.HAUL_MOVE,"two-material recipe reaches real HAUL_MOVE")
+ CrewStatus.damage(hauler,999)
+ check(hauler.carrying>=0 and ((hauler.carry_n if hauler.carrying==WOOD else 0)+int(hauler.carry_bonus.get(WOOD,0)))==2 and ((hauler.carry_n if hauler.carrying==IRON else 0)+int(hauler.carry_bonus.get(IRON,0)))==1,"downed HAUL_MOVE owns each reserved input exactly once")
+ check(main.storage.count_of(WOOD)==0 and main.storage.count_of(IRON)==0 and main.processor.incoming.is_empty(),"rescue interruption releases the reservation without duplicating its materials")
+ var carried_save:=SaveGame.capture(main)
+ check(SaveGame.validate(carried_save,main) and SaveGame.apply(main,carried_save),"interrupted multi-material haul round-trips through save")
+ hauler=main.workers[0]
+ rescue_carrier=main.workers[1]
+ check(((hauler.carry_n if hauler.carrying==WOOD else 0)+int(hauler.carry_bonus.get(WOOD,0)))==2 and ((hauler.carry_n if hauler.carrying==IRON else 0)+int(hauler.carry_bonus.get(IRON,0)))==1 and main.processor.incoming.is_empty(),"saved HAUL interruption keeps exact personal cargo and no stale reservation")
+ for w in main.workers:w.set_process(false)
+ hauler.position=Vector2(900,GameData.LO_Y)
+ rescue_carrier.position=Vector2(700,GameData.LO_Y)
+ check(main.rescue.assign(rescue_carrier,hauler),"carrier accepts interrupted multi-material haul")
+ for n in 1200:
+  main.rescue.carrier_tick(rescue_carrier,0.1)
+  if not hauler.down:break
+ check(not hauler.down and main.storage.count_of(WOOD)==2 and main.storage.count_of(IRON)==1,"rescue delivery returns each interrupted haul material once")
+
 func allocation():
  await setup();main.finish_build("workbench");main.refill_settings=ProductionPlan.defaults()
  var st=main.storage

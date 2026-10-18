@@ -43,6 +43,16 @@ func _initialize() -> void:
 	check(not injured.down and injured.hp >= RescueSystem.SIMPLE_TREAT_HP and injured.ai.post_rescue_wait, "return provides simple treatment then waits for player resume")
 	main.rescue.resume(injured)
 	check(not injured.ai.post_rescue_wait, "resume remains explicit and does not require HP 70")
+	# A carrier who is told to withdraw on deck must leave the rescue state, then
+	# follow the normal return path instead of remaining frozen in RESCUE_MOVE.
+	CrewStatus.damage(injured, 999.0)
+	carrier = spare
+	carrier.position = Vector2(720, GameData.LO_Y)
+	injured.position = Vector2(920, GameData.LO_Y)
+	check(main.rescue.assign(carrier, injured), "deck-side rescue can be assigned for return interruption")
+	carrier.ai.return_request = true
+	carrier.ai.tick(0.1)
+	check(carrier.ai.rescue_target < 0 and carrier.ai.state == CharacterAI.State.RETURN_BASE and int(main.rescue.record_for(injured).get("carrier", -1)) < 0, "return interruption cancels rescue and enters the normal return state")
 	CrewStatus.damage(injured, 999.0)
 	var r: Dictionary = main.rescue.record_for(injured)
 	r.left = 0.05
@@ -58,13 +68,34 @@ func _initialize() -> void:
 	check(not main.rescue.revive_at_city(injured), "city revival rejects missing city/funds without charging")
 	await fresh()
 	injured = main.workers[0]
+	carrier = main.workers[1]
 	for w in main.workers: w.set_process(false)
-	var saved := SaveGame.capture(main)
+	injured.position = Vector2(900, GameData.LO_Y)
+	carrier.position = Vector2(760, GameData.LO_Y)
+	injured.carrying = GameData.Item.WOOD
+	injured.carry_n = 2
+	injured.carry_bonus = {GameData.Item.STONE: 3}
 	CrewStatus.damage(injured, 999.0)
-	main.rescue.tick(7.0)
-	saved.rescue = main.rescue.snapshot()
-	check(SaveGame.validate(saved, main), "rescue timer state is save-valid")
-	check(SaveGame.apply(main, saved), "rescue timer state restores")
+	check(main.rescue.assign(carrier, injured), "carried-rescue snapshot assignment succeeds")
+	for n in 500:
+		main.rescue.carrier_tick(carrier, 0.1)
+		if bool(main.rescue.record_for(injured).get("carried", false)): break
+	main.rescue.tick(2.0)
+	var left_at_save: float = float(main.rescue.record_for(injured).left)
+	var saved := SaveGame.capture(main)
+	check(SaveGame.validate(saved, main), "actual carried rescue snapshot is save-valid")
+	injured.carrying = -1
+	injured.carry_bonus.clear()
+	carrier.ai.rescue_target = -1
+	carrier.ai._set_state(CharacterAI.State.SEARCH)
+	main.rescue.incapacitated.clear()
+	check(SaveGame.apply(main, saved), "actual carried rescue snapshot restores")
+	injured = main.workers[0]
+	carrier = main.workers[1]
+	var restored: Dictionary = main.rescue.record_for(injured)
+	check(injured.down and bool(restored.get("carried", false)) and is_equal_approx(float(restored.left), left_at_save) and int(restored.get("carrier", -1)) == main.rescue.worker_index(carrier), "restore preserves carried timer and carrier reservation")
+	check(carrier.ai.rescue_target == main.rescue.worker_index(injured) and carrier.ai.state == CharacterAI.State.RESCUE_CARRY, "restore preserves both rescue AI states")
+	check(injured.carrying == GameData.Item.WOOD and injured.carry_n == 2 and int(injured.carry_bonus.get(GameData.Item.STONE, 0)) == 3, "restore preserves downed worker personal cargo")
 	for w in main.workers:
 		if not w.down: CrewStatus.damage(w, 999.0)
 	main.rescue.tick(0.1)
