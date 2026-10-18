@@ -93,8 +93,8 @@ const SPAWN_Y_MIN := GameData.GROUND_Y_MIN + 4.0
 const SPAWN_Y_MAX := GameData.GROUND_Y_MAX - 4.0
 ## Normal map outdoor space: a shallow continuous strip with two readable
 ## front/back resting lanes. Interior floors keep their existing coordinates.
-const OUTDOOR_DEPTH_BACK_Y := 570.0
-const OUTDOOR_DEPTH_FRONT_Y := 625.0
+const OUTDOOR_DEPTH_BACK_Y := 625.0
+const OUTDOOR_DEPTH_FRONT_Y := 680.0
 
 const WORKER_DEFS := [
 	{"name": "ネズ吉", "palette": "grey",

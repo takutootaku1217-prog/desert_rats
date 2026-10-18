@@ -1138,6 +1138,19 @@ Workspace: `C:\Users\user\Documents\Codex\2026-10-18\task-3\desert_rats`; branch
 `0c92c7f59fbd5d00c4760e7419bcde2fbcfb6939`. The original PC checkout, `main`, existing saves,
 and stash `09e6de75e16a7e695b1c47d88650189dadf5f979` remain untouched.
 
+### 2026-10-18 Final two-lane depth-band coordinate correction (isolated worktree)
+
+The normal-map depth strip remains exactly two continuous front/back lanes, 55 px
+wide, with movement at every X and no crossing coordinate. Its final anchors are
+world Y=625 (back) and Y=680 (front). The first 570/625 placement changed the
+fixed-FPS first-cycle production rhythm enough to starve the storage-box build of
+iron, although it did not change resource amounts. Translating the same-width band
+to the legacy outdoor neighbourhood restores that flow without changing the map,
+routes, rewards, resource counts, or the lane count. The fixed-FPS `first_cycle_flow`
+and `two_lane_live_integration` passes were repeated after this correction; the
+comparison and live-render PNG evidence was regenerated with the Intel Iris Xe
+Compatibility renderer. Full core validation follows from this isolated branch.
+
 Notion was rechecked through `docs/Notion参照索引.md`. World 1's autonomous gather/haul/return is
 adopted; the delivery-loop page was still a planning proposal (last edited 2026-10-13), with reward
 details undecided. The current user direction therefore governs this implementation.

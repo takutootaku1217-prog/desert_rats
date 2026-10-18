@@ -2,8 +2,8 @@ extends "res://tools/test_quarry.gd"
 ## 通常 Main / Worker / CharacterAI に限定した、連続奥行き帯の小規模接続試験。
 ## 固定線・固定横断路ではない。通常マップ全体にはまだ展開しない。
 
-const BACK_Y := 570.0
-const FRONT_Y := 625.0
+const BACK_Y := 625.0
+const FRONT_Y := 680.0
 
 
 func _configure_depth_strip() -> void:
@@ -44,7 +44,7 @@ func _add_front_vein() -> GatherPoint:
 func _sample_depth_motion(worker, xs: Array) -> bool:
 	if worker.floor_i != 0:
 		return false
-	if worker.position.y <= BACK_Y + 4.0 or worker.position.y >= FRONT_Y - 4.0:
+	if worker.position.y <= BACK_Y + 1.0 or worker.position.y >= FRONT_Y - 1.0:
 		return false
 	xs.append(worker.position.x)
 	return true
