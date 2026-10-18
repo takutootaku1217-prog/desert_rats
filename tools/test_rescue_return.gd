@@ -21,9 +21,11 @@ func _initialize() -> void:
 	injured.carrying = GameData.Item.WOOD
 	CrewStatus.damage(injured, 999.0)
 	check(injured.down and main.rescue.record_for(injured).left == RescueSystem.WAIT_SECONDS, "down starts a 90 second rescue wait")
+	check(main.rescue.status_text(injured).begins_with("救助待ち：残り"), "downed worker shows the localized waiting status with remaining seconds")
 	check(injured.carrying == GameData.Item.WOOD, "down retains personal cargo")
 	carrier.carrying = GameData.Item.STONE
 	check(main.rescue.assign(carrier, injured), "manual carrier designation succeeds even with carrier cargo")
+	check(main.rescue.status_text(injured).begins_with("救助担当が移動中：残り"), "assigned carrier shows localized travel status while the timer continues")
 	check(not main.rescue.assign(spare, injured), "duplicate carrier reservation is rejected")
 	var waiting_before_pickup: float = float(main.rescue.record_for(injured).left)
 	main.rescue.tick(5.0)
@@ -32,6 +34,7 @@ func _initialize() -> void:
 		main.rescue.carrier_tick(carrier, 0.1)
 		if int(main.rescue.record_for(injured).get("carrier", -1)) >= 0 and bool(main.rescue.record_for(injured).get("carried", false)): break
 	var left_before: float = float(main.rescue.record_for(injured).left)
+	check(main.rescue.status_text(injured) == "搬送中／救助時間停止中", "carried rescue shows the localized paused-timer status")
 	main.rescue.tick(5.0)
 	check(is_equal_approx(float(main.rescue.record_for(injured).left), left_before), "pickup pauses rescue timer")
 	CrewStatus.damage(carrier, 999.0)
@@ -68,6 +71,7 @@ func _initialize() -> void:
 	main.rescue.incapacitated[main.rescue.worker_index(injured)] = r
 	main.rescue.tick(1.0)
 	check(bool(main.rescue.record_for(injured).get("expired", false)), "expired crew stay as recoverable records")
+	check(main.rescue.status_text(injured) == "救助期限切れ：回収待ち", "expired worker shows the localized recovery-wait status")
 	injured.carrying = GameData.Item.WOOD
 	main.rescue.assign(spare, injured)
 	for n in 1200:
@@ -109,6 +113,7 @@ func _initialize() -> void:
 		if not w.down: CrewStatus.damage(w, 999.0)
 	main.rescue.tick(0.1)
 	check(main.rescue.prompt != null and main.rescue.prompt.visible, "all-down checkpoint restart prompt appears immediately")
+	check(main.rescue.prompt_label.text.contains("チェックポイントから再開") and main.rescue.prompt_label.text.contains("10%"), "all-down prompt is localized and explains the checkpoint loss")
 	await fresh()
 	for w in main.workers: w.set_process(false)
 	var recalled = main.workers[0]
@@ -181,6 +186,9 @@ func _initialize() -> void:
 
 func fresh() -> void:
 	if main != null:
+		main.set_process(false)
+		for worker in main.workers:
+			worker.set_process(false)
 		root.remove_child(main)
 		main.free()
 	FacilityDB.start_all = false
@@ -188,3 +196,6 @@ func fresh() -> void:
 	root.add_child(main)
 	await process_frame
 	await process_frame
+	# This test replaces the Main scene in one SceneTree; retain the new owner
+	# explicitly so a FieldOperations node cannot keep the previous fixture.
+	main.operations.game = main

@@ -49,6 +49,9 @@ func _frames() -> void:
 	for i in 4: await process_frame
 
 func _capture(label: String) -> void:
-	await RenderingServer.frame_post_draw
+	# The compatibility renderer used by automated Windows runs does not always
+	# emit frame_post_draw while the capture script owns the SceneTree. One
+	# normal frame after the prepared state is sufficient for this viewport read.
+	await process_frame
 	root.get_texture().get_image().save_png(destination.path_join(label + ".png"))
 	await process_frame

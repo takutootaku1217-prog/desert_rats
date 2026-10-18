@@ -302,11 +302,11 @@ func _build_detail_header(right: VBoxContainer) -> void:
 	returning.custom_minimum_size = Vector2(150, 32)
 	actions.add_child(returning)
 	_header["return"] = returning
-	var exempt := UIKit.button("Group recall: included", _toggle_recall_exempt)
+	var exempt := UIKit.button("全体帰還：対象", _toggle_recall_exempt)
 	exempt.custom_minimum_size = Vector2(150, 28)
 	actions.add_child(exempt)
 	_header["recall_exempt"] = exempt
-	var rescue := UIKit.button("Rescue action", _request_rescue)
+	var rescue := UIKit.button("救助操作", _request_rescue)
 	rescue.custom_minimum_size = Vector2(150, 32)
 	actions.add_child(rescue)
 	_header["rescue"] = rescue
@@ -1057,7 +1057,15 @@ func _update_header(w) -> void:
 	_header["portrait"].texture = _portrait_of(w)
 	var number: int = game.crew_alerts.number_of(w) if game.crew_alerts != null else 0
 	_header["name"].text = ("No.%02d " % number if number > 0 else "") + w.char_name
-	_header["action"].text = "現在行動：" + w.ai.status_text()
+	var rescue_status: String = game.rescue.status_text(w) if game.rescue != null else ""
+	var action_text: String = w.ai.status_text()
+	if not rescue_status.is_empty():
+		action_text = rescue_status
+	elif w.ai.rescue_target >= 0:
+		action_text = "仲間を救助中"
+	elif w.ai.post_rescue_wait:
+		action_text = "手当て完了：作業再開待ち"
+	_header["action"].text = "現在行動：" + action_text
 	var directives: Array[String] = []
 	if w.ai.return_request:
 		directives.append("帰還指示：受付中")
@@ -1065,9 +1073,13 @@ func _update_header(w) -> void:
 		directives.append("\u4fee\u7406\u6307\u793a: \u53d7\u4ed8\u4e2d")
 	if not w.ai.life_request.is_empty():
 		directives.append(("休憩" if w.ai.life_request == "rest" else "食事") + "：受付中")
-	_header["instruction"].text = " / ".join(PackedStringArray(directives)) if not directives.is_empty() else "自動作業中"
+	var instruction_text := "自動作業中"
+	if not rescue_status.is_empty() or w.ai.rescue_target >= 0:
+		instruction_text = "救助対応中"
+	elif w.ai.post_rescue_wait:
+		instruction_text = "手当て完了：再開待ち"
+	_header["instruction"].text = " / ".join(PackedStringArray(directives)) if not directives.is_empty() else instruction_text
 	var warning := _important_warning(w)
-	var rescue_status: String = game.rescue.status_text(w) if game.rescue != null else ""
 	if not rescue_status.is_empty(): warning = rescue_status
 	var has_warning := warning != "重要な不調：なし"
 	_header["warning"].visible = has_warning
@@ -1081,30 +1093,30 @@ func _update_header(w) -> void:
 	if w.ai.return_request:
 		returning.tooltip_text = "\u9000\u5374\u3092\u89e3\u9664\u3057\u3001\u5e30\u9084\u5f8c\u306e\u6b21\u306e\u5b89\u5168\u306a\u6642\u70b9\u304b\u3089\u81ea\u5f8b\u884c\u52d5\u306b\u623b\u3057\u307e\u3059\u3002"
 	var exempt: Button = _header["recall_exempt"]
-	exempt.text = "Group recall: excluded" if w.recall_exempt else "Group recall: included"
-	exempt.tooltip_text = "This crew member ignores the group recall; individual return and low-HP outdoor withdrawal still apply."
+	exempt.text = "全体帰還：対象外" if w.recall_exempt else "全体帰還：対象"
+	exempt.tooltip_text = "この仲間は全体帰還の対象外です。個別帰還と屋外でのHP30%以下の安全帰還は優先されます。"
 	var rescue: Button = _header["rescue"]
 	if w.down:
 		var rec: Dictionary = game.rescue.record_for(w)
 		if bool(rec.get("expired", false)):
-			rescue.text = "Revive in town (%d Cr)" % TownDB.REVIVAL_COST
+			rescue.text = "都市で回復（%d Cr）" % TownDB.REVIVAL_COST
 			rescue.disabled = not game.town.location_ok() or game.town.credits < TownDB.REVIVAL_COST
-			rescue.tooltip_text = "Expired crew remain recoverable in town."
+			rescue.tooltip_text = "期限切れの仲間は拠点へ回収後、都市で回復できます。"
 		else:
-			rescue.text = "Assign rescue carrier"
+			rescue.text = "救助担当を指定"
 			rescue.disabled = int(rec.get("carrier", -1)) >= 0
-			rescue.tooltip_text = "Explicit action; rescue is never assigned automatically."
+			rescue.tooltip_text = "救助担当は自動で割り当てません。救助する仲間を指定します。"
 	elif w.ai.post_rescue_wait:
-		rescue.text = "Resume work"
+		rescue.text = "作業を再開"
 		rescue.disabled = false
-		rescue.tooltip_text = "Recovery completed. Resume is a player decision."
+		rescue.tooltip_text = "手当て完了後の再開は、プレイヤーが決めます。"
 	else:
 		var has_target := false
 		for target in game.workers:
 			if target.down: has_target = true
-		rescue.text = "Assign to rescue"
+		rescue.text = "救助へ向かう"
 		rescue.disabled = not has_target or game.rescue.is_carrier(w)
-		rescue.tooltip_text = "Assign selected crew to an incapacitated teammate."
+		rescue.tooltip_text = "戦闘不能の仲間を選び、救助担当にします。"
 	var repair: Button = _header["repair"]
 	var info: Dictionary = game.repair_order_info()
 	var repair_reason: String = ""

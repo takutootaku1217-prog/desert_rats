@@ -32,7 +32,7 @@ func _build_prompt() -> void:
 	prompt_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	box.add_child(prompt_label)
 	var restart := Button.new()
-	restart.text = "Restart from checkpoint"
+	restart.text = "チェックポイントから再開"
 	restart.pressed.connect(func(): SaveGame.restart_from_checkpoint(game))
 	box.add_child(restart)
 
@@ -50,9 +50,11 @@ func is_carrier(w) -> bool:
 func status_text(w) -> String:
 	var r := record_for(w)
 	if r.is_empty(): return ""
-	if bool(r.get("expired", false)): return "Rescue expired: revive in town"
-	if int(r.get("carrier", -1)) >= 0: return "Carried (rescue timer paused)"
-	return "Awaiting rescue: %d sec" % ceili(float(r.get("left", WAIT_SECONDS)))
+	if bool(r.get("expired", false)): return "救助期限切れ：回収待ち"
+	var left := ceili(float(r.get("left", WAIT_SECONDS)))
+	if int(r.get("carrier", -1)) >= 0:
+		return "搬送中／救助時間停止中" if bool(r.get("carried", false)) else "救助担当が移動中：残り%d秒" % left
+	return "救助待ち：残り%d秒" % left
 
 func on_down(w) -> void:
 	cancel_carrier(w)
@@ -174,7 +176,7 @@ func tick(delta: float) -> void:
 	all_down_elapsed = all_down_elapsed + delta if active > 0 and down_count == active else 0.0
 	if prompt != null:
 		prompt.visible = active > 0 and down_count == active
-		if prompt.visible: prompt_label.text = "All crew are incapacitated. Restart applies the checkpoint credit loss."
+		if prompt.visible: prompt_label.text = "全員が戦闘不能です。チェックポイントから再開すると、クレジットの10%を失います。"
 
 func snapshot() -> Dictionary:
 	return {"version": 1, "incapacitated": incapacitated.duplicate(true), "all_down_elapsed": all_down_elapsed}
