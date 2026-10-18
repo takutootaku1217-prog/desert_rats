@@ -162,5 +162,14 @@ func execute() -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if is_open() and event is InputEventKey:
-		if event.pressed and event.keycode == KEY_ESCAPE: close()
+		if event.pressed and event.keycode == KEY_ESCAPE:
+			# v2 migration is a second confirmation inside the neutral resume UI.
+			# Escape there cancels that confirmation only; closing the startup screen
+			# would incorrectly settle the neutral run and replace its checkpoint.
+			if _action == "migrate":
+				_action = ""
+				_confirm.hide()
+				_legacy.show()
+			else:
+				close()
 		get_viewport().set_input_as_handled()
