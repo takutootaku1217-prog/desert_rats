@@ -7,7 +7,9 @@ func snapshot_ok()->bool:
  var d:=SaveGame.capture(main)
  return SaveGame.write(main,"user://field-check.json",true) and SaveGame.apply(main,SaveGame.read("user://field-check.json")) and SaveGame.capture(main)==d
 func _initialize():
- await fresh();main.target_speed=0;main.tool_auto=false
+ # This is the explicit small-crew cross-role fixture. It is independent of
+ # the five-person new-game default.
+ await fresh(false,3);main.target_speed=0;main.tool_auto=false
  var w=main.workers[0];var ops=main.operations
  check(ops.set_stance("alert"),"後退は警戒態勢として受理")
  check(ops.can_depart(w,Vector2(1080,680)) and not ops.can_depart(w,Vector2(350,680)),"警戒でも近場採取可、遠い新規往復不可")

@@ -40,6 +40,8 @@ CHECKS = {c.id: c for c in [
     Check("import", ("--editor", "--import", "--quit"), timeout=120),
     *(diagnostic(n) for n in ("journey", "journey_ui", "journey_flow", "town", "town_flow", "town_ui", "production_recovery", "production_reservations", "order_flow", "production_ui", "hunt_bounds", "auto_craft_guard", "developer_mode", "quarry", "gather", "cargo", "items", "crew_status", "life_actions", "tool_management", "rooms", "view", "camera", "artscale", "packed_equipment", "equipment_ui", "weapon", "weapon_ui", "cargo_accounting", "cargo_escape_ui", "progression", "clarity_ui", "inventory_discard", "save_game", "save_ui", "save_progression", "world_map", "world_flow", "world_boundaries", "world_fauna", "world_scenery", "world_reencounter", "seed_initialization", "tool_progression", "tool_flow", "first_cycle", "field_operations", "manual_combat", "trouble_loop", "field_ui", "ecosystem", "first_cycle_flow", "navigation_bar", "batch_crafting", "batch_ui", "batch_flow", "haul_support", "haul_ui", "haul_flow", "facility_packing", "packing_flow", "crew_detail", "build")),
     Check("rescue_return", ("-s", "res://tools/test_rescue_return.gd"), "== RESULT: ALL PASSED =="),
+    Check("sortie_economy_4", ("-s", "res://tools/test_sortie_economy.gd", "--", "--crew-count", "4"), "== RESULT: ALL PASSED ==", 900),
+    Check("sortie_economy_5", ("-s", "res://tools/test_sortie_economy.gd", "--", "--crew-count", "5"), "== RESULT: ALL PASSED ==", 900),
     *(diagnostic(n, "== 結果: 0 件失敗 ==") for n in ("cargo_reservations", "consumption_loop")),
     Check("loop_vanilla", ("-s", "res://tools/test_loop.gd", "--", "32", "2", "12", "500", "0", "vanilla"),
           "== 結果: 問題なし ==", 300, 32, 2),
@@ -58,7 +60,7 @@ CHECKS = {c.id: c for c in [
 ]}
 SUITES = {
     "core": ["journey", "journey_ui", "journey_flow", "town", "town_flow", "town_ui", "production_recovery", "production_reservations", "order_flow", "production_ui", "hunt_bounds", "auto_craft_guard", "developer_mode", "developer_enabled", "artscale", "tool_progression", "tool_flow", "first_cycle", "field_operations", "manual_combat", "field_ui", "ecosystem", "first_cycle_flow", "navigation_bar", "batch_crafting", "batch_ui", "batch_flow", "haul_support", "haul_ui", "haul_flow", "facility_packing", "packing_flow", "world_map", "world_flow", "world_boundaries", "world_fauna", "world_scenery", "world_reencounter", "save_game", "save_ui", "inventory_discard", "clarity_ui", "cargo_accounting", "cargo_escape_ui", "progression", "weapon", "weapon_ui", "equipment_ui", "packed_equipment", "quarry", "gather", "cargo", "items", "crew_status", "life_actions", "tool_management",
-    "cargo_reservations", "consumption_loop", "trouble_loop", "rescue_return", "loop_vanilla", "loop_normal", "startup"],
+    "cargo_reservations", "consumption_loop", "trouble_loop", "rescue_return", "sortie_economy_4", "sortie_economy_5", "loop_vanilla", "loop_normal", "startup"],
     "endurance": [f"world_endurance_{seed}_{mode}" for seed in (501, 502, 503) for mode in ("stay", "route", "ordered_stay", "ordered_route")],
     "extra": ["loop_manual", "loop_events"],
     "layout": ["rooms", "view", "camera", "artscale", "quarry", "quarry_rear", "consumption_loop"],
@@ -228,7 +230,7 @@ def main() -> int:
     checks = []
     for name in selected:
         argv = [args.godot, "--headless", "--path", str(ROOT), "--fixed-fps", "60", *CHECKS[name].args]
-        if name not in ("import", "startup", "journey", "journey_ui", "journey_flow", "town", "town_flow", "town_ui", "order_flow", "production_ui", "seed_initialization", "tool_progression", "tool_flow", "ecosystem", "first_cycle_flow", "navigation_bar", "batch_crafting", "batch_ui", "batch_flow", "haul_support", "haul_ui", "haul_flow", "facility_packing", "packing_flow") and not name.startswith("world_"):
+        if name not in ("import", "startup", "journey", "journey_ui", "journey_flow", "town", "town_flow", "town_ui", "order_flow", "production_ui", "seed_initialization", "tool_progression", "tool_flow", "ecosystem", "first_cycle_flow", "navigation_bar", "batch_crafting", "batch_ui", "batch_flow", "haul_support", "haul_ui", "haul_flow", "facility_packing", "packing_flow", "sortie_economy_4", "sortie_economy_5") and not name.startswith("world_"):
             if "--" not in argv: argv.append("--")
             argv.append("legacy-world-test")  # Existing-loop fixtures; world_* exercise the new default map.
         checks.append((CHECKS[name], argv))

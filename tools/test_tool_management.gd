@@ -38,6 +38,9 @@ func _fresh() -> void:
 		main.free()
 	FacilityDB.start_all = true
 	main = load("res://scenes/main.tscn").instantiate()
+	# This ranking matrix has three defined workers; do not inherit the
+	# five-worker new-game default.
+	main.set_meta("diagnostic_crew_count", 3)
 	root.add_child(main)
 	main.process_mode = Node.PROCESS_MODE_DISABLED
 	await process_frame

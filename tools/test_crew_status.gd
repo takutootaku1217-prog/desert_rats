@@ -42,6 +42,8 @@ func _fresh(all_facilities := true) -> void:
 		main.free()
 	FacilityDB.start_all = all_facilities
 	main = load("res://scenes/main.tscn").instantiate()
+	# Historical status values are a deliberate three-worker fixture.
+	main.set_meta("diagnostic_crew_count", 3)
 	root.add_child(main)
 	await process_frame
 	await process_frame

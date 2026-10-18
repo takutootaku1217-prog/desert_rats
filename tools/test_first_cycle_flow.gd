@@ -1,6 +1,8 @@
 extends "res://tools/test_tool_flow.gd"
 func _initialize():
- main=load("res://scenes/main.tscn").instantiate();main.set_meta("diagnostic_seed",diagnostic_seed());root.add_child(main);await main.ready
+ # Keep the normal-map small-crew flow explicit rather than inheriting the
+ # five-person default used by new games.
+ main=load("res://scenes/main.tscn").instantiate();main.set_meta("diagnostic_seed",diagnostic_seed());main.set_meta("diagnostic_crew_count",3);root.add_child(main);await main.ready
  Engine.time_scale=12
  print("FIRST_CYCLE_FLOW 通常開始3人・有限資源・既定出来事・素材/道具/設備注入なし seed=",diagnostic_seed())
  main.request_build("workbench")

@@ -65,7 +65,7 @@ func _initialize():
   var key:String=source+":"+ItemDB.name_of(it)
   receipts[key]=int(receipts.get(key,0))+n
   if source==Inventory.SOURCE_PURCHASE:violations.append("開発用物資の注入"))
- if not main.world.active or not main.director.enabled or main.workers.size()!=3:violations.append("既定開始条件の不一致")
+ if not main.world.active or not main.director.enabled or main.workers.size()!=main.DEFAULT_INITIAL_WORKERS:violations.append("既定開始条件の不一致")
  emit_record("start",{"seed":seed_value,"scenario":scenario,"requested_seconds":duration,"events_enabled":main.director.enabled,"map_active":main.world.active,"refill_settings":main.refill_settings})
  emit_record("action",{"request":"workbench","accepted":main.request_build("workbench")})
  if scenario.begins_with("ordered_"):

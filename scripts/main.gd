@@ -94,6 +94,13 @@ const SPAWN_X := 1330.0
 const SPAWN_Y_MIN := GameData.GROUND_Y_MIN + 4.0
 const SPAWN_Y_MAX := GameData.GROUND_Y_MAX - 4.0
 
+## New runs begin with five generalists. Recruiting is intentionally not a
+## feature of this stage. Existing saved runs retain the crew size captured in
+## their own snapshot so this change does not silently add a member to a
+## player's in-progress run.
+const DEFAULT_INITIAL_WORKERS := 5
+const MIN_INITIAL_WORKERS := 3
+const MAX_INITIAL_WORKERS := 5
 const WORKER_DEFS := [
 	{"name": "ネズ吉", "palette": "grey",
 		"profile": {"level": 3, "gender": 0, "ranks": {GameData.Field.GATHERER: 3, GameData.Field.COMBAT: 1, GameData.Field.DEV: 0},
@@ -110,6 +117,16 @@ const WORKER_DEFS := [
 			"skills": ["武器設計"]},
 		"prio": {GameData.Job.HUNT: 1, GameData.Job.GATHER: 1, GameData.Job.HAUL: 3, GameData.Job.PROCESS: 5,
 			GameData.Job.REPAIR: 4, GameData.Job.REST: 3, GameData.Job.COMBAT: 2}},
+	{"name": "カド", "palette": "grey",
+		"profile": {"level": 2, "gender": 1, "ranks": {GameData.Field.GATHERER: 2, GameData.Field.MEDIC: 2, GameData.Field.COOK: 1},
+			"skills": ["近場採取", "応急処置"]},
+		"prio": {GameData.Job.HUNT: 2, GameData.Job.GATHER: 4, GameData.Job.HAUL: 4, GameData.Job.PROCESS: 2,
+			GameData.Job.REPAIR: 3, GameData.Job.REST: 3, GameData.Job.COMBAT: 2}},
+	{"name": "スナ", "palette": "tan",
+		"profile": {"level": 2, "gender": 0, "ranks": {GameData.Field.GATHERER: 2, GameData.Field.COMBAT: 2, GameData.Field.DEV: 1},
+			"skills": ["積載整理"]},
+		"prio": {GameData.Job.HUNT: 4, GameData.Job.GATHER: 4, GameData.Job.HAUL: 3, GameData.Job.PROCESS: 1,
+			GameData.Job.REPAIR: 3, GameData.Job.REST: 3, GameData.Job.COMBAT: 4}},
 ]
 
 
@@ -191,7 +208,8 @@ func _ready() -> void:
 	workers_root.name = "Workers"
 	workers_root.y_sort_enabled = true
 	ground_sort.add_child(workers_root)
-	for i in WORKER_DEFS.size():
+	var initial_worker_count := _initial_worker_count(force_new_checkpoint)
+	for i in initial_worker_count:
 		var d: Dictionary = WORKER_DEFS[i]
 		var w := Worker.new()
 		w.setup(self, d["name"], d["palette"], d["prio"], i, d["profile"])
@@ -277,6 +295,27 @@ func _ready() -> void:
 	navigation.game = self
 	add_child(navigation)
 	call_deferred("_ensure_initial_checkpoint", force_new_checkpoint)
+
+
+## A saved run is allowed to keep its original crew size.  New-game requests
+## always use the current default, while diagnostics may compare the approved
+## four- and five-person starts without changing resources or player funds.
+func _initial_worker_count(force_new: bool) -> int:
+	if has_meta("diagnostic_crew_count"):
+		return clampi(int(get_meta("diagnostic_crew_count")), MIN_INITIAL_WORKERS, MAX_INITIAL_WORKERS)
+	# Save-disabled fixtures are historical three-person test cases, not a new
+	# player run. Their roster must stay explicit so balancing regressions remain
+	# comparable while the actual new-game path uses five people.
+	if SaveGame.disabled:
+		return MIN_INITIAL_WORKERS
+	if force_new:
+		return DEFAULT_INITIAL_WORKERS
+	var saved := SaveGame.read_progress()
+	if saved.get("crew") is Array:
+		var saved_count: int = saved.crew.size()
+		if saved_count >= MIN_INITIAL_WORKERS and saved_count <= MAX_INITIAL_WORKERS:
+			return saved_count
+	return DEFAULT_INITIAL_WORKERS
 
 func _ensure_initial_checkpoint(force_new := false) -> void:
 	if not SaveGame.ensure_initial_checkpoint(self, force_new):

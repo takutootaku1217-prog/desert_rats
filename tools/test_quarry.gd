@@ -6,12 +6,14 @@ func check(ok: bool, msg: String) -> void:
 	print("  %s %s" % ["ok" if ok else "FAIL", msg])
 	if not ok: fails += 1
 
-func fresh(all_facilities := false) -> void:
+func fresh(all_facilities := false, diagnostic_crew_count := 0) -> void:
 	if main != null:
 		root.remove_child(main)
 		main.free()
 	FacilityDB.start_all = all_facilities
 	main = load("res://scenes/main.tscn").instantiate()
+	if diagnostic_crew_count > 0:
+		main.set_meta("diagnostic_crew_count", diagnostic_crew_count)
 	root.add_child(main)
 	main.process_mode = Node.PROCESS_MODE_DISABLED
 	await process_frame
