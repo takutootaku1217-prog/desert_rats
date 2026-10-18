@@ -115,6 +115,21 @@ func stop_work() -> void:
 	a._release_task()
 
 
+func stop_work_for_rescue() -> void:
+	var a := ai
+	a.life_request = ""
+	a.return_request = false
+	a.manual_job = -1
+	if a.state == CharacterAI.State.HAUL_MOVE and not a.haul_recipe.is_empty():
+		game.processor.cancel_reservation(a.haul_recipe)
+		a.haul_recipe = {}
+	if a.state in [CharacterAI.State.REFUEL_MOVE, CharacterAI.State.REFUEL]: game.base.refuel_reserved = false
+	if a.state in [CharacterAI.State.REPAIR_MOVE, CharacterAI.State.REPAIR]:
+		game.base.repair_reserved.erase(a.repair_part)
+		a.repair_part = -1
+	a._release_task()
+
+
 ## 荷物は保有済み。外部取得の容量判定と混同しない。
 func unload_owned() -> void:
 	var source := carry_source
@@ -233,7 +248,10 @@ func rank_text(field: int) -> String:
 
 ## ステータスが悪いと移動が遅くなる（満腹度・疲労度・HP のうち、いちばん悪いもの。CrewStatus.move_mult）。
 func current_speed() -> float:
-	return speed * CrewStatus.move_mult(self)
+	var result := speed * CrewStatus.move_mult(self)
+	if game != null and game.rescue != null and game.rescue.is_carrier(self):
+		result *= RescueSystem.FRAME_SPEED if work_support == GameData.Item.HAUL_FRAME else RescueSystem.CARRY_SPEED
+	return result
 
 
 ## target へ向かって1歩進む。到着したら true。

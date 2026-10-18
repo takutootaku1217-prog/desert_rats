@@ -10,6 +10,7 @@ const SUPPLY_OFFERS := {
  GameData.Item.WOOD:{"count":6,"reward":24},
  GameData.Item.STONE:{"count":6,"reward":24},
 }
+const REVIVAL_COST := 48 # Two ordinary 24 Cr supply rewards.
 const DELIVERY_TO := "south_oasis"
 const DELIVERY_REWARD := 32
 const DELIVERY_PARCEL_WEIGHT := 12

@@ -78,6 +78,7 @@ static func _low_mult(table: Array, value: float) -> float:
 static func _tick_hp(w, delta: float) -> void:
 	var g = w.game
 	if w.down:
+		if w.game.rescue != null: return
 		w.hp = minf(CrewStatusDB.MAX_HP, w.hp + CrewStatusDB.HP_DOWN_RATE * delta)
 		if w.hp >= CrewStatusDB.HP_REVIVE_AT:
 			w.down = false                                          # 起き上がる（AI が探し直す）

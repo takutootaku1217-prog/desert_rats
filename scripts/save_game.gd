@@ -29,7 +29,7 @@ static func select_current_run() -> void:
 	active_checkpoint.clear()
 const MAIN := ["target_speed", "scroll_speed", "save_run_id", "room_layout", "total_rooms_built", "recipe_priority", "gather_policy", "hunt_policy", "blueprints", "total_gathered", "total_hunted", "total_eaten", "tool_auto", "_tool_clock", "build_queue", "total_built", "total_wasted", "_waste_note_at", "_spawn_dist", "_creature_dist", "wave", "kills", "_wave_timer", "transfer_queue", "craft_queue", "total_transferred", "total_crafted_by_hand", "_feed_clock"]
 const WORKER := ["char_name", "palette", "priorities", "carrying", "carcass_cargo", "carrying_species", "carry_source", "carry_n", "carry_bonus", "weapon", "work_support", "tools", "speed", "target", "position", "slot_offset", "hp", "hunger", "fatigue", "stress", "calm", "mental", "down", "floor_i", "facing", "level", "gender", "ranks", "skills", "dept", "away", "bed_index", "_climb_dest", "_climb_floor", "_climb_kind"]
-const AI := ["state", "timer", "haul_item", "haul_recipe", "repair_part", "gather_ev", "bag_limit", "bag_frac", "eat_wait", "xfer_item", "xfer_dir", "current_job", "life_request", "process_slot", "safe_after", "retreating", "danger_hold", "manual_attack", "return_request", "manual_job"]
+const AI := ["state", "timer", "haul_item", "haul_recipe", "repair_part", "gather_ev", "bag_limit", "bag_frac", "eat_wait", "xfer_item", "xfer_dir", "current_job", "life_request", "process_slot", "safe_after", "retreating", "danger_hold", "manual_attack", "return_request", "manual_job", "rescue_target", "post_rescue_wait"]
 const BASE := ["built", "max_hp", "hp", "fuel", "parts", "rear_engine_damage", "total_refuel", "total_repair"]
 const PROCESSOR := ["orders", "current", "progress", "output", "batch_output", "total_done", "waiting_fuel"]
 const DIRECTOR := ["active", "forecast", "default_stance", "log", "elapsed", "distance", "stats", "enabled", "_next_in"]
@@ -61,7 +61,7 @@ static func capture(g) -> Dictionary:
 		"inventory": g.storage.inventory.counts.duplicate(true), "wasted": g.storage.wasted.duplicate(true),
 		"butchered": g.storage.total_butchered, "capacity": g.storage.capacity_bonus, "weight": g.storage.current_weight(),
 		"director": fields(g.director, DIRECTOR), "quarry": fields(g.quarry, QUARRY), "expedition": fields(g.expedition, EXPEDITION),
-		"party": [], "crew": [], "resources": [], "creatures": [], "enemies": [], "rescue": RESCUE_DEFAULT.duplicate(true),
+		"party": [], "crew": [], "resources": [], "creatures": [], "enemies": [], "rescue": g.rescue.snapshot() if g.rescue != null else RESCUE_DEFAULT.duplicate(true),
 		"camera": g.camera.position, "follow": g.workers.find(g.follow_target), "scroll": 0.0}
 	d["journey"] = g.journey.snapshot()
 	d["town"] = g.town.snapshot()
@@ -191,6 +191,8 @@ static func ai_data(row: Dictionary) -> Dictionary:
 	if not result.has("manual_attack"): result.manual_attack = false
 	if not result.has("return_request"): result.return_request = false
 	if not result.has("manual_job"): result.manual_job = -1
+	if not result.has("rescue_target"): result.rescue_target = -1
+	if not result.has("post_rescue_wait"): result.post_rescue_wait = false
 	return result
 
 ## 試作ブランチで先行した報酬補充予約を、通常版の旧セーブでは false として補完する。
@@ -232,6 +234,9 @@ static func rescue_valid(d: Dictionary) -> bool:
 			if not timer.has(key): return false
 		if typeof(timer.left) not in [TYPE_FLOAT, TYPE_INT] or timer.left < 0.0 or not timer.carried is bool:
 			return false
+		if timer.has("carrier") and (not timer.carrier is int or timer.carrier < -1): return false
+		if timer.has("expired") and not timer.expired is bool: return false
+		if timer.has("at_base") and not timer.at_base is bool: return false
 	return true
 
 static func validate(d, g) -> bool:
@@ -502,6 +507,7 @@ static func apply(g, d: Dictionary) -> bool:
 		a._eat_claimed = a.state == S.EAT_TAKE
 		if a._eat_claimed: g.food_claims += 1
 	for i in d.party: g.expedition.party.append(g.workers[i])
+	if g.rescue != null: g.rescue.restore(rescue_data(d))
 	g.camera.position = d.camera; g.camera.reset_smoothing()
 	g.follow_target = g.workers[d.follow] if d.follow >= 0 else null
 	for node in g.get_children():

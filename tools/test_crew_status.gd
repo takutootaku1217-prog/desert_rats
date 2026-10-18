@@ -482,6 +482,19 @@ func _test_step5_mental() -> void:
 
 # ---------------------------------------------------------------- STEP 6: HP と戦闘不能
 func _test_step6_hp() -> void:
+	print("-- STEP 6: rescue replaces natural revival")
+	var rw = W[0]
+	_reset(rw)
+	rw.carrying = GameData.Item.WOOD
+	var rescue_wood: int = main.storage.count_of(GameData.Item.WOOD)
+	CrewStatus.damage(rw, 100.0, 20.0)
+	check(rw.down and rw.hp == 0.0 and rw.ai.state == CharacterAI.State.DOWN, "HP zero starts incapacity")
+	check(rw.carrying == GameData.Item.WOOD and main.storage.count_of(GameData.Item.WOOD) == rescue_wood, "rescue retains personal cargo")
+	for i in 400:
+		rw._process(0.5)
+	check(rw.down and rw.hp == 0.0, "incapacity has no natural revive")
+	check(not main.rescue.record_for(rw).is_empty(), "incapacity creates rescue record")
+	return
 	print("-- STEP 6: HP（ケガ・回復・戦闘不能）")
 	await _fresh()
 	var w = W[0]

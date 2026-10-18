@@ -302,6 +302,10 @@ func _build_detail_header(right: VBoxContainer) -> void:
 	returning.custom_minimum_size = Vector2(150, 32)
 	actions.add_child(returning)
 	_header["return"] = returning
+	var rescue := UIKit.button("Rescue action", _request_rescue)
+	rescue.custom_minimum_size = Vector2(150, 32)
+	actions.add_child(rescue)
+	_header["rescue"] = rescue
 	var repair := UIKit.button("\u4fee\u7406\u3092\u4efb\u305b\u308b", _request_header_repair)
 	repair.custom_minimum_size = Vector2(150, 32)
 	actions.add_child(repair)
@@ -601,6 +605,23 @@ func _request_return() -> void:
 			_worker.ai.cancel_return()
 		else:
 			_worker.ai.request_return()
+	_update_live()
+
+
+func _request_rescue() -> void:
+	if not is_instance_valid(_worker) or not game.workers.has(_worker): return
+	var record: Dictionary = game.rescue.record_for(_worker)
+	if _worker.down:
+		if bool(record.get("expired", false)):
+			game.rescue.revive_at_city(_worker)
+		else:
+			for carrier in game.workers:
+				if game.rescue.assign(carrier, _worker): break
+	elif _worker.ai.post_rescue_wait:
+		game.rescue.resume(_worker)
+	else:
+		for target in game.workers:
+			if target.down and game.rescue.assign(_worker, target): break
 	_update_live()
 
 
@@ -1037,6 +1058,8 @@ func _update_header(w) -> void:
 		directives.append(("休憩" if w.ai.life_request == "rest" else "食事") + "：受付中")
 	_header["instruction"].text = " / ".join(PackedStringArray(directives)) if not directives.is_empty() else "自動作業中"
 	var warning := _important_warning(w)
+	var rescue_status: String = game.rescue.status_text(w) if game.rescue != null else ""
+	if not rescue_status.is_empty(): warning = rescue_status
 	var has_warning := warning != "重要な不調：なし"
 	_header["warning"].visible = has_warning
 	_header["warning"].text = warning.replace("重要な不調：", "不調：") if has_warning else ""
@@ -1048,6 +1071,28 @@ func _update_header(w) -> void:
 	returning.tooltip_text = return_reason if not return_reason.is_empty() else "この仲間だけに帰還を指示します。全員撤退は行いません。"
 	if w.ai.return_request:
 		returning.tooltip_text = "\u9000\u5374\u3092\u89e3\u9664\u3057\u3001\u5e30\u9084\u5f8c\u306e\u6b21\u306e\u5b89\u5168\u306a\u6642\u70b9\u304b\u3089\u81ea\u5f8b\u884c\u52d5\u306b\u623b\u3057\u307e\u3059\u3002"
+	var rescue: Button = _header["rescue"]
+	if w.down:
+		var rec: Dictionary = game.rescue.record_for(w)
+		if bool(rec.get("expired", false)):
+			rescue.text = "Revive in town (%d Cr)" % TownDB.REVIVAL_COST
+			rescue.disabled = not game.town.location_ok() or game.town.credits < TownDB.REVIVAL_COST
+			rescue.tooltip_text = "Expired crew remain recoverable in town."
+		else:
+			rescue.text = "Assign rescue carrier"
+			rescue.disabled = int(rec.get("carrier", -1)) >= 0
+			rescue.tooltip_text = "Explicit action; rescue is never assigned automatically."
+	elif w.ai.post_rescue_wait:
+		rescue.text = "Resume work"
+		rescue.disabled = false
+		rescue.tooltip_text = "Recovery completed. Resume is a player decision."
+	else:
+		var has_target := false
+		for target in game.workers:
+			if target.down: has_target = true
+		rescue.text = "Assign to rescue"
+		rescue.disabled = not has_target or game.rescue.is_carrier(w)
+		rescue.tooltip_text = "Assign selected crew to an incapacitated teammate."
 	var repair: Button = _header["repair"]
 	var info: Dictionary = game.repair_order_info()
 	var repair_reason: String = ""

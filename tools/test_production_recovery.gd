@@ -89,6 +89,10 @@ func interruptions():
     else:
      var enemy:=Enemy.new();enemy.setup_kind(main,"sand_stalker");enemy.ecological=true;enemy.position=w.position+Vector2(20,0);enemy.home_x=enemy.position.x;main.enemies_root.add_child(enemy)
     w.ai.tick(0.2)
+   if loaded and w.down:
+    check(w.carrying==WOOD and main.processor.incoming.is_empty() and main.production_orders.size()==1 and main.storage.count_of(WOOD)==0,"down retains the worker's reserved cargo for rescue")
+    check(roundtrip(),"down state and personal cargo save")
+    continue
    if not loaded or cause=="負傷":
     check(main.processor.incoming.is_empty() and main.production_orders.size()==1 and main.storage.count_of(WOOD)==2,cause+"で予約解放・注文復帰・木2保持")
    else:

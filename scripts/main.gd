@@ -86,6 +86,7 @@ var _creature_dist := 200.0       # 次の生物までの残り距離
 var wave := 0
 var kills := 0
 var game_over := false
+var rescue: RescueSystem
 var _wave_timer := 14.0
 var _over_layer: CanvasLayer
 
@@ -151,6 +152,9 @@ func _ready() -> void:
 	storage = base.storage
 	storage.overflowed.connect(_on_overflow)
 	processor = base.processor
+	rescue = RescueSystem.new()
+	rescue.setup(self)
+	add_child(rescue)
 	if FacilityDB.start_all:
 		base.grant_all()            # 自己診断・放置比較ツール用。ゲームは設備なし（手作業）から始まる
 	# 最初の蓄え（すぐに詰まないよう、少しだけ持って出発する）
@@ -282,6 +286,7 @@ func _ensure_initial_checkpoint(force_new := false) -> void:
 func _process(delta: float) -> void:
 	if game_over:
 		return
+	rescue.tick(delta)
 	if GameData.ENABLE_COMBAT and base.hp <= 0.0:
 		_game_over()
 		return

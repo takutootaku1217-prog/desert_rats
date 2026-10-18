@@ -21,6 +21,7 @@ enum State {
 	HUNT_MOVE, HUNT_ATTACK,
 	EAT_TAKE, EAT, DOWN, REST_HERE, XFER_TAKE, XFER_MOVE, RETURN_BASE,
 	MISSION_RECOVERY_MOVE, MISSION_RECOVERY_LOAD, MISSION_RECOVERY_RETURN,
+	RESCUE_MOVE, RESCUE_CARRY,
 }
 
 const STATE_TEXT := {
@@ -93,6 +94,10 @@ var life_request: String = ""   # プレイヤーの促し（rest / eat）。安
 var return_request := false       # 個人への帰還指示。荷物を安全に届けた後、既存の RETURN_BASE を使う。
 
 
+var rescue_target := -1
+var post_rescue_wait := false
+
+
 func setup(worker, g) -> void:
 	ch = worker
 	game = g
@@ -102,7 +107,7 @@ func setup(worker, g) -> void:
 func status_text() -> String:
 	if ch.away:
 		return "遠征中"
-	var current: String = STATE_TEXT[state]
+	var current: String = STATE_TEXT.get(state, "Rescue")
 	if return_request:
 		return "退却命令・" + current
 	if manual_job == GameData.Job.REPAIR and state not in [State.REPAIR_TAKE, State.REPAIR_MOVE, State.REPAIR]:
@@ -249,6 +254,10 @@ func _interrupt_for_life_need() -> bool:
 
 func tick(delta: float) -> void:
 	if ch.away:
+		return
+	if ch.down:
+		return
+	if game.rescue != null and game.rescue.carrier_tick(ch, delta):
 		return
 	if manual_attack and (state not in [State.COMBAT_MOVE,State.COMBAT] or not _enemy_valid()):manual_attack=false
 	if manual_attack and (ch.hp<FieldOperations.RECOVER_HP or _urgent_life_need()):begin_retreat()
@@ -772,6 +781,12 @@ func _res_valid() -> bool:
 
 ## 優先度の高い仕事から順に、着手できるものを探す。
 func _search() -> void:
+	if post_rescue_wait:
+		if _try_life_need(): return
+		current_job = -1
+		timer = 1.0
+		_set_state(State.IDLE)
+		return
 	var jobs: Array = GameData.job_list()
 	jobs.erase(GameData.Job.REST)                              # 休憩は仕事の星から独立した生活行動
 	jobs.sort_custom(func(a, b):
@@ -895,7 +910,8 @@ func _xfer_point(from_source: bool) -> Vector2:
 
 ## HP が 0 になった（戦闘不能）。仕事を中断して（荷物は倉庫へ戻し、予約は解放して）、その場に倒れる。
 func on_down() -> void:
-	ch.stop_work()
+	ch.stop_work_for_rescue()
+	game.rescue.on_down(ch)
 	_set_state(State.DOWN)
 
 
