@@ -133,6 +133,43 @@ C:\Users\user\AppData\Local\Temp\desert-rats-economy-scheduled\20261018T173334Z-
   source_changed_during_run: false
 ```
 
+### Final follow-up core and test-scope boundaries
+
+This result supersedes the older `68 / 68` reference later in this document.
+The isolated Windows Godot 4.7.2 core suite passed **69 / 69** from commit
+`857dd52076d7a2af40355b04e346b3a68656d849` on
+`gpt/rescue-return-loop`.
+
+```text
+C:\Users\user\AppData\Local\Temp\desert-rats-final-core-followup\20261018T174106Z-jvwdi0a_\results.json
+  run HEAD: 857dd52076d7a2af40355b04e346b3a68656d849
+  status: passed
+  passed checks: 69 / 69
+  source_changed_during_run: false
+```
+
+The economy maintenance reference is the post-preparation, post-normal-town
+maintenance baseline. Every sortie departure and return is compared against
+that common baseline for fuel, food, repair kits, and all base-part durability;
+it is not a claim that a brand-new starting inventory is kept unchanged.
+
+`test_world_carcass_replenish.gd` is a renewal/persistence regression, not a
+combat-difficulty benchmark. It uses a fixed normal-map prey placement and
+clamps that prey to 1 HP so the ordinary `HUNT_ATTACK` ->
+`Main.on_creature_killed` -> carcass pickup path completes deterministically
+inside the finite viewport. The test still uses the normal hunt, storage,
+mission reward, and revisit paths, but does not measure typical live-combat
+survival difficulty.
+
+Native OS clicking remains unverified. The available Computer Use surface was
+checked after the core run: it exposed no native app surfaces and only an empty
+Edge browser surface, so there was no Godot DEBUG window to target with
+Windows input automation. Script and Viewport results above are therefore not
+represented as native click coverage. Minimal user check: launch the Godot
+DEBUG window, load or start a run, click the rescue/Resume work and
+Save/Continue controls once each, then report any visible mismatch or attach a
+screenshot.
+
 ### Updated Claude review prompt
 
 ```text
