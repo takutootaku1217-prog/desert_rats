@@ -68,15 +68,22 @@ func ready_reason() -> String:
  for w in game.workers:
   if w.away or w.floor_i == 0 or w._climb_dest != null or w.carrying >= 0 or not w.carry_bonus.is_empty() or game.town.recovery_carried_by(w): return "仲間と荷物の帰還・荷卸し待ち"
   for target in [w.ai.res,w.ai.prey,w.ai.enemy]:
-   # Indoor crews can have just selected a newly spawned outdoor target.
-   # Departure will archive it before they leave, so an unstarted plan must
-   # not block an otherwise ready city action.
-   if w.floor_i != 0 and w._climb_dest == null: continue
    # Archived outdoor nodes remain reference-valid until the deferred free.
    # They cannot be resumed, so they should not block city actions.
    if is_instance_valid(target) and target.is_queued_for_deletion(): continue
    if is_instance_valid(target): return "屋外作業の予約解除待ち"
  return ""
+
+## Town actions may be performed once everyone and every carried item is inside.
+## This deliberately ignores a just-reserved outdoor target; the normal departure
+## gate above still waits for it so a map trip cannot discard queued field work.
+func city_action_ready() -> bool:
+ if region==TownDB.RECOVERY_TO and game.town.recovery in ["site","loading","carried"]: return false
+ if game.quarry.hostile() or game.expedition.state=="running" or not game.quarry.loose.is_empty(): return false
+ for w in game.workers:
+  if w.away or w.floor_i==0 or w._climb_dest!=null or w.carrying>=0 or not w.carry_bonus.is_empty() or game.town.recovery_carried_by(w): return false
+ return true
+
 func request(to: String, planned := false) -> bool:
  if not active or phase != "stopped" or game.quarry.state != "road" or game.game_over: return false
  if region==TownDB.RECOVERY_TO and game.town.recovery_blocks_departure(): return false

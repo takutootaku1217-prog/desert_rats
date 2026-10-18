@@ -42,7 +42,8 @@ func location_ok() -> bool:
  return game.world.active and game.world.region=="central_trade" and game.world.phase=="stopped" and game.quarry.state=="road" and not game.game_over
 func entry_reason() -> String:
  if not location_ok(): return "中央都市に停泊すると利用できます"
- return game.world.ready_reason()
+ var reason: String = game.world.ready_reason()
+ return "" if game.world.city_action_ready() else reason
 func available(item:int) -> int:
  return maxi(0,AutoCraftGuard.available(game,item)-int(ProductionPlan.held_for_orders(game).get(item,0)))
 func snapshot() -> Dictionary: return SaveGame.fields(self,FIELDS)
