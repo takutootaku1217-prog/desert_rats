@@ -12,7 +12,7 @@ const AI := ["state", "timer", "haul_item", "haul_recipe", "repair_part", "gathe
 const BASE := ["built", "max_hp", "hp", "fuel", "parts", "rear_engine_damage", "total_refuel", "total_repair"]
 const PROCESSOR := ["orders", "current", "progress", "output", "batch_output", "total_done", "waiting_fuel"]
 const DIRECTOR := ["active", "forecast", "default_stance", "log", "elapsed", "distance", "stats", "enabled", "_next_in"]
-const QUARRY := ["state", "left", "near_only", "remaining", "progress", "visit_generated", "visit_nearby", "visit_discarded", "last_report", "_food_start", "discarded", "loose", "saved_speed", "visits"]
+const QUARRY := ["state", "left", "near_only", "remaining", "progress", "visit_generated", "visit_nearby", "visit_discarded", "last_report", "_food_start", "discarded", "loose", "saved_speed", "visits", "reward_replenish_pending"]
 const EXPEDITION := ["state", "site_id", "offer_left", "approach_id", "kit", "steps", "step_i", "step_left", "step_time", "loot", "lost", "blueprint", "ok_count", "ng_count", "kit_used", "retreated", "log", "result_left", "stats"]
 const RESOURCE := ["world_id","position", "item", "species", "gather_progress", "age"]
 const GATHER := ["kind", "remaining", "max_amount", "work"]
@@ -167,6 +167,11 @@ static func ai_data(row: Dictionary) -> Dictionary:
 	if not result.has("manual_job"): result.manual_job = -1
 	return result
 
+static func quarry_data(row: Dictionary) -> Dictionary:
+	var result := row.duplicate(true)
+	if not result.has("reward_replenish_pending"): result.reward_replenish_pending = false
+	return result
+
 
 ## 旧セーブには、通常の DRIVE 損傷と分離した後部被弾蓄積がない。
 ## 0 を補完して、単に DRIVE が低い旧セーブを燃料漏れ扱いにしない。
@@ -185,13 +190,15 @@ static func operation_totals(row: Dictionary, time_key: String) -> bool:
 
 static func validate(d, g) -> bool:
 	if not d is Dictionary or not safe(d) or d.get("version") != VERSION: return false
+	d = d.duplicate(true)
+	if d.get("quarry") is Dictionary: d.quarry = quarry_data(d.quarry)
 	if not TownEconomy.valid(d.get("town",{}),g.workers.size()): return false
 	if not ProductionPlan.valid(d.get("production",{})): return false
 	if not WorldTrip.valid(d.get("world"),g): return false
 	if not JourneyPlan.valid(d.get("journey",{}),d.world): return false
 	for k in ["main", "base", "processor", "stock", "inventory", "wasted", "butchered", "capacity", "weight", "director", "quarry", "expedition", "party", "crew", "resources", "creatures", "enemies", "camera", "follow", "scroll"]:
 		if not d.has(k): return false
-	for row in [[d.main,g,MAIN],[base_data(d.base) if d.base is Dictionary else d.base,g.base,BASE],[processor_data(d.processor) if d.processor is Dictionary else d.processor,g.processor,PROCESSOR],[d.director,g.director,DIRECTOR],[d.quarry,g.quarry,QUARRY],[d.expedition,g.expedition,EXPEDITION]]:
+	for row in [[d.main,g,MAIN],[base_data(d.base) if d.base is Dictionary else d.base,g.base,BASE],[processor_data(d.processor) if d.processor is Dictionary else d.processor,g.processor,PROCESSOR],[d.director,g.director,DIRECTOR],[quarry_data(d.quarry) if d.quarry is Dictionary else d.quarry,g.quarry,QUARRY],[d.expedition,g.expedition,EXPEDITION]]:
 		if not shape(row[0],row[1],row[2]): return false
 	var base_row: Dictionary = base_data(d.base)
 	for k in ["party", "crew", "resources", "creatures", "enemies"]:
@@ -401,7 +408,7 @@ static func apply(g, d: Dictionary) -> bool:
 	g.processor._out_times.clear(); g.processor._drops.clear()
 	g.base.beds = [null,null,null]; g.base.refuel_reserved = false; g.base.repair_reserved.clear()
 	g.base.apply_layout()
-	put(g.director,d.director,DIRECTOR); put(g.quarry,d.quarry,QUARRY); put(g.expedition,d.expedition,EXPEDITION)
+	put(g.director,d.director,DIRECTOR); put(g.quarry,quarry_data(d.quarry),QUARRY); put(g.expedition,d.expedition,EXPEDITION)
 	g.quarry.points.clear(); g.expedition.party.clear()
 	g.food_claims = 0; g.transfer_worker = null; g.last_carcass = null
 	for parent in [g.resources_root,g.creatures_root,g.enemies_root]:

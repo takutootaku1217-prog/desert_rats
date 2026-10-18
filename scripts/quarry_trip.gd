@@ -17,11 +17,23 @@ var discarded := {}          # プレイヤーが確認して放棄した品目�
 var loose := {}                      # 満載時の搬入口残置。出発前に必ず倉庫へ回収する
 var saved_speed := 60.0
 var visits := 0
+var reward_replenish_pending := false
 
 func setup(g) -> void:
 	game = g
 	for d in QuarryDB.POINTS:
 		remaining[d["id"]] = d["amount"]
+
+func schedule_mission_replenishment() -> void:
+	reward_replenish_pending = true
+
+func _apply_reward_replenishment() -> void:
+	if not reward_replenish_pending:
+		return
+	for d in QuarryDB.POINTS:
+		remaining[d["id"]] = d["amount"]
+		progress.erase(d["id"])
+	reward_replenish_pending = false
 
 func sheltered() -> bool:
 	return state in ["parked", "recall"]
@@ -132,6 +144,7 @@ func tick(dist: float) -> void:
 				loose.erase(it)
 
 func _arrive() -> void:
+	_apply_reward_replenishment()
 	visit_generated.clear()
 	visit_nearby.clear()
 	visit_discarded.clear()

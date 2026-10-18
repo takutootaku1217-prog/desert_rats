@@ -123,14 +123,26 @@ func _initialize():
   if row.type=="gather":row.spent=true;row.data.remaining=0;row.data.work=0.0;depleted+=1
   elif row.type=="creature":row.spent=true;row.data.dead=true;row.data.hp=0.0;killed=true
  visit_region("central_trade")
+ var quarry_depleted:=0
+ for point in QuarryDB.POINTS:
+  main.quarry.remaining[point.id]=0
+  main.quarry.progress[point.id]=0.5
+  quarry_depleted+=1
  st=main.storage;st.inventory.counts={GameData.Item.WOOD:TownDB.SUPPLY_OFFERS[GameData.Item.WOOD].count}
  var cycle_before:int=main.world.replenishment_cycle
  check(act("accept_supply",GameData.Item.WOOD) and act("claim_supply") and main.world.replenishment_cycle==cycle_before+1,"supply reward schedules exactly one replenishment cycle")
+ check(main.quarry.reward_replenish_pending and main.quarry.remaining.values().all(func(amount):return amount==0),"claim leaves the inactive quarry depleted until its next arrival")
  check(main.world.replenishment_pending.has(south_key) and main.world.replenishment_pending.has("region:central_trade") and south_rows.values().any(func(row):return row.type=="gather" and row.spent),"reward keeps the current place and remote ledger depleted until their next visit")
  var pending_save:=SaveGame.capture(main)
  check(SaveGame.apply(main,pending_save) and main.world.replenishment_pending==pending_save.world.replenishment_pending,"pending replenishment survives save/load before travel")
  var cycle_after_claim:int=main.world.replenishment_cycle
  check(not act("claim_supply") and main.world.replenishment_cycle==cycle_after_claim,"duplicate reward claim cannot schedule another replenishment")
+ main.quarry._arrive()
+ var quarry_restored:bool=main.quarry.points.size()==quarry_depleted and main.quarry.points.all(func(point):return point.remaining==point.max_amount) and not main.quarry.reward_replenish_pending
+ for point in main.quarry.points:
+  main.resources_root.remove_child(point);point.queue_free()
+ main.quarry.points.clear();main.quarry.state="road"
+ check(quarry_restored,"the quarry restores fixed vein maxima once on its next visit")
  visit_region("south_oasis")
  var restored:=0
  var creature_restored:=false
@@ -155,6 +167,8 @@ func _initialize():
  t.recovery="ready";t.recovery_worker=-1
  check(act("claim_recovery") and t.recovery=="idle" and main.world.replenishment_cycle==repeat_cycle+2,"recovery reward returns to repeatable idle state and schedules once")
  check(act("accept_recovery") and act("cancel_recovery") and main.world.replenishment_cycle==repeat_cycle+2,"recovery retry/cancel does not schedule a refill")
+ var legacy_quarry:=SaveGame.capture(main);legacy_quarry.quarry.erase("reward_replenish_pending")
+ check(SaveGame.apply(main,legacy_quarry) and not main.quarry.reward_replenish_pending,"older quarry saves normalize the pending-replenishment flag")
  var d:=SaveGame.capture(main);d.erase("town")
  check(SaveGame.apply(main,d) and t.credits==0 and t.delivery=="idle" and t.recovery=="idle","旧v3のtown省略は0 Cr・依頼なし")
  d=SaveGame.capture(main)

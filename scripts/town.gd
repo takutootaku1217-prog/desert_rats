@@ -163,6 +163,7 @@ func recovery_status_text() -> String:return {"idle":"未受注","outbound":"%s�
 func _claim_repeatable_mission(id:String) -> void:
  claimed[id]=int(claimed.get(id,0))+1
  game.world.schedule_mission_replenishment()
+ game.quarry.schedule_mission_replenishment()
 
 func observe() -> void:
  if delivery=="outbound" and game.world.region==TownDB.DELIVERY_TO and game.world.phase=="stopped":

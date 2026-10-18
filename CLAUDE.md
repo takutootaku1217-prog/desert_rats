@@ -1094,6 +1094,11 @@ HUD/仲間詳細PNGを成功生成した。Computer Useがネイティブウィ�
 
 ### 2026-10-18 Repeatable subquests and reward-triggered outdoor replenishment (isolated worktree)
 
+Quarry follow-up: a successful repeatable-mission reward also saves a quarry pending flag and restores
+fixed vein maxima only at the next quarry arrival. Legacy quarry saves without that flag normalize to
+`false`. Focused Windows Godot 4.7.2 checks (`town`, `quarry`, `save_game`, `town_flow`) passed with
+isolated APPDATA; evidence: `docs/quarry-mission-replenishment-coverage-2026-10-18.md`.
+
 Workspace: `C:\Users\user\Documents\Codex\2026-10-18\task-3\desert_rats`; branch:
 `gpt/prototype-ground-two-lanes`; starting HEAD:
 `0c92c7f59fbd5d00c4760e7419bcde2fbcfb6939`. The original PC checkout, `main`, existing saves,
