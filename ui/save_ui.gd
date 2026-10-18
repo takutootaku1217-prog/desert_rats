@@ -3,7 +3,8 @@ extends CanvasLayer
 ## 明示的な1スロット保存。ロード/ニューゲーム/上書きは必ず確認。
 static var skip_start_once := false
 var game
-var path := SaveGame.PATH
+var path := SaveGame.PROGRESS_PATH
+var checkpoint_path := SaveGame.CHECKPOINT_PATH
 var _overlay: ColorRect
 var _text: Label
 var _confirm: Button
@@ -44,6 +45,8 @@ func _ready() -> void:
 		box.add_child(UIKit.button(pair[0],func(): ask(action)))
 	_legacy = UIKit.button("旧version2を確認して移行",func(): ask("migrate"))
 	box.add_child(_legacy)
+	box.add_child(UIKit.button("途中から続ける", func(): ask("load")))
+	box.add_child(UIKit.button("出撃前からやり直す", func(): ask("checkpoint")))
 	_legacy.hide()
 	_confirm = UIKit.button("実行する",execute)
 	box.add_child(_confirm)
@@ -76,6 +79,9 @@ func is_open() -> bool:
 func ask(action: String) -> void:
 	_action = action
 	_confirm.show()
+	if action == "checkpoint":
+		_text.text = "出撃前のチェックポイントからやり直しますか？ 現在の進行は破棄されます。ペナルティ量は未設定のため、現段階では資金を失いません。"
+		return
 	match action:
 		"save": _text.text = ("既存の保存を現在の進行で上書きします。直前の有効な保存はバックアップへ残します。" if SaveGame.exists(path) else "現在の進行を最初の保存として記録します。") + "\n旧version2は .legacy-v2、破損・その他の旧形式は .damaged に保全します。\n実行しますか？"
 		"load", "backup": _text.text = "未保存の現在の進行を破棄し、%sから再開します。\n読込に失敗した場合は、現在の進行もファイルも変更しません。\n実行しますか？" % ("バックアップ" if action == "backup" else "保存")
@@ -86,12 +92,21 @@ func execute() -> void:
 	var action := _action
 	_action = ""
 	_confirm.hide()
+	if action == "checkpoint":
+		if not SaveGame.restart_from_checkpoint(game, SaveGame.DEFAULT_RESTART_LOSS, checkpoint_path):
+			_text.text = SaveGame.last_error
+			return
+		game.game_over = false
+		if is_instance_valid(game._over_layer): game._over_layer.queue_free()
+		_was_paused = false
+		_text.text = "出撃前のチェックポイントを復元しました。"
+		return
 	match action:
 		"save":
-			var ok := SaveGame.write(game,path,true)
+			var ok := SaveGame.write(game,path,true,SaveGame.SLOT_PROGRESS)
 			_text.text = "保存しました。" if ok else SaveGame.last_error
 		"load", "backup":
-			var d := SaveGame.read(path + (".bak" if action == "backup" else ""))
+			var d := SaveGame.read_slot(path + (".bak" if action == "backup" else ""), SaveGame.SLOT_PROGRESS)
 			if d.is_empty():
 				_text.text = SaveGame.last_error
 				_legacy.visible = SaveGame.last_error.begins_with("旧version2")

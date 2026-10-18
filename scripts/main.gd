@@ -263,6 +263,11 @@ func _ready() -> void:
 	navigation = NavigationBar.new()
 	navigation.game = self
 	add_child(navigation)
+	call_deferred("_ensure_initial_checkpoint")
+
+func _ensure_initial_checkpoint() -> void:
+	if not SaveGame.ensure_initial_checkpoint(self):
+		director.note("初期チェックポイントを保存できませんでした: " + SaveGame.last_error)
 
 
 func _process(delta: float) -> void:

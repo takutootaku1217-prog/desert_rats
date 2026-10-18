@@ -4,6 +4,16 @@ extends RefCounted
 ## UIの停止中、またはフレーム内の同期呼出しでsnapshot。自動保存はしない。
 const VERSION := 3
 const PATH := "user://save.json"
+## v3 の単一セーブは読み取り専用の互換入口として残す。新規の書き込み先は用途別。
+const PROGRESS_PATH := "user://progress.json"
+const CHECKPOINT_PATH := "user://checkpoint.json"
+const SLOT_PROGRESS := "progress"
+const SLOT_CHECKPOINT := "checkpoint"
+## 正式な損失量・対象は未決。再開処理はこの差し替え可能なポリシーだけを見る。
+## 固定値はテスト用で、既定 0 は現在のゲームバランスを変更しない。
+const DEFAULT_RESTART_LOSS := {"credits_fixed": 0}
+## 将来の救助タイマー用。現段階では AI を動かさず、保存形式だけを予約する。
+const RESCUE_DEFAULT := {"version": 1, "incapacitated": {}, "all_down_elapsed": 0.0}
 static var last_error := ""
 static var disabled := false
 const MAIN := ["target_speed", "scroll_speed", "room_layout", "total_rooms_built", "recipe_priority", "gather_policy", "hunt_policy", "blueprints", "total_gathered", "total_hunted", "total_eaten", "tool_auto", "_tool_clock", "build_queue", "total_built", "total_wasted", "_waste_note_at", "_spawn_dist", "_creature_dist", "wave", "kills", "_wave_timer", "transfer_queue", "craft_queue", "total_transferred", "total_crafted_by_hand", "_feed_clock"]
@@ -12,7 +22,7 @@ const AI := ["state", "timer", "haul_item", "haul_recipe", "repair_part", "gathe
 const BASE := ["built", "max_hp", "hp", "fuel", "parts", "rear_engine_damage", "total_refuel", "total_repair"]
 const PROCESSOR := ["orders", "current", "progress", "output", "batch_output", "total_done", "waiting_fuel"]
 const DIRECTOR := ["active", "forecast", "default_stance", "log", "elapsed", "distance", "stats", "enabled", "_next_in"]
-const QUARRY := ["state", "left", "near_only", "remaining", "progress", "visit_generated", "visit_nearby", "visit_discarded", "last_report", "_food_start", "discarded", "loose", "saved_speed", "visits"]
+const QUARRY := ["state", "left", "near_only", "remaining", "progress", "visit_generated", "visit_nearby", "visit_discarded", "last_report", "_food_start", "discarded", "loose", "saved_speed", "visits", "reward_replenish_pending"]
 const EXPEDITION := ["state", "site_id", "offer_left", "approach_id", "kit", "steps", "step_i", "step_left", "step_time", "loot", "lost", "blueprint", "ok_count", "ng_count", "kit_used", "retreated", "log", "result_left", "stats"]
 const RESOURCE := ["world_id","position", "item", "species", "gather_progress", "age"]
 const GATHER := ["kind", "remaining", "max_amount", "work"]
@@ -40,7 +50,7 @@ static func capture(g) -> Dictionary:
 		"inventory": g.storage.inventory.counts.duplicate(true), "wasted": g.storage.wasted.duplicate(true),
 		"butchered": g.storage.total_butchered, "capacity": g.storage.capacity_bonus, "weight": g.storage.current_weight(),
 		"director": fields(g.director, DIRECTOR), "quarry": fields(g.quarry, QUARRY), "expedition": fields(g.expedition, EXPEDITION),
-		"party": [], "crew": [], "resources": [], "creatures": [], "enemies": [],
+		"party": [], "crew": [], "resources": [], "creatures": [], "enemies": [], "rescue": RESCUE_DEFAULT.duplicate(true),
 		"camera": g.camera.position, "follow": g.workers.find(g.follow_target), "scroll": 0.0}
 	d["journey"] = g.journey.snapshot()
 	d["town"] = g.town.snapshot()
@@ -167,6 +177,12 @@ static func ai_data(row: Dictionary) -> Dictionary:
 	if not result.has("manual_job"): result.manual_job = -1
 	return result
 
+## 試作ブランチで先行した報酬補充予約を、通常版の旧セーブでは false として補完する。
+static func quarry_data(row: Dictionary) -> Dictionary:
+	var result := row.duplicate(true)
+	if not result.has("reward_replenish_pending"): result.reward_replenish_pending = false
+	return result
+
 
 ## 旧セーブには、通常の DRIVE 損傷と分離した後部被弾蓄積がない。
 ## 0 を補完して、単に DRIVE が低い旧セーブを燃料漏れ扱いにしない。
@@ -183,15 +199,35 @@ static func operation_totals(row: Dictionary, time_key: String) -> bool:
 		if typeof(row.get(k)) not in [TYPE_INT,TYPE_FLOAT] or row[k]<0: return false
 	return true
 
+static func rescue_data(d: Dictionary) -> Dictionary:
+	var value: Variant = d.get("rescue", RESCUE_DEFAULT)
+	return value.duplicate(true) if value is Dictionary else {}
+
+static func rescue_valid(d: Dictionary) -> bool:
+	if d.size() != RESCUE_DEFAULT.size() or d.get("version") != 1 or not d.get("incapacitated") is Dictionary:
+		return false
+	if typeof(d.get("all_down_elapsed")) not in [TYPE_FLOAT, TYPE_INT] or d.all_down_elapsed < 0.0:
+		return false
+	for crew_id in d.incapacitated:
+		var timer: Variant = d.incapacitated[crew_id]
+		if not crew_id is int or crew_id < 0 or not timer is Dictionary:
+			return false
+		for key in ["left", "carried"]:
+			if not timer.has(key): return false
+		if typeof(timer.left) not in [TYPE_FLOAT, TYPE_INT] or timer.left < 0.0 or not timer.carried is bool:
+			return false
+	return true
+
 static func validate(d, g) -> bool:
 	if not d is Dictionary or not safe(d) or d.get("version") != VERSION: return false
+	if not rescue_valid(rescue_data(d)): return false
 	if not TownEconomy.valid(d.get("town",{}),g.workers.size()): return false
 	if not ProductionPlan.valid(d.get("production",{})): return false
 	if not WorldTrip.valid(d.get("world"),g): return false
 	if not JourneyPlan.valid(d.get("journey",{}),d.world): return false
 	for k in ["main", "base", "processor", "stock", "inventory", "wasted", "butchered", "capacity", "weight", "director", "quarry", "expedition", "party", "crew", "resources", "creatures", "enemies", "camera", "follow", "scroll"]:
 		if not d.has(k): return false
-	for row in [[d.main,g,MAIN],[base_data(d.base) if d.base is Dictionary else d.base,g.base,BASE],[processor_data(d.processor) if d.processor is Dictionary else d.processor,g.processor,PROCESSOR],[d.director,g.director,DIRECTOR],[d.quarry,g.quarry,QUARRY],[d.expedition,g.expedition,EXPEDITION]]:
+	for row in [[d.main,g,MAIN],[base_data(d.base) if d.base is Dictionary else d.base,g.base,BASE],[processor_data(d.processor) if d.processor is Dictionary else d.processor,g.processor,PROCESSOR],[d.director,g.director,DIRECTOR],[quarry_data(d.quarry) if d.quarry is Dictionary else d.quarry,g.quarry,QUARRY],[d.expedition,g.expedition,EXPEDITION]]:
 		if not shape(row[0],row[1],row[2]): return false
 	var base_row: Dictionary = base_data(d.base)
 	for k in ["party", "crew", "resources", "creatures", "enemies"]:
@@ -401,7 +437,7 @@ static func apply(g, d: Dictionary) -> bool:
 	g.processor._out_times.clear(); g.processor._drops.clear()
 	g.base.beds = [null,null,null]; g.base.refuel_reserved = false; g.base.repair_reserved.clear()
 	g.base.apply_layout()
-	put(g.director,d.director,DIRECTOR); put(g.quarry,d.quarry,QUARRY); put(g.expedition,d.expedition,EXPEDITION)
+	put(g.director,d.director,DIRECTOR); put(g.quarry,quarry_data(d.quarry),QUARRY); put(g.expedition,d.expedition,EXPEDITION)
 	g.quarry.points.clear(); g.expedition.party.clear()
 	g.food_claims = 0; g.transfer_worker = null; g.last_carcass = null
 	for parent in [g.resources_root,g.creatures_root,g.enemies_root]:
@@ -458,6 +494,21 @@ static func apply(g, d: Dictionary) -> bool:
 	last_error = ""
 	return true
 
+## チェックポイントは常にファイル上の元スナップショットから復元するため、同じ再開を
+## 何度選んでも損失は積み上がらない。正式バランスは後で policy を差し替える。
+static func restart_from_checkpoint(g, policy: Dictionary = DEFAULT_RESTART_LOSS, path: String = CHECKPOINT_PATH) -> bool:
+	var d := read_slot(path, SLOT_CHECKPOINT)
+	if d.is_empty(): return false
+	var restored := d.duplicate(true)
+	var fixed := int(policy.get("credits_fixed", 0))
+	if fixed < 0:
+		last_error = "再開ペナルティの指定が不正です。"
+		return false
+	var town_state: Dictionary = TownEconomy.normalized(restored.get("town", {}))
+	town_state.credits = maxi(0, int(town_state.credits) - fixed)
+	restored.town = town_state
+	return apply(g, restored)
+
 static func item_mass(item: int, n := 1) -> int:
 	return CargoDB.size_of(item) * n if CargoDB.bay_of(item) >= 0 else 0
 
@@ -491,6 +542,28 @@ static func saved_weight(d: Dictionary) -> int:
 static func exists(path: String = PATH) -> bool:
 	return FileAccess.file_exists(path)
 
+static func slot_path(slot: String) -> String:
+	return CHECKPOINT_PATH if slot == SLOT_CHECKPOINT else PROGRESS_PATH
+
+static func read_slot(path: String, slot: String) -> Dictionary:
+	if (path == CHECKPOINT_PATH and slot != SLOT_CHECKPOINT) or (path == PROGRESS_PATH and slot != SLOT_PROGRESS):
+		last_error = "別の保存枠のデータです。"
+		return {}
+	var d := read(path)
+	if d.is_empty(): return {}
+	return d
+
+## 旧 user://save.json は途中経過として扱う。新スロットがまだ無い環境だけで使う。
+static func read_progress() -> Dictionary:
+	if exists(PROGRESS_PATH): return read_slot(PROGRESS_PATH, SLOT_PROGRESS)
+	return read(PATH)
+
+static func ensure_initial_checkpoint(g) -> bool:
+	if disabled or exists(CHECKPOINT_PATH): return true
+	# 旧単一セーブは read_progress() から継続でき、元ファイルを変更しない。
+	# 新しい checkpoint は現在起動中の初期状態から作る。
+	return write_checkpoint(g, false)
+
 static func read(path: String = PATH, allow_legacy := false) -> Dictionary:
 	last_error = ""
 	if not exists(path):
@@ -519,7 +592,7 @@ static func read(path: String = PATH, allow_legacy := false) -> Dictionary:
 		return {}
 	return d
 
-static func write(g, path: String = PATH, overwrite := false) -> bool:
+static func write(g, path: String = PATH, overwrite := false, slot := "") -> bool:
 	if g.game_over: last_error = "ゲーム終了状態は保存できません。"; return false
 	if disabled: last_error = "検証モードではプレイヤーの保存は無効です。"; return false
 	var paused: bool = g.get_tree().paused
@@ -555,6 +628,12 @@ static func write(g, path: String = PATH, overwrite := false) -> bool:
 		return false
 	last_error = ""
 	return true
+
+static func write_progress(g, overwrite := false) -> bool:
+	return write(g, PROGRESS_PATH, overwrite, SLOT_PROGRESS)
+
+static func write_checkpoint(g, overwrite := true) -> bool:
+	return write(g, CHECKPOINT_PATH, overwrite, SLOT_CHECKPOINT)
 
 
 ## 明示確認後だけ呼ぶ。旧街道には地域を推測で与えない。

@@ -42,6 +42,9 @@ func request(to: String, planned := false) -> bool:
  if region==TownDB.RECOVERY_TO and game.town.recovery_blocks_departure(): return false
  var r := WorldMapDB.road_between(region,to)
  if not WorldMapDB.public_road(r): return false
+ # 都市を出る瞬間だけ、出発前の完全な checkpoint を確定する。
+ # 書き込みに失敗しても旧 checkpoint は残し、既存の出発可否は変えない。
+ if region == "central_trade" and not SaveGame.write_checkpoint(game): game.director.note("チェックポイント保存失敗: " + SaveGame.last_error)
  if not planned:game.journey.clear()
  origin = region; destination = to; road = r; phase = "departing"
  return true

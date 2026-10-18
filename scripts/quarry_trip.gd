@@ -17,6 +17,8 @@ var discarded := {}          # プレイヤーが確認して放棄した品目�
 var loose := {}                      # 満載時の搬入口残置。出発前に必ず倉庫へ回収する
 var saved_speed := 60.0
 var visits := 0
+## 報酬による次回補充予約。奥行き試作の保存を通常版でも安全に読めるよう保持する。
+var reward_replenish_pending := false
 
 func setup(g) -> void:
 	game = g
