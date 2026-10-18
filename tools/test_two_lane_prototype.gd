@@ -18,6 +18,7 @@ func _initialize() -> void:
 	print("-- 屋外固定レーン試作 --")
 	var one := run_collection("one")
 	var two := run_collection("two")
+	check(is_equal_approx(Model.CROSS_BACK.x, Model.CROSS_FRONT.x), "レーン間の横断路は同じ平地の固定X座標にあり、斜路ではない")
 	check(one.complete() and two.complete(), "一列/二レーンとも同じ鉄鉱石6個を採取・運搬・スロープ帰還・荷卸しまで完了")
 	check(one.delivered == two.delivered and one.remaining_resource() == two.remaining_resource(), "比較条件の総量と残量が一致")
 	check(one.lane_changes == 0 and two.lane_changes > 0, "一列は接続なし、二レーンは固定接続部を実際に通過")

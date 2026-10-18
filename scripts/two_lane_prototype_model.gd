@@ -7,8 +7,10 @@ const BACK_Y := 350.0
 const FRONT_Y := 470.0
 const BASE_DOOR := Vector2(188.0, 174.0)
 const RAMP_FOOT := Vector2(350.0, BACK_Y)
-const CROSS_BACK := Vector2(485.0, BACK_Y)
-const CROSS_FRONT := Vector2(595.0, FRONT_Y)
+const CROSS_X := 540.0
+# 同じ平地を縦に横断する地点。斜路／橋ではない。
+const CROSS_BACK := Vector2(CROSS_X, BACK_Y)
+const CROSS_FRONT := Vector2(CROSS_X, FRONT_Y)
 const CARRY_LIMIT := 2
 const WALK_SPEED := 90.0
 const GATHER_SECONDS := 0.8

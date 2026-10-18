@@ -43,14 +43,14 @@ func _make_controls() -> void:
 	_add_button(layer, "A: 追跡試験", Vector2(450, 14), Vector2(126, 34), func(): model.start_chase(selected_agent))
 	for i in 3:
 		var b := Button.new()
-		b.position = Vector2(18 + i * 142, 56)
-		b.size = Vector2(134, 30)
+		b.position = Vector2(18 + i * 160, 56)
+		b.size = Vector2(152, 30)
 		b.pressed.connect(func(): selected_agent = i)
 		layer.add_child(b)
 		_agent_buttons.append(b)
 	info = Label.new()
-	info.position = Vector2(18, 94)
-	info.size = Vector2(525, 135)
+	info.position = Vector2(18, 100)
+	info.size = Vector2(610, 96)
 	info.add_theme_font_size_override("font_size", 15)
 	info.add_theme_color_override("font_color", Color("fff4d6"))
 	layer.add_child(info)
@@ -70,10 +70,12 @@ func _refresh_ui() -> void:
 	if model == null:
 		return
 	for i in _agent_buttons.size():
-		_agent_buttons[i].text = ("▶ " if i == selected_agent else "   ") + model.agent_status(i)
+		_agent_buttons[i].text = ("▶ " if i == selected_agent else "   ") + String(model.agents[i]["name"])
 	var one_or_two := "一列" if model.mode == "one" else "固定2レーン"
 	var end := "完了 %.1f秒" % model.completion_time if model.completion_time >= 0.0 else "進行中"
 	info.text = "%s比較 / 同じ鉄鉱石 %d 個・仲間3人\n荷卸し %d/%d  残り %d  %s\n%s\n近接: %s\nTab/上の名前で奥側の仲間も直接選択。クリックは選択だけで、移動・近接判定とは分離。" % [one_or_two, Model.TOTAL_RESOURCE, model.delivered, Model.TOTAL_RESOURCE, model.remaining_resource(), end, model.attack_log, "別レーン命中なし" if model.cross_lane_melee_is_blocked() else "FAIL"]
+	# 仲間名のボタンは短く保ち、状態は選択中だけを専用行に表示する。
+	info.text = "%s比較　鉄鉱石%d個・仲間3人\n荷卸し %d/%d　残り%d　%s\n選択: %s\n近接: %s　（Tab・上の名前・クリックで選択）" % [one_or_two, Model.TOTAL_RESOURCE, model.delivered, Model.TOTAL_RESOURCE, model.remaining_resource(), end, model.agent_status(selected_agent), "別レーン命中なし" if model.cross_lane_melee_is_blocked() else "FAIL"]
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -132,9 +134,12 @@ func _draw_lane(y: float, name: String, color: Color) -> void:
 
 
 func _draw_ramp_and_crossing() -> void:
-	draw_line(Model.CROSS_BACK, Model.CROSS_FRONT, Color("6b4932"), 16)
-	draw_line(Model.CROSS_BACK, Model.CROSS_FRONT, Color("d6bd78"), 8)
-	draw_string(_font, Vector2(454, 428), "レーン接続", HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color("4a3423"))
+	# 同じ平地を横切る踏み固めた通路。レールや高低差は描かない。
+	draw_rect(Rect2(Model.CROSS_X - 18.0, Model.BACK_Y - 18.0, 36.0, Model.FRONT_Y - Model.BACK_Y + 36.0), Color("c38d4c"))
+	draw_line(Model.CROSS_BACK, Model.CROSS_FRONT, Color("d5a765"), 8)
+	for y in range(int(Model.BACK_Y) + 16, int(Model.FRONT_Y), 20):
+		draw_line(Vector2(Model.CROSS_X - 8.0, y), Vector2(Model.CROSS_X + 8.0, y), Color("89613c"), 2)
+	draw_string(_font, Vector2(456, 426), "平地の横断路", HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color("4a3423"))
 
 
 func _draw_source(source: Dictionary) -> void:

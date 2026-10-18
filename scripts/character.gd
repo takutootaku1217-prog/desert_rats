@@ -59,6 +59,9 @@ var bed_index := -1
 var _climb_dest = null        # 階をまたぐ移動の途中（Vector2）
 var _climb_floor := 1
 var _climb_kind := ""
+var _ground_lane_target := -1 # Fixed ground-lane test only; inactive on normal maps.
+var ground_lane_crossings := 0
+var ground_lane_last_crossing_x := INF
 var _t := 0.0
 var _sheet: Texture2D
 
@@ -255,6 +258,26 @@ func move_to_target(delta: float) -> bool:
 				facing = signf(d.x)
 		return false
 	var tf := GameData.floor_of_y(target.y)
+	# 固定地上レーンは、通常マップには存在しない試験用の任意設定。
+	# 設定のない既存マップは従来どおり自由な地上座標を使う。
+	var lane_config := _ground_lane_config()
+	if floor_i == 0 and not lane_config.is_empty():
+		var requested_lane := 0 if tf != 0 else _ground_lane_index(target.y, lane_config)
+		if _ground_lane_target < 0 and _ground_lane_index(position.y, lane_config) != requested_lane:
+			_ground_lane_target = requested_lane
+		if _ground_lane_target >= 0:
+			# Do not change target halfway through the flat crossing just because it becomes nearer.
+			if _cross_ground_lanes(_ground_lane_target, step, lane_config):
+				ground_lane_crossings += 1
+				ground_lane_last_crossing_x = float(lane_config.get("crossing_x", GameData.RAMP_FOOT.x))
+				_ground_lane_target = -1
+			return false
+		# 地上の目的地だけはレーン中央を保つ。拠点へ戻る時は既存スロープの
+		# 足元を優先し、中央へ引き戻して往復することを避ける。
+		if tf == 0:
+			var lane_y := _ground_lane_y(requested_lane, lane_config)
+			if absf(position.y - lane_y) > 4.0:
+				return _step_toward(Vector2(position.x, lane_y), step)
 	if floor_i != tf:
 		var leg := GameData.route_leg(floor_i, tf)
 		if _step_toward(leg["approach"], step):
@@ -265,6 +288,39 @@ func move_to_target(delta: float) -> bool:
 				facing = signf(_climb_dest.x - position.x)
 		return false
 	return _step_toward(target, step)
+
+
+## 地上の固定2レーン試験を有効にするメタデータ。
+## { enabled, back_y, front_y, crossing_x } の4項目を Main に設定した時だけ使う。
+func _ground_lane_config() -> Dictionary:
+	if game == null or not is_instance_valid(game) or not game.has_meta("ground_lane_config"):
+		return {}
+	var config = game.get_meta("ground_lane_config")
+	if not (config is Dictionary) or not bool(config.get("enabled", false)):
+		return {}
+	return config
+
+
+func _ground_lane_y(lane: int, config: Dictionary) -> float:
+	return float(config.get("front_y", GameData.GROUND_Y_MAX)) if lane == 1 else float(config.get("back_y", GameData.GROUND_Y_MIN))
+
+
+func _ground_lane_index(y: float, config: Dictionary) -> int:
+	return 1 if absf(y - _ground_lane_y(1, config)) < absf(y - _ground_lane_y(0, config)) else 0
+
+
+## レーン変更は斜め抜けを許さず、同じ平地にある固定横断地点を通る。
+func _cross_ground_lanes(target_lane: int, step: float, config: Dictionary) -> bool:
+	var crossing_x := float(config.get("crossing_x", GameData.RAMP_FOOT.x))
+	# Once at the crossing X, keep moving vertically to the requested lane. Re-evaluating
+	# the nearest lane while midway would otherwise bounce a worker back and forth.
+	if absf(position.x - crossing_x) <= 4.0:
+		return _step_toward(Vector2(crossing_x, _ground_lane_y(target_lane, config)), step)
+	var current_lane := _ground_lane_index(position.y, config)
+	var current_y := _ground_lane_y(current_lane, config)
+	if absf(position.y - current_y) > 4.0:
+		return _step_toward(Vector2(position.x, current_y), step)
+	return _step_toward(Vector2(crossing_x, current_y), step)
 
 
 func _step_toward(p: Vector2, step: float) -> bool:
