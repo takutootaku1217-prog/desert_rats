@@ -29,7 +29,7 @@ static var run_selected := true
 static func select_current_run() -> void:
 	run_selected = true
 	active_checkpoint.clear()
-const MAIN := ["target_speed", "scroll_speed", "boost_core_id", "boost_load", "boost_active", "save_run_id", "room_layout", "total_rooms_built", "recipe_priority", "gather_policy", "hunt_policy", "blueprints", "total_gathered", "total_hunted", "total_eaten", "tool_auto", "_tool_clock", "build_queue", "total_built", "total_wasted", "_waste_note_at", "_spawn_dist", "_creature_dist", "wave", "kills", "_wave_timer", "transfer_queue", "craft_queue", "total_transferred", "total_crafted_by_hand", "_feed_clock"]
+const MAIN := ["target_speed", "scroll_speed", "boost_core_id", "boost_recovery_core_id", "boost_load", "boost_active", "save_run_id", "room_layout", "total_rooms_built", "recipe_priority", "gather_policy", "hunt_policy", "blueprints", "total_gathered", "total_hunted", "total_eaten", "tool_auto", "_tool_clock", "build_queue", "total_built", "total_wasted", "_waste_note_at", "_spawn_dist", "_creature_dist", "wave", "kills", "_wave_timer", "transfer_queue", "craft_queue", "total_transferred", "total_crafted_by_hand", "_feed_clock"]
 const WORKER := ["char_name", "palette", "priorities", "carrying", "carcass_cargo", "carrying_species", "carry_source", "carry_n", "carry_bonus", "weapon", "work_support", "tools", "speed", "target", "position", "slot_offset", "hp", "hunger", "fatigue", "stress", "calm", "mental", "down", "floor_i", "facing", "level", "gender", "ranks", "skills", "dept", "away", "recall_exempt", "bed_index", "_climb_dest", "_climb_floor", "_climb_kind"]
 const AI := ["state", "timer", "haul_item", "haul_recipe", "repair_part", "gather_ev", "bag_limit", "bag_frac", "eat_wait", "xfer_item", "xfer_dir", "current_job", "life_request", "process_slot", "safe_after", "retreating", "danger_hold", "manual_attack", "return_request", "manual_job", "rescue_target", "post_rescue_wait"]
 const BASE := ["built", "max_hp", "hp", "fuel", "parts", "rear_engine_damage", "total_refuel", "total_repair"]
@@ -178,6 +178,7 @@ static func main_data(row: Dictionary) -> Dictionary:
 	if not result.has("save_run_id"): result.save_run_id = "legacy"
 	# 旧セーブは持続型・負荷なし・休止中として読み、ロードで無料回復させない。
 	if not result.has("boost_core_id"): result.boost_core_id = BoostCores.SUSTAINED
+	if not result.has("boost_recovery_core_id"): result.boost_recovery_core_id = result.boost_core_id
 	if not result.has("boost_load"): result.boost_load = 0.0
 	if not result.has("boost_active"): result.boost_active = false
 	return result
@@ -271,7 +272,7 @@ static func validate(d, g) -> bool:
 		if key not in GameData.Item.values() or not d.main.gather_policy[key] is int or d.main.gather_policy[key] < 0 or d.main.gather_policy[key] > 5: return false
 	for key in d.main.hunt_policy:
 		if not GameData.CREATURES.has(key) or not d.main.hunt_policy[key] is bool: return false
-	if not d.main.boost_core_id is String or not BoostCores.valid_id(d.main.boost_core_id) or typeof(d.main.boost_load) not in [TYPE_FLOAT, TYPE_INT] or d.main.boost_load < 0.0 or d.main.boost_load > BoostCores.MAX_LOAD or not d.main.boost_active is bool: return false
+	if not d.main.boost_core_id is String or not BoostCores.valid_id(d.main.boost_core_id) or not d.main.boost_recovery_core_id is String or not BoostCores.valid_id(d.main.boost_recovery_core_id) or typeof(d.main.boost_load) not in [TYPE_FLOAT, TYPE_INT] or d.main.boost_load < 0.0 or d.main.boost_load > BoostCores.MAX_LOAD or not d.main.boost_active is bool: return false
 	for k in ["weight", "capacity", "butchered"]:
 		if not d[k] is int or d[k] < 0: return false
 	for v in [d.inventory,d.stock,d.wasted,d.quarry.loose,d.quarry.discarded,d.quarry.visit_generated,d.quarry.visit_nearby,d.quarry.visit_discarded,d.expedition.loot,d.expedition.lost]:

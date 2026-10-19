@@ -21,6 +21,7 @@ var target_speed := 60.0          # プレイヤーが決める目標速度（�
 var scroll_speed := 60.0          # 実際の速度。燃料切れ・走行装置の故障で遅くなる
 # ブーストは燃料とは別の「負荷」。休止中に下がり、満杯では明示操作まで再開しない。
 var boost_core_id := BoostCores.SUSTAINED
+var boost_recovery_core_id := BoostCores.SUSTAINED
 var boost_load := 0.0
 var boost_active := false
 var save_run_id := ""
@@ -1618,7 +1619,7 @@ func boost_remaining_seconds() -> float:
 
 
 func boost_recovery_seconds() -> float:
-	var duration: float = float(boost_profile()["recover_seconds"])
+	var duration: float = float(BoostCores.profile(boost_recovery_core_id)["recover_seconds"])
 	return duration * clampf(boost_load / BoostCores.MAX_LOAD, 0.0, 1.0)
 
 
@@ -1641,6 +1642,7 @@ func request_boost_toggle() -> bool:
 		return true
 	if not can_start_boost():
 		return false
+	boost_recovery_core_id = boost_core_id
 	boost_active = true
 	return true
 
@@ -1664,7 +1666,9 @@ func _tick_boost(delta: float) -> void:
 			boost_load = BoostCores.MAX_LOAD
 			boost_active = false # 限界で自動解除。再起動は次の明示操作だけ。
 	else:
-		boost_load = maxf(0.0, boost_load - BoostCores.recovery_per_second(boost_core_id) * delta)
+		boost_load = maxf(0.0, boost_load - BoostCores.recovery_per_second(boost_recovery_core_id) * delta)
+		if boost_load <= 0.0:
+			boost_recovery_core_id = boost_core_id
 
 
 ## いまカメラに見えている世界座標の左端（カメラなし・position=0 のときは 0.0 で、これまでと同じ）。

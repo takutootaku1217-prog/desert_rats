@@ -117,6 +117,11 @@ func _ready() -> void:
 	v.add_child(_repair)
 	_crew_repair = UIKit.button("\u9069\u4efb\u306b\u4fee\u7406\u3092\u4f9d\u983c", func(): game.request_repair())
 	v.add_child(_crew_repair)
+	# Keep the existing right-top emergency repair location stable.  Boost controls
+	# belong below it instead of displacing the navigation-bar repair affordance.
+	v.move_child(_boost, v.get_child_count() - 1)
+	v.move_child(_boost_bar, v.get_child_count() - 1)
+	v.move_child(boost_buttons, v.get_child_count() - 1)
 
 
 func _set_gauge(key: String, value: float, maximum: float, label: String, tip: String) -> void:
@@ -173,8 +178,12 @@ func _process(_d: float) -> void:
 	var core: Dictionary = game.boost_profile()
 	var remaining: float = game.boost_remaining_seconds()
 	var recover: float = game.boost_recovery_seconds()
+	var recovery_core: Dictionary = BoostCores.profile(game.boost_recovery_core_id)
 	_boost.text = "ブースト負荷 %d%%　%s　残り %.1f秒%s" % [int(round(game.boost_load)), String(core["name"]), remaining, "　休止で %.1f秒" % recover if not game.boost_active and game.boost_load > 0.0 else ""]
 	_boost.tooltip_text = "燃料とは別の負荷ゲージ。使用中に増え、休止中に下がります。\n%s / 速度 %.1f倍。満杯で解除され、再開はVキーまたは開始ボタンで明示操作します。" % [String(core["summary"]), BoostCores.SPEED_MULTIPLIER]
+	if not game.boost_active and game.boost_load > 0.0:
+		_boost.text += " [recovery: %s]" % String(recovery_core["name"])
+		_boost.tooltip_text += "\nRemaining load recovers at the last-used core's rate until empty; swapping cores cannot accelerate it."
 	_boost_bar.value = game.boost_load
 	_boost_bar.tooltip_text = _boost.tooltip_text
 	_boost_toggle.text = "ブースト解除 (V)" if game.boost_active else "ブースト開始 (V)"
