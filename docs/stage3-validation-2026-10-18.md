@@ -385,6 +385,12 @@ make refill room. A full inventory can otherwise prevent food purchase despite
 credits; the idle observation intentionally does not sell or travel and must
 not be used to judge this loop.
 
+This is **delivery-only** evidence.  The repeated legs do not re-run the fixed
+supply or recovery contracts, so they do not establish that every mixed
+delivery/supply/rescue rotation is stable.  Their supported conclusion is
+limited to paid delivery income, its food/refill capacity boundary, and the
+normal repair/refuel work that occurs during those delivery loops.
+
 ### Initial-upgrade cause, not inferred crafting wait
 
 The haul frame requires wood 2, **hide 1**, and iron 1. The diagnostic now
@@ -412,6 +418,17 @@ blocks duplicate city service for that part. The paid-repeat diagnostic waits
 for the reservation to finish and records it; no AI remains stuck and all 21
 repeats complete. The original immediate assertions remain, so this timing
 boundary is visible rather than silently weakened.
+
+More specifically, 642/4 ends the fixed recovery return with 6 repair kits,
+wood 8, stone 19 and iron 2, while drive is 74.98 and the worker is in
+`REPAIR_TAKE`; city service restores hull but must not duplicate the worker's
+reserved drive repair.  643/4 has the same boundary on its first return:
+5 kits, wood 5 and stone 3 remain while hull is 55.01 and the worker owns that
+repair.  The later fixed legs can restore the common baseline, confirming a
+timing/measurement boundary rather than a resource loss, price shortfall, or
+stuck AI.  The test's fixed-leg assertion is intentionally retained as a
+signal; the paid-loop helper waits for the already-owned repair work before
+assessing departure maintenance.
 
 ### Save/rescue boundaries rechecked
 

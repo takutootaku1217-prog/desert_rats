@@ -83,3 +83,5 @@
   normal AI repair reservation, not a stuck worker.  No balance values,
   crew/bed settings, or save policy were changed; the required product decision
   for the 1--2 sortie target is documented in the stage3 validation record.
+  The paid-repeat result is delivery-only evidence: it does not establish the
+  stability of a mixed delivery/supply/recovery rotation.
