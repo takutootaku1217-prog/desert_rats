@@ -19,6 +19,10 @@ var save_ui: SaveUI
 
 var target_speed := 60.0          # プレイヤーが決める目標速度（↑↓キー）
 var scroll_speed := 60.0          # 実際の速度。燃料切れ・走行装置の故障で遅くなる
+# ブーストは燃料とは別の「負荷」。休止中に下がり、満杯では明示操作まで再開しない。
+var boost_core_id := BoostCores.SUSTAINED
+var boost_load := 0.0
+var boost_active := false
 var save_run_id := ""
 var storage: BaseStorage
 var processor: BaseProcessor
@@ -375,8 +379,10 @@ func _process(delta: float) -> void:
 		if _wave_timer <= 0.0:
 			_spawn_wave()
 			_wave_timer = 22.0
-	# 移動: 燃料切れや走行装置の故障で遅くなる（完全には止めない。止まると資源が来なくなるため）
-	scroll_speed = minf(target_speed, base.speed_limit())
+	_tick_boost(delta)
+	# 移動: ブースト倍率を掛けても、既存の走行装置・天候・停車・到着境界の上限を通す。
+	var requested_speed := target_speed * (BoostCores.SPEED_MULTIPLIER if boost_active else 1.0)
+	scroll_speed = minf(requested_speed, base.speed_limit())
 	if not base.has_fuel():
 		scroll_speed = minf(scroll_speed, GameData.CRAWL_SPEED)
 	scroll_speed *= director.speed_mult()      # 天候の対処方針（減速・停止）
@@ -1595,8 +1601,70 @@ func _unhandled_input(event: InputEvent) -> void:
 			target_speed = minf(target_speed + 10.0, 200.0)
 		elif event.keycode == KEY_DOWN:
 			target_speed = maxf(target_speed - 10.0, 0.0)
+		elif event.keycode == KEY_V:
+			request_boost_toggle()
 		elif event.keycode == KEY_ESCAPE:
 			follow_target = null                # 追従の解除（選んだ仲間・優先度パネルの表示はそのまま。カメラだけ戻る）
+
+
+# ---------------------------------------------------------------- ブーストコア（燃料とは独立した負荷）
+func boost_profile() -> Dictionary:
+	return BoostCores.profile(boost_core_id)
+
+
+func boost_remaining_seconds() -> float:
+	var duration: float = float(boost_profile()["active_seconds"])
+	return duration * maxf(0.0, 1.0 - boost_load / BoostCores.MAX_LOAD)
+
+
+func boost_recovery_seconds() -> float:
+	var duration: float = float(boost_profile()["recover_seconds"])
+	return duration * clampf(boost_load / BoostCores.MAX_LOAD, 0.0, 1.0)
+
+
+## 既存の停止・帰還・到着・燃料・走行装置制約を一切越えず、走行中だけ起動する。
+func boost_motion_allowed() -> bool:
+	if game_over or target_speed <= 0.0 or not base.has_fuel() or quarry.recalling() or world.recalling():
+		return false
+	if world.active and world.phase != "travel":
+		return false
+	return minf(target_speed, base.speed_limit()) > 0.0
+
+
+func can_start_boost() -> bool:
+	return not boost_active and boost_load < BoostCores.MAX_LOAD and boost_motion_allowed()
+
+
+func request_boost_toggle() -> bool:
+	if boost_active:
+		boost_active = false
+		return true
+	if not can_start_boost():
+		return false
+	boost_active = true
+	return true
+
+
+## コア交換は休止中だけ。負荷率をそのまま引き継ぐので、交換で無料回復しない。
+func select_boost_core(id: String) -> bool:
+	if boost_active or not BoostCores.valid_id(id):
+		return false
+	boost_core_id = id
+	boost_load = clampf(boost_load, 0.0, BoostCores.MAX_LOAD)
+	return true
+
+
+func _tick_boost(delta: float) -> void:
+	if boost_active:
+		if not boost_motion_allowed():
+			boost_active = false
+			return
+		boost_load = minf(BoostCores.MAX_LOAD, boost_load + BoostCores.load_per_second(boost_core_id) * delta)
+		if boost_load >= BoostCores.MAX_LOAD:
+			boost_load = BoostCores.MAX_LOAD
+			boost_active = false # 限界で自動解除。再起動は次の明示操作だけ。
+	else:
+		boost_load = maxf(0.0, boost_load - BoostCores.recovery_per_second(boost_core_id) * delta)
 
 
 ## いまカメラに見えている世界座標の左端（カメラなし・position=0 のときは 0.0 で、これまでと同じ）。

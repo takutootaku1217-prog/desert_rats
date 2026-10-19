@@ -18,6 +18,11 @@ var _stock: StockGrid
 var _repair: Button
 var _crew_repair: Button
 var _leak: Label
+var _boost: Label
+var _boost_bar: ProgressBar
+var _boost_toggle: Button
+var _boost_sustained: Button
+var _boost_burst: Button
 var _totals: Label
 var _capacity: Label
 
@@ -83,6 +88,24 @@ func _ready() -> void:
 	_leak = UIKit.lbl("", 12, Color("ffb347"))
 	_leak.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	v.add_child(_leak)
+	_boost = UIKit.lbl("", 12, Color("9ddcff"))
+	_boost.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	v.add_child(_boost)
+	_boost_bar = ProgressBar.new()
+	_boost_bar.custom_minimum_size = Vector2(W - 16, 14)
+	_boost_bar.max_value = BoostCores.MAX_LOAD
+	_boost_bar.show_percentage = false
+	v.add_child(_boost_bar)
+	var boost_buttons := HBoxContainer.new()
+	boost_buttons.add_theme_constant_override("separation", 3)
+	v.add_child(boost_buttons)
+	_boost_toggle = UIKit.button("ブースト開始 (V)", func(): game.request_boost_toggle())
+	_boost_toggle.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	boost_buttons.add_child(_boost_toggle)
+	_boost_sustained = UIKit.button("持続 8/24", func(): game.select_boost_core(BoostCores.SUSTAINED))
+	boost_buttons.add_child(_boost_sustained)
+	_boost_burst = UIKit.button("短時間 2/6", func(): game.select_boost_core(BoostCores.BURST))
+	boost_buttons.add_child(_boost_burst)
 	# 3段目: 倉庫の中身
 	_stock = StockGrid.new().setup(STOCK_ROWS)
 	v.add_child(_stock)
@@ -147,6 +170,17 @@ func _process(_d: float) -> void:
 	if _leak.visible:
 		_leak.text = "\u30a8\u30f3\u30b8\u30f3\u71c3\u6599\u6f0f\u308c: %.3f/\u79d2 (\u6e1b\u901f\u3067\u6e1b\u5c11\u30fb\u505c\u6b62\u4e2d\u3082\u7d99\u7d9a)" % leak_rate
 		_leak.tooltip_text = "\u5f8c\u90e8\u88ab\u5f3e\u84c4\u7a4d %.1f / 100\nDRIVE %d / 100\n\u73fe\u5730\u4fee\u7406\u304c\u5b8c\u4e86\u3059\u308b\u307e\u3067\u6f0f\u308c\u307e\u3059\u3002" % [b.rear_engine_damage, int(b.condition(GameData.Part.DRIVE))]
+	var core: Dictionary = game.boost_profile()
+	var remaining: float = game.boost_remaining_seconds()
+	var recover: float = game.boost_recovery_seconds()
+	_boost.text = "ブースト負荷 %d%%　%s　残り %.1f秒%s" % [int(round(game.boost_load)), String(core["name"]), remaining, "　休止で %.1f秒" % recover if not game.boost_active and game.boost_load > 0.0 else ""]
+	_boost.tooltip_text = "燃料とは別の負荷ゲージ。使用中に増え、休止中に下がります。\n%s / 速度 %.1f倍。満杯で解除され、再開はVキーまたは開始ボタンで明示操作します。" % [String(core["summary"]), BoostCores.SPEED_MULTIPLIER]
+	_boost_bar.value = game.boost_load
+	_boost_bar.tooltip_text = _boost.tooltip_text
+	_boost_toggle.text = "ブースト解除 (V)" if game.boost_active else "ブースト開始 (V)"
+	_boost_toggle.disabled = not game.boost_active and not game.can_start_boost()
+	_boost_sustained.disabled = game.boost_active or game.boost_core_id == BoostCores.SUSTAINED
+	_boost_burst.disabled = game.boost_active or game.boost_core_id == BoostCores.BURST
 	var cond: float = b.condition(GameData.Part.HULL)
 	_set_gauge("hull", cond, 100.0, str(int(cond)), "拠点HP %d / 100%s" % [int(cond), "（不調）" if cond < GameData.PART_BAD else ""])
 	_set_gauge("fuel", b.fuel, GameData.FUEL_CAP, str(int(b.fuel / GameData.FUEL_CAP * 100.0)), "燃料 %d / %d" % [int(b.fuel), int(GameData.FUEL_CAP)])
