@@ -85,3 +85,11 @@
   for the 1--2 sortie target is documented in the stage3 validation record.
   The paid-repeat result is delivery-only evidence: it does not establish the
   stability of a mixed delivery/supply/recovery rotation.
+- Follow-up maintenance probe (2026-10-19): the immediate fixed-leg assertions
+  remain diagnostic, while a separate bounded probe proves each observed
+  `REPAIR_TAKE` completes exactly once without duplicate repair-kit consumption
+  and then returns to the same durability baseline through the existing city
+  service.  642/4 needs 3.6 seconds and no city repair; 643/4 needs 3.0
+  seconds for the owned hull kit and one 7 Cr per-part city repair.  The town
+  UI already describes repair per part and names the active crew reservation,
+  so this evidence requires no display or balance change.

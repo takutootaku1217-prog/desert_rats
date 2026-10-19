@@ -412,23 +412,39 @@ worker-seconds for 641 four/five and 23.6/18.8 for 643 four/five; IDLE and
 REST vary by seed, not monotonically by crew. No standard run builds or uses a
 bed.
 
-The 642/4 and 643/4 immediate maintenance failures are also not cash/material
-shortages: a worker owns a normal `REPAIR_TAKE` reservation, which correctly
-blocks duplicate city service for that part. The paid-repeat diagnostic waits
-for the reservation to finish and records it; no AI remains stuck and all 21
-repeats complete. The original immediate assertions remain, so this timing
-boundary is visible rather than silently weakened.
+The 642/4 and 643/4 immediate maintenance failures are also not a lost-item or
+stuck-AI result: a worker owns a normal `REPAIR_TAKE` reservation, which
+correctly blocks duplicate city service for that part.  The immediate fixed-leg
+assertion remains deliberately unchanged.  A separate bounded
+`--eventual-maintenance-probe` records the actual completion before allowing
+normal city service to fill any remaining gap:
 
-More specifically, 642/4 ends the fixed recovery return with 6 repair kits,
-wood 8, stone 19 and iron 2, while drive is 74.98 and the worker is in
-`REPAIR_TAKE`; city service restores hull but must not duplicate the worker's
-reserved drive repair.  643/4 has the same boundary on its first return:
-5 kits, wood 5 and stone 3 remain while hull is 55.01 and the worker owns that
-repair.  The later fixed legs can restore the common baseline, confirming a
-timing/measurement boundary rather than a resource loss, price shortfall, or
-stuck AI.  The test's fixed-leg assertion is intentionally retained as a
-signal; the paid-loop helper waits for the already-owned repair work before
-assessing departure maintenance.
+| case | reserved part | bounded wait | automatic result | city completion | result |
+| --- | --- | ---: | --- | --- | --- |
+| 642/4 recovery return | drive | 3.6 s | one action, kit 6→5, drive 74.98→99.98 | none | baseline restored |
+| 643/4 delivery return | hull | 3.0 s | one action, kit 5→4, hull 55.01→79.81 | after recall, one 7 Cr hull service to 100 | baseline restored |
+
+Thus each reservation completes once and consumes at most its one repair kit;
+there is no duplicate material consumption.  In 643/4 the automatic threshold
+is 75, so the one 25-point repair intentionally stops at 79.81 rather than
+repeating to the higher preparation baseline.  Returning the idle crew to the
+city and using the existing per-part cash service restores that baseline in
+finite time.  This is a timing/state-boundary in the immediate assertion, not
+a balance shortfall or an AI deadlock.  The town UI does not claim a global
+"full repair": it presents a per-part repair quote and explicitly reports
+`仲間がこの部位を修理予約中` for the reserved part, so no display change is
+required from this evidence.
+
+The probe is intentionally separate from the normal fixed-leg run, because
+waiting advances the deterministic world/RNG.  Reproduce it without weakening
+the standard assertions:
+
+```text
+godot --headless --path . --fixed-fps 60 -s res://tools/test_sortie_economy.gd -- \
+  --crew-count 4 --seed 642 --eventual-maintenance-probe
+godot --headless --path . --fixed-fps 60 -s res://tools/test_sortie_economy.gd -- \
+  --crew-count 4 --seed 643 --eventual-maintenance-probe
+```
 
 ### Save/rescue boundaries rechecked
 
