@@ -53,3 +53,19 @@
   `C:\Users\user\AppData\Local\Temp\desert-rats-economy-scheduled\20261018T173334Z-peyvrvtn\results.json`
   (`source_changed_during_run: false`). A final complete core run remains due
   from the final follow-up commit.
+
+- Independent Linux follow-up (2026-10-19): fixed four non-design regressions
+  on `gpt/rescue-return-loop`: return-to-reward-city renewal is deferred until
+  a different normal arrival; corrupt separated progress refuses an unproven
+  foreign backup; a completed rescue carrier unloads its normal owned cargo
+  before recovery wait; and the save migration confirmation is scrollable and
+  revealed within the viewport.  Added strict regression coverage in
+  `test_world_reward_replenish.gd`, `test_save_ui.gd`, and
+  `test_rescue_return.gd`; focused isolated Godot 4.6.3 run passed.  Extended
+  the ordinary economy fixture with an optional 1,400-second real-meal
+  observation and recorded seeds 641--643 for 4/5 workers.  Several existing
+  maintenance/first-improvement assertions fail on 642/4, 643/4 and 643/5;
+  they were not weakened.  All six runs have 8--12 meals and zero built/used
+  beds, so no crew-count/bed-capacity product change was made.  Full details,
+  commands, limitations and Claude handoff prompt are in
+  `docs/stage3-validation-2026-10-18.md`.

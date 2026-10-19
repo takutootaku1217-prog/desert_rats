@@ -16,9 +16,12 @@ var ecosystem_epoch := {}
 ## It is saved so claiming, quitting, and returning later cannot lose or repeat
 ## the renewal.
 var reward_replenish_pending := false
+## Returning to the reward city after a turnback is not the subsequent normal
+## region visit that consumes this reservation.
+var reward_replenish_excluded_region := ""
 const FAUNA_RETURN_SECONDS := 120.0
 var next_id := 0
-const FIELDS := ["active","region","phase","road","origin","destination","progress","direction","locations","next_id","ecosystem_epoch","reward_replenish_pending"]
+const FIELDS := ["active","region","phase","road","origin","destination","progress","direction","locations","next_id","ecosystem_epoch","reward_replenish_pending","reward_replenish_excluded_region"]
 
 func setup(g) -> void:
  game = g
@@ -55,6 +58,7 @@ func request(to: String, planned := false) -> bool:
 
 func schedule_mission_replenishment() -> void:
  reward_replenish_pending=true
+ reward_replenish_excluded_region=region
 
 ## Do not create new IDs. Reset only the stored normal-world entities for the
 ## region just reached; _spawn_visible then materializes each existing ID once.
@@ -62,6 +66,7 @@ func schedule_mission_replenishment() -> void:
 ## respawn instantly at the current location.
 func _apply_reward_replenishment() -> void:
  if not reward_replenish_pending:return
+ if region==reward_replenish_excluded_region:return
  for id in locations.get(key(),{}):
   var row:Dictionary=locations[key()][id]
   match row.type:
@@ -78,6 +83,7 @@ func _apply_reward_replenishment() -> void:
     row.data._wander_t=1.0
     row.erase("return_at")
  reward_replenish_pending=false
+ reward_replenish_excluded_region=""
 
 func cancel_or_return() -> bool:
  if game.game_over: return false
@@ -294,6 +300,7 @@ static func normalized(d: Dictionary) -> Dictionary:
  var result:=d.duplicate(true)
  if not result.has("ecosystem_epoch"):result.ecosystem_epoch={}
  if not result.has("reward_replenish_pending"):result.reward_replenish_pending=false
+ if not result.has("reward_replenish_excluded_region"):result.reward_replenish_excluded_region="central_trade" if result.reward_replenish_pending else ""
  return result
 static func valid(d, g) -> bool:
  if not d is Dictionary:return false

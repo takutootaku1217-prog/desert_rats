@@ -128,6 +128,10 @@ func _finish_delivery(carrier, target, r: Dictionary) -> void:
 	var expired := bool(r.get("expired", false))
 	incapacitated.erase(ti)
 	carrier.ai.rescue_target = -1
+	# The carried-person slot is separate from pre-existing carrier cargo.  Put
+	# that owned cargo away before the explicit recovery wait so it cannot block
+	# the next departure or be counted twice later.
+	carrier.unload_owned()
 	carrier.ai.post_rescue_wait = true
 	carrier.ai._set_state(CharacterAI.State.IDLE)
 	target.ai.post_rescue_wait = true

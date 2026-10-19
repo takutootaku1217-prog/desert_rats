@@ -574,16 +574,23 @@ static func continue_progress(g, d: Dictionary) -> bool:
 	run_selected = true
 	return true
 
-## A readable primary must agree with its backup on both run and roster.  If
-## the primary is missing or damaged, the already-validated backup is the
-## recovery source by definition: rejecting it would make the backup unusable
-## precisely in the failure it exists to recover.  A readable different run is
-## still never accepted as the current run's fallback.
-static func backup_matches_progress(primary: Dictionary, backup: Dictionary) -> bool:
+## A readable primary must agree with its backup on both run and roster.  When
+## it is damaged, the same-run checkpoint is the remaining authority; a valid
+## payload from another run must never become the recovery source by itself.
+static func backup_matches_progress(primary: Dictionary, backup: Dictionary, authority: Dictionary = {}) -> bool:
 	if backup.is_empty():
 		last_error = "Backup could not be read."
 		return false
 	if primary.is_empty():
+		if authority.is_empty():
+			last_error = "Progress primary is damaged and no same-run checkpoint can verify this backup."
+			return false
+		if snapshot_run_id(authority) != snapshot_run_id(backup):
+			last_error = "Backup belongs to a different run."
+			return false
+		if not authority.get("crew") is Array or not backup.get("crew") is Array or authority.crew.size() != backup.crew.size():
+			last_error = "Backup crew count does not match the current run."
+			return false
 		last_error = ""
 		return true
 	if snapshot_run_id(primary) != snapshot_run_id(backup):

@@ -219,3 +219,127 @@ For the normal world, verify a reward claim persists a pending renewal, has no i
 - 実行時 HEAD（前後）: `ca3b27f931cdd96eafc59bb59fb32bb86344744f`
 
 公開したブランチ HEAD と GitHub の同一 SHA は、タスク完了時のハンドオフで報告する。
+
+## 2026-10-19: independent Linux follow-up
+
+This follow-up started from `828c5ec96c61674d4e0a4ef23e175d66f2064525`
+on `gpt/rescue-return-loop`.  It uses a fresh clone and a per-run isolated
+`HOME`/`XDG_*` directory; it does not read or modify a real player profile.
+Godot 4.6.3 stable is the locally available comparison runtime.  The previous
+Windows 4.7.2 result remains historical evidence only, not a result for this
+follow-up.
+
+### Corrected defects and regressions
+
+* **Return reward renewal:** a reward reserved in `central_trade` no longer
+  renews that same city when the player cancels/returns into it.  The
+  reservation is consumed only by a later normal arrival in another region.
+  `world_reward_replenish` spends the normal city resource and creature,
+  saves/continues, returns to that city, and asserts both are still spent;
+  it then verifies exactly one later normal renewal.
+* **Damaged primary save:** when the separated progress primary is corrupt,
+  recovery accepts a backup only when the existing same-run checkpoint proves
+  both run id and crew count.  A legacy/foreign backup with no such authority
+  is refused rather than becoming the source of truth.  `save_ui` creates a
+  corrupt primary plus an actual foreign `.bak` and asserts the current
+  snapshot is unchanged and the UI says it belongs to another run.
+* **Rescue carrier cargo:** a carrier now unloads normal owned cargo when the
+  carried crew member is delivered, before entering recovery wait.  This
+  keeps the dedicated carried-person slot distinct from item ownership and
+  removes the departure blocker without duplicating or consuming the items.
+  `rescue_return` starts the carrier with two stone and one wood carry bonus,
+  checks the exact storage delta, empty carrier/bonus, and an empty
+  `ready_reason()` after delivery.
+* **Migration confirmation visibility:** Save UI now uses a full-viewport
+  panel and vertical `ScrollContainer`; the confirmation is revealed when it
+  opens.  `save_ui` exercises v2 migration and asserts the panel and confirm
+  control lie in the visible viewport/scroll rect.  This is renderer/script
+  layout coverage, not a claim of native Linux mouse or compositor coverage.
+
+Focused isolated run (Godot 4.6.3):
+
+```text
+/tmp/desert-rats-targeted-3/20261019T025431Z-6e6xk5g9/results.json
+import, save_ui, rescue_return, world_reward_replenish,
+world_carcass_replenish: passed
+```
+
+The same focused set also passed with the official Godot 4.7.2 Linux binary:
+
+```text
+/tmp/desert-rats-targeted-472/20261019T030430Z-szjtg76d/results.json
+import, save_ui, rescue_return, world_reward_replenish,
+world_carcass_replenish: passed
+```
+
+### Longer normal-settings economy observation (not a balance decision)
+
+Each case uses the normal three-sortie scenario and its ordinary preparation,
+then continues **1,400 simulated seconds**.  It has no material/credit grant
+and requires at least two real eating actions.  This exceeds the roughly
+19-minute hunger threshold from 100 to below 25; all six cases actually ate
+8--12 times.  The columns after cash are observation-only: meals, food
+inventory change, ending food, `REST_HERE` worker-seconds, and ending
+refuel/repair action totals.
+
+| seed | crew | first improvement s | 3-sortie s | cash | meals | food delta / end | REST_HERE | refuel / repair | result |
+| --- | ---: | ---: | ---: | ---: | ---: | --- | ---: | --- | --- |
+| 641 | 4 | 308.8 | 364.0 | 52 | 8 | -8 / 4 | 477.8 | 4 / 17 | pass |
+| 641 | 5 | 445.0 | 500.0 | 44 | 10 | -10 / 2 | 538.6 | 4 / 16 | pass |
+| 642 | 4 | 434.0 | 486.4 | 58 | 8 | -7 / 4 | 540.0 | 4 / 16 | **maintenance fail on sortie 3** |
+| 642 | 5 | 308.2 | 346.2 | 48 | 10 | -10 / 2 | 633.4 | 3 / 17 | pass |
+| 643 | 4 | 491.0 | 544.8 | 50 | 12 | -8 / 0 | 457.2 | 5 / 17 | **maintenance and first-improvement fail** |
+| 643 | 5 | 485.8 | 537.8 | 47 | 12 | -8 / 0 | 668.6 | 5 / 18 | **first-improvement fail** |
+
+The failures above are retained assertions, not relaxed pass criteria.  In the
+642/4 case the third return cannot meet the common repair/durability baseline;
+643/4 additionally cannot meet it on the first return and does not craft the
+first improvement; 643/5 does not craft that first improvement.  All six runs
+remain non-game-over and cash is unchanged during the post-sortie observation.
+Food delta differs in 642/4 because one cooked replacement is produced.  No
+beds are built in any of the six standard cases (`built_beds = 0`, bed busy
+time = 0); rest is `REST_HERE` (457.2--668.6 worker-seconds), so the proposed
+three-bed contention explanation is not supported by this evidence.  Hunger
+below the eating threshold is measured (25.8--224.8 worker-seconds) and urgent
+hunger is zero.
+
+Reproduce one case with:
+
+```text
+XDG_CONFIG_HOME=<isolated> XDG_DATA_HOME=<isolated> XDG_CACHE_HOME=<isolated> \
+  godot --headless --path . --fixed-fps 60 -s res://tools/test_sortie_economy.gd -- \
+  --crew-count 4 --seed 641 --observe-seconds 1400
+```
+
+The logs used for this report were `/tmp/desert-rats-survey-{641,642,643}-{4,5}.log`.
+They show refuel/repair action counts, state-time causes, food consumption and
+end inventories separately.  They do **not** justify changing default crew
+count or bed capacity.  A balance decision is required before changing either:
+the observed seed-sensitive maintenance/upgrade failures must first be given a
+product target (for example, whether every normal seed must reach the first
+upgrade by sortie 1--2 and whether post-preparation replenishment must be paid
+from cash or gathered materials).
+
+### Claude review prompt for this follow-up
+
+```text
+Review the newest gpt/rescue-return-loop HEAD of desert_rats.  Do not make a
+product decision about starting crew count, bed capacity, or revival cost.
+Run save_ui, rescue_return, world_reward_replenish and
+world_carcass_replenish in an isolated profile.  Verify: a corrupt progress
+primary rejects a foreign backup but accepts a checkpoint-proven same-run
+backup; returning to the reward city does not respawn its spent resource or
+creature; a delivered rescue carrier unloads its owned items exactly once and
+can depart; and the migration confirmation is within the ScrollContainer
+visible rect.  Distinguish that viewport/layout evidence from native OS mouse
+input.
+
+Run test_sortie_economy with seeds 641, 642 and 643 for crews 4 and 5 using
+--observe-seconds 1400.  Do not weaken failures.  Report cash, food eaten and
+inventory change, refuel/repair totals, REST_HERE/bed state time, and each
+maintenance or first-improvement failure separately.  Confirm that normal
+runs build zero beds, so the data does not establish a bed-capacity cause.
+Finally run the core suite from the reviewed commit and report runtime version,
+isolated-profile path, source_changed_during_run, and native-input coverage
+separately.
+```

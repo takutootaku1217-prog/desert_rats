@@ -86,6 +86,21 @@ func _initialize():
 	ui.ask("backup")
 	ui.execute()
 	check(main.storage.count_of(GameData.Item.WOOD) == initial, "SaveUI recovers a valid progress backup when the primary is missing")
+	# The current checkpoint remains an authority boundary after the progress
+	# primary is damaged.  Do not accept an otherwise valid backup from another
+	# run simply because the primary can no longer be parsed.
+	var checkpoint_snapshot := SaveGame.capture(main)
+	checkpoint_snapshot.main.save_run_id = "save-ui-primary-run"
+	main.save_run_id = "save-ui-primary-run"
+	check(SaveGame.write(main, ui.checkpoint_path, true, SaveGame.SLOT_CHECKPOINT, checkpoint_snapshot), "same-run checkpoint anchors damaged-primary recovery")
+	var foreign_only_backup := checkpoint_snapshot.duplicate(true)
+	foreign_only_backup.main.save_run_id = "save-ui-foreign-run"
+	check(SaveGame.write(main, ui.path + ".bak", true, SaveGame.SLOT_PROGRESS, foreign_only_backup), "foreign backup fixture writes")
+	var broken_primary := FileAccess.open(ui.path, FileAccess.WRITE); broken_primary.store_string("broken"); broken_primary.close()
+	var before_damaged_foreign := SaveGame.capture(main)
+	ui.ask("backup")
+	ui.execute()
+	check(SaveGame.capture(main) == before_damaged_foreign and ui._text.text.contains("different run"), "damaged primary rejects a readable backup from another run")
 	# A readable primary remains an authority boundary: a normal backup from a
 	# different run must not replace it just because the backup is valid itself.
 	var primary_snapshot := SaveGame.capture(main)
@@ -222,6 +237,13 @@ func _initialize():
 	await activate_ui(ui._confirm)
 	check(ui._legacy.visible and not SaveGame.run_selected, "v2 Continue exposes migration without selecting a run")
 	await click(ui._legacy)
+	await frames()
+	var confirm_area: Rect2 = ui._confirm.get_global_rect()
+	var scroll_area: Rect2 = ui._scroll.get_global_rect()
+	var panel_area: Rect2 = ui._panel.get_global_rect()
+	var viewport_area: Rect2 = root.get_visible_rect()
+	check(panel_area.position.x >= viewport_area.position.x - 1.0 and panel_area.position.y >= viewport_area.position.y - 1.0 and panel_area.end.x <= viewport_area.end.x + 1.0 and panel_area.end.y <= viewport_area.end.y + 1.0, "save panel scales inside the current viewport")
+	check(confirm_area.position.y >= scroll_area.position.y - 1.0 and confirm_area.end.y <= scroll_area.end.y + 1.0, "migration confirmation remains reachable in the visible save panel")
 	await click(ui._confirm)
 	check(SaveGame.run_selected and main.save_run_id == "legacy-v2-run" and main.town.credits == 37 and SaveGame.read(SaveGame.PATH, true).get("version") == 2, "v2 migration UI restores and selects the legacy run without rewriting it")
 	ui.open()

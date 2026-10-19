@@ -9,6 +9,8 @@ var legacy_path := SaveGame.PATH
 var _overlay: ColorRect
 var _text: Label
 var _confirm: Button
+var _panel: PanelContainer
+var _scroll: ScrollContainer
 var _action := ""
 var _legacy: Button
 var _legacy_path := ""
@@ -45,17 +47,25 @@ func _ready() -> void:
 	_overlay.color = Color(0,0,0,0.85)
 	_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(_overlay)
-	var panel := PanelContainer.new()
-	panel.position = Vector2(240,110)
-	panel.custom_minimum_size = Vector2(800,480)
-	panel.add_theme_stylebox_override("panel",UIKit.box(Color("1b1e24"),UIKit.C_ACCENT,4,20))
-	_overlay.add_child(panel)
+	_panel = PanelContainer.new()
+	_panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_panel.offset_left = 24
+	_panel.offset_top = 24
+	_panel.offset_right = -24
+	_panel.offset_bottom = -24
+	_panel.add_theme_stylebox_override("panel",UIKit.box(Color("1b1e24"),UIKit.C_ACCENT,4,20))
+	_overlay.add_child(_panel)
+	_scroll = ScrollContainer.new()
+	_scroll.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_panel.add_child(_scroll)
 	var box := VBoxContainer.new()
+	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	box.add_theme_constant_override("separation",12)
-	panel.add_child(box)
+	_scroll.add_child(box)
 	box.add_child(UIKit.lbl("保存 / 続きから（1スロット）",24,UIKit.C_ACCENT))
 	_text = UIKit.lbl("",17)
-	_text.custom_minimum_size = Vector2(740,135)
+	_text.custom_minimum_size = Vector2(0,135)
 	_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	box.add_child(_text)
 	for pair in [["手動で保存", "save"],["続きから", "load"],["バックアップから再開", "backup"],["ニューゲーム", "new"]]:
@@ -103,6 +113,8 @@ func is_open() -> bool:
 func ask(action: String) -> void:
 	_action = action
 	_confirm.show()
+	if _scroll != null:
+		_scroll.call_deferred("ensure_control_visible", _confirm)
 	if action == "checkpoint" or action == "checkpoint_backup":
 		_text.text = "出撃前のチェックポイントからやり直しますか？ 現在の進行は破棄されます。ペナルティ量は未設定のため、現段階では資金を失いません。"
 		var checkpoint_source := checkpoint_path + (".bak" if action == "checkpoint_backup" else "")
@@ -143,7 +155,8 @@ func execute() -> void:
 				return
 			if action == "backup":
 				var primary := SaveGame.read_slot(base_source, SaveGame.SLOT_PROGRESS) if base_source == path else SaveGame.read(base_source)
-				if not SaveGame.backup_matches_progress(primary, d):
+				var authority := SaveGame.read_slot(checkpoint_path, SaveGame.SLOT_CHECKPOINT) if primary.is_empty() and base_source == path else {}
+				if not SaveGame.backup_matches_progress(primary, d, authority):
 					_text.text = SaveGame.last_error
 					return
 			if not SaveGame.continue_progress(game,d):

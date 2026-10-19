@@ -100,6 +100,14 @@ func _initialize() -> void:
 	check(row(city_ids.resource).spent and row(city_ids.creature).spent, "claiming a reward never respawns the current town immediately")
 	check(SaveGame.write_progress(main, true) and SaveGame.continue_progress(main, SaveGame.read_progress()), "pending normal-world renewal survives save and explicit Continue")
 	check(main.world.reward_replenish_pending, "restored progress retains the pending renewal exactly once")
+	# A turnback reaches the city where the reward was received, not a new normal
+	# region.  It must leave its spent ledger rows untouched and keep the pending
+	# renewal for the next distinct region arrival.
+	main.operations.set_stance("recall")
+	check(main.world.request("south_oasis") and await wait_for(func(): return main.world.phase == "travel", 60.0), "post-reward departure begins before the turnback check")
+	check(main.world.cancel_or_return() and await wait_for(func(): return main.world.region == "central_trade" and main.world.phase == "stopped", 240.0), "turning back reaches the reward city normally")
+	main.operations.set_stance("normal")
+	check(main.world.reward_replenish_pending and row(city_ids.resource).spent and row(city_ids.creature).spent, "turnback to the reward city neither renews resources nor consumes the pending renewal")
 
 	check(await travel("south_oasis"), "next normal-world visit reaches the depleted region")
 	main.world._spawn_visible()

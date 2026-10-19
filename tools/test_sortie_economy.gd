@@ -6,7 +6,7 @@ extends SceneTree
 ## resource grants, checkpoint loss, or rescue component fixtures are mixed
 ## into the economic result.
 const STEP := 0.2
-const SEED_VALUE := 641
+const DEFAULT_SEED_VALUE := 641
 const FOOD_TARGET := 8
 const REPAIR_KIT_TARGET := 2
 const FUEL_TARGET := 100.0
@@ -17,6 +17,8 @@ var legs: Array = []
 var sales: Array = []
 var maintenance_reference := {}
 var case_started_elapsed := 0.0
+var seed_value := DEFAULT_SEED_VALUE
+var observation_seconds := 0.0
 
 func check(ok: bool, message: String) -> void:
 	print("  %s %s" % ["ok" if ok else "FAIL", message])
@@ -28,7 +30,7 @@ func boot(crew_count: int) -> void:
 	SaveGame.active_checkpoint.clear()
 	SaveGame.run_selected = true
 	main = load("res://scenes/main.tscn").instantiate()
-	main.set_meta("diagnostic_seed", SEED_VALUE)
+	main.set_meta("diagnostic_seed", seed_value)
 	main.set_meta("diagnostic_crew_count", crew_count)
 	root.add_child(main)
 	await main.ready
@@ -187,6 +189,29 @@ func checkpoint_fixture(economic_snapshot: Dictionary) -> Dictionary:
 	check(SaveGame.apply(main, economic_snapshot), "economic state is restored after separate checkpoint fixture")
 	return {"copy_written": written, "purchased_after_copy": bought, "restart_credits": expected}
 
+## Optional long normal-world observation used for balance investigation.  It
+## changes no settings and records worker-state time rather than treating an
+## idle/bed state as an unexplained aggregate wait.
+func observe_normal_play(seconds: float) -> Dictionary:
+	var start := snapshot()
+	var state_seconds := {}
+	var bed_busy_seconds := 0.0
+	var rest_here_seconds := 0.0
+	var hunger_below_eat_seconds := 0.0
+	var hunger_below_urgent_seconds := 0.0
+	var until: float = main.director.elapsed + seconds
+	while main.director.elapsed < until and not main.game_over:
+		for worker in main.workers:
+			var state_name: String = CharacterAI.State.keys()[worker.ai.state]
+			state_seconds[state_name] = snappedf(float(state_seconds.get(state_name, 0.0)) + STEP, 0.01)
+			if worker.sleeping: bed_busy_seconds += STEP
+			if worker.resting: rest_here_seconds += STEP
+			if worker.hunger < CrewStatusDB.EAT_BELOW: hunger_below_eat_seconds += STEP
+			if worker.hunger < CrewStatusDB.EAT_URGENT_BELOW: hunger_below_urgent_seconds += STEP
+		await tick()
+	var finish := snapshot()
+	return {"requested_seconds": seconds, "elapsed_seconds": snappedf(float(finish.elapsed_seconds) - float(start.elapsed_seconds), 0.01), "start": start, "end": finish, "food_consumed": int(finish.eaten) - int(start.eaten), "food_inventory_delta": int(finish.food) - int(start.food), "state_seconds_by_worker": state_seconds, "bed_busy_worker_seconds": snappedf(bed_busy_seconds, 0.01), "rest_here_worker_seconds": snappedf(rest_here_seconds, 0.01), "hunger_below_eat_worker_seconds": snappedf(hunger_below_eat_seconds, 0.01), "hunger_below_urgent_worker_seconds": snappedf(hunger_below_urgent_seconds, 0.01), "built_beds": main.base.built.get("bed", []).size(), "game_over": main.game_over}
+
 func run_case(crew_count: int) -> Dictionary:
 	await boot(crew_count)
 	legs.clear(); sales.clear(); maintenance_reference = {}
@@ -259,7 +284,12 @@ func run_case(crew_count: int) -> Dictionary:
 
 	var economic_final := snapshot()
 	var checkpoint := checkpoint_fixture(SaveGame.capture(main))
-	var result := {"seed": SEED_VALUE, "crew_count": crew_count, "preparation": prelude, "elapsed_seconds_to_first_improvement": first_improvement_elapsed, "elapsed_seconds_total": snappedf(main.director.elapsed - case_started_elapsed, 0.01), "travel_legs": legs, "sorties": sorties, "city_sales": sales, "initial": initial, "economic_final": economic_final, "first_improvement": economic_final.upgrades, "checkpoint_fixture_separate": checkpoint}
+	var observation := {}
+	if observation_seconds > 0.0:
+		observation = await observe_normal_play(observation_seconds)
+	if observation_seconds > 0.0:
+		check(int(observation.food_consumed) >= 2, "extended normal observation includes multiple real meals")
+	var result := {"seed": seed_value, "crew_count": crew_count, "preparation": prelude, "elapsed_seconds_to_first_improvement": first_improvement_elapsed, "elapsed_seconds_total": snappedf(main.director.elapsed - case_started_elapsed, 0.01), "travel_legs": legs, "sorties": sorties, "city_sales": sales, "initial": initial, "economic_final": economic_final, "first_improvement": economic_final.upgrades, "checkpoint_fixture_separate": checkpoint, "post_sortie_observation": observation}
 	print("SORTIE_ECONOMY_JSON " + JSON.stringify(result))
 	check(legs.size() == 7, "all preparation and three-sortie map legs are recorded with no hidden trips")
 	check(sorties.size() == 3 and sorties.all(func(row): return row.maintenance.reached), "all three sorties include complete return-to-target maintenance accounting")
@@ -271,6 +301,10 @@ func _initialize() -> void:
 	var args := OS.get_cmdline_user_args()
 	var index := args.find("--crew-count")
 	if index >= 0 and index + 1 < args.size(): crew_count = int(args[index + 1])
+	index = args.find("--seed")
+	if index >= 0 and index + 1 < args.size(): seed_value = int(args[index + 1])
+	index = args.find("--observe-seconds")
+	if index >= 0 and index + 1 < args.size(): observation_seconds = maxf(0.0, float(args[index + 1]))
 	check(crew_count in [4, 5], "selected crew count is supported")
 	if crew_count not in [4, 5]:
 		print("== RESULT: %d FAILED ==" % fails)

@@ -83,6 +83,27 @@ func _initialize() -> void:
 	injured = main.workers[0]
 	carrier = main.workers[1]
 	for w in main.workers: w.set_process(false)
+	injured.position = Vector2(920, GameData.LO_Y)
+	injured.floor_i = 0
+	carrier.position = Vector2(760, GameData.LO_Y)
+	carrier.floor_i = 0
+	carrier.carrying = GameData.Item.STONE
+	carrier.carry_n = 2
+	carrier.carry_bonus = {GameData.Item.WOOD: 1}
+	carrier.carry_source = Inventory.SOURCE_TRANSFER
+	var stone_before: int = main.storage.count_of(GameData.Item.STONE)
+	var wood_before: int = main.storage.count_of(GameData.Item.WOOD)
+	CrewStatus.damage(injured, 999.0)
+	check(main.rescue.assign(carrier, injured), "loaded carrier can begin a rescue")
+	for n in 1200:
+		main.rescue.carrier_tick(carrier, 0.1)
+		if not injured.down: break
+	check(carrier.carrying < 0 and carrier.carry_bonus.is_empty() and main.storage.count_of(GameData.Item.STONE) == stone_before + 2 and main.storage.count_of(GameData.Item.WOOD) == wood_before + 1, "rescue completion unloads the carrier's original cargo exactly once before waiting")
+	check(main.world.ready_reason() == "", "unloaded rescue carrier no longer blocks departure while waiting for explicit resume")
+	await fresh()
+	injured = main.workers[0]
+	carrier = main.workers[1]
+	for w in main.workers: w.set_process(false)
 	injured.position = Vector2(900, GameData.LO_Y)
 	carrier.position = Vector2(760, GameData.LO_Y)
 	injured.carrying = GameData.Item.WOOD
