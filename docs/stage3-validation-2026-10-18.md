@@ -343,3 +343,105 @@ Finally run the core suite from the reviewed commit and report runtime version,
 isolated-profile path, source_changed_during_run, and native-input coverage
 separately.
 ```
+
+## 2026-10-19: repeatable-loop cause analysis
+
+### Scope: idle observation versus paid repetition
+
+The earlier 1,400-second observation is explicitly a **no-income city idle
+observation**: it begins after the three fixed missions, at `central_trade`,
+with no accepted follow-up job, map travel, or mission claim. Normal autonomous
+eating/resting/crafting/repair remains enabled, but there is no resource or
+reward opportunity. It is food/wait evidence, not a profitability result.
+
+The new `--repeat-deliveries 21` mode is separate. After the fixed three
+missions it repeats normal paid delivery: accept, travel to `south_oasis`, wait
+for normal gathering AI, return, claim the 32 Cr reward, then restore the same
+fuel/food/repair/durability baseline. Every leg, maintenance purchase, meal,
+state time, and market sale is recorded. When capacity would prevent a food
+purchase, it sells only normal unreserved surplus using the existing city
+market; this is recorded separately and is not a grant.
+
+### Repeated normal work with real meals
+
+All rows complete 21 paid deliveries and at least four actual meals. `Repeat
+net` is after maintenance and includes the separately shown market sale
+proceeds. Cash maintenance is actual city spending; fuel/part columns are
+action counts.
+
+| seed | crew | 3-mission cash | repeat net | end cash | meals | food buys | fuel / part repair | cash maintenance | sale proceeds |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | --- | ---: | ---: |
+| 641 | 4 | 52 | +555 | 607 | 4 | 0 | 21 / 27 | 179 | 62 |
+| 641 | 5 | 44 | +541 | 585 | 5 | 1 | 21 / 28 | 189 | 58 |
+| 642 | 4 | 58 | +558 | 616 | 4 | 0 | 21 / 19 | 170 | 56 |
+| 642 | 5 | 48 | +569 | 617 | 5 | 1 | 21 / 28 | 177 | 74 |
+| 643 | 4 | 50 | +515 | 565 | 4 | 4 | 21 / 29 | 205 | 48 |
+| 643 | 5 | 47 | +541 | 588 | 5 | 5 | 21 / 28 | 197 | 66 |
+
+Thus successful, income-producing normal repeats pay maintenance and remain
+cash-positive in all six cohorts. This does not erase fixed three-mission
+failures: it shows a player can keep earning when using the existing market to
+make refill room. A full inventory can otherwise prevent food purchase despite
+credits; the idle observation intentionally does not sell or travel and must
+not be used to judge this loop.
+
+### Initial-upgrade cause, not inferred crafting wait
+
+The haul frame requires wood 2, **hide 1**, and iron 1. The diagnostic now
+records `ProductionPlan.order_reason()` every 0.2 seconds during the approved
+first-upgrade wait, rather than labelling `IDLE` as manufacturing delay.
+
+| seed | crew | wait | recorded reason | outcome |
+| --- | ---: | ---: | --- | --- |
+| 641 | 4 | 58.8 s | material shortage 58.6 s; transfer 0.2 s | completed |
+| 641 | 5 | 209.4 s | material shortage 209.2 s; transfer 0.2 s | completed |
+| 643 | 4 | 240.0 s | material shortage 240.0 s; hide absent | not completed |
+| 643 | 5 | 240.0 s | material shortage 240.0 s; hide absent | not completed |
+
+The earlier approximately 210/59-second difference is therefore not evidence
+of slower five-worker manufacturing or bed contention. In seed 641 it is hide
+availability. In seed 643 both cohorts retain an unstarted haul-frame order
+because hide never arrives. Supply-phase `PROCESS` time is only 27.8/34.6
+worker-seconds for 641 four/five and 23.6/18.8 for 643 four/five; IDLE and
+REST vary by seed, not monotonically by crew. No standard run builds or uses a
+bed.
+
+The 642/4 and 643/4 immediate maintenance failures are also not cash/material
+shortages: a worker owns a normal `REPAIR_TAKE` reservation, which correctly
+blocks duplicate city service for that part. The paid-repeat diagnostic waits
+for the reservation to finish and records it; no AI remains stuck and all 21
+repeats complete. The original immediate assertions remain, so this timing
+boundary is visible rather than silently weakened.
+
+### Save/rescue boundaries rechecked
+
+The rescue regression now fills storage to exact capacity including the
+carrier's 2 stone + 1 wood. Delivery verifies exact final counts, unchanged
+total weight/capacity, empty carrier cargo, and no `wasted` item:
+
+```text
+/tmp/desert-rats-rescue-capacity/20261019T032849Z-tz1zsmj0/results.json
+import, rescue_return: passed
+```
+
+Cargo is already part of `current_weight()` while carried, so `unload_owned()`
+changes owner location rather than adding external loot. For B, there is an
+intentional availability limit: without a readable primary or same-run
+checkpoint, a legitimate standalone `.bak` cannot be distinguished from a
+foreign run and is refused. Relaxing that safeguard needs a product decision
+to accept cross-run-load risk.
+
+### Decision boundary and Notion evidence
+
+The adopted direction requires upgrades to create overall surplus rather than
+only move a bottleneck, but leaves numerical costs, materials, capacity and
+unlock conditions undecided ([adopted direction](https://app.notion.com/p/3f9ec2f2a3c181baaa0dd0e3363730aa?pvs=204)). The delivery/life-improvement
+page is a proposal and also leaves rewards, mission conditions and balance
+numbers undecided ([proposal](https://app.notion.com/p/3f8ec2f2a3c1817fbd31fa3c068f6bc3?pvs=204)).
+
+No balance number was changed. The approved targets remain: successful normal
+loops pay maintenance and profit; the first improvement should be a one-to-two
+sortie expectation. The former is met by paid repetition; the latter is not
+robust because seed 643 gets no required hide. Minimum product decision: either
+guarantee hide by sortie 1--2, or make the first improvement not depend on
+hide. The amount/drop placement or alternative recipe is a balance choice.

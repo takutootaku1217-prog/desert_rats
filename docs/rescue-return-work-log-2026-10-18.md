@@ -69,3 +69,17 @@
   beds, so no crew-count/bed-capacity product change was made.  Full details,
   commands, limitations and Claude handoff prompt are in
   `docs/stage3-validation-2026-10-18.md`.
+
+- Continued loop investigation (2026-10-19): added a full-capacity rescue
+  delivery regression (carrier cargo is included in owned weight before and
+  after transfer, with no overflow/waste) and extended the economy diagnostic
+  with production-reason traces plus optional paid delivery repetition.  The
+  1,400-second post-three-sortie run is now explicitly documented as no-income
+  city-idle observation, separate from 21 normal paid deliveries with real
+  meals and market-funded maintenance.  The apparent 641 five-worker crafting
+  delay is hide/material shortage (209.2 seconds), not processing throughput;
+  seed 643 lacks hide through the 240-second first-upgrade window for both
+  crew sizes.  Immediate 642/4 and 643/4 maintenance failures coincide with a
+  normal AI repair reservation, not a stuck worker.  No balance values,
+  crew/bed settings, or save policy were changed; the required product decision
+  for the 1--2 sortie target is documented in the stage3 validation record.
