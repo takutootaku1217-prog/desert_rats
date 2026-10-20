@@ -86,39 +86,42 @@ func _draw_large_vehicle_layers(off: Vector2) -> void:
 	## The interior stays authoritative for rooms/workers; this layer only supplies
 	## the exterior shell, running gear, garage, and roof weapons.
 	var state: Dictionary = base.vehicle_loadout
-	var frame_col := Color("b57a32") if state.chassis == "large" else Color("c18d3e")
-	var armor_col := Color("7d4228") if state.armor == "plate" else (Color("9a562b") if state.armor == "composite" else Color("a35f2f"))
-	var outline := Color("2a1b18")
-	var shadow := Color("593425")
-	var glow := Color("ffb34f")
+	var frame_col := Color("e4dccb") if state.chassis == "large" else Color("c7c2b8")
+	var armor_col := Color("30343c") if state.armor == "plate" else (Color("424750") if state.armor == "composite" else Color("252a32"))
+	var outline := Color("101217")
+	var shadow := Color("1b2028")
+	var glow := Color("35d8ff")
+	var stripe := Color("c93d35")
 	var origin := GameData.HULL_POS + off
-	var upper := Rect2(origin + Vector2(44, -114), Vector2(712, 184))
+	# Preserve three deck heights instead of compressing the fortress into a flat bus.
+	var upper := Rect2(origin + Vector2(32, -226), Vector2(744, 280))
 	# stepped roofline and riveted main shell
-	var hull := PackedVector2Array([upper.position + Vector2(0, 178), upper.position + Vector2(0, 32), upper.position + Vector2(56, 32), upper.position + Vector2(56, 4), upper.position + Vector2(420, 4), upper.position + Vector2(420, 22), upper.position + Vector2(622, 22), upper.position + Vector2(712, 64), upper.position + Vector2(712, 178)])
+	var hull := PackedVector2Array([upper.position + Vector2(0, 270), upper.position + Vector2(0, 78), upper.position + Vector2(58, 78), upper.position + Vector2(126, 20), upper.position + Vector2(452, 20), upper.position + Vector2(452, 4), upper.position + Vector2(628, 4), upper.position + Vector2(744, 72), upper.position + Vector2(744, 270)])
 	draw_colored_polygon(hull, outline)
-	var inner := PackedVector2Array([upper.position + Vector2(8, 170), upper.position + Vector2(8, 40), upper.position + Vector2(64, 40), upper.position + Vector2(64, 12), upper.position + Vector2(412, 12), upper.position + Vector2(412, 30), upper.position + Vector2(616, 30), upper.position + Vector2(704, 68), upper.position + Vector2(704, 170)])
+	var inner := PackedVector2Array([upper.position + Vector2(8, 262), upper.position + Vector2(8, 84), upper.position + Vector2(66, 84), upper.position + Vector2(132, 28), upper.position + Vector2(444, 28), upper.position + Vector2(444, 12), upper.position + Vector2(622, 12), upper.position + Vector2(736, 76), upper.position + Vector2(736, 262)])
 	draw_colored_polygon(inner, frame_col)
 	for floor in [0, 1, 2]:
-		var y: float = upper.position.y + 10 + floor * 56
-		draw_line(Vector2(upper.position.x + 10, y + 48), Vector2(upper.end.x - 10, y + 48), shadow, 5.0)
-		draw_line(Vector2(upper.position.x + 12, y + 45), Vector2(upper.end.x - 12, y + 45), Color("e0a24a"), 1.0)
+		var y: float = upper.position.y + 18 + floor * 82
+		draw_line(Vector2(upper.position.x + 10, y + 70), Vector2(upper.end.x - 10, y + 70), shadow, 6.0)
+		draw_line(Vector2(upper.position.x + 12, y + 66), Vector2(upper.end.x - 12, y + 66), Color("8d98a4"), 1.0)
 		for column in 6:
-			var panel := Rect2(Vector2(upper.position.x + 22 + column * 110, y + 10), Vector2(76, 31))
+			var panel := Rect2(Vector2(upper.position.x + 22 + column * 114, y + 10), Vector2(80, 48))
 			draw_rect(panel.grow(2), outline)
-			draw_rect(panel, armor_col.darkened(0.12 + 0.03 * ((column + floor) % 2)))
+			draw_rect(panel, frame_col if (column + floor) % 2 == 0 else armor_col)
+			draw_line(panel.position + Vector2(14, 4), panel.position + Vector2(48, 44), stripe, 7.0)
 			# Small, recessed armored slits only: exterior must not read as a lit interior.
 			if (floor == 0 and column == 1) or (floor == 1 and column == 4) or (floor == 2 and column == 2):
-				var slit := Rect2(panel.position + Vector2(16, 11), Vector2(38, 7))
+				var slit := Rect2(panel.position + Vector2(18, 18), Vector2(42, 8))
 				draw_rect(slit.grow(2), Color("1c1716"))
 				draw_rect(slit, glow.darkened(0.35))
 				for bolt_y in [panel.position.y + 5.0, panel.end.y - 5.0]:
 					draw_circle(Vector2(panel.position.x + 6, bolt_y), 2.0, Color("edb15d"))
 					draw_circle(Vector2(panel.end.x - 6, bolt_y), 2.0, Color("edb15d"))
 	# structural ribs, pipes and hanging lower garage frame
-	for x in [upper.position.x + 90.0, upper.position.x + 198.0, upper.position.x + 418.0, upper.position.x + 550.0, upper.position.x + 665.0]:
-		draw_line(Vector2(x, upper.position.y + 42), Vector2(x, upper.end.y - 10), shadow, 5.0)
-		draw_line(Vector2(x + 2, upper.position.y + 46), Vector2(x + 2, upper.end.y - 14), Color("e2a248"), 1.0)
-	var garage := Rect2(upper.position + Vector2(530, 116), Vector2(154, 54))
+	for x in [upper.position.x + 104.0, upper.position.x + 220.0, upper.position.x + 448.0, upper.position.x + 578.0, upper.position.x + 696.0]:
+		draw_line(Vector2(x, upper.position.y + 88), Vector2(x, upper.end.y - 12), shadow, 6.0)
+		draw_line(Vector2(x + 2, upper.position.y + 92), Vector2(x + 2, upper.end.y - 16), Color("9ba6af"), 1.0)
+	var garage := Rect2(upper.position + Vector2(544, 204), Vector2(166, 58))
 	draw_rect(garage.grow(4), outline)
 	draw_rect(garage, Color("402821"))
 	draw_rect(Rect2(garage.position + Vector2(12, 12), Vector2(102, 24)), Color("ab6030"))
@@ -126,12 +129,12 @@ func _draw_large_vehicle_layers(off: Vector2) -> void:
 	draw_circle(garage.position + Vector2(34, 39), 6, Color("8c8574"))
 	draw_circle(garage.position + Vector2(96, 39), 10, outline)
 	draw_circle(garage.position + Vector2(96, 39), 6, Color("8c8574"))
-	draw_line(upper.position + Vector2(28, 94), upper.position + Vector2(28, 156), Color("523126"), 8.0)
-	draw_line(upper.position + Vector2(28, 94), upper.position + Vector2(70, 94), Color("523126"), 8.0)
+	draw_line(upper.position + Vector2(26, 142), upper.position + Vector2(26, 248), Color("1b2028"), 10.0)
+	draw_line(upper.position + Vector2(26, 142), upper.position + Vector2(104, 82), Color("1b2028"), 10.0)
 	if state.armor != "none":
 		for floor in 3:
-			var left_plate := Rect2(Vector2(upper.position.x - 10, upper.position.y + floor * 56 + 12), Vector2(18, 38))
-			var right_plate := Rect2(Vector2(upper.end.x - 8, upper.position.y + floor * 56 + 18), Vector2(18, 34))
+			var left_plate := Rect2(Vector2(upper.position.x - 10, upper.position.y + floor * 82 + 24), Vector2(22, 52))
+			var right_plate := Rect2(Vector2(upper.end.x - 8, upper.position.y + floor * 82 + 24), Vector2(22, 52))
 			draw_rect(left_plate, outline)
 			draw_rect(left_plate.grow(-3), armor_col)
 			draw_rect(right_plate, outline)

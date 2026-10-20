@@ -99,3 +99,31 @@ cutaway. The existing garage and separate weapon mounts remain functional
 visual parts. Focused `import`, `manual_combat`, and `combat_orders` checks
 passed after this change; see
 `C:\\Users\\user\\AppData\\Local\\Temp\\vehicle-visual-armor\\20261020T144954Z-ddc3tmws\\results.json`.
+
+## Adopted art direction update (awaiting local pixels)
+
+The user selected the assault-mobile-fortress concept
+`libfile_b6707d88a96881918eec8f6e296af1d5`
+(`call_850ef205b8e74aafa63bb34cd927de4c.png`) as the new appearance target.
+Once its actual local pixels are available, the exterior should be redesigned
+as a side-view 2D interpretation of its giant main cannon, forward-projecting
+sloped heavy armor, stepped silhouette, white/black/red armor scheme, and
+small blue emissive details. The source is an angled concept image; it must
+not be pasted or perspective-squashed into the game. This supersedes ochre
+box-like exterior art as the finish target, but authorizes no uninspected art
+change. The current code prototype remains preserved pending a user-provided
+local PNG path.
+
+## User-provided reference confirmation
+
+The user supplied a local copy named `大型拠点` in Downloads. It was confirmed
+as a readable PNG and inspected at **1672 x 941 px**, RGB. The actual pixels
+show a factory-lit, angled assault fortress concept: four large wheels, a
+forward-projecting armored nose, stacked armor decks, oversized roof cannon,
+secondary roof weapons, off-white and charcoal armor, red diagonal markings,
+and sparse cyan-blue lights. The factory background, floor reflections, and
+flag are reference-only and are not game assets.
+
+The local reference copy is intentionally held outside this Godot project at
+`C:\\Users\\user\\Documents\\Codex\\2026-10-20\\task-4\\reference\\user_provided_assault_fortress.png`
+so it cannot be accidentally imported or displayed in-game.
