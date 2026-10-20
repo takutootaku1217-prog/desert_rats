@@ -70,3 +70,32 @@ install locations. The harness import check consequently recorded
 The required computer-use guidance resource also returned
 `skill environment is not available for this callback`; no native window
 automation or screenshot claim is made.
+
+## Verification update
+
+Existing harness evidence identified the installed Godot 4.7.2 console binary:
+`C:\\Users\\user\\Downloads\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe`.
+Using it, this isolated checkout passed the full selected core harness on
+2026-10-20; results are at
+`C:\\Users\\user\\AppData\\Local\\Temp\\vehicle-visual-core\\20261020T143651Z-uvvzt41x\\results.json`.
+It also completed a four-second headless scene startup using the validation
+user-data folder. This is compatibility evidence, not a visual screenshot.
+
+After the original JPEG failure, distinct transparent candidate exterior and
+interior assets were supplied by the parent task: exterior
+`libfile_e045a803a8208191b509967f59d3fa50`, interior
+`libfile_7ea6ffaee3588191b38ef5f59120ff4e`. Each was prepared through the
+official Library materialization route and each single download failed with
+`library file transfer failed: download failed`. They are not local and their
+pixels remain uninspected; the failed transfers are not being retried.
+
+## Exterior revision
+
+Following the later exterior-art direction, the code prototype now treats the
+large shell as thick armor: the former repeated warm windows are covered by
+large riveted armor panels, with only three small recessed amber armored
+vision slits. This prevents the exterior from reading as a bedroom/workshop
+cutaway. The existing garage and separate weapon mounts remain functional
+visual parts. Focused `import`, `manual_combat`, and `combat_orders` checks
+passed after this change; see
+`C:\\Users\\user\\AppData\\Local\\Temp\\vehicle-visual-armor\\20261020T144954Z-ddc3tmws\\results.json`.

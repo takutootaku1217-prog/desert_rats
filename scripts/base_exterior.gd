@@ -103,13 +103,17 @@ func _draw_large_vehicle_layers(off: Vector2) -> void:
 		draw_line(Vector2(upper.position.x + 10, y + 48), Vector2(upper.end.x - 10, y + 48), shadow, 5.0)
 		draw_line(Vector2(upper.position.x + 12, y + 45), Vector2(upper.end.x - 12, y + 45), Color("e0a24a"), 1.0)
 		for column in 6:
-			var window := Rect2(Vector2(upper.position.x + 22 + column * 110, y + 13), Vector2(58, 21))
-			draw_rect(window.grow(2), outline)
-			draw_rect(window, Color("6c3a24"))
-			draw_rect(window.grow(-4), glow if (column + floor) % 2 == 0 else Color("d96a2e"))
-			for bolt_y in [window.position.y - 4.0, window.end.y + 2.0]:
-				draw_circle(Vector2(window.position.x - 4, bolt_y), 2.0, Color("edb15d"))
-				draw_circle(Vector2(window.end.x + 4, bolt_y), 2.0, Color("edb15d"))
+			var panel := Rect2(Vector2(upper.position.x + 22 + column * 110, y + 10), Vector2(76, 31))
+			draw_rect(panel.grow(2), outline)
+			draw_rect(panel, armor_col.darkened(0.12 + 0.03 * ((column + floor) % 2)))
+			# Small, recessed armored slits only: exterior must not read as a lit interior.
+			if (floor == 0 and column == 1) or (floor == 1 and column == 4) or (floor == 2 and column == 2):
+				var slit := Rect2(panel.position + Vector2(16, 11), Vector2(38, 7))
+				draw_rect(slit.grow(2), Color("1c1716"))
+				draw_rect(slit, glow.darkened(0.35))
+				for bolt_y in [panel.position.y + 5.0, panel.end.y - 5.0]:
+					draw_circle(Vector2(panel.position.x + 6, bolt_y), 2.0, Color("edb15d"))
+					draw_circle(Vector2(panel.end.x - 6, bolt_y), 2.0, Color("edb15d"))
 	# structural ribs, pipes and hanging lower garage frame
 	for x in [upper.position.x + 90.0, upper.position.x + 198.0, upper.position.x + 418.0, upper.position.x + 550.0, upper.position.x + 665.0]:
 		draw_line(Vector2(x, upper.position.y + 42), Vector2(x, upper.end.y - 10), shadow, 5.0)
