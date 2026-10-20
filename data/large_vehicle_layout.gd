@@ -12,6 +12,11 @@ const UPPER_LADDER_X := 636.0
 const RAMP_TOP := Vector2(904, 462)
 const RAMP_FOOT := Vector2(992, 548)
 const ROOF_TURRET_MOUNT := Vector2(286, 86)
+const RASTER_HULL := "res://assets/fortress_source/fortress-hull.png"
+const RASTER_INTERIOR := "res://assets/fortress_source/fortress-interior.png"
+const RASTER_MAIN_GUN := "res://assets/fortress_source/fortress-main-gun.png"
+const RASTER_SUB_TURRET := "res://assets/fortress_source/fortress-sub-turret.png"
+const RASTER_WHEEL := "res://assets/fortress_source/fortress-wheel.png"
 
 ## The lower and middle decks retain the live room/facility slots.  The top
 ## deck is a real walkable prototype deck with its own targets; it deliberately
@@ -28,3 +33,9 @@ static func deck_y(floor_i: int) -> float:
 
 static func top_room_anchor(index: int) -> Vector2:
 	return TOP_DECK_ROOMS[clampi(index, 0, TOP_DECK_ROOMS.size() - 1)]["anchor"]
+
+
+static func raster_assets_available() -> bool:
+	return FileAccess.file_exists(RASTER_HULL) and FileAccess.file_exists(RASTER_INTERIOR) \
+		and FileAccess.file_exists(RASTER_MAIN_GUN) and FileAccess.file_exists(RASTER_SUB_TURRET) \
+		and FileAccess.file_exists(RASTER_WHEEL)

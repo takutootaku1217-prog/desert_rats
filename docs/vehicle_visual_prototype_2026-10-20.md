@@ -185,3 +185,32 @@ parts rather than a flattened perspective image:
 The factory background, text/UI, and angled reference perspective are excluded
 from every game asset. Native window capture remains unverified because the
 computer-use guidance callback is unavailable in this environment.
+
+## Local raster integration update
+
+The user later saved all five generated RGBA PNGs locally. They were copied
+without renaming the Downloads originals into this isolated checkout only and
+their actual pixels were inspected before use:
+
+| asset | supplied pixels | game display / alignment |
+| --- | --- | --- |
+| `fortress-hull.png` | 1927 x 816 | intact RGBA, drawn into `x=-80..912`, `y=106..506` |
+| `fortress-interior.png` | 1974 x 797 | intact RGBA cutaway, drawn into the same hull rectangle behind live workers/facilities |
+| `fortress-main-gun.png` | 2172 x 724 | intact RGBA, `560 x 187` display; right-biased mount pivot `(432,161)` lands at `(390,132)` |
+| `fortress-sub-turret.png` | 1659 x 948 | intact RGBA, three independent `166 x 95` instances with pivots `(112,76)` |
+| `fortress-wheel.png` | 1254 x 1254 | intact RGBA, five independent rotating `112 x 112` instances at the existing five wheel centers |
+
+The exterior source contains three large fender openings while the existing
+prototype deliberately retains five functional wheel centers. Wheels are drawn
+behind the hull, so its fenders cover their upper arcs; no source image was
+cut, repainted, or flattened to hide the difference. The interior source is an
+empty three-deck background: existing lower/middle facilities and real Workers
+remain live overlays. The third deck remains walkable only and does not gain a
+facility/save slot or production behavior.
+
+Godot 4.7.2 imported all five PNGs and `tools/test_vehicle_prototype.gd`
+passed with the large chassis: exact raster dimensions are readable, exterior
+and interior switching works, cannon damage/ammunition works, and existing
+crew combat still uses the normal path. This is headless functional evidence;
+the computer-use guidance callback was retried after new evidence but remained
+unavailable, so no native-window screenshot is claimed.

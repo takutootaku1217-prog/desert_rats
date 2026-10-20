@@ -462,6 +462,10 @@ func _process(delta: float) -> void:
 ## 6つの区画の部屋の絵を、車体（初期配置の部屋が焼き込まれた hull.png）の上に重ねて描く。
 ## 部屋を変えるとここが変わる（重ね絵は assets/base/rooms/<系統>/。初期配置と同じ部屋でも同じ絵を重ねるので継ぎ目は出ない）。
 func _draw_rooms(off: Vector2) -> void:
+	if GameData.large_three_deck_enabled and LargeVehicleLayout.raster_assets_available():
+		# The supplied cutaway already contains the aligned three-deck shell.
+		# Facilities and real Workers are drawn afterwards, not baked into it.
+		return
 	var now := Time.get_ticks_msec()
 	for slot in Rooms.SLOT_ORDER:
 		var rtype: String = game.room_layout.get(slot, "empty")
@@ -532,16 +536,23 @@ func _draw() -> void:
 	var shake := _shake
 	var bob := 0.0                                  # 内装は跳ねない。外装の車体の跳ねは body_bob（BaseExterior が使う）
 	# 車輪（どちらの画面でも同じ。外装の車体は、この上に重ねて描かれる）
-	var wheels := GameData.tex("res://assets/base/wheels.png")
+	var use_fortress_raster := is_large_three_deck() and LargeVehicleLayout.raster_assets_available()
+	var wheels := GameData.tex(LargeVehicleLayout.RASTER_WHEEL if use_fortress_raster else "res://assets/base/wheels.png")
 	var wspec := ArtSpec.WHEELS
 	var wsize := ArtSpec.px_size(wspec["cell"])                     # 画面上の大きさ（絵の細かさに依存しない）
 	var f := int(_wheel_t) % int(wspec["frames"])
 	for wx in WHEEL_X:
-		draw_texture_rect_region(wheels, Rect2(Vector2(wx, WHEEL_Y + bob) - wsize / 2.0, wsize), ArtSpec.frame_src(wheels, wspec, f))
+		if use_fortress_raster:
+			draw_set_transform(Vector2(wx, WHEEL_Y + bob), _wheel_t, Vector2.ONE)
+			draw_texture_rect(wheels, Rect2(-wsize / 2.0, wsize), false)
+			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+		else:
+			draw_texture_rect_region(wheels, Rect2(Vector2(wx, WHEEL_Y + bob) - wsize / 2.0, wsize), ArtSpec.frame_src(wheels, wspec, f))
 	if not view_exterior:
 		# 内装: 横から見た断面（車体・部屋・斜路・設備・燃料計）。屋根の上の物は、子の BaseExterior が重ねて描く
-		var hull := GameData.tex("res://assets/base/hull.png")
-		draw_texture_rect(hull, Rect2(GameData.HULL_POS + shake + Vector2(0, bob), ArtSpec.px_size(ArtSpec.HULL)), false)
+		var hull := GameData.tex(LargeVehicleLayout.RASTER_INTERIOR if use_fortress_raster else "res://assets/base/hull.png")
+		var hull_rect := Rect2(LargeVehicleLayout.HULL_RECT.position + shake + Vector2(0, bob), LargeVehicleLayout.HULL_RECT.size) if use_fortress_raster else Rect2(GameData.HULL_POS + shake + Vector2(0, bob), ArtSpec.px_size(ArtSpec.HULL))
+		draw_texture_rect(hull, hull_rect, false)
 		_draw_rooms(shake + Vector2(0, bob))
 		# 斜路
 		var ramp := GameData.tex("res://assets/base/ramp.png")

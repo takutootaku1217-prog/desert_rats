@@ -31,13 +31,18 @@ func _draw() -> void:
 	if base == null or base.game == null:
 		return
 	var off: Vector2 = base.body_offset()
+	var large := str(base.vehicle_loadout.get("chassis", "medium")) != "medium"
+	var raster := large and LargeVehicleLayout.raster_assets_available()
 	if base.view_exterior:
-		_draw_glass(off)
-		draw_texture_rect(ExteriorDB.body_tex(), Rect2(GameData.HULL_POS + off, ArtSpec.px_size(ArtSpec.HULL)), false)
-		if str(base.vehicle_loadout.get("chassis", "medium")) != "medium":
+		if not raster:
+			_draw_glass(off)
+			draw_texture_rect(ExteriorDB.body_tex(), Rect2(GameData.HULL_POS + off, ArtSpec.px_size(ArtSpec.HULL)), false)
+		if large:
 			_draw_large_vehicle_layers(off)
-		_draw_parts(["wall", "armor"], off)
-	_draw_parts(["roof"], off)
+		if not raster:
+			_draw_parts(["wall", "armor"], off)
+	if not raster:
+		_draw_parts(["roof"], off)
 	if base.view_exterior:
 		draw_texture_rect(GameData.tex(ExteriorDB.RAMP_SHEET), Rect2(ExteriorDB.RAMP_POS, ArtSpec.px_size(ArtSpec.RAMP)), false)   # 斜路は車体に付いているので揺れない
 
@@ -86,6 +91,9 @@ func _draw_large_vehicle_layers(off: Vector2) -> void:
 	## The interior stays authoritative for rooms/workers; this layer only supplies
 	## the exterior shell, running gear, garage, and roof weapons.
 	var state: Dictionary = base.vehicle_loadout
+	if LargeVehicleLayout.raster_assets_available():
+		_draw_large_vehicle_rasters(off, state)
+		return
 	var frame_col := Color("e4dccb") if state.chassis == "large" else Color("c7c2b8")
 	var armor_col := Color("30343c") if state.armor == "plate" else (Color("424750") if state.armor == "composite" else Color("252a32"))
 	var outline := Color("101217")
@@ -156,3 +164,21 @@ func _draw_large_vehicle_layers(off: Vector2) -> void:
 			draw_circle(mount2 + Vector2(15, 14), 12, Color("71432a"))
 			draw_rect(Rect2(mount2 + Vector2(22, 4), Vector2(60, 5)), Color("e1af55"))
 			draw_rect(Rect2(mount2 + Vector2(22, 13), Vector2(60, 5)), Color("e1af55"))
+
+
+func _draw_large_vehicle_rasters(off: Vector2, state: Dictionary) -> void:
+	# Keep the supplied RGBA assets intact. Alignment uses Godot display rects and
+	# pivots only; this code does not crop, flatten, or edit their pixels.
+	draw_texture_rect(GameData.tex(LargeVehicleLayout.RASTER_HULL), Rect2(LargeVehicleLayout.HULL_RECT.position + off, LargeVehicleLayout.HULL_RECT.size), false)
+	if state.primary != "none":
+		# The generated main gun has a right-biased mount and a long left-facing barrel.
+		var main_size := Vector2(560, 187)
+		var main_pivot := Vector2(432, 161)
+		var recoil := Vector2(sin(_t * 11.0) * 2.0, 0.0) if int(state.get("ammo", 0)) > 0 else Vector2.ZERO
+		var mount := Vector2(390, 132) + off
+		draw_texture_rect(GameData.tex(LargeVehicleLayout.RASTER_MAIN_GUN), Rect2(mount - main_pivot + recoil, main_size), false)
+	if state.secondary != "none":
+		var sub_size := Vector2(166, 95)
+		var sub_pivot := Vector2(112, 76)
+		for mount in [Vector2(144, 134), Vector2(550, 126), Vector2(792, 142)]:
+			draw_texture_rect(GameData.tex(LargeVehicleLayout.RASTER_SUB_TURRET), Rect2(mount + off - sub_pivot, sub_size), false)
