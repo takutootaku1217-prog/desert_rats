@@ -434,6 +434,11 @@ func _until_idle() -> void:
 func _test_bob() -> void:
 	print("-- 外装の走行（車体が段差で跳ねる。内装は跳ねない）")
 	await _fresh(false, true)
+	# This fixture verifies free road running, not the world-map stop state.
+	# WorldTrip now starts active and stopped, which correctly limits speed to
+	# zero until a route is selected; turn it off only for this visual fixture.
+	main.world.active = false
+	main.target_speed = 60.0
 	Engine.time_scale = 12.0
 	var seen_bob := false
 	var interior_bob := false
@@ -464,6 +469,9 @@ func _test_bob() -> void:
 func _test_soak() -> void:
 	print("-- 通し（外装・内装を切り替え続けながら、建設・部屋の変更・回収・加工。10分・12倍速）")
 	await _fresh(false, true)
+	# This is the legacy free-road soak.  Do not let the newer world map's
+	# default stopped state replace road movement with a route-selection test.
+	main.world.active = false
 	Engine.time_scale = 12.0
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 20260928
