@@ -82,32 +82,68 @@ func _draw_parts(layers: Array, off: Vector2) -> void:
 
 
 func _draw_large_vehicle_layers(off: Vector2) -> void:
-	## Deliberately code-drawn for this prototype: the stacked silhouette makes the
-	## large chassis readable without replacing the existing interior artwork.
+	## Large chassis remains composed from independently readable exterior parts.
+	## The interior stays authoritative for rooms/workers; this layer only supplies
+	## the exterior shell, running gear, garage, and roof weapons.
 	var state: Dictionary = base.vehicle_loadout
-	var frame_col := Color("5d625d") if state.chassis == "large" else Color("778176")
-	var armor_col := Color("596876") if state.armor == "plate" else (Color("7d8b74") if state.armor == "composite" else frame_col)
+	var frame_col := Color("b57a32") if state.chassis == "large" else Color("c18d3e")
+	var armor_col := Color("7d4228") if state.armor == "plate" else (Color("9a562b") if state.armor == "composite" else Color("a35f2f"))
+	var outline := Color("2a1b18")
+	var shadow := Color("593425")
+	var glow := Color("ffb34f")
 	var origin := GameData.HULL_POS + off
-	var upper := Rect2(origin + Vector2(44, -108), Vector2(712, 178))
-	draw_rect(upper, Color("1d252b"))
-	draw_rect(upper.grow(-4), frame_col)
+	var upper := Rect2(origin + Vector2(44, -114), Vector2(712, 184))
+	# stepped roofline and riveted main shell
+	var hull := PackedVector2Array([upper.position + Vector2(0, 178), upper.position + Vector2(0, 32), upper.position + Vector2(56, 32), upper.position + Vector2(56, 4), upper.position + Vector2(420, 4), upper.position + Vector2(420, 22), upper.position + Vector2(622, 22), upper.position + Vector2(712, 64), upper.position + Vector2(712, 178)])
+	draw_colored_polygon(hull, outline)
+	var inner := PackedVector2Array([upper.position + Vector2(8, 170), upper.position + Vector2(8, 40), upper.position + Vector2(64, 40), upper.position + Vector2(64, 12), upper.position + Vector2(412, 12), upper.position + Vector2(412, 30), upper.position + Vector2(616, 30), upper.position + Vector2(704, 68), upper.position + Vector2(704, 170)])
+	draw_colored_polygon(inner, frame_col)
 	for floor in [0, 1, 2]:
-		var y: float = upper.position.y + 8 + floor * 56
-		draw_line(Vector2(upper.position.x + 8, y + 48), Vector2(upper.end.x - 8, y + 48), Color("20252a"), 4.0)
+		var y: float = upper.position.y + 10 + floor * 56
+		draw_line(Vector2(upper.position.x + 10, y + 48), Vector2(upper.end.x - 10, y + 48), shadow, 5.0)
+		draw_line(Vector2(upper.position.x + 12, y + 45), Vector2(upper.end.x - 12, y + 45), Color("e0a24a"), 1.0)
 		for column in 6:
-			var window := Rect2(Vector2(upper.position.x + 18 + column * 112, y + 12), Vector2(66, 24))
-			draw_rect(window, Color("6b9aab"))
-			draw_rect(window.grow(-4), Color("31515e"))
+			var window := Rect2(Vector2(upper.position.x + 22 + column * 110, y + 13), Vector2(58, 21))
+			draw_rect(window.grow(2), outline)
+			draw_rect(window, Color("6c3a24"))
+			draw_rect(window.grow(-4), glow if (column + floor) % 2 == 0 else Color("d96a2e"))
+			for bolt_y in [window.position.y - 4.0, window.end.y + 2.0]:
+				draw_circle(Vector2(window.position.x - 4, bolt_y), 2.0, Color("edb15d"))
+				draw_circle(Vector2(window.end.x + 4, bolt_y), 2.0, Color("edb15d"))
+	# structural ribs, pipes and hanging lower garage frame
+	for x in [upper.position.x + 90.0, upper.position.x + 198.0, upper.position.x + 418.0, upper.position.x + 550.0, upper.position.x + 665.0]:
+		draw_line(Vector2(x, upper.position.y + 42), Vector2(x, upper.end.y - 10), shadow, 5.0)
+		draw_line(Vector2(x + 2, upper.position.y + 46), Vector2(x + 2, upper.end.y - 14), Color("e2a248"), 1.0)
+	var garage := Rect2(upper.position + Vector2(530, 116), Vector2(154, 54))
+	draw_rect(garage.grow(4), outline)
+	draw_rect(garage, Color("402821"))
+	draw_rect(Rect2(garage.position + Vector2(12, 12), Vector2(102, 24)), Color("ab6030"))
+	draw_circle(garage.position + Vector2(34, 39), 10, outline)
+	draw_circle(garage.position + Vector2(34, 39), 6, Color("8c8574"))
+	draw_circle(garage.position + Vector2(96, 39), 10, outline)
+	draw_circle(garage.position + Vector2(96, 39), 6, Color("8c8574"))
+	draw_line(upper.position + Vector2(28, 94), upper.position + Vector2(28, 156), Color("523126"), 8.0)
+	draw_line(upper.position + Vector2(28, 94), upper.position + Vector2(70, 94), Color("523126"), 8.0)
 	if state.armor != "none":
 		for floor in 3:
-			draw_rect(Rect2(Vector2(upper.position.x - 8, upper.position.y + floor * 56), Vector2(12, 50)), armor_col)
-			draw_rect(Rect2(Vector2(upper.end.x - 4, upper.position.y + floor * 56), Vector2(12, 50)), armor_col)
+			var left_plate := Rect2(Vector2(upper.position.x - 10, upper.position.y + floor * 56 + 12), Vector2(18, 38))
+			var right_plate := Rect2(Vector2(upper.end.x - 8, upper.position.y + floor * 56 + 18), Vector2(18, 34))
+			draw_rect(left_plate, outline)
+			draw_rect(left_plate.grow(-3), armor_col)
+			draw_rect(right_plate, outline)
+			draw_rect(right_plate.grow(-3), armor_col)
 	if state.primary != "none":
-		var mount := Vector2(upper.position.x + 420, upper.position.y - 18)
-		draw_rect(Rect2(mount, Vector2(74, 22)), Color("333b3b"))
-		draw_rect(Rect2(mount + Vector2(48, 6), Vector2(118, 10)), Color("9c9b84"))
+		var mount := Vector2(upper.position.x + 426, upper.position.y - 18)
+		draw_circle(mount + Vector2(28, 18), 27, outline)
+		draw_circle(mount + Vector2(28, 18), 21, Color("7c4a2c"))
+		var recoil := sin(_t * 11.0) * 2.0 if int(state.get("ammo", 0)) > 0 else 0.0
+		draw_rect(Rect2(mount + Vector2(40 - recoil, 11), Vector2(142, 14)), outline)
+		draw_rect(Rect2(mount + Vector2(44 - recoil, 14), Vector2(138, 8)), Color("d7a64d"))
+		draw_circle(mount + Vector2(20, 17), 5, Color("f6c263"))
 	if state.secondary != "none":
-		var mount2 := Vector2(upper.position.x + 160, upper.position.y - 12)
-		draw_rect(Rect2(mount2, Vector2(36, 18)), Color("30383a"))
-		draw_rect(Rect2(mount2 + Vector2(26, 4), Vector2(56, 5)), Color("b8aa7a"))
-		draw_rect(Rect2(mount2 + Vector2(26, 11), Vector2(56, 5)), Color("b8aa7a"))
+		for x in [140.0, 270.0, 610.0]:
+			var mount2 := Vector2(upper.position.x + x, upper.position.y - 12)
+			draw_circle(mount2 + Vector2(15, 14), 17, outline)
+			draw_circle(mount2 + Vector2(15, 14), 12, Color("71432a"))
+			draw_rect(Rect2(mount2 + Vector2(22, 4), Vector2(60, 5)), Color("e1af55"))
+			draw_rect(Rect2(mount2 + Vector2(22, 13), Vector2(60, 5)), Color("e1af55"))
