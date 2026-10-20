@@ -12,6 +12,34 @@ func frames(n := 8) -> void:
 	for i in n:
 		await process_frame
 
+
+func find_first(node: Node, kind) -> Control:
+	for child in node.get_children():
+		if is_instance_of(child, kind):
+			return child
+		var found := find_first(child, kind)
+		if found != null:
+			return found
+	return null
+
+
+func find_button_text(node: Node, text_: String) -> Button:
+	for child in node.get_children():
+		if child is Button and child.text == text_:
+			return child
+		var found := find_button_text(child, text_)
+		if found != null:
+			return found
+	return null
+
+
+func press_key(code: int) -> void:
+	var event := InputEventKey.new()
+	event.keycode = code
+	event.pressed = true
+	root.push_input(event, true)
+	await process_frame
+
 func _initialize() -> void:
 	main = load("res://scenes/main.tscn").instantiate()
 	root.add_child(main)
@@ -40,12 +68,39 @@ func _initialize() -> void:
 	var armored: float = 100.0 - float(base.parts[GameData.Part.HULL])
 	check(unarmored > armored and is_equal_approx(armored, 0.0), "armor reduces actual incoming hull damage")
 	main.equip_vehicle_part("primary", "cannon")
-	base.set_view_exterior(true)
+	# The vehicle panel must remain usable on a narrow window: fixed close action,
+	# vertical scroll, wrapping action flow, and Esc all use real input paths.
+	var old_window_size := DisplayServer.window_get_size()
+	DisplayServer.window_set_size(Vector2i(640, 360))
 	await frames()
-	check(base.view_exterior, "raster fortress switches to the exterior view")
-	base.set_view_exterior(false)
+	var vehicle_ui = main.vehicle_ui
+	vehicle_ui.open()
 	await frames()
-	check(not base.view_exterior, "raster fortress returns to the interior cutaway")
+	var panel: PanelContainer = find_first(vehicle_ui._overlay, PanelContainer)
+	var scroll: ScrollContainer = find_first(vehicle_ui._overlay, ScrollContainer)
+	var viewport: Rect2 = root.get_visible_rect()
+	check(vehicle_ui.is_open() and panel != null and panel.get_global_rect().position.x >= 0.0 and panel.get_global_rect().end.x <= viewport.end.x + 1.0 and panel.get_global_rect().end.y <= viewport.end.y + 1.0, "vehicle panel stays inside the current viewport")
+	check(scroll != null and scroll.horizontal_scroll_mode == ScrollContainer.SCROLL_MODE_DISABLED and scroll.get_child(0).size.x <= scroll.size.x + 1.0, "vehicle rows fit the vertical scroll width")
+	check(find_button_text(vehicle_ui._overlay, "戦闘フルスペック試作") != null, "combat preset uses the readable Japanese label")
+	main.apply_vehicle_combat_preset()
+	check(str(base.vehicle_loadout.chassis) == "reinforced_large" and vehicle_ui.is_open(), "combat preset applies while the panel is open")
+	vehicle_ui.close()
+	check(not vehicle_ui.is_open(), "vehicle panel closes")
+	vehicle_ui.open()
+	await press_key(KEY_ESCAPE)
+	check(not vehicle_ui.is_open(), "Escape closes the reopened vehicle panel")
+	DisplayServer.window_set_size(old_window_size)
+	await frames()
+	# The walkthrough itself was exercised by the preset.  Cancel it before the
+	# independent crew-combat regression below so its target selection is tested.
+	for worker in main.workers:
+		worker.prototype_walk_target = null
+	await press_key(KEY_O)
+	await frames(20) # The view cross-fades before applying the exterior renderer.
+	check(base.view_exterior, "O switches the raster fortress to the exterior view")
+	await press_key(KEY_I)
+	await frames(20)
+	check(not base.view_exterior, "I returns the raster fortress to the interior cutaway")
 	main.spawn_vehicle_test_enemy()
 	await frames()
 	var enemy = main.enemies_root.get_child(0)

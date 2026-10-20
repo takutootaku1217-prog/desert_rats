@@ -29,7 +29,10 @@ func _refresh(m: int) -> void:
 	UIKit.style(_b_int, m == BaseView.Mode.INTERIOR)
 
 
-func _unhandled_input(event: InputEvent) -> void:
+func _input(event: InputEvent) -> void:
+	# Keep these view shortcuts available after a modal button has held keyboard
+	# focus.  The customization panel can be closed with Esc/V, then O/I must
+	# still immediately return to the exterior/interior without relying on focus.
 	if event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode == KEY_O:
 			game.base_view.set_mode(BaseView.Mode.EXTERIOR)

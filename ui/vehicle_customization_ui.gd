@@ -22,15 +22,31 @@ func _ready() -> void:
 	shade.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_overlay.add_child(shade)
 	var panel := PanelContainer.new()
-	panel.position = Vector2(90, 24)
-	panel.custom_minimum_size = Vector2(1100, 672)
+	panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	panel.offset_left = 12
+	panel.offset_top = 12
+	panel.offset_right = -12
+	panel.offset_bottom = -12
 	panel.add_theme_stylebox_override("panel", UIKit.box(Color("202630"), Color("dca85f"), 3, 12))
 	_overlay.add_child(panel)
+	# This control is outside the scroll content, so it remains reachable on
+	# a narrow or high-DPI game window.
+	var pinned_close := UIKit.button("閉じる (V / Esc)", close)
+	pinned_close.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	pinned_close.offset_left = -188
+	pinned_close.offset_top = 20
+	pinned_close.offset_right = -20
+	pinned_close.offset_bottom = 64
+	pinned_close.custom_minimum_size = Vector2(168, 44)
+	pinned_close.z_index = 2
+	_overlay.add_child(pinned_close)
 	var scroll := ScrollContainer.new()
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	panel.add_child(scroll)
 	var box := VBoxContainer.new()
-	box.custom_minimum_size = Vector2(1060, 0)
+	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	box.add_theme_constant_override("separation", 10)
 	scroll.add_child(box)
 	var top := HBoxContainer.new()
@@ -43,7 +59,7 @@ func _ready() -> void:
 	top.add_child(close_button)
 	var description := UIKit.lbl("大型シャーシ（縦増築3層の試作表示）。武装・装甲の数値と重量は仮データです。部屋・設備そのものは積載に含めません。", 15, UIKit.C_DIM)
 	description.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	description.custom_minimum_size.x = 980
+	description.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	box.add_child(description)
 	var prototype_note := UIKit.lbl("戦闘フルスペック試作: 重量は表示・比較するが、制限なしで装備・行動できます。", 14, Color("b9f3b9"))
 	box.add_child(prototype_note)
@@ -53,7 +69,7 @@ func _ready() -> void:
 	box.add_child(_stats)
 	for slot in ["chassis", "drive", "power", "armor", "primary", "secondary"]:
 		_add_slot(box, slot)
-	var actions := HBoxContainer.new()
+	var actions := HFlowContainer.new()
 	actions.add_theme_constant_override("separation", 12)
 	box.add_child(actions)
 	var primary := UIKit.button("主砲を撃つ", func(): game.fire_vehicle_weapon("primary"))
@@ -68,16 +84,16 @@ func _ready() -> void:
 	var ammo := UIKit.button("試験弾薬 +6", game.refill_vehicle_ammo)
 	ammo.custom_minimum_size = Vector2(165, 46)
 	actions.add_child(ammo)
-	var preset := UIKit.button("�����t���X�y�b�N����", game.apply_vehicle_combat_preset)
+	var preset := UIKit.button("戦闘フルスペック試作", game.apply_vehicle_combat_preset)
 	preset.custom_minimum_size = Vector2(230, 46)
 	actions.add_child(preset)
 	_result = UIKit.lbl("", 16, Color("b9f3b9"))
 	_result.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_result.custom_minimum_size.x = 980
+	_result.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	box.add_child(_result)
 	var future := UIKit.lbl("今回未実装：作業・支援装置の改造、車内部屋の建設／撤去の両入口。既存の部屋・設備は保持し、重量は0として扱います。", 13, UIKit.C_DIM)
 	future.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	future.custom_minimum_size.x = 980
+	future.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	box.add_child(future)
 	_overlay.hide()
 
@@ -85,11 +101,12 @@ func _add_slot(parent: Control, slot: String) -> void:
 	var panel := PanelContainer.new()
 	panel.add_theme_stylebox_override("panel", UIKit.box(Color("151a22"), Color("4d5c70"), 2, 6))
 	parent.add_child(panel)
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 8)
+	var row := VBoxContainer.new()
+	row.add_theme_constant_override("separation", 6)
 	panel.add_child(row)
 	var label := UIKit.lbl("", 16)
-	label.custom_minimum_size = Vector2(410, 76)
+	label.custom_minimum_size = Vector2(0, 42)
+	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	row.add_child(label)
 	var choices := VBoxContainer.new()
@@ -136,6 +153,9 @@ func refresh() -> void:
 			else:
 				text += "　速度 %+d / 燃料 %.2f倍" % [int(candidate.get("speed_bonus", 0)), float(candidate.get("fuel_mult", 1.0))]
 			var button := UIKit.button(text, func(): game.equip_vehicle_part(slot, candidate.id))
+			button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			button.custom_minimum_size = Vector2(0, 44)
+			button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			button.disabled = current == candidate.id
 			button.tooltip_text = candidate.desc + "\n試作段階では素材は表示のみで消費しません。"
 			row.choices.add_child(button)

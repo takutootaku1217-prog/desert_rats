@@ -1456,6 +1456,7 @@ func apply_vehicle_combat_preset() -> void:
 	base.vehicle_loadout.last_note = "�����t���X�y�b�N�𑕔��"
 	base.queue_redraw()
 	if vehicle_ui != null:
+		base.vehicle_loadout.last_note = "戦闘フルスペック試作を適用しました。"
 		vehicle_ui.refresh()
 
 
