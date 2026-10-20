@@ -153,7 +153,7 @@ func _draw_large_vehicle_layers(off: Vector2) -> void:
 		var mount := LargeVehicleLayout.ROOF_TURRET_MOUNT + off
 		draw_circle(mount + Vector2(28, 18), 27, outline)
 		draw_circle(mount + Vector2(28, 18), 21, Color("7c4a2c"))
-		var recoil := sin(_t * 11.0) * 2.0 if int(state.get("ammo", 0)) > 0 else 0.0
+		var recoil: float = base.vehicle_weapon_recoil("primary")
 		draw_rect(Rect2(mount + Vector2(40 - recoil, 11), Vector2(142, 14)), outline)
 		draw_rect(Rect2(mount + Vector2(44 - recoil, 14), Vector2(138, 8)), Color("d7a64d"))
 		draw_circle(mount + Vector2(20, 17), 5, Color("f6c263"))
@@ -174,11 +174,28 @@ func _draw_large_vehicle_rasters(off: Vector2, state: Dictionary) -> void:
 		# The generated main gun has a right-biased mount and a long left-facing barrel.
 		var main_size := Vector2(560, 187)
 		var main_pivot := Vector2(432, 161)
-		var recoil := Vector2(sin(_t * 11.0) * 2.0, 0.0) if int(state.get("ammo", 0)) > 0 else Vector2.ZERO
+		var recoil := Vector2(base.vehicle_weapon_recoil("primary"), 0.0)
 		var mount := Vector2(390, 132) + off
 		draw_texture_rect(GameData.tex(LargeVehicleLayout.RASTER_MAIN_GUN), Rect2(mount - main_pivot + recoil, main_size), false)
+		if base.vehicle_weapon_flash("primary") > 0.0:
+			_draw_main_muzzle_flash(Vector2(-36, 48) + off, base.vehicle_weapon_flash("primary"))
 	if state.secondary != "none":
 		var sub_size := Vector2(166, 95)
 		var sub_pivot := Vector2(112, 76)
 		for mount in [Vector2(144, 134), Vector2(550, 126), Vector2(792, 142)]:
 			draw_texture_rect(GameData.tex(LargeVehicleLayout.RASTER_SUB_TURRET), Rect2(mount + off - sub_pivot, sub_size), false)
+
+
+func _draw_main_muzzle_flash(muzzle: Vector2, timer: float) -> void:
+	# Source-pixel inspection places the left-facing barrel muzzle at this world
+	# position under the existing raster pivot.  A tiny two-tone flash keeps the
+	# source art intact and is visible only for a resolved primary shot.
+	var k := clampf(timer / 0.18, 0.0, 1.0)
+	var outer := PackedVector2Array([
+		muzzle + Vector2(-30.0 - 10.0 * k, 0),
+		muzzle + Vector2(-6.0, -12.0),
+		muzzle + Vector2(8.0, 0),
+		muzzle + Vector2(-6.0, 12.0),
+	])
+	draw_colored_polygon(outer, Color(1.0, 0.46, 0.10, 0.82 * k))
+	draw_circle(muzzle + Vector2(-8, 0), 7.0, Color(1.0, 0.92, 0.62, k))

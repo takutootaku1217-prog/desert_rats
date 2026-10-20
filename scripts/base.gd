@@ -42,6 +42,8 @@ var _wheel_t := 0.0
 var _puffs: Array = []                   # 煙・砂ぼこり
 var _puff_timer := 0.0
 var _dust_timer := 0.0
+var _primary_fire_fx := 0.0
+var _secondary_fire_fx := 0.0
 
 const WHEEL_X := [40.0, 296.0, 424.0, 664.0, 792.0]
 const WHEEL_Y := 506.0
@@ -76,6 +78,32 @@ func set_view_exterior(on: bool) -> void:
 ## 車体の揺れ（被弾・走行中の小さな跳ね）。外装の描画と共通。
 func body_offset() -> Vector2:
 	return _shake + Vector2(0.0, body_bob)
+
+
+## Presentation-only feedback for successful large-fortress weapon hits.
+func trigger_vehicle_fire_fx(slot: String) -> void:
+	if not is_large_three_deck():
+		return
+	if slot == "primary":
+		_primary_fire_fx = 0.18
+	elif slot == "secondary":
+		_secondary_fire_fx = 0.10
+	queue_redraw()
+	if exterior != null:
+		exterior.queue_redraw()
+
+
+func vehicle_weapon_recoil(slot: String) -> float:
+	if slot == "primary":
+		# The supplied main gun faces left, so recoil moves it right.
+		return 14.0 * clampf(_primary_fire_fx / 0.18, 0.0, 1.0)
+	if slot == "secondary":
+		return 5.0 * clampf(_secondary_fire_fx / 0.10, 0.0, 1.0)
+	return 0.0
+
+
+func vehicle_weapon_flash(slot: String) -> float:
+	return _primary_fire_fx if slot == "primary" else _secondary_fire_fx
 
 
 ## 車体の中（外から見たとき、姿が見えない場所）か。斜路の上・地面にいる仲間は外にいる。斜路の上の端（搬入口の入口）から中。
@@ -429,6 +457,8 @@ func heal(amount: float) -> void:
 func _process(delta: float) -> void:
 	GameData.large_three_deck_enabled = is_large_three_deck()
 	hit_timer = maxf(0.0, hit_timer - delta)
+	_primary_fire_fx = maxf(0.0, _primary_fire_fx - delta)
+	_secondary_fire_fx = maxf(0.0, _secondary_fire_fx - delta)
 	var spd: float = game.scroll_speed
 	_wheel_t += spd * delta / 13.6
 	_shake = Vector2(randf_range(-4, 4), 0) if hit_timer > 0.0 else Vector2.ZERO
@@ -541,6 +571,13 @@ func _draw() -> void:
 	var wspec := ArtSpec.WHEELS
 	var wsize := ArtSpec.px_size(wspec["cell"])                     # 画面上の大きさ（絵の細かさに依存しない）
 	var f := int(_wheel_t) % int(wspec["frames"])
+	if use_fortress_raster and view_exterior:
+		# Three supplied fender recesses cover these five independent centers;
+		# paired wheels therefore read as heavy running gear rather than stickers.
+		for wx in WHEEL_X:
+			draw_set_transform(Vector2(wx, 553.0), 0.0, Vector2(1.0, 0.24))
+			draw_circle(Vector2.ZERO, 58.0, Color(0.015, 0.02, 0.03, 0.32))
+			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	for wx in WHEEL_X:
 		if use_fortress_raster:
 			draw_set_transform(Vector2(wx, WHEEL_Y + bob), _wheel_t, Vector2.ONE)

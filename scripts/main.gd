@@ -1480,7 +1480,10 @@ func fire_vehicle_weapon(slot: String) -> void:
 			var before: float = target.hp
 			base.vehicle_loadout.ammo -= ammo
 			target.take_damage(damage)
-			base.vehicle_loadout.last_note = "%s 発射: 敵HP %.0f → %.0f（与ダメージ %.0f）/ 弾薬 -%d" % [part.name, before, maxf(0.0, before-damage), damage, ammo]
+			base.trigger_vehicle_fire_fx(slot)
+			var actual := maxf(0.0, before - target.hp)
+			var volley := " / 3連装副砲" if shots == 3 else ""
+			base.vehicle_loadout.last_note = "%s%s 発射: 敵HP %.0f → %.0f（実ダメージ %.1f / 入力 %.0f）/ 弾薬 -%d" % [part.name, volley, before, maxf(0.0, target.hp), actual, damage, ammo]
 	if vehicle_ui != null:
 		vehicle_ui.refresh()
 

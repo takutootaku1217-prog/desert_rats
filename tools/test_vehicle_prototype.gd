@@ -107,7 +107,10 @@ func _initialize() -> void:
 	var hp_before: float = enemy.hp
 	var ammo_before: int = base.vehicle_loadout.ammo
 	main.fire_vehicle_weapon("primary")
-	check(is_equal_approx(enemy.hp, hp_before - 30.0) and base.vehicle_loadout.ammo == ammo_before - 2, "primary weapon damages existing enemy and consumes ammunition")
+	check(is_equal_approx(enemy.hp, hp_before - 30.0) and base.vehicle_loadout.ammo == ammo_before - 2 \
+		and base.vehicle_weapon_recoil("primary") > 0.0 and base.vehicle_weapon_flash("primary") > 0.0, "primary weapon damages, consumes ammunition, and triggers fortress fire feedback")
+	await frames(20)
+	check(is_zero_approx(base.vehicle_weapon_recoil("primary")) and is_zero_approx(base.vehicle_weapon_flash("primary")), "fortress fire feedback ends after its short presentation window")
 	# Existing crew AI should use the same non-ecological enemy after it reaches
 	# the base. Keep it alive after vehicle fire and let auto-combat acquire it.
 	enemy.hp = 100.0
