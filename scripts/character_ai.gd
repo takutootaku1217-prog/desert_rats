@@ -593,16 +593,24 @@ func tick(delta: float) -> void:
 				_release_task()
 				_set_state(State.SEARCH)
 				return
-			ch.target = enemy.position + Vector2(-30, 0)
-			if ch.move_to_target(delta):
+			var desired_range: float = ch.weapon_range()
+			ch.target = enemy.position + Vector2(-desired_range * 0.75, 0)
+			if ch.position.distance_to(enemy.position) <= desired_range:
 				_set_state(State.COMBAT)
+			else:
+				ch.move_to_target(delta)
 		State.COMBAT:
 			if not _enemy_valid():
 				_release_task()
 				_set_state(State.SEARCH)
 				return
-			ch.target = enemy.position + Vector2(-30, 0)
-			ch.move_to_target(delta)
+			var desired_range: float = ch.weapon_range()
+			ch.target = enemy.position + Vector2(-desired_range * 0.75, 0)
+			if ch.position.distance_to(enemy.position) > desired_range:
+				_set_state(State.COMBAT_MOVE)
+				return
+			if ch.weapon_is_ranged() and ch.position.distance_to(enemy.position) < desired_range * 0.45:
+				ch.move_to_target(delta)
 			ch.attacking = true
 			enemy.take_damage(ATTACK_DPS * ch.skill_mult(GameData.Job.COMBAT) * ch.weapon_mult() * delta, ch)
 			ch.fatigue = minf(CrewStatusDB.MAX_FATIGUE, ch.fatigue + CrewStatusDB.FATIGUE_COMBAT_GAIN * delta)

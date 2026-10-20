@@ -30,6 +30,7 @@ const SIZES := {
 	GameData.Item.HAUL_FRAME: 15, # 木2+皮1+鉄1と同重量。装備中も計上。
 	GameData.Item.WORKBENCH_PACK: 18, GameData.Item.SUPPLY_CACHE_PACK: 20, # 既存セーブの重量検証を保つ固定重量。木だけの新作業台も撤去品は18。
 	GameData.Item.SIMPLE_SPEAR: 10, # 材料と同重量。装備中も積載に含む。
+	GameData.Item.RIFLE: 16,
 	GameData.Item.FOOD: 1, GameData.Item.HIDE: 1, GameData.Item.BONE: 1, GameData.Item.FAT: 1,
 	GameData.Item.MEAT: 2,
 	GameData.Item.WOOD: 4, GameData.Item.FUEL: 4, GameData.Item.REPAIR_KIT: 4,

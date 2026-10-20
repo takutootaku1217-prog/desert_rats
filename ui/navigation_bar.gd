@@ -63,7 +63,7 @@ func _ready() -> void:
  return_result=UIKit.lbl("",13);return_result.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;return_result.custom_minimum_size.x=470;field_group.add_child(return_result)
  recovery_cancel=UIKit.button("回収を断念して帰還",func():game.town.abandon_recovery_from_field())
  recovery_cancel.custom_minimum_size=Vector2(220,36);field_group.add_child(recovery_cancel)
- _group("拠点",[["街に入る",game.town_ui.request_open],["建設 (B)",game.build_ui.open],["部屋 (R)",game.room_ui.open],["製作 (F)",game.craft_ui.open],["内外装",func(): activate("内外装")]])
+ _group("拠点",[["街に入る",game.town_ui.request_open],["大型車両・改造 (V)",game.vehicle_ui.open],["建設 (B)",game.build_ui.open],["部屋 (R)",game.room_ui.open],["製作 (F)",game.craft_ui.open],["内外装",func(): activate("内外装")]])
  _group("内外装",[["外装 (O)",func(): game.base_view.set_mode(BaseView.Mode.EXTERIOR)],["内装 (I)",func(): game.base_view.set_mode(BaseView.Mode.INTERIOR)],["戻る",func(): activate("拠点")]])
  _group("物資",[["倉庫 (Tab)",game.inventory_ui.open],["製作 (F)",game.craft_ui.open]])
  var stock_group:VBoxContainer=groups["物資"]
@@ -104,7 +104,7 @@ func close() -> void:
 
 func _process(_delta:float) -> void:
  var modal:=false
- for owner in [game.policy,game.expedition_ui,game.build_ui,game.room_ui,game.inventory_ui,game.craft_ui,game.quarry_ui,game.save_ui,game.map_ui,game.town_ui,game.detail,game.crew_alerts]:
+ for owner in [game.policy,game.expedition_ui,game.build_ui,game.room_ui,game.inventory_ui,game.craft_ui,game.vehicle_ui,game.quarry_ui,game.save_ui,game.map_ui,game.town_ui,game.detail,game.crew_alerts]:
   if owner._overlay.visible: modal=true;break
  bar.visible=not modal and not game.game_over
  if modal or game.game_over: close()

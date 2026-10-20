@@ -9,7 +9,7 @@ static var disabled := false
 const MAIN := ["target_speed", "scroll_speed", "room_layout", "total_rooms_built", "recipe_priority", "gather_policy", "hunt_policy", "blueprints", "total_gathered", "total_hunted", "total_eaten", "tool_auto", "_tool_clock", "build_queue", "total_built", "total_wasted", "_waste_note_at", "_spawn_dist", "_creature_dist", "wave", "kills", "_wave_timer", "transfer_queue", "craft_queue", "total_transferred", "total_crafted_by_hand", "_feed_clock"]
 const WORKER := ["char_name", "palette", "priorities", "carrying", "carcass_cargo", "carrying_species", "carry_source", "carry_n", "carry_bonus", "weapon", "work_support", "tools", "speed", "target", "position", "slot_offset", "hp", "hunger", "fatigue", "stress", "calm", "mental", "down", "floor_i", "facing", "level", "gender", "ranks", "skills", "dept", "away", "bed_index", "_climb_dest", "_climb_floor", "_climb_kind"]
 const AI := ["state", "timer", "haul_item", "haul_recipe", "repair_part", "gather_ev", "bag_limit", "bag_frac", "eat_wait", "xfer_item", "xfer_dir", "current_job", "life_request", "process_slot", "safe_after", "retreating", "danger_hold", "manual_attack", "return_request", "manual_job"]
-const BASE := ["built", "max_hp", "hp", "fuel", "parts", "rear_engine_damage", "total_refuel", "total_repair"]
+const BASE := ["built", "max_hp", "hp", "fuel", "parts", "rear_engine_damage", "total_refuel", "total_repair", "vehicle_loadout"]
 const PROCESSOR := ["orders", "current", "progress", "output", "batch_output", "total_done", "waiting_fuel"]
 const DIRECTOR := ["active", "forecast", "default_stance", "log", "elapsed", "distance", "stats", "enabled", "_next_in"]
 const QUARRY := ["state", "left", "near_only", "remaining", "progress", "visit_generated", "visit_nearby", "visit_discarded", "last_report", "_food_start", "discarded", "loose", "saved_speed", "visits"]
@@ -173,6 +173,7 @@ static func ai_data(row: Dictionary) -> Dictionary:
 static func base_data(row: Dictionary) -> Dictionary:
 	var result := row.duplicate(true)
 	if not result.has("rear_engine_damage"): result.rear_engine_damage = 0.0
+	if not result.has("vehicle_loadout"): result.vehicle_loadout = VehicleLoadout.initial_state()
 	return result
 
 static func extra_data(d: Dictionary) -> Dictionary:
@@ -222,6 +223,7 @@ static func validate(d, g) -> bool:
 	for k in base_row.parts:
 		if k not in GameData.Part.values() or typeof(base_row.parts[k]) not in [TYPE_FLOAT,TYPE_INT] or base_row.parts[k] < 0 or base_row.parts[k] > 100: return false
 	if typeof(base_row.rear_engine_damage) not in [TYPE_FLOAT,TYPE_INT] or base_row.rear_engine_damage < 0 or base_row.rear_engine_damage > 100: return false
+	if not VehicleLoadout.valid(base_row.vehicle_loadout): return false
 	if d.has("operations"):
 		if not shape(d.operations,g.operations,FieldOperations.FIELDS) or d.operations.stance not in ["normal","alert","recall"] or d.operations.fuel_spent<0: return false
 		if not counts(d.operations.delivered): return false
@@ -274,7 +276,7 @@ static func validate(d, g) -> bool:
 		if a.state not in CharacterAI.State.values() or w.floor_i not in [0,1,2] or w._climb_floor not in [0,1,2]: return false
 		if a.manual_job not in [-1, GameData.Job.REPAIR]: return false
 		if w.hp < 0 or w.hp > 100 or w.hunger < 0 or w.hunger > 100 or w.fatigue < 0 or w.fatigue > 100: return false
-		if w.palette not in ["grey","tan","pink"] or w.weapon not in [-1,GameData.Item.SIMPLE_SPEAR]: return false
+		if w.palette not in ["grey","tan","pink"] or (w.weapon != -1 and w.weapon not in GameData.WEAPON_ITEMS): return false
 		if w.work_support != -1 and w.work_support not in GameData.SUPPORT_ITEMS: return false
 		if w.carrying != -1 and w.carrying not in GameData.Item.values(): return false
 		if w.carry_n < 1 or not counts(w.carry_bonus) or not counts(w.carcass_cargo) or not recipe(a.haul_recipe): return false
@@ -483,6 +485,7 @@ static func saved_weight(d: Dictionary) -> int:
 		if w.weapon >= 0: n += item_mass(w.weapon)
 		if w.work_support >= 0: n += item_mass(w.work_support)
 	if d.expedition.state == "running" and d.expedition.kit and not d.expedition.kit_used: n += item_mass(GameData.Item.REPAIR_KIT)
+	n += VehicleLoadout.equipment_weight(base_data(d.base).vehicle_loadout)
 	var town:Dictionary = TownEconomy.normalized(d.get("town",{}))
 	if town.get("delivery","")=="outbound" and town.get("delivery_cargo",false): n += TownDB.DELIVERY_PARCEL_WEIGHT
 	if town.get("recovery","") in ["carried","return","ready"]: n += TownDB.RECOVERY_PARCEL_WEIGHT

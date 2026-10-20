@@ -15,7 +15,7 @@ const CATEGORY_COLORS := {
 const ORDER := [
 	GameData.Item.MEAT, GameData.Item.HIDE, GameData.Item.BONE, GameData.Item.FAT, GameData.Item.WOOD, GameData.Item.STONE, GameData.Item.IRON_ORE,
 	GameData.Item.IRON, GameData.Item.REPAIR_KIT, GameData.Item.BED_PACK, GameData.Item.STORAGE_BOX, GameData.Item.WORKBENCH_PACK, GameData.Item.SUPPLY_CACHE_PACK, GameData.Item.STORAGE_UPGRADE_PACK, GameData.Item.PARALLEL_BENCH_PACK, GameData.Item.FOOD, GameData.Item.FUEL,
-	GameData.Item.WOOD_PICK, GameData.Item.WOOD_AXE, GameData.Item.HAMMER, GameData.Item.PICKAXE, GameData.Item.ADV_PICK, GameData.Item.AXE, GameData.Item.IRON_AXE, GameData.Item.SIMPLE_SPEAR, GameData.Item.HAUL_FRAME, GameData.Item.HANDCART,
+	GameData.Item.WOOD_PICK, GameData.Item.WOOD_AXE, GameData.Item.HAMMER, GameData.Item.PICKAXE, GameData.Item.ADV_PICK, GameData.Item.AXE, GameData.Item.IRON_AXE, GameData.Item.SIMPLE_SPEAR, GameData.Item.RIFLE, GameData.Item.HAUL_FRAME, GameData.Item.HANDCART,
 ]
 
 
@@ -117,6 +117,8 @@ static func effect_text(item: int) -> String:
 			return "設置1個で積載容量＋%d（最大%d個）。未設置は重量%dで、容量は増えません。設置後は重量対象外。" % [FacilityDB.def("cargo_rack")["capacity_bonus"], FacilityDB.max_of("cargo_rack"), CargoDB.size_of(item)]
 		GameData.Item.SIMPLE_SPEAR:
 			return "Cの個体情報で装備すると、本人の迎撃攻撃＋%d%%。狩猟や他の仲間には加算されません。重量%dは装備中も計上します。" % [roundi((GameData.SIMPLE_WEAPON_MULT-1.0)*100), CargoDB.size_of(item)]
+		GameData.Item.RIFLE:
+			return "個体詳細で装備すると、220pxの距離を保って射撃します。近接槍より威力は低めですが、敵へ近寄らず戦えます。重量%dは積載量に計上されます。" % CargoDB.size_of(item)
 		GameData.Item.REPAIR_KIT:
 			return "1枚で部位の耐久＋%.1f（上限100）。右上の使用ボタンは、居住区・走行装置・加工設備のうち最も傷んだ未予約部位を自動選択。燃料・仲間HPは回復しません。" % GameData.REPAIR_AMOUNT
 	return ""

@@ -34,6 +34,8 @@ func _draw() -> void:
 	if base.view_exterior:
 		_draw_glass(off)
 		draw_texture_rect(ExteriorDB.body_tex(), Rect2(GameData.HULL_POS + off, ArtSpec.px_size(ArtSpec.HULL)), false)
+		if str(base.vehicle_loadout.get("chassis", "medium")) != "medium":
+			_draw_large_vehicle_layers(off)
 		_draw_parts(["wall", "armor"], off)
 	_draw_parts(["roof"], off)
 	if base.view_exterior:
@@ -77,3 +79,35 @@ func _draw_parts(layers: Array, off: Vector2) -> void:
 		var at := ExteriorDB.at_of(part, e["slot"], engine_unit)
 		draw_texture_rect_region(ExteriorDB.sheet_tex(part["sheet"]),
 				Rect2(_world(Vector2(at), off), Vector2(ExteriorDB.frame_units(part)) * float(U)), Rect2(ExteriorDB.frame_of(part)))
+
+
+func _draw_large_vehicle_layers(off: Vector2) -> void:
+	## Deliberately code-drawn for this prototype: the stacked silhouette makes the
+	## large chassis readable without replacing the existing interior artwork.
+	var state: Dictionary = base.vehicle_loadout
+	var frame_col := Color("5d625d") if state.chassis == "large" else Color("778176")
+	var armor_col := Color("596876") if state.armor == "plate" else (Color("7d8b74") if state.armor == "composite" else frame_col)
+	var origin := GameData.HULL_POS + off
+	var upper := Rect2(origin + Vector2(44, -108), Vector2(712, 178))
+	draw_rect(upper, Color("1d252b"))
+	draw_rect(upper.grow(-4), frame_col)
+	for floor in [0, 1, 2]:
+		var y: float = upper.position.y + 8 + floor * 56
+		draw_line(Vector2(upper.position.x + 8, y + 48), Vector2(upper.end.x - 8, y + 48), Color("20252a"), 4.0)
+		for column in 6:
+			var window := Rect2(Vector2(upper.position.x + 18 + column * 112, y + 12), Vector2(66, 24))
+			draw_rect(window, Color("6b9aab"))
+			draw_rect(window.grow(-4), Color("31515e"))
+	if state.armor != "none":
+		for floor in 3:
+			draw_rect(Rect2(Vector2(upper.position.x - 8, upper.position.y + floor * 56), Vector2(12, 50)), armor_col)
+			draw_rect(Rect2(Vector2(upper.end.x - 4, upper.position.y + floor * 56), Vector2(12, 50)), armor_col)
+	if state.primary != "none":
+		var mount := Vector2(upper.position.x + 420, upper.position.y - 18)
+		draw_rect(Rect2(mount, Vector2(74, 22)), Color("333b3b"))
+		draw_rect(Rect2(mount + Vector2(48, 6), Vector2(118, 10)), Color("9c9b84"))
+	if state.secondary != "none":
+		var mount2 := Vector2(upper.position.x + 160, upper.position.y - 12)
+		draw_rect(Rect2(mount2, Vector2(36, 18)), Color("30383a"))
+		draw_rect(Rect2(mount2 + Vector2(26, 4), Vector2(56, 5)), Color("b8aa7a"))
+		draw_rect(Rect2(mount2 + Vector2(26, 11), Vector2(56, 5)), Color("b8aa7a"))

@@ -44,6 +44,7 @@ var inventory_ui: InventoryUI     # インベントリの画面（Tabキー・�
 var craft_ui: CraftUI             # 制作の画面（Fキー・右の「制作」ボタン）。ui/craft_ui.gd
 var base_view: BaseView           # 拠点の見え方（外装 ⇄ 内装）。scripts/base_view.gd
 var view_switch: ViewSwitchUI     # 外装・内装の切り替えボタン（Oキー・Iキー）。ui/view_switch.gd
+var vehicle_ui: VehicleCustomizationUI
 
 # ---- カメラ追従（個体管理タブとカメラ追従_仕様書のうち、カメラ追従の最小構成。2026-09-30） ----
 # Camera2D は世界（背景・拠点・仲間・資源。CanvasLayer の外）だけを動かす。HUD は CanvasLayer なので触れない。
@@ -235,6 +236,9 @@ func _ready() -> void:
 	craft_ui = CraftUI.new()
 	craft_ui.game = self
 	add_child(craft_ui)
+	vehicle_ui = VehicleCustomizationUI.new()
+	vehicle_ui.game = self
+	add_child(vehicle_ui)
 	base_view = BaseView.new()                     # 外装 ⇄ 内装（仲間ができたあとに作る。仲間の見え方も決めるため）
 	base_view.game = self
 	add_child(base_view)
@@ -828,7 +832,7 @@ func unequip_tool(w, slot: String) -> bool:
 
 ## その道具を作る意味があるか（もう1つ増えると、全員の総合点が上がり、予備も作りかけもない）。加工の選択（choose_recipe）で使う。
 ## 武器は手動1枠。遠征中・戦闘不能は変更しない。自動採取道具とは独立。
-func weapon_change_reason(w, equip: bool) -> String:
+func weapon_change_reason(w, equip: bool, item := GameData.Item.SIMPLE_SPEAR) -> String:
 	var reason := _tool_target_reason(w)
 	if not reason.is_empty(): return reason
 	if game_over: return "ゲーム終了中は変更できません。"
@@ -836,18 +840,19 @@ func weapon_change_reason(w, equip: bool) -> String:
 	if w.down: return "戦闘不能の間は武器を保持します。"
 	if equip:
 		if w.weapon >= 0: return "すでに武器を装備しています。"
-		if storage.count_of(GameData.Item.SIMPLE_SPEAR) < 1: return "倉庫に簡易槍がありません。"
+		if item not in GameData.WEAPON_ITEMS: return "武器ではありません。"
+		if storage.count_of(item) < 1: return "倉庫に%sがありません。" % ItemDB.name_of(item)
 	elif w.weapon < 0:
 		return "武器を装備していません。"
 	return ""
 
 
-func equip_weapon(w) -> bool:
-	if not weapon_change_reason(w, true).is_empty(): return false
+func equip_weapon(w, item := GameData.Item.SIMPLE_SPEAR) -> bool:
+	if not weapon_change_reason(w, true, item).is_empty(): return false
 	var inv: Inventory = storage.inventory
 	# 装備と在庫を同時に移す。重量はその前後で不変。
-	inv.counts[GameData.Item.SIMPLE_SPEAR] = inv.count(GameData.Item.SIMPLE_SPEAR) - 1
-	w.weapon = GameData.Item.SIMPLE_SPEAR
+	inv.counts[item] = inv.count(item) - 1
+	w.weapon = item
 	inv.changed.emit()
 	return true
 
@@ -1244,7 +1249,7 @@ func build_room(slot: String, rtype: String) -> bool:
 
 ## 別の画面を開くとき、ほかの管理画面を閉じる（重ならないように）。keep はいま開く画面。
 func close_other_panels(keep) -> void:
-	for p in [navigation, build_ui, room_ui, policy, detail, expedition_ui, inventory_ui, craft_ui, crew_alerts, quarry_ui, save_ui, map_ui, town_ui]:
+	for p in [navigation, build_ui, room_ui, policy, detail, expedition_ui, inventory_ui, craft_ui, vehicle_ui, crew_alerts, quarry_ui, save_ui, map_ui, town_ui]:
 		if p != null and p != keep and p.has_method("close"):
 			p.close()
 
@@ -1418,6 +1423,66 @@ func _spawn_wave() -> void:
 
 
 ## 敵を倒すと素材を落とす（流れる資源として拾える）。
+func vehicle_test_enemy_damage() -> float:
+	return 8.0
+
+
+func spawn_vehicle_test_enemy() -> void:
+	var e := Enemy.new()
+	e.setup_kind(self, "scorpion")
+	e.max_hp = 70.0
+	e.hp = e.max_hp
+	e.damage = vehicle_test_enemy_damage()
+	e.hold_x = 980.0
+	e.position = Vector2(980.0, GameData.GROUND_Y_MAX - 12.0)
+	enemies_root.add_child(e)
+	base.vehicle_loadout.last_note = "試験対象のサソリを呼びました（HP 70 / 攻撃 %.0f）" % e.damage
+
+
+func refill_vehicle_ammo() -> void:
+	base.vehicle_loadout.ammo = mini(99, int(base.vehicle_loadout.ammo) + 6)
+	base.vehicle_loadout.last_note = "試験弾薬を補給: %d" % int(base.vehicle_loadout.ammo)
+
+
+func equip_vehicle_part(slot: String, id: String) -> void:
+	base.equip_vehicle_part(slot, id)
+	if vehicle_ui != null:
+		vehicle_ui.refresh()
+
+
+func apply_vehicle_combat_preset() -> void:
+	base.vehicle_loadout.merge({"chassis":"reinforced_large", "drive":"tracks", "power":"turbo", "armor":"composite", "primary":"cannon", "secondary":"machine_gun", "ammo":12, "prototype_unlimited":true}, true)
+	base.vehicle_loadout.last_note = "�����t���X�y�b�N�𑕔��"
+	base.queue_redraw()
+	if vehicle_ui != null:
+		vehicle_ui.refresh()
+
+
+func fire_vehicle_weapon(slot: String) -> void:
+	var part := VehicleLoadout.selected(base.vehicle_loadout, slot)
+	var damage := float(part.get("damage", 0))
+	var ammo := int(part.get("ammo", 0))
+	if damage <= 0.0:
+		base.vehicle_loadout.last_note = "このスロットには武装がありません。"
+	elif int(base.vehicle_loadout.ammo) < ammo:
+		base.vehicle_loadout.last_note = "弾薬不足: 必要 %d / 所持 %d" % [ammo, int(base.vehicle_loadout.ammo)]
+	else:
+		var target = null
+		for e in enemies_root.get_children():
+			if e is Enemy and not e.dead and not e.is_queued_for_deletion():
+				target = e
+				break
+		if target == null:
+			base.vehicle_loadout.last_note = "標的がいません。「試験用の既存敵を呼ぶ」でサソリを出してください。"
+		else:
+			var before: float = target.hp
+			base.vehicle_loadout.ammo -= ammo
+			target.take_damage(damage)
+			base.vehicle_loadout.last_note = "%s 発射: 敵HP %.0f → %.0f（与ダメージ %.0f）/ 弾薬 -%d" % [part.name, before, maxf(0.0, before-damage), damage, ammo]
+	if vehicle_ui != null:
+		vehicle_ui.refresh()
+
+
 func on_enemy_killed(e) -> void:
 	kills += 1
 	director.enemy_killed(e)           # 戦利品は敵の種類ごと（data/events.gd の ENEMIES）

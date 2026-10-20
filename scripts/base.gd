@@ -28,6 +28,9 @@ var total_refuel := 0                    # 補給した回数（確認用）
 var parts := {GameData.Part.HULL: 100.0, GameData.Part.DRIVE: 100.0, GameData.Part.MACHINE: 100.0}
 ## 後部への敵攻撃だけを記録する、DRIVE 耐久とは別の漏れ原因。旧セーブは 0 として読む。
 var rear_engine_damage := 0.0
+## Externally fitted large-vehicle prototype. Room fixtures intentionally stay
+## out of this weight calculation; only cargo and exterior equipment count.
+var vehicle_loadout: Dictionary = VehicleLoadout.initial_state()
 var repair_reserved := {}                # Part -> 修理に向かっている Worker
 var total_repair := 0                    # 修理した回数（確認用）
 var view_exterior := false               # true なら外から見る（外装）。false なら中を見る（内装の断面図）。切り替えは BaseView
@@ -200,7 +203,7 @@ func consume_fuel(amount: float) -> void:
 	game.operations.fuel_spent += consumed
 
 func burn(distance: float) -> void:
-	consume_fuel(distance * GameData.FUEL_PER_PX * game.director.burn_mult())
+	consume_fuel(distance * GameData.FUEL_PER_PX * game.director.burn_mult() * vehicle_fuel_mult())
 
 
 ## 後部被弾の蓄積がしきい値に達すると燃料が漏れる。通常の DRIVE 摩耗や前方被弾はここへ接続しない。
@@ -226,6 +229,58 @@ func leak_fuel(delta: float, speed: float) -> float:
 
 func has_fuel() -> bool:
 	return fuel > 0.0
+
+
+# ---- large vehicle prototype: swappable weapons and armor ----
+func vehicle_equipment_weight(state: Dictionary = vehicle_loadout) -> int:
+	return VehicleLoadout.equipment_weight(state)
+
+
+func vehicle_capacity() -> int:
+	return VehicleLoadout.capacity(vehicle_loadout)
+
+
+func vehicle_defense() -> float:
+	return VehicleLoadout.defense(vehicle_loadout)
+
+
+func damage_after_armor(incoming: float) -> float:
+	return maxf(0.0, incoming - vehicle_defense())
+
+
+func vehicle_speed_limit() -> float:
+	return VehicleLoadout.speed_limit(vehicle_loadout)
+
+
+func vehicle_fuel_mult() -> float:
+	return VehicleLoadout.fuel_mult(vehicle_loadout)
+
+
+func preview_loadout(slot: String, id: String) -> Dictionary:
+	var candidate := VehicleLoadout.part(slot, id)
+	if candidate.is_empty():
+		return {}
+	var before := vehicle_equipment_weight()
+	var preview := vehicle_loadout.duplicate(true)
+	preview[slot] = id
+	var after := VehicleLoadout.equipment_weight(preview)
+	var cargo_only := storage.current_weight() - before if storage != null else 0
+	var used := cargo_only + after
+	var capacity := VehicleLoadout.capacity(preview)
+	return {"used":used, "left":capacity-used, "delta":after-before, "damage_after":maxf(0.0, 8.0-float(candidate.get("defense",0)))}
+
+
+func equip_vehicle_part(slot: String, id: String) -> bool:
+	if VehicleLoadout.part(slot, id).is_empty():
+		return false
+	var preview := preview_loadout(slot, id)
+	if int(preview.left) < 0 and not bool(vehicle_loadout.get("prototype_unlimited", false)):
+		vehicle_loadout.last_note = "積載上限を超えるため装着できません（不足 %d）" % -int(preview.left)
+		return false
+	vehicle_loadout[slot] = id
+	vehicle_loadout.last_note = "%sを装着。積載 %+d、防御 %d、実被害 %.0f" % [VehicleLoadout.part(slot,id).name, int(preview.delta), int(vehicle_defense()), damage_after_armor(8.0)]
+	queue_redraw()
+	return true
 
 
 # ---- 耐久度と修理 ----
@@ -328,8 +383,8 @@ func speed_limit() -> float:
 	if parts[GameData.Part.DRIVE] <= 0.0:
 		return GameData.CRAWL_SPEED
 	if parts[GameData.Part.DRIVE] < GameData.PART_BAD:
-		return 40.0
-	return 9999.0
+		return minf(40.0, vehicle_speed_limit())
+	return vehicle_speed_limit()
 
 
 # ---- 戦闘用（現段階では未使用） ----
@@ -340,9 +395,12 @@ func repair_point() -> Vector2:
 func take_damage(amount: float, impact_x := INF) -> void:
 	# 敵の攻撃は車体に当たる（車体の耐久度が0になると拠点は動かなくなる）
 	# 敵の攻撃は HULL と DRIVE を傷めるが、燃料漏れ原因は後部の被弾蓄積だけに分離する。
-	parts[GameData.Part.HULL] = maxf(0.0, parts[GameData.Part.HULL] - amount)
-	parts[GameData.Part.DRIVE] = maxf(0.0, parts[GameData.Part.DRIVE] - amount)
-	record_rear_engine_damage(amount, impact_x)
+	var actual := damage_after_armor(amount)
+	vehicle_loadout.last_damage = actual
+	vehicle_loadout.last_note = "被弾: %.0f → 装甲 %d → 実被害 %.0f" % [amount, int(vehicle_defense()), actual]
+	parts[GameData.Part.HULL] = maxf(0.0, parts[GameData.Part.HULL] - actual)
+	parts[GameData.Part.DRIVE] = maxf(0.0, parts[GameData.Part.DRIVE] - actual)
+	record_rear_engine_damage(actual, impact_x)
 	# Damage may force a lower target speed. Repair intentionally does not restore it.
 	if game.target_speed > speed_limit():
 		game.target_speed = speed_limit()

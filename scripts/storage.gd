@@ -56,7 +56,10 @@ func current_weight() -> int:
 	var g = game()
 	if g != null and g.town != null:
 		mission_weight = g.town.mission_cargo_weight()
-	return n + equipped_support_weight() + equipped_weapon_weight() + workshop_weight() + carried_weight() + expedition_weight() + mission_weight
+	var vehicle_weight := 0
+	if get_parent() is MobileBase:
+		vehicle_weight = get_parent().vehicle_equipment_weight()
+	return n + equipped_support_weight() + equipped_weapon_weight() + workshop_weight() + carried_weight() + expedition_weight() + mission_weight + vehicle_weight
 
 
 func item_weight(item: int, n := 1) -> int:
@@ -71,6 +74,14 @@ func set_weight(items: Dictionary) -> int:
 
 func game():
 	return get_parent().game if get_parent() is MobileBase else null
+
+
+func limits_active() -> bool:
+	if not enforce:
+		return false
+	if get_parent() is MobileBase and bool(get_parent().vehicle_loadout.get("prototype_unlimited", false)):
+		return false
+	return true
 
 
 func workshop_weight() -> int:
@@ -125,7 +136,7 @@ func processing_reserve() -> int:
 
 func transform_limit(r: Dictionary, reserved_units := 0) -> int:
 	var growth := recipe_growth(r)
-	if not enforce or growth <= 0: return 1000000
+	if not limits_active() or growth <= 0: return 1000000
 	var room := max_weight() - current_weight() - processing_reserve() + growth * reserved_units
 	var g = game()
 	if g != null: room -= set_weight(g.gather_room())
@@ -158,7 +169,10 @@ func equipped_weapon_weight() -> int:
 
 ## 積載できる重量の合計（CargoDB.CAPACITY ＋ 拠点の強化で増えた分 capacity_bonus）。区画ごとの上限はない。
 func max_weight() -> int:
-	return CargoDB.CAPACITY + capacity_bonus
+	var base_capacity := CargoDB.CAPACITY
+	if get_parent() is MobileBase:
+		base_capacity = get_parent().vehicle_capacity()
+	return base_capacity + capacity_bonus
 
 
 ## 積載率 0〜1（画面のアイコンゲージの充填に使う）
@@ -169,7 +183,7 @@ func weight_ratio() -> float:
 # ---------------------------------------------------------------- 積載量（重量制。素材ごとの枠はない）
 ## その素材が、いまの残りの重さであと何個置けるか。制限なしのときは十分大きな数。
 func free_for(item: int) -> int:
-	if not enforce or CargoDB.bay_of(item) < 0:
+	if not limits_active() or CargoDB.bay_of(item) < 0:
 		return 1000000
 	var size := CargoDB.size_of(item)
 	return maxi(0, floori(float(max_weight() - current_weight() - processing_reserve()) / float(size)))
@@ -178,13 +192,13 @@ func free_for(item: int) -> int:
 ## その素材を、拠点がいま最大で何個まで持てるか（いま置いてある分＋残りの重さで置ける分）。
 ## 加工の作り置きの上限（Main.choose_recipe の room）など、「枠」があった頃の使い方をそのまま保つための窓口。
 func quota_of(item: int) -> int:
-	if not enforce or CargoDB.bay_of(item) < 0:
+	if not limits_active() or CargoDB.bay_of(item) < 0:
 		return 1000000
 	return inventory.count(item) + free_for(item)
 
 
 func is_full(item: int) -> bool:
-	return enforce and CargoDB.bay_of(item) >= 0 and free_for(item) <= 0
+	return limits_active() and CargoDB.bay_of(item) >= 0 and free_for(item) <= 0
 
 
 ## 区画（素材棚／加工品置き場）に置いてある重さ。上限はなく、内訳の表示だけに使う。
@@ -205,7 +219,7 @@ func drop_fit(species: String) -> float:
 	for it in drops:
 		var n := int(drops[it])
 		total += n
-		if enforce and CargoDB.bay_of(it) >= 0:
+		if limits_active() and CargoDB.bay_of(it) >= 0:
 			n = mini(n, floori(float(room) / CargoDB.size_of(it)))
 			room -= n * CargoDB.size_of(it)
 		fit += n
@@ -268,6 +282,6 @@ func _slot(item: int, cx: float, base_y: float, sz: float) -> void:
 	if is_full(item):
 		col = Color("ff8a70")
 		txt += "満"
-	elif enforce and weight_ratio() >= CargoDB.WARN_RATIO:
+	elif limits_active() and weight_ratio() >= CargoDB.WARN_RATIO:
 		col = Color("ffc266")
 	GameData.draw_text(self, Vector2(cx - 4, base_y - 2), txt, 12, col, 30.0, HORIZONTAL_ALIGNMENT_LEFT)

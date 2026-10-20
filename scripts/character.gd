@@ -167,7 +167,19 @@ func carry_limit() -> int:
 
 ## 迎撃時の本人の攻撃補正。採取と狩猟には適用しない。
 func weapon_mult() -> float:
-	return GameData.SIMPLE_WEAPON_MULT if weapon == GameData.Item.SIMPLE_SPEAR else 1.0
+	if weapon == GameData.Item.SIMPLE_SPEAR:
+		return GameData.SIMPLE_WEAPON_MULT
+	if weapon == GameData.Item.RIFLE:
+		return GameData.RIFLE_WEAPON_MULT
+	return 1.0
+
+
+func weapon_range() -> float:
+	return GameData.RIFLE_ATTACK_RANGE if weapon == GameData.Item.RIFLE else GameData.MELEE_ATTACK_RANGE
+
+
+func weapon_is_ranged() -> bool:
+	return weapon == GameData.Item.RIFLE
 
 
 ## 採取ポイント kind に使う道具（-1 = 素手）。採掘・伐採の枠は武器と独立。

@@ -716,6 +716,10 @@ func _build_tools(w) -> void:
 		_update_live())
 	weapon_row.add_child(_live["weapon_equip"])
 	weapon_row.add_child(_live["weapon_off"])
+	_live["weapon_rifle"] = UIKit.button("試作カービンを装備", func():
+		if is_instance_valid(w) and w == _worker: game.equip_weapon(w, GameData.Item.RIFLE)
+		_update_live())
+	weapon_row.add_child(_live["weapon_rifle"])
 	_live["weapon_reason"] = _wrapped_label("", 13, UIKit.C_DIM)
 	weapon_card.add_child(_live["weapon_reason"])
 	_add_details_toggle(weapon_card, ItemDB.effect_text(GameData.Item.SIMPLE_SPEAR))
@@ -971,6 +975,8 @@ func _update_live() -> void:
 		var off_reason: String = game.weapon_change_reason(w, false)
 		_live["weapon_equip"].disabled = not equip_reason.is_empty()
 		_live["weapon_off"].disabled = not off_reason.is_empty()
+		_live["weapon_rifle"].disabled = not game.weapon_change_reason(w, true, GameData.Item.RIFLE).is_empty()
+		_live["weapon_rifle"].tooltip_text = game.weapon_change_reason(w, true, GameData.Item.RIFLE)
 		_live["weapon_reason"].text = off_reason if w.weapon >= 0 else equip_reason
 		_live["weapon_reason"].visible = not _live["weapon_reason"].text.is_empty()
 	if _live.has("work_support"):

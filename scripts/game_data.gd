@@ -138,7 +138,7 @@ static func job_list() -> Array:
 # 狩猟・採取・購入・捕獲・探索の持ち帰りは、すべて同じ Item / Inventory に集約する。
 # ------------------------------------------------------------------
 enum Item { MEAT, HIDE, BONE, FAT, WOOD, STONE, IRON_ORE, IRON, FOOD, FUEL, REPAIR_KIT, CARCASS,
-		HAMMER, PICKAXE, ADV_PICK, AXE, IRON_AXE, BED_PACK, STORAGE_BOX, SIMPLE_SPEAR, WORKBENCH_PACK, SUPPLY_CACHE_PACK, HAUL_FRAME, WOOD_PICK, WOOD_AXE, HANDCART, STORAGE_UPGRADE_PACK, PARALLEL_BENCH_PACK }        # TOOL_ITEMSだけ積載対象外。武器は装備中も計上。
+		HAMMER, PICKAXE, ADV_PICK, AXE, IRON_AXE, BED_PACK, STORAGE_BOX, SIMPLE_SPEAR, WORKBENCH_PACK, SUPPLY_CACHE_PACK, HAUL_FRAME, WOOD_PICK, WOOD_AXE, HANDCART, STORAGE_UPGRADE_PACK, PARALLEL_BENCH_PACK, RIFLE }        # TOOL_ITEMSだけ積載対象外。武器は装備中も計上。
 const TOOL_ITEMS := [Item.WOOD_PICK, Item.WOOD_AXE, Item.HAMMER, Item.PICKAXE, Item.ADV_PICK, Item.AXE, Item.IRON_AXE]
 const CREATURE_ITEMS := [Item.MEAT, Item.HIDE, Item.BONE, Item.FAT]   # 生物から取れる素材
 const GROUND_ITEMS := [Item.WOOD, Item.STONE, Item.IRON_ORE]          # 地面で採取する基本資源
@@ -147,11 +147,14 @@ const RAW_ITEMS := [Item.MEAT, Item.HIDE, Item.BONE, Item.FAT, Item.WOOD, Item.S
 const HAUL_FRAME_LIMIT := 5
 const HANDCART_LIMIT := 8
 const SUPPORT_ITEMS := [Item.HAUL_FRAME, Item.HANDCART]
-const WEAPON_ITEMS := [Item.SIMPLE_SPEAR]
+const WEAPON_ITEMS := [Item.SIMPLE_SPEAR, Item.RIFLE]
 # 武器補正は調整用初期値。迎撃時の本人だけに適用。
 const SIMPLE_WEAPON_MULT := 1.2
+const RIFLE_WEAPON_MULT := 0.9
+const MELEE_ATTACK_RANGE := 42.0
+const RIFLE_ATTACK_RANGE := 220.0
 const PACKED_ITEMS := [Item.BED_PACK, Item.STORAGE_BOX, Item.WORKBENCH_PACK, Item.SUPPLY_CACHE_PACK]
-const PRODUCT_ITEMS := [Item.IRON, Item.FOOD, Item.FUEL, Item.REPAIR_KIT, Item.BED_PACK, Item.STORAGE_BOX, Item.SIMPLE_SPEAR, Item.WORKBENCH_PACK, Item.SUPPLY_CACHE_PACK, Item.HAUL_FRAME, Item.HANDCART, Item.STORAGE_UPGRADE_PACK, Item.PARALLEL_BENCH_PACK]
+const PRODUCT_ITEMS := [Item.IRON, Item.FOOD, Item.FUEL, Item.REPAIR_KIT, Item.BED_PACK, Item.STORAGE_BOX, Item.SIMPLE_SPEAR, Item.RIFLE, Item.WORKBENCH_PACK, Item.SUPPLY_CACHE_PACK, Item.HAUL_FRAME, Item.HANDCART, Item.STORAGE_UPGRADE_PACK, Item.PARALLEL_BENCH_PACK]
 const ITEM_NAMES := {
 	Item.WOOD_PICK: "木製採掘具", Item.WOOD_AXE: "木製の斧",
 	Item.HAUL_FRAME: "背負いフレーム", Item.HANDCART: "一人用手押し車", Item.STORAGE_UPGRADE_PACK: "収納補強材", Item.PARALLEL_BENCH_PACK: "増設加工台",
@@ -159,7 +162,7 @@ const ITEM_NAMES := {
 	Item.MEAT: "生肉", Item.HIDE: "皮", Item.BONE: "骨", Item.FAT: "脂肪",
 	Item.WOOD: "木材", Item.STONE: "石", Item.IRON_ORE: "鉄鉱石",
 	Item.IRON: "鉄", Item.FOOD: "食料", Item.FUEL: "燃料", Item.REPAIR_KIT: "応急修理板", Item.BED_PACK: "寝床", Item.STORAGE_BOX: "収納ボックス",
-	Item.CARCASS: "獲物", Item.SIMPLE_SPEAR: "簡易槍",
+	Item.CARCASS: "獲物", Item.SIMPLE_SPEAR: "簡易槍", Item.RIFLE: "試作カービン",
 	Item.HAMMER: "石のハンマー", Item.PICKAXE: "鉄製ピッケル", Item.ADV_PICK: "高性能ピッケル",
 	Item.AXE: "石の斧", Item.IRON_AXE: "鉄の斧",
 }
@@ -170,7 +173,7 @@ const ITEM_FILES := {
 	Item.MEAT: "meat", Item.HIDE: "hide", Item.BONE: "bone", Item.FAT: "fat",
 	Item.WOOD: "wood", Item.STONE: "stone", Item.IRON_ORE: "iron_ore",
 	Item.IRON: "iron", Item.FOOD: "ration", Item.FUEL: "fuel", Item.REPAIR_KIT: "repair_kit", Item.BED_PACK: "bed_pack", Item.STORAGE_BOX: "storage_box",
-	Item.CARCASS: "meat", Item.SIMPLE_SPEAR: "simple_spear",
+	Item.CARCASS: "meat", Item.SIMPLE_SPEAR: "simple_spear", Item.RIFLE: "simple_spear",
 	Item.HAMMER: "hammer", Item.PICKAXE: "pickaxe", Item.ADV_PICK: "adv_pick", Item.AXE: "axe", Item.IRON_AXE: "iron_axe",
 }
 ## 地面の資源の出やすさ（木材は多く、鉄鉱石は少ない）
@@ -185,6 +188,8 @@ const GROUND_WEIGHTS := {Item.WOOD: 4.0, Item.STONE: 3.0, Item.IRON_ORE: 1.5}
 const RECIPES := [
 	{"id": "simple_spear", "name": "簡易槍", "in": {Item.WOOD: 1, Item.IRON: 1}, "out": Item.SIMPLE_SPEAR, "n": 1,
 		"time": 4.0, "tank_fuel": 0.0, "field": Field.DEV, "station": "workbench"},
+	{"id": "rifle", "name": "試作カービン", "in": {Item.WOOD: 1, Item.IRON: 3}, "out": Item.RIFLE, "n": 1,
+		"time": 6.0, "tank_fuel": 0.0, "field": Field.DEV, "station": "workbench"},
 	{"id": "handcart", "name": "一人用手押し車", "in": {Item.HAUL_FRAME: 1, Item.WOOD: 2, Item.IRON: 2}, "out": Item.HANDCART, "n": 1, "time": 6.0, "tank_fuel": 0.0, "field": Field.DEV, "station": "workbench"},
 	{"id": "haul_frame", "name": "背負いフレーム", "in": {Item.WOOD: 2, Item.HIDE: 1, Item.IRON: 1}, "out": Item.HAUL_FRAME, "n": 1,
 		"time": 4.0, "tank_fuel": 0.0, "field": Field.DEV, "station": "workbench"},

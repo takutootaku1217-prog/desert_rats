@@ -22,7 +22,7 @@ func _initialize():
 	check(a.weapon == ITEM and main.storage.count_of(ITEM) == 0 and main.storage.current_weight() == weight, "倉庫と個人の単一所有・重量不変")
 	check(not main.equip_weapon(a) and not main.equip_weapon(b), "連打・在庫0から他人へ装備は複製しない")
 	check(not main.storage.take_item(ITEM) and GameData.RECIPES.all(func(r): return not r["in"].has(ITEM)), "装備中は倉庫消費や製作材料にならない")
-	main.storage.inventory.counts[GameData.Item.FOOD] = main.storage.max_weight() - main.storage.equipped_weapon_weight()
+	main.storage.inventory.counts[GameData.Item.FOOD] = main.storage.max_weight() - main.storage.current_weight()
 	weight = main.storage.current_weight()
 	check(weight == main.storage.max_weight() and main.unequip_weapon(a), "満載でも計上済み重量のまま倉庫へ外せる")
 	check(main.storage.current_weight() == weight and main.storage.count_of(ITEM) == 1 and not main.unequip_weapon(a), "解除連打で重複せず重量・在庫保持")
@@ -65,7 +65,22 @@ func _initialize():
 	check(a.weapon_mult() == 1.0, "未装備の他人へ補正を広げない")
 	# 満載出力保全。0容量を意図的に注入し、完成品を捨てない。
 	main.storage.inventory.counts.clear()
-	main.storage.capacity_bonus = -CargoDB.CAPACITY
+	# Ranged gear is a swappable item on the same combat path. At close range
+	# it steps back toward its preferred distance while applying its attack.
+	main.storage.inventory.counts[GameData.Item.RIFLE] = 1
+	check(main.equip_weapon(b, GameData.Item.RIFLE), "ranged weapon equips on an individual")
+	check(b.weapon_is_ranged() and b.weapon_range() > GameData.MELEE_ATTACK_RANGE, "ranged weapon has a longer range than melee")
+	b.position = Vector2(680, GameData.GROUND_Y_MIN)
+	e.position = Vector2(700, GameData.GROUND_Y_MIN)
+	b.ai.enemy = e
+	b.ai._set_state(CharacterAI.State.COMBAT)
+	before = e.hp
+	b.ai.tick(0.5)
+	check(e.hp < before and b.position.distance_to(e.position) > 20.0, "ranged weapon attacks and backs away from a nearby enemy")
+	check(main.unequip_weapon(b) and b.weapon == -1, "ranged weapon can be unequipped")
+	main.storage.inventory.counts.clear()
+	main.base.vehicle_loadout = {"chassis":"large", "drive":"none", "power":"none", "primary":"none", "secondary":"none", "armor":"none", "ammo":0, "last_damage":0.0, "last_note":""}
+	main.storage.capacity_bonus = -main.base.vehicle_capacity()
 	main.enemies_root.remove_child(e)
 	e.free()
 	b.stop_work()

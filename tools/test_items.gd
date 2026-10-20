@@ -79,7 +79,7 @@ func _test_itemdb() -> void:
 	var ok := true
 	for it in all:
 		ok = ok and ItemDB.name_of(it) != "?" and ItemDB.CATEGORIES.has(ItemDB.category_of(it)) and ItemDB.tex(it) != null
-	check(ok and all.size() == 27, "インベントリに出る27種すべてに、名前・分類・絵がある")
+	check(ok and all.size() == 28, "インベントリに出る28種すべてに、名前・分類・絵がある")
 	var unique := {}
 	for it in all: unique[it]=true
 	check(unique.size()==all.size(), "アイテムIDに重複がない")
