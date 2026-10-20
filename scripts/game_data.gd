@@ -338,6 +338,9 @@ const RAMP_TOP := Vector2(904, 484)
 const RAMP_FOOT := Vector2(992, 548)
 const GROUND_Y_MIN := 556.0
 const GROUND_Y_MAX := 700.0
+## Enabled only by the isolated large/reinforced-large chassis.  Keeping this
+## runtime flag false preserves the ordinary two-deck game and its saves.
+static var large_three_deck_enabled := false
 ## 以下は、部屋の初期配置（data/rooms.gd の DEFAULT_LAYOUT）での位置。実際の位置は部屋の変更で動くので、
 ## ゲームは Rooms の位置（processor_pos / storage_pos / engine_pos / floor_pos）を使う。ここは基準の値と、最初の仲間の位置にだけ使う。
 const MACHINE_X := 340.0                    # 加工設備（上の階）
@@ -349,6 +352,14 @@ const STORAGE_SLOTS_X := [556.0, 600.0, 644.0, 688.0, 732.0]
 
 ## 足元のy座標からどの階かを返す（0=地面 1=下の階 2=上の階）
 static func floor_of_y(y: float) -> int:
+	if large_three_deck_enabled:
+		if y >= 520.0:
+			return 0
+		if y >= 408.0:
+			return 1
+		if y >= 300.0:
+			return 2
+		return 3
 	if y >= 520.0:
 		return 0
 	if y >= 420.0:
@@ -357,11 +368,25 @@ static func floor_of_y(y: float) -> int:
 
 
 static func deck_y(floor_i: int) -> float:
+	if large_three_deck_enabled:
+		return LargeVehicleLayout.deck_y(floor_i)
 	return LO_Y if floor_i == 1 else UP_Y
 
 
 ## 階をまたぐ移動の1区間。approach まで歩き、dest まで登り降りして dest_floor になる。
 static func route_leg(from_floor: int, to_floor: int) -> Dictionary:
+	if large_three_deck_enabled:
+		if to_floor > from_floor:
+			if from_floor == 0:
+				return {"approach": LargeVehicleLayout.RAMP_FOOT, "dest": LargeVehicleLayout.RAMP_TOP, "floor": 1, "kind": "ramp"}
+			if from_floor == 1:
+				return {"approach": Vector2(LargeVehicleLayout.LOWER_LADDER_X, LargeVehicleLayout.deck_y(1)), "dest": Vector2(LargeVehicleLayout.LOWER_LADDER_X, LargeVehicleLayout.deck_y(2)), "floor": 2, "kind": "ladder"}
+			return {"approach": Vector2(LargeVehicleLayout.UPPER_LADDER_X, LargeVehicleLayout.deck_y(2)), "dest": Vector2(LargeVehicleLayout.UPPER_LADDER_X, LargeVehicleLayout.deck_y(3)), "floor": 3, "kind": "ladder"}
+		if from_floor == 3:
+			return {"approach": Vector2(LargeVehicleLayout.UPPER_LADDER_X, LargeVehicleLayout.deck_y(3)), "dest": Vector2(LargeVehicleLayout.UPPER_LADDER_X, LargeVehicleLayout.deck_y(2)), "floor": 2, "kind": "ladder"}
+		if from_floor == 2:
+			return {"approach": Vector2(LargeVehicleLayout.LOWER_LADDER_X, LargeVehicleLayout.deck_y(2)), "dest": Vector2(LargeVehicleLayout.LOWER_LADDER_X, LargeVehicleLayout.deck_y(1)), "floor": 1, "kind": "ladder"}
+		return {"approach": LargeVehicleLayout.RAMP_TOP, "dest": LargeVehicleLayout.RAMP_FOOT, "floor": 0, "kind": "ramp"}
 	if to_floor > from_floor:
 		if from_floor == 0:
 			return {"approach": RAMP_FOOT, "dest": RAMP_TOP, "floor": 1, "kind": "ramp"}

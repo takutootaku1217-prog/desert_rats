@@ -127,3 +127,61 @@ flag are reference-only and are not game assets.
 The local reference copy is intentionally held outside this Godot project at
 `C:\\Users\\user\\Documents\\Codex\\2026-10-20\\task-4\\reference\\user_provided_assault_fortress.png`
 so it cannot be accidentally imported or displayed in-game.
+
+## Three-deck coordinate correction (current)
+
+The previous code-only shell used an unrelated top rectangle (`y=-32..248`)
+while the real floors and wheels remained around `y=354/482/506`.  It is now
+replaced by `data/large_vehicle_layout.gd`, the single world-pixel contract
+used by the large/reinforced-large chassis only:
+
+| item | world coordinate / bound |
+| --- | --- |
+| exterior hull body | `x=-80..912`, `y=106..506` |
+| walkable decks | floor 1 `y=462`, floor 2 `y=354`, floor 3 `y=246` |
+| wheel centers | `(40,506)`, `(296,506)`, `(424,506)`, `(664,506)`, `(792,506)` |
+| lower vertical path | `x=484`, floor 1 ↔ floor 2 |
+| upper vertical path | `x=636`, floor 2 ↔ floor 3 |
+| ramp | `(992,548)` ↔ `(904,462)` |
+| roof main-turret mount | `(286,86)` |
+
+The standard two-deck constants and room-save schema remain unchanged.
+`GameData.large_three_deck_enabled` is set at runtime only for the isolated
+large/reinforced-large chassis.  Existing lower/middle room overlays,
+facilities, and workers follow the revised floor positions; the third deck is
+a separate three-room walkable prototype deck. Applying the existing combat
+preset starts three real Worker walkthrough targets there; during that short
+walkthrough only, a worker's usual AI yields to the route and resumes on
+arrival.  This is not a global AI or save-format change.
+
+`tools/test_large_vehicle_layout.gd` checks the shared hull/deck/wheel/turret
+contract and drives a real `Worker.move_to_target()` from the ramp through all
+three top-deck rooms, down through both ladders, and back to the ground.  It
+also checks that normal two-deck coordinates remain unchanged when the flag is
+off. The marker completed with Godot 4.7.2 on 2026-10-20. The existing
+headless `view` and `manual_combat` diagnostics also passed after this change.
+These are behavior/coordinate checks, not an OS-level screenshot.
+
+## Raster-asset handoff after alignment
+
+No generated raster was silently substituted for the inspected reference.
+Once a consumer-local generated asset is available, use these transparent PNG
+parts rather than a flattened perspective image:
+
+- `fortress_hull_side.png`: **1024×432**, with the visible body in canvas
+  `x=16..1008`, `y=32..432`; place canvas at world `(-96,74)` so the visible
+  body lands exactly on the contract hull.
+- `fortress_main_turret.png`: **256×112**, separate from the hull; use a pivot
+  32 px from its left and 72 px from its top at `(286,86)` so recoil/aim stay
+  independent.
+- `fortress_secondary_turret.png`: **112×64**, three independent mounts on
+  the roofline; do not bake barrels into the body asset.
+- `fortress_armor_overlay.png`: **1024×432**, matching the hull canvas and
+  containing only removable white/charcoal plates, red diagonal marks, and
+  sparse cyan emitters. Keep windows as small armored slits.
+- retain the existing five wheel centers above until a deliberate running-gear
+  redesign; any wheel sheet must be centered on those coordinates.
+
+The factory background, text/UI, and angled reference perspective are excluded
+from every game asset. Native window capture remains unverified because the
+computer-use guidance callback is unavailable in this environment.

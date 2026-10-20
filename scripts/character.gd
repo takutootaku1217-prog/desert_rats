@@ -59,6 +59,9 @@ var bed_index := -1
 var _climb_dest = null        # 階をまたぐ移動の途中（Vector2）
 var _climb_floor := 1
 var _climb_kind := ""
+## Isolated visual-prototype route.  It temporarily takes precedence over AI
+## only while the fortress walkthrough is running, then returns control intact.
+var prototype_walk_target = null
 var _t := 0.0
 var _sheet: Texture2D
 
@@ -300,7 +303,12 @@ func _process(delta: float) -> void:
 	sleeping = false
 	resting = false
 	pose = ""
-	ai.tick(delta)
+	if prototype_walk_target != null:
+		target = prototype_walk_target
+		if move_to_target(delta):
+			prototype_walk_target = null
+	else:
+		ai.tick(delta)
 	CrewStatus.tick(self, delta)                  # 満腹度・疲労度・HP・精神状態の増減（scripts/crew_status.gd）
 	queue_redraw()
 

@@ -203,13 +203,18 @@ static func effect_text(rtype: String) -> String:
 # 位置（ワールド座標）。車体の左上 GameData.HULL_POS からの論理ユニット × UNIT。絵の細かさとは関係がない
 # ------------------------------------------------------------------
 static func slot_feet_y(slot: String) -> float:
+	if GameData.large_three_deck_enabled:
+		return GameData.deck_y(int(SLOTS[slot]["floor"]))
 	return GameData.HULL_POS.y + float(SLOTS[slot]["feet"]) * UNIT
 
 
 ## 区画に重ねる絵の描画範囲（ワールド座標。天井の吊り金具のぶん、上に2ユニット広い。絵の細かさに依存しない）
 static func overlay_rect(slot: String) -> Rect2:
 	var s: Dictionary = SLOTS[slot]
-	var pos := Vector2(GameData.HULL_POS.x + float(s["x0"]) * UNIT, GameData.HULL_POS.y + float(s["top"] - 2) * UNIT)
+	var y := GameData.HULL_POS.y + float(s["top"] - 2) * UNIT
+	if GameData.large_three_deck_enabled:
+		y = slot_feet_y(slot) - float(s["feet"] - s["top"] + 2) * UNIT
+	var pos := Vector2(GameData.HULL_POS.x + float(s["x0"]) * UNIT, y)
 	return Rect2(pos, slot_size(slot) * float(UNIT))
 
 

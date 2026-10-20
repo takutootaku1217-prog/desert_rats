@@ -94,6 +94,20 @@ func apply_layout() -> void:
 	storage.position = Rooms.storage_pos(ss) if ss != "" else Vector2(GameData.STORAGE_X, GameData.LO_Y)
 
 
+func is_large_three_deck() -> bool:
+	return str(vehicle_loadout.get("chassis", "medium")) in ["large", "reinforced_large"]
+
+
+func start_large_interior_walkthrough() -> void:
+	if not is_large_three_deck():
+		return
+	GameData.large_three_deck_enabled = true
+	for i in mini(game.workers.size(), LargeVehicleLayout.TOP_DECK_ROOMS.size()):
+		var worker = game.workers[i]
+		if worker != null and not worker.away and not worker.down:
+			worker.prototype_walk_target = LargeVehicleLayout.top_room_anchor(i)
+
+
 ## 部屋の種類の区画（なければ ""）
 func room_slot(rtype: String) -> String:
 	return Rooms.slot_of(game.room_layout, rtype)
@@ -413,6 +427,7 @@ func heal(amount: float) -> void:
 
 
 func _process(delta: float) -> void:
+	GameData.large_three_deck_enabled = is_large_three_deck()
 	hit_timer = maxf(0.0, hit_timer - delta)
 	var spd: float = game.scroll_speed
 	_wheel_t += spd * delta / 13.6
@@ -456,6 +471,28 @@ func _draw_rooms(off: Vector2) -> void:
 		if age < 1.6:                                                    # 部屋ができた合図
 			GameData.draw_text(self, rect.position + off + Vector2(rect.size.x / 2.0, 76.0 - age * 14.0), "%sができた!" % Rooms.TYPES[rtype]["name"],
 					16, Color("fde68a"), 160.0)
+	if GameData.large_three_deck_enabled:
+		_draw_large_top_deck(off)
+
+
+func _draw_large_top_deck(off: Vector2) -> void:
+	var deck_y := LargeVehicleLayout.deck_y(3)
+	# Real walkable third deck; no menu text is painted on the exterior shell.
+	draw_rect(Rect2(Vector2(-48, deck_y - 82) + off, Vector2(832, 82)), Color("241d1d"))
+	draw_line(Vector2(-48, deck_y) + off, Vector2(784, deck_y) + off, Color("15191f"), 8.0)
+	draw_line(Vector2(-48, deck_y - 4) + off, Vector2(784, deck_y - 4) + off, Color("e49a54"), 2.0)
+	for room in LargeVehicleLayout.TOP_DECK_ROOMS:
+		var r: Rect2 = room["rect"]
+		r.position += off
+		draw_rect(r.grow(3), Color("0d1015"))
+		draw_rect(r, Color("533629"))
+		draw_rect(Rect2(r.position + Vector2(12, 18), Vector2(r.size.x - 24, 8)), Color("f0a34d"))
+		for lamp_x in [r.position.x + 24.0, r.end.x - 24.0]:
+			draw_circle(Vector2(lamp_x, r.position.y + 34), 4.0, Color("ffcc75"))
+	# Two separate vertical paths make every deck reachable without moving the
+	# normal-game ladder/ramp constants.
+	for ladder_x in [LargeVehicleLayout.LOWER_LADDER_X, LargeVehicleLayout.UPPER_LADDER_X]:
+		draw_line(Vector2(ladder_x, deck_y) + off, Vector2(ladder_x, LargeVehicleLayout.deck_y(2)) + off, Color("b8a58d"), 4.0)
 
 
 ## 建てた設備（ワークベンチ・ベッド）を車体の上に重ねて描く。まだ建てていない置き場所は、
@@ -508,7 +545,8 @@ func _draw() -> void:
 		_draw_rooms(shake + Vector2(0, bob))
 		# 斜路
 		var ramp := GameData.tex("res://assets/base/ramp.png")
-		draw_texture_rect(ramp, Rect2(Vector2(900, 482) + Vector2(0, bob), ArtSpec.px_size(ArtSpec.RAMP)), false)
+		var ramp_top_y := LargeVehicleLayout.RAMP_TOP.y if GameData.large_three_deck_enabled else 482.0
+		draw_texture_rect(ramp, Rect2(Vector2(900, ramp_top_y) + Vector2(0, bob), ArtSpec.px_size(ArtSpec.RAMP)), false)
 		_draw_facilities(shake + Vector2(0, bob))
 		# 燃料計（燃料を入れる場所の上。機関室があればその炉、なければ搬入口）
 		var ex := engine_point().x

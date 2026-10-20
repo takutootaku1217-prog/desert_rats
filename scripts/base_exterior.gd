@@ -93,19 +93,21 @@ func _draw_large_vehicle_layers(off: Vector2) -> void:
 	var glow := Color("35d8ff")
 	var stripe := Color("c93d35")
 	var origin := GameData.HULL_POS + off
-	# Preserve three deck heights instead of compressing the fortress into a flat bus.
-	var upper := Rect2(origin + Vector2(32, -226), Vector2(744, 280))
+	# One shared world-space contract: hull x=-80..912, lower edge y=506,
+	# wheel centers y=506, and three actual deck lines y=246/354/462.
+	var upper := Rect2(LargeVehicleLayout.HULL_RECT.position + off, LargeVehicleLayout.HULL_RECT.size)
 	# stepped roofline and riveted main shell
-	var hull := PackedVector2Array([upper.position + Vector2(0, 270), upper.position + Vector2(0, 78), upper.position + Vector2(58, 78), upper.position + Vector2(126, 20), upper.position + Vector2(452, 20), upper.position + Vector2(452, 4), upper.position + Vector2(628, 4), upper.position + Vector2(744, 72), upper.position + Vector2(744, 270)])
+	var hull := PackedVector2Array([upper.position + Vector2(0, 400), upper.position + Vector2(0, 142), upper.position + Vector2(76, 142), upper.position + Vector2(172, 54), upper.position + Vector2(540, 54), upper.position + Vector2(540, 18), upper.position + Vector2(762, 18), upper.position + Vector2(992, 132), upper.position + Vector2(992, 400)])
 	draw_colored_polygon(hull, outline)
-	var inner := PackedVector2Array([upper.position + Vector2(8, 262), upper.position + Vector2(8, 84), upper.position + Vector2(66, 84), upper.position + Vector2(132, 28), upper.position + Vector2(444, 28), upper.position + Vector2(444, 12), upper.position + Vector2(622, 12), upper.position + Vector2(736, 76), upper.position + Vector2(736, 262)])
+	var inner := PackedVector2Array([upper.position + Vector2(8, 392), upper.position + Vector2(8, 148), upper.position + Vector2(84, 148), upper.position + Vector2(180, 62), upper.position + Vector2(532, 62), upper.position + Vector2(532, 26), upper.position + Vector2(756, 26), upper.position + Vector2(984, 138), upper.position + Vector2(984, 392)])
 	draw_colored_polygon(inner, frame_col)
 	for floor in [0, 1, 2]:
-		var y: float = upper.position.y + 18 + floor * 82
-		draw_line(Vector2(upper.position.x + 10, y + 70), Vector2(upper.end.x - 10, y + 70), shadow, 6.0)
-		draw_line(Vector2(upper.position.x + 12, y + 66), Vector2(upper.end.x - 12, y + 66), Color("8d98a4"), 1.0)
+		var deck_y := LargeVehicleLayout.deck_y(3 - floor) + off.y
+		var y: float = deck_y - 76
+		draw_line(Vector2(upper.position.x + 10, deck_y), Vector2(upper.end.x - 10, deck_y), shadow, 6.0)
+		draw_line(Vector2(upper.position.x + 12, deck_y - 4), Vector2(upper.end.x - 12, deck_y - 4), Color("8d98a4"), 1.0)
 		for column in 6:
-			var panel := Rect2(Vector2(upper.position.x + 22 + column * 114, y + 10), Vector2(80, 48))
+			var panel := Rect2(Vector2(upper.position.x + 36 + column * 150, y + 12), Vector2(106, 50))
 			draw_rect(panel.grow(2), outline)
 			draw_rect(panel, frame_col if (column + floor) % 2 == 0 else armor_col)
 			draw_line(panel.position + Vector2(14, 4), panel.position + Vector2(48, 44), stripe, 7.0)
@@ -121,7 +123,7 @@ func _draw_large_vehicle_layers(off: Vector2) -> void:
 	for x in [upper.position.x + 104.0, upper.position.x + 220.0, upper.position.x + 448.0, upper.position.x + 578.0, upper.position.x + 696.0]:
 		draw_line(Vector2(x, upper.position.y + 88), Vector2(x, upper.end.y - 12), shadow, 6.0)
 		draw_line(Vector2(x + 2, upper.position.y + 92), Vector2(x + 2, upper.end.y - 16), Color("9ba6af"), 1.0)
-	var garage := Rect2(upper.position + Vector2(544, 204), Vector2(166, 58))
+	var garage := Rect2(upper.position + Vector2(744, 312), Vector2(166, 58))
 	draw_rect(garage.grow(4), outline)
 	draw_rect(garage, Color("402821"))
 	draw_rect(Rect2(garage.position + Vector2(12, 12), Vector2(102, 24)), Color("ab6030"))
@@ -129,18 +131,18 @@ func _draw_large_vehicle_layers(off: Vector2) -> void:
 	draw_circle(garage.position + Vector2(34, 39), 6, Color("8c8574"))
 	draw_circle(garage.position + Vector2(96, 39), 10, outline)
 	draw_circle(garage.position + Vector2(96, 39), 6, Color("8c8574"))
-	draw_line(upper.position + Vector2(26, 142), upper.position + Vector2(26, 248), Color("1b2028"), 10.0)
-	draw_line(upper.position + Vector2(26, 142), upper.position + Vector2(104, 82), Color("1b2028"), 10.0)
+	draw_line(upper.position + Vector2(32, 312), upper.position + Vector2(32, 390), Color("1b2028"), 10.0)
+	draw_line(upper.position + Vector2(32, 312), upper.position + Vector2(118, 222), Color("1b2028"), 10.0)
 	if state.armor != "none":
 		for floor in 3:
-			var left_plate := Rect2(Vector2(upper.position.x - 10, upper.position.y + floor * 82 + 24), Vector2(22, 52))
-			var right_plate := Rect2(Vector2(upper.end.x - 8, upper.position.y + floor * 82 + 24), Vector2(22, 52))
+			var left_plate := Rect2(Vector2(upper.position.x - 10, LargeVehicleLayout.deck_y(3 - floor) - 66 + off.y), Vector2(22, 52))
+			var right_plate := Rect2(Vector2(upper.end.x - 8, LargeVehicleLayout.deck_y(3 - floor) - 66 + off.y), Vector2(22, 52))
 			draw_rect(left_plate, outline)
 			draw_rect(left_plate.grow(-3), armor_col)
 			draw_rect(right_plate, outline)
 			draw_rect(right_plate.grow(-3), armor_col)
 	if state.primary != "none":
-		var mount := Vector2(upper.position.x + 426, upper.position.y - 18)
+		var mount := LargeVehicleLayout.ROOF_TURRET_MOUNT + off
 		draw_circle(mount + Vector2(28, 18), 27, outline)
 		draw_circle(mount + Vector2(28, 18), 21, Color("7c4a2c"))
 		var recoil := sin(_t * 11.0) * 2.0 if int(state.get("ammo", 0)) > 0 else 0.0
@@ -148,8 +150,8 @@ func _draw_large_vehicle_layers(off: Vector2) -> void:
 		draw_rect(Rect2(mount + Vector2(44 - recoil, 14), Vector2(138, 8)), Color("d7a64d"))
 		draw_circle(mount + Vector2(20, 17), 5, Color("f6c263"))
 	if state.secondary != "none":
-		for x in [140.0, 270.0, 610.0]:
-			var mount2 := Vector2(upper.position.x + x, upper.position.y - 12)
+		for x in [126.0, 420.0, 716.0]:
+			var mount2 := Vector2(upper.position.x + x, upper.position.y + 22)
 			draw_circle(mount2 + Vector2(15, 14), 17, outline)
 			draw_circle(mount2 + Vector2(15, 14), 12, Color("71432a"))
 			draw_rect(Rect2(mount2 + Vector2(22, 4), Vector2(60, 5)), Color("e1af55"))

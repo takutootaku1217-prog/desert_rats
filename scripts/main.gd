@@ -1452,6 +1452,7 @@ func equip_vehicle_part(slot: String, id: String) -> void:
 
 func apply_vehicle_combat_preset() -> void:
 	base.vehicle_loadout.merge({"chassis":"reinforced_large", "drive":"tracks", "power":"turbo", "armor":"composite", "primary":"cannon", "secondary":"machine_gun", "ammo":12, "prototype_unlimited":true}, true)
+	base.start_large_interior_walkthrough()
 	base.vehicle_loadout.last_note = "�����t���X�y�b�N�𑕔��"
 	base.queue_redraw()
 	if vehicle_ui != null:
