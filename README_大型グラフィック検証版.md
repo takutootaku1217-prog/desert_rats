@@ -4,11 +4,11 @@
 
 ## 場所と履歴
 
-- コピー: `C:\Users\user\Documents\Codex\2026-10-21\task-4\desert_rats-github-current`
+- コピー: このリポジトリのルート（ローカルの検証用 checkout）
 - GitHub 基点: `main` / `c04407e29765bbfc57d3852a449577c934febc46`
 - 作業ブランチ: `gpt/large-fortress-graphics-validation`
 - 移植元: ローカル隔離試作 `prototype/vehicle-visual-validation` / `54c8f84f18aeba86a8312016d5830c8f6cb26143`。この SHA は GitHub 未 push であり、GitHub 現行版には大型拠点の追加内容が含まれません。
-- このコピーの変更はローカルコミットのみです。push、PR、`main` 統合は行っていません。
+- このブランチは検証用途だけの公開ブランチです。PR、`main` 統合は行いません。
 
 ## 移植した検証範囲
 
