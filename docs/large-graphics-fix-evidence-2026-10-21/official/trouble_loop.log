@@ -1,0 +1,53 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+-- manual repair, interruption, and autonomous return --
+  ok repair UI data reports kit requirement and shortage before assigning
+  ok a missing kit neither assigns a worker nor consumes an order
+  ok explicit worker repair order is accepted with one kit
+  ok repair assignment is visible while pending
+  ok repairer collects kit, repairs, and finishes without fuel
+  ok one field repair spends exactly one kit, repairs DRIVE, and clears its rear-hit leak accumulation
+  ok completed direct repair releases assignment and reservation
+  ok after repair, normal priority work resumes automatically
+  ok a second repair request starts normally
+  ok repair reaches its active phase
+  ok active repair can be cancelled
+  ok cancelling active repair returns the kit and clears reservation
+  ok repair can be assigned again after cancellation
+  ok reassigned repair starts
+  ok repairer accepts a persistent retreat order
+  ok retreat pauses repair safely without losing its kit or reservation
+  ok persistent retreat has an explicit cancellation path
+  ok injury/stop-work cleanup cannot leave a repair assignment stuck
+  ok HUD exposes repair material and assignment information
+-- retreat interrupts eating and combat without re-engaging --
+  ok worker can begin the existing eating state
+  ok eating state is active before retreat
+  ok retreat command is accepted while eating
+  ok retreat releases meal claim and returns carried food
+  ok retreat can be cancelled after eating interruption
+  ok manual combat order starts
+  ok combatant accepts early retreat
+  ok retreat clears active combat target and prevents a new engagement
+  ok persistent retreat blocks another manual combat order
+  ok crew status text identifies persistent retreat
+-- rear-only enemy damage, speed, and fuel leak --
+  ok normal travel wear lowers DRIVE without creating a fuel leak
+  ok front enemy hit damages ordinary DRIVE only and cannot start a leak
+  ok center enemy hit remains separate from rear leak accumulation
+  ok rear hits below the provisional threshold do not leak
+  ok rear hit crossing the threshold starts a fuel leak
+  ok continued rear hits accumulate and raise the leak rate
+  ok reverse travel keeps the same vehicle-local rear and excludes the front
+  ok severe rear engine damage lowers target speed
+  ok stopping reduces but does not eliminate leak cost, and empty fuel never goes negative
+  ok repairs reduce rear accumulation until the leak stops without restoring speed automatically
+  ok emergency repair clears rear-hit accumulation together with DRIVE
+  ok breakdown DRIVE damage is separate from rear enemy leak damage
+  ok HUD shows the rear-hit leak status and reduced/stopped behavior
+-- save restore preserves orders without blocked reservations --
+  ok repair request is ready for save
+  ok save snapshot with retreat and repair assignment restores
+  ok new saves restore rear-hit leakage while paused repair has no stale reservation
+  ok older saves with low DRIVE but no rear-hit field stay compatible and do not leak
+== 結果: すべて成功 ==

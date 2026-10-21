@@ -1,0 +1,13 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+OK worker 0 finishes walkthrough at its actual upper-deck anchor
+OK worker 1 finishes walkthrough at its actual upper-deck anchor
+OK worker 2 finishes walkthrough at its actual upper-deck anchor
+OK large chassis walkthrough reaches all three upper-deck anchors
+OK normal hauling uses the lower-deck ladder and middle deck
+OK normal hauling and processing complete after large chassis switch
+OK worker position is advanced by normal AI rather than a fixed interior marker
+OK switching back restores ordinary storage floor
+OK large chassis snapshot applies
+OK save restore synchronizes large storage floor before AI resumes
+== large vehicle workers: passed ==

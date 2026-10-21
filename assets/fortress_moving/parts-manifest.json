@@ -1,0 +1,152 @@
+{
+  "format_version": 1,
+  "coordinate_system": "world pixels, x right, y down; radians clockwise; regions preserve unmodified RGBA sources",
+  "parts": {
+    "body": {
+      "file": "png/body-fixed.png",
+      "source_region": [
+        32,
+        4,
+        1610,
+        920
+      ],
+      "rect": [
+        8,
+        4,
+        880,
+        502.857143
+      ],
+      "motion": "fixed; crane, fabric and garage shutter removed",
+      "sha256": "14e8c83a2086e1e8e2f206fe73a197d922650c717086435df4015bcb58496ee1"
+    },
+    "wheel": {
+      "file": "png/wheel.png",
+      "source_region": [
+        92,
+        97,
+        1072,
+        1072
+      ],
+      "size": [
+        112,
+        112
+      ],
+      "pivot": [
+        56,
+        56
+      ],
+      "mounts": [
+        [
+          116,
+          506
+        ],
+        [
+          220,
+          506
+        ],
+        [
+          416,
+          506
+        ],
+        [
+          520,
+          506
+        ],
+        [
+          628,
+          506
+        ],
+        [
+          744,
+          506
+        ]
+      ],
+      "motion": "angle_rad += signed_distance / 56.0",
+      "sha256": "ee15e292d4a33272abfaa1f9a85897d6a00ce27d780ff55088f72d54cfd07d55"
+    },
+    "gun": {
+      "file": "png/roof-gun.png",
+      "source_region": [
+        216,
+        272,
+        1360,
+        400
+      ],
+      "size": [
+        172,
+        50.588235
+      ],
+      "pivot": [
+        60,
+        49.3
+      ],
+      "mount": [
+        438,
+        119
+      ],
+      "motion": "rotate whole sprite and translate for recoil; barrel/base not split",
+      "sha256": "08ee2658270c2d166dece5b8d9e781efd37d5d3068e11d7245ff2a59b8405297"
+    },
+    "crane": {
+      "file": "png/crane.png",
+      "source_region": [
+        80,
+        75,
+        1904,
+        635
+      ],
+      "size": [
+        206,
+        68.7
+      ],
+      "pivot": [
+        39,
+        68
+      ],
+      "mount": [
+        644,
+        119
+      ],
+      "motion": "rotate whole crane; joints not split",
+      "sha256": "fe674565c7ec8f2f7080700e8331074405edf382c448b0a7299373eba7a91de3"
+    },
+    "flag": {
+      "file": "png/flag.png",
+      "source_region": [
+        152,
+        92,
+        1234,
+        836
+      ],
+      "rect": [
+        163,
+        28,
+        62,
+        42
+      ],
+      "pivot": [
+        62,
+        0
+      ],
+      "motion": "deform fabric columns; pole remains in fixed body",
+      "sha256": "39af20e5ca35fbc1123f26164da2d61009890e538caefb8000e83e4debc9ecad"
+    },
+    "shutter": {
+      "file": "png/garage-shutter.png",
+      "source_region": [
+        140,
+        120,
+        1588,
+        608
+      ],
+      "rect": [
+        600,
+        364,
+        170,
+        81
+      ],
+      "motion": "translate up within clipped opening; 0=closed,1=open",
+      "sha256": "739c58793d5220aec9c13d6f3539dedbe78071b79c61356178044b2230eb55f6"
+    }
+  }
+}

@@ -1,0 +1,13 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+WARNING: Loaded resource as image file, this will not work on export: 'res://assets/fortress_source/fortress-hull.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+     at: load_from_file (core/io/image.cpp:2766)
+     GDScript backtrace (most recent call first):
+         [0] _assert_rect_contract (res://tools/test_large_vehicle_layout.gd:26)
+         [1] _init (res://tools/test_large_vehicle_layout.gd:6)
+WARNING: Loaded resource as image file, this will not work on export: 'res://assets/fortress_source/fortress-interior.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+     at: load_from_file (core/io/image.cpp:2766)
+     GDScript backtrace (most recent call first):
+         [0] _assert_rect_contract (res://tools/test_large_vehicle_layout.gd:31)
+         [1] _init (res://tools/test_large_vehicle_layout.gd:6)
+LARGE_VEHICLE_LAYOUT_COMPLETE

@@ -1453,10 +1453,9 @@ func equip_vehicle_part(slot: String, id: String) -> void:
 func apply_vehicle_combat_preset() -> void:
 	base.vehicle_loadout.merge({"chassis":"reinforced_large", "drive":"tracks", "power":"turbo", "armor":"composite", "primary":"cannon", "secondary":"machine_gun", "ammo":12, "prototype_unlimited":true}, true)
 	base.start_large_interior_walkthrough()
-	base.vehicle_loadout.last_note = "�����t���X�y�b�N�𑕔��"
+	base.vehicle_loadout.last_note = "戦闘フルスペック試作を適用しました。"
 	base.queue_redraw()
 	if vehicle_ui != null:
-		base.vehicle_loadout.last_note = "戦闘フルスペック試作を適用しました。"
 		vehicle_ui.refresh()
 
 
@@ -1482,8 +1481,7 @@ func fire_vehicle_weapon(slot: String) -> void:
 			target.take_damage(damage)
 			base.trigger_vehicle_fire_fx(slot)
 			var actual := maxf(0.0, before - target.hp)
-			var volley := " / 3連装副砲" if shots == 3 else ""
-			base.vehicle_loadout.last_note = "%s%s 発射: 敵HP %.0f → %.0f（実ダメージ %.1f / 入力 %.0f）/ 弾薬 -%d" % [part.name, volley, before, maxf(0.0, target.hp), actual, damage, ammo]
+			base.vehicle_loadout.last_note = "%s 発射: 敵HP %.0f → %.0f（実ダメージ %.1f / 入力 %.0f）/ 弾薬 -%d" % [part.name, before, maxf(0.0, target.hp), actual, damage, ammo]
 	if vehicle_ui != null:
 		vehicle_ui.refresh()
 

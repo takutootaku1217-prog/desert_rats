@@ -1,0 +1,25 @@
+{
+  "adopted_on": "2026-10-21",
+  "approval": "User: これいいねえ これに変更！",
+  "generator": "built-in image_gen.imagegen; transparent_background=true",
+  "reference": "art_sources/approved_fortress/approved-exterior-mockup.png",
+  "prompts": {
+    "armored-body.png": "Use case: precise-object-edit / background-extraction. Production game sprite extraction from APPROVED reference. Extract ONLY the large central armored mobile-base body as a single transparent RGBA sprite, exactly preserving the approved faded olive/ochre bolted iron armor, dark pixel outlines, amber slit windows, three-level BOX SHAPED profile, small blue left-facing cab, utility hatches, bottom-right closed garage shutter, rooftop yellow crane, satellite dish, antenna, little red flag and rooftop crates. Preserve its exact character and high-detail 2D PIXEL ART design; do not redesign or replace it with a spaceship, tank, or white/red armor. Strict side view, whole body fully inside canvas with modest transparent margins. REMOVE the navy UI, text, hangar background, floor, shadows and all SIX circular tires; tires will be separately animated. Preserve the undercarriage beams and suspension housings above the removed tires, but no tires or circular wheels remain anywhere in the sprite. Also REMOVE ONLY the compact roof cannon at the middle-left of roof, leaving a small empty mounting plate there; this cannon will be a separate animated sprite. Keep the yellow utility crane on the right. Vehicle body should have a flat coherent bottom edge with tire connection points. No drop shadows, glow outside silhouette, baked labels, checkerboard or background colors. Use visible clean square pixel clusters and stepped contours, discrete material shading; match approved style. Output only this one body asset on genuinely transparent background.",
+    "wheel.png": "Use case: precise-object-edit / background-extraction. Extract JUST ONE of the six large matching tires from the APPROVED central vehicle into a standalone centered transparent RGBA game sprite. Exactly match approved side-on 2D PIXEL ART: chunky charcoal rubber tire with discrete tread blocks, rusty brown metal hub, round concentric rings and six small wheel bolts. Perfectly circular orthographic side view, no perspective, NO suspension, NO axle extending outside circle, NO body, NO floor or shadow, NO UI or text. Center circle precisely in square canvas with 5 percent transparent margin all around, for rotation around canvas center. The center must be the true center of the wheel. Preserve readable square pixels, limited brown/gray palette and warm highlights. Do not generate a photoreal car wheel or steel spaceship wheel. One tire only, transparent outside.",
+    "roof-gun.png": "Use case: precise-object-edit / background-extraction. Extract ONLY the compact single rooftop cannon from the center-left roof of the APPROVED vehicle, as a standalone game sprite with genuinely transparent background. Preserve precisely its small grounded industrial 2D PIXEL ART design: rectangular olive/ochre gun housing with rivets, dark barrel pointing RIGHT, tiny amber details, and a small flat dark mounting foot beneath. Full orthographic side view, squared pixel clusters, stepped outline, warm brown/olive/steel palette, no neon cyan, no smooth chrome. The whole gun including mount and barrel fully fits in a landscape canvas with modest transparent margins. Nothing else: NO vehicle body, NO tires, NO crane, NO UI, NO text, NO environment, NO floor, NO drop shadow. Keep proportions of the reference compact gun: low-profile housing, relatively thin horizontal barrel, understated base. This is a separate roof-mounted 2D sprite, not a giant battleship turret."
+  },
+  "assets": {
+    "armored-body.png": {
+      "path": "assets/fortress_pixel/armored-body.png",
+      "sha256": "329c96816f294dad738c295e88a24f88823ad657a028d737efae07aa9d3d02b7"
+    },
+    "wheel.png": {
+      "path": "assets/fortress_pixel/wheel.png",
+      "sha256": "ee15e292d4a33272abfaa1f9a85897d6a00ce27d780ff55088f72d54cfd07d55"
+    },
+    "roof-gun.png": {
+      "path": "assets/fortress_pixel/roof-gun.png",
+      "sha256": "08ee2658270c2d166dece5b8d9e781efd37d5d3068e11d7245ff2a59b8405297"
+    }
+  }
+}

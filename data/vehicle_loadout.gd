@@ -49,9 +49,9 @@ static func initial_state() -> Dictionary:
 
 static func part(slot: String, id: String) -> Dictionary:
 	if slot == "chassis" and id == "medium":
-		return {"id":"medium", "name":"�����t���[��", "weight":0, "capacity":360, "defense":0, "materials":{}, "desc":"���݂̕W���̎ԑ́B"}
+		return {"id":"medium", "name":"中型・標準フレーム", "weight":0, "capacity":360, "defense":0, "materials":{}, "desc":"既存の標準車体。"}
 	if id == "none" and slot in ["drive", "power"]:
-		return {"id":"none", "name":"������", "weight":0, "speed":100 if slot == "drive" else 0, "speed_bonus":0, "fuel_mult":1.0, "materials":{}, "desc":"���p���b�g���󂯂�"}
+		return {"id":"none", "name":"未装備", "weight":0, "speed":200 if slot == "drive" else 0, "speed_bonus":0, "fuel_mult":1.0, "materials":{}, "desc":"このスロットを空ける。"}
 	for row in PARTS.get(slot, []):
 		if row.id == id:
 			var result: Dictionary = row.duplicate(true)

@@ -28,9 +28,13 @@ func _initialize() -> void:
 	await _frames(5)
 	_shot("large-vehicle-customization.png")
 	main.vehicle_ui.close()
+	await _frames(5)
+	_shot("large-vehicle-interior.png")
 	main.base_view.set_mode(BaseView.Mode.EXTERIOR, true)
 	await _frames(5)
 	_shot("large-vehicle-exterior.png")
+	await _frames(30)
+	_shot("large-vehicle-exterior-flag-wave.png")
 	var worker = main.workers[0]
 	main.storage.inventory.counts[GameData.Item.RIFLE] = 1
 	main.equip_weapon(worker, GameData.Item.RIFLE)

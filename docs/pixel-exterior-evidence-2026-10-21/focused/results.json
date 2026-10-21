@@ -1,0 +1,17 @@
+[
+  {
+    "test": "large_vehicle_layout",
+    "exit": 0,
+    "passed": true
+  },
+  {
+    "test": "large_vehicle_workers",
+    "exit": 0,
+    "passed": true
+  },
+  {
+    "test": "vehicle_prototype",
+    "exit": 0,
+    "passed": true
+  }
+]

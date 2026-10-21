@@ -39,6 +39,7 @@ var body_bob := 0.0                      # 外装で、走っているときに�
 var _shake := Vector2.ZERO               # 被弾で揺れる量（このフレーム。内装・外装で同じ値を使う）
 var _body_t := 0.0
 var _wheel_t := 0.0
+var _wheel_angle := 0.0
 var _puffs: Array = []                   # 煙・砂ぼこり
 var _puff_timer := 0.0
 var _dust_timer := 0.0
@@ -473,6 +474,8 @@ func _process(delta: float) -> void:
 	_secondary_fire_fx = maxf(0.0, _secondary_fire_fx - delta)
 	var spd: float = game.scroll_speed
 	_wheel_t += spd * delta / 13.6
+	var wheel_radius := LargeVehicleLayout.MOVING_WHEEL_RADIUS if is_large_three_deck() and LargeVehicleLayout.moving_parts_available() else (LargeVehicleLayout.PIXEL_WHEEL_RADIUS if is_large_three_deck() and LargeVehicleLayout.pixel_exterior_available() else LargeVehicleLayout.WHEEL_RADIUS)
+	_wheel_angle = fposmod(_wheel_angle + spd * delta / wheel_radius, TAU)
 	_shake = Vector2(randf_range(-4, 4), 0) if hit_timer > 0.0 else Vector2.ZERO
 	# 外装: 走っているとき、車体（車輪は地面のまま）が段差で1ドットぶん跳ねる。内装は仲間の足元が動かないよう跳ねない
 	if view_exterior and spd > 5.0:
@@ -504,20 +507,30 @@ func _process(delta: float) -> void:
 ## 6つの区画の部屋の絵を、車体（初期配置の部屋が焼き込まれた hull.png）の上に重ねて描く。
 ## 部屋を変えるとここが変わる（重ね絵は assets/base/rooms/<系統>/。初期配置と同じ部屋でも同じ絵を重ねるので継ぎ目は出ない）。
 func _draw_rooms(off: Vector2) -> void:
-	if GameData.large_three_deck_enabled and LargeVehicleLayout.raster_assets_available():
-		# The supplied cutaway already contains the aligned three-deck shell.
-		# Facilities and real Workers are drawn afterwards, not baked into it.
-		return
+	var raster := GameData.large_three_deck_enabled and LargeVehicleLayout.raster_assets_available()
 	var now := Time.get_ticks_msec()
 	for slot in Rooms.SLOT_ORDER:
 		var rtype: String = game.room_layout.get(slot, "empty")
 		var rect: Rect2 = Rooms.overlay_rect(slot)
-		draw_texture_rect(GameData.tex(Rooms.overlay_path(slot, rtype)), Rect2(rect.position + off, rect.size), false)
+		# Keep the source cutaway for untouched rooms; player changes still get
+		# their live overlay. Leave the source ladder corridor visible through it.
+		if not raster or rtype != str(Rooms.DEFAULT_LAYOUT.get(slot, "empty")):
+			var tex := GameData.tex(Rooms.overlay_path(slot, rtype))
+			if raster and rect.position.x < LargeVehicleLayout.LOWER_LADDER_X + 18.0 and rect.end.x > LargeVehicleLayout.LOWER_LADDER_X - 18.0:
+				for span in [Vector2(rect.position.x, LargeVehicleLayout.LOWER_LADDER_X - 18.0), Vector2(LargeVehicleLayout.LOWER_LADDER_X + 18.0, rect.end.x)]:
+					var left := maxf(rect.position.x, span.x)
+					var right := minf(rect.end.x, span.y)
+					if right <= left:
+						continue
+					var region := Rect2((left - rect.position.x) / rect.size.x * tex.get_width(), 0, (right - left) / rect.size.x * tex.get_width(), tex.get_height())
+					draw_texture_rect_region(tex, Rect2(Vector2(left, rect.position.y) + off, Vector2(right - left, rect.size.y)), region)
+			else:
+				draw_texture_rect(tex, Rect2(rect.position + off, rect.size), false)
 		var age := float(now - int(room_built_at.get(slot, -99999))) / 1000.0
 		if age < 1.6:                                                    # 部屋ができた合図
 			GameData.draw_text(self, rect.position + off + Vector2(rect.size.x / 2.0, 76.0 - age * 14.0), "%sができた!" % Rooms.TYPES[rtype]["name"],
 					16, Color("fde68a"), 160.0)
-	if GameData.large_three_deck_enabled:
+	if GameData.large_three_deck_enabled and not raster:
 		_draw_large_top_deck(off)
 
 
@@ -579,24 +592,37 @@ func _draw() -> void:
 	var bob := 0.0                                  # 内装は跳ねない。外装の車体の跳ねは body_bob（BaseExterior が使う）
 	# 車輪（どちらの画面でも同じ。外装の車体は、この上に重ねて描かれる）
 	var use_fortress_raster := is_large_three_deck() and LargeVehicleLayout.raster_assets_available()
-	var wheels := GameData.tex(LargeVehicleLayout.RASTER_WHEEL if use_fortress_raster else "res://assets/base/wheels.png")
+	var moving_wheels := use_fortress_raster and LargeVehicleLayout.moving_parts_available()
+	var pixel_wheels := use_fortress_raster and LargeVehicleLayout.pixel_exterior_available()
+	var wheel_path := LargeVehicleLayout.MOVING_WHEEL if moving_wheels else (LargeVehicleLayout.PIXEL_WHEEL if pixel_wheels else (LargeVehicleLayout.RASTER_WHEEL if use_fortress_raster else "res://assets/base/wheels.png"))
+	var wheels := GameData.tex(wheel_path)
+	var radius := LargeVehicleLayout.MOVING_WHEEL_RADIUS if moving_wheels else (LargeVehicleLayout.PIXEL_WHEEL_RADIUS if pixel_wheels else LargeVehicleLayout.WHEEL_RADIUS)
 	var wspec := ArtSpec.WHEELS
 	var wsize := ArtSpec.px_size(wspec["cell"])                     # 画面上の大きさ（絵の細かさに依存しない）
 	var f := int(_wheel_t) % int(wspec["frames"])
-	if use_fortress_raster and view_exterior:
-		# Three supplied fender recesses cover these five independent centers;
-		# paired wheels therefore read as heavy running gear rather than stickers.
+	var centers := (LargeVehicleLayout.MOVING_WHEEL_CENTERS if moving_wheels else (LargeVehicleLayout.PIXEL_WHEEL_CENTERS if pixel_wheels else LargeVehicleLayout.WHEEL_CENTERS)) if use_fortress_raster else []
+	if not use_fortress_raster:
 		for wx in WHEEL_X:
-			draw_set_transform(Vector2(wx, 553.0), 0.0, Vector2(1.0, 0.24))
-			draw_circle(Vector2.ZERO, 58.0, Color(0.015, 0.02, 0.03, 0.32))
+			centers.append(Vector2(wx, WHEEL_Y))
+	if use_fortress_raster:
+		wsize = Vector2.ONE * radius * 2.0
+	if use_fortress_raster and view_exterior:
+		for center in centers:
+			draw_set_transform(Vector2(center.x, center.y + radius - 3.0), 0.0, Vector2(1.0, 0.16))
+			draw_circle(Vector2.ZERO, radius, Color(0.015, 0.02, 0.03, 0.32))
 			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
-	for wx in WHEEL_X:
+	for center in centers:
 		if use_fortress_raster:
-			draw_set_transform(Vector2(wx, WHEEL_Y + bob), _wheel_t, Vector2.ONE)
-			draw_texture_rect(wheels, Rect2(-wsize / 2.0, wsize), false)
+			draw_set_transform(center + Vector2(0, bob), _wheel_angle, Vector2.ONE)
+			if moving_wheels:
+				draw_texture_rect_region(wheels, Rect2(-wsize / 2.0, wsize), LargeVehicleLayout.MOVING_WHEEL_REGION)
+			elif pixel_wheels:
+				draw_texture_rect_region(wheels, Rect2(-wsize / 2.0, wsize), LargeVehicleLayout.PIXEL_WHEEL_REGION)
+			else:
+				draw_texture_rect(wheels, Rect2(-wsize / 2.0, wsize), false)
 			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 		else:
-			draw_texture_rect_region(wheels, Rect2(Vector2(wx, WHEEL_Y + bob) - wsize / 2.0, wsize), ArtSpec.frame_src(wheels, wspec, f))
+			draw_texture_rect_region(wheels, Rect2(center + Vector2(0, bob) - wsize / 2.0, wsize), ArtSpec.frame_src(wheels, wspec, f))
 	if not view_exterior:
 		# 内装: 横から見た断面（車体・部屋・斜路・設備・燃料計）。屋根の上の物は、子の BaseExterior が重ねて描く
 		var hull := GameData.tex(LargeVehicleLayout.RASTER_INTERIOR if use_fortress_raster else "res://assets/base/hull.png")

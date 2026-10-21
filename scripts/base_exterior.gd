@@ -167,22 +167,28 @@ func _draw_large_vehicle_layers(off: Vector2) -> void:
 
 
 func _draw_large_vehicle_rasters(off: Vector2, state: Dictionary) -> void:
+	if LargeVehicleLayout.moving_parts_available():
+		_draw_moving_parts_vehicle(off, state)
+		return
+	if LargeVehicleLayout.pixel_exterior_available():
+		_draw_pixel_vehicle(off, state)
+		return
 	# Keep the supplied RGBA assets intact. Alignment uses Godot display rects and
 	# pivots only; this code does not crop, flatten, or edit their pixels.
-	draw_texture_rect(GameData.tex(LargeVehicleLayout.RASTER_HULL), Rect2(LargeVehicleLayout.HULL_RECT.position + off, LargeVehicleLayout.HULL_RECT.size), false)
+	draw_texture_rect(GameData.tex(LargeVehicleLayout.RASTER_HULL), Rect2(LargeVehicleLayout.EXTERIOR_HULL_RECT.position + off, LargeVehicleLayout.EXTERIOR_HULL_RECT.size), false)
 	if state.primary != "none":
 		# The generated main gun has a right-biased mount and a long left-facing barrel.
-		var main_size := Vector2(560, 187)
-		var main_pivot := Vector2(432, 161)
+		var main_size := LargeVehicleLayout.MAIN_GUN_SIZE
+		var main_pivot := LargeVehicleLayout.MAIN_GUN_PIVOT
 		var recoil := Vector2(base.vehicle_weapon_recoil("primary"), 0.0)
-		var mount := Vector2(390, 132) + off
+		var mount := LargeVehicleLayout.ROOF_TURRET_MOUNT + off
 		draw_texture_rect(GameData.tex(LargeVehicleLayout.RASTER_MAIN_GUN), Rect2(mount - main_pivot + recoil, main_size), false)
 		if base.vehicle_weapon_flash("primary") > 0.0:
-			_draw_main_muzzle_flash(Vector2(-36, 48) + off, base.vehicle_weapon_flash("primary"))
+			_draw_main_muzzle_flash(mount - main_pivot + LargeVehicleLayout.MAIN_GUN_MUZZLE + recoil, base.vehicle_weapon_flash("primary"))
 	if state.secondary != "none":
-		var sub_size := Vector2(166, 95)
-		var sub_pivot := Vector2(112, 76)
-		for mount in [Vector2(144, 134), Vector2(550, 126), Vector2(792, 142)]:
+		var sub_size := LargeVehicleLayout.SUB_TURRET_SIZE
+		var sub_pivot := LargeVehicleLayout.SUB_TURRET_PIVOT
+		for mount in LargeVehicleLayout.SUB_TURRET_MOUNTS:
 			draw_texture_rect(GameData.tex(LargeVehicleLayout.RASTER_SUB_TURRET), Rect2(mount + off - sub_pivot, sub_size), false)
 
 
@@ -199,3 +205,64 @@ func _draw_main_muzzle_flash(muzzle: Vector2, timer: float) -> void:
 	])
 	draw_colored_polygon(outer, Color(1.0, 0.46, 0.10, 0.82 * k))
 	draw_circle(muzzle + Vector2(-8, 0), 7.0, Color(1.0, 0.92, 0.62, k))
+
+
+func _draw_pixel_vehicle(off: Vector2, state: Dictionary) -> void:
+	draw_texture_rect_region(GameData.tex(LargeVehicleLayout.PIXEL_HULL), Rect2(LargeVehicleLayout.PIXEL_HULL_RECT.position + off, LargeVehicleLayout.PIXEL_HULL_RECT.size), LargeVehicleLayout.PIXEL_HULL_REGION)
+	# Swappable, compact guns use the adopted palette. Damage/ammo are unchanged.
+	for slot in ["primary", "secondary"]:
+		if str(state.get(slot, "none")) == "none":
+			continue
+		var scale_ := 1.0 if slot == "primary" else 0.535
+		var mount: Vector2 = LargeVehicleLayout.PIXEL_GUN_MOUNT if slot == "primary" else LargeVehicleLayout.PIXEL_SECONDARY_MOUNT
+		var recoil := Vector2(-base.vehicle_weapon_recoil(slot) * 0.25, 0)
+		var size_: Vector2 = LargeVehicleLayout.PIXEL_GUN_SIZE * scale_
+		var at: Vector2 = mount + off - LargeVehicleLayout.PIXEL_GUN_PIVOT * scale_ + recoil
+		draw_texture_rect_region(GameData.tex(LargeVehicleLayout.PIXEL_GUN), Rect2(at, size_), LargeVehicleLayout.PIXEL_GUN_REGION)
+		var flash: float = base.vehicle_weapon_flash(slot)
+		if flash > 0.0:
+			var muzzle := at + Vector2(size_.x - 1.0, 17.0 * scale_)
+			var k := clampf(flash / (0.18 if slot == "primary" else 0.10), 0.0, 1.0)
+			draw_colored_polygon(PackedVector2Array([muzzle + Vector2(20.0 * k, 0), muzzle + Vector2(3, -5), muzzle + Vector2(-1, 0), muzzle + Vector2(3, 5)]), Color(1.0, 0.65, 0.2, k))
+
+
+func _draw_moving_parts_vehicle(off: Vector2, state: Dictionary) -> void:
+	# Keep each supplied RGBA source intact.  Regions, pivots, and mounts are the
+	# manifest contract; animation only changes draw transforms.
+	draw_texture_rect_region(GameData.tex(LargeVehicleLayout.MOVING_BODY), Rect2(LargeVehicleLayout.MOVING_BODY_RECT.position + off, LargeVehicleLayout.MOVING_BODY_RECT.size), LargeVehicleLayout.MOVING_BODY_REGION)
+
+	# There is no garage interaction in the game state.  Preserve the supplied
+	# closed shutter as a visual sample instead of inventing an operation.
+	draw_texture_rect_region(GameData.tex(LargeVehicleLayout.MOVING_SHUTTER), Rect2(LargeVehicleLayout.MOVING_SHUTTER_RECT.position + off, LargeVehicleLayout.MOVING_SHUTTER_RECT.size), LargeVehicleLayout.MOVING_SHUTTER_REGION)
+
+	# Crane is one whole sprite; no joint-by-joint motion is implied by the asset.
+	var crane_rect := Rect2(-LargeVehicleLayout.MOVING_CRANE_PIVOT + LargeVehicleLayout.MOVING_CRANE_MOUNT + off, LargeVehicleLayout.MOVING_CRANE_SIZE)
+	draw_texture_rect_region(GameData.tex(LargeVehicleLayout.MOVING_CRANE), crane_rect, LargeVehicleLayout.MOVING_CRANE_REGION)
+
+	# The fixed body keeps the pole.  Wave only the fabric strips as in the
+	# supplied sample, anchoring its right edge at the pole.
+	var flag_tex := GameData.tex(LargeVehicleLayout.MOVING_FLAG)
+	for i in 24:
+		var u := float(i) / 24.0
+		var source := LargeVehicleLayout.MOVING_FLAG_REGION
+		var strip := Rect2(source.position + Vector2(source.size.x * u, 0), Vector2(source.size.x / 24.0, source.size.y))
+		var wave := sin(_t * 5.0 + u * 7.0) * 2.2 * (1.0 - u)
+		var rect := Rect2(Vector2(LargeVehicleLayout.MOVING_FLAG_RECT.position.x + LargeVehicleLayout.MOVING_FLAG_RECT.size.x * u, LargeVehicleLayout.MOVING_FLAG_RECT.position.y + wave) + off, Vector2(LargeVehicleLayout.MOVING_FLAG_RECT.size.x / 24.0 + 0.08, LargeVehicleLayout.MOVING_FLAG_RECT.size.y))
+		draw_texture_rect_region(flag_tex, rect, strip)
+
+	# Existing weapon fire drives whole-sprite recoil.  No new aiming or combat
+	# behavior is introduced because the game has no independent turret aim state.
+	for slot in ["primary", "secondary"]:
+		if str(state.get(slot, "none")) == "none":
+			continue
+		var scale_ := 1.0 if slot == "primary" else 0.535
+		var mount: Vector2 = LargeVehicleLayout.MOVING_GUN_MOUNT if slot == "primary" else LargeVehicleLayout.MOVING_SECONDARY_MOUNT
+		var recoil := Vector2(-base.vehicle_weapon_recoil(slot) * 0.25, 0)
+		var size_: Vector2 = LargeVehicleLayout.MOVING_GUN_SIZE * scale_
+		var at: Vector2 = mount + off - LargeVehicleLayout.MOVING_GUN_PIVOT * scale_ + recoil
+		draw_texture_rect_region(GameData.tex(LargeVehicleLayout.MOVING_GUN), Rect2(at, size_), LargeVehicleLayout.MOVING_GUN_REGION)
+		var flash: float = base.vehicle_weapon_flash(slot)
+		if flash > 0.0:
+			var muzzle := at + Vector2(size_.x - 1.0, 17.0 * scale_)
+			var k := clampf(flash / (0.18 if slot == "primary" else 0.10), 0.0, 1.0)
+			draw_colored_polygon(PackedVector2Array([muzzle + Vector2(20.0 * k, 0), muzzle + Vector2(3, -5), muzzle + Vector2(-1, 0), muzzle + Vector2(3, 5)]), Color(1.0, 0.65, 0.2, k))

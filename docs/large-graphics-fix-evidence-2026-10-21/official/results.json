@@ -1,0 +1,462 @@
+{
+  "schema_version": 1,
+  "run_directory": "/workspace/scratch/7be024cc4a55/checks/official/20261021T133843Z-xxdzsimg",
+  "started_utc": "2026-10-21T13:38:43.155821+00:00",
+  "metadata": {
+    "platform": "Linux-6.18.55-x86_64-with-glibc2.39",
+    "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+    "python_executable": "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+    "runner_command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+      "tools/run_checks.py",
+      "--godot",
+      "/workspace/scratch/e482ae95cb01/runtime/Godot_v4.6.3-stable_linux.x86_64",
+      "--check",
+      "view",
+      "--check",
+      "items",
+      "--check",
+      "rooms",
+      "--check",
+      "cargo",
+      "--check",
+      "cargo_accounting",
+      "--check",
+      "save_game",
+      "--check",
+      "trouble_loop",
+      "--check",
+      "weapon",
+      "--check",
+      "startup",
+      "--output-dir",
+      "/workspace/scratch/7be024cc4a55/checks/official"
+    ],
+    "root": "/workspace/desert_rats",
+    "git_before": {
+      "head": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "rev-parse",
+          "HEAD"
+        ],
+        "returncode": 0,
+        "output": "4a06a96d90bf26c8197eea79aaa90619be4d7b88"
+      },
+      "branch": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "branch",
+          "--show-current"
+        ],
+        "returncode": 0,
+        "output": "gpt/large-fortress-graphics-validation"
+      },
+      "status": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "status",
+          "--porcelain=v1",
+          "--untracked-files=all"
+        ],
+        "returncode": 0,
+        "output": "M data/large_vehicle_layout.gd\n M data/vehicle_loadout.gd\n M scripts/base.gd\n M scripts/base_exterior.gd\n M scripts/main.gd\n M tools/test_large_vehicle_layout.gd\n M tools/test_large_vehicle_workers.gd\n M tools/test_vehicle_prototype.gd\n?? tools/test_large_vehicle_workers.gd.uid"
+      },
+      "changed_files": [
+        {
+          "path": "data/large_vehicle_layout.gd",
+          "sha256": "e20eb1af92a414099cf9309aa604e8a3d60b58285697040be33c3cdac866153a"
+        },
+        {
+          "path": "data/vehicle_loadout.gd",
+          "sha256": "47ac2ac80876a4c6842feca9a107cc64ba4d78abd319f792859ec208800cae41"
+        },
+        {
+          "path": "scripts/base.gd",
+          "sha256": "5d59f38640cbeec2cc5f29ff690a6d24e78efe87f35559c276fb2e839eb06522"
+        },
+        {
+          "path": "scripts/base_exterior.gd",
+          "sha256": "6b2454f34fb48c8e597692efe2a90f8c6074cb3f2a7d5573af5048660f64316c"
+        },
+        {
+          "path": "scripts/main.gd",
+          "sha256": "dc59991dccca1cdd1dd6027d5695db6feced9cb5f451c3dcb63989c0ef0fa303"
+        },
+        {
+          "path": "tools/test_large_vehicle_layout.gd",
+          "sha256": "62e6924cd2377b1688578fa6a532d171a589cc1a73a2f9ab64a8c09f1eee62d8"
+        },
+        {
+          "path": "tools/test_large_vehicle_workers.gd",
+          "sha256": "b9a71adc7457e7596053bdfa58cb13e3644884e554d45349515b38ebb4a66f3e"
+        },
+        {
+          "path": "tools/test_large_vehicle_workers.gd.uid",
+          "sha256": "d110f9488d36ac4ed9150c035a9767d3b23e2dbd93d9505b7a303dc62ec5c2b4"
+        },
+        {
+          "path": "tools/test_vehicle_prototype.gd",
+          "sha256": "5ad6bbf7c33d9ca3cfa36984b92e213f348f3105882b9569f4994184c039f1d2"
+        }
+      ],
+      "dirty": true
+    },
+    "godot_version": {
+      "command": [
+        "/workspace/scratch/e482ae95cb01/runtime/Godot_v4.6.3-stable_linux.x86_64",
+        "--version"
+      ],
+      "returncode": 0,
+      "output": "4.6.3.stable.official.7d41c59c4"
+    },
+    "suite": null,
+    "unverified": [
+      "Windows / Godot 4.7.2",
+      "OS-level input",
+      "Audio"
+    ],
+    "scope_note": "order_flow/production_ui, first_cycle_flow/ecosystem, tool_progression/tool_flow, world_*, batch_*, haul_*, facility_packing, packing_flow and startup use the default map; other gameplay checks explicitly use legacy-world-test fixtures. world_endurance runs up to 60 game minutes with defaults, workbench request and optional 5-minute map trips; ordered_* additionally place finite tool and smelting orders; passed means observation integrity, not survival. Only selected checks; core does not cover extra/endurance or all gameplay conditions.",
+    "git_after": {
+      "head": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "rev-parse",
+          "HEAD"
+        ],
+        "returncode": 0,
+        "output": "4a06a96d90bf26c8197eea79aaa90619be4d7b88"
+      },
+      "branch": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "branch",
+          "--show-current"
+        ],
+        "returncode": 0,
+        "output": "gpt/large-fortress-graphics-validation"
+      },
+      "status": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "status",
+          "--porcelain=v1",
+          "--untracked-files=all"
+        ],
+        "returncode": 0,
+        "output": "M data/large_vehicle_layout.gd\n M data/vehicle_loadout.gd\n M scripts/base.gd\n M scripts/base_exterior.gd\n M scripts/main.gd\n M tools/test_large_vehicle_layout.gd\n M tools/test_large_vehicle_workers.gd\n M tools/test_vehicle_prototype.gd\n?? tools/test_large_vehicle_workers.gd.uid"
+      },
+      "changed_files": [
+        {
+          "path": "data/large_vehicle_layout.gd",
+          "sha256": "e20eb1af92a414099cf9309aa604e8a3d60b58285697040be33c3cdac866153a"
+        },
+        {
+          "path": "data/vehicle_loadout.gd",
+          "sha256": "47ac2ac80876a4c6842feca9a107cc64ba4d78abd319f792859ec208800cae41"
+        },
+        {
+          "path": "scripts/base.gd",
+          "sha256": "5d59f38640cbeec2cc5f29ff690a6d24e78efe87f35559c276fb2e839eb06522"
+        },
+        {
+          "path": "scripts/base_exterior.gd",
+          "sha256": "6b2454f34fb48c8e597692efe2a90f8c6074cb3f2a7d5573af5048660f64316c"
+        },
+        {
+          "path": "scripts/main.gd",
+          "sha256": "dc59991dccca1cdd1dd6027d5695db6feced9cb5f451c3dcb63989c0ef0fa303"
+        },
+        {
+          "path": "tools/test_large_vehicle_layout.gd",
+          "sha256": "62e6924cd2377b1688578fa6a532d171a589cc1a73a2f9ab64a8c09f1eee62d8"
+        },
+        {
+          "path": "tools/test_large_vehicle_workers.gd",
+          "sha256": "b9a71adc7457e7596053bdfa58cb13e3644884e554d45349515b38ebb4a66f3e"
+        },
+        {
+          "path": "tools/test_large_vehicle_workers.gd.uid",
+          "sha256": "d110f9488d36ac4ed9150c035a9767d3b23e2dbd93d9505b7a303dc62ec5c2b4"
+        },
+        {
+          "path": "tools/test_vehicle_prototype.gd",
+          "sha256": "5ad6bbf7c33d9ca3cfa36984b92e213f348f3105882b9569f4994184c039f1d2"
+        }
+      ],
+      "dirty": true
+    }
+  },
+  "scope": [
+    "import",
+    "view",
+    "items",
+    "rooms",
+    "cargo",
+    "cargo_accounting",
+    "save_game",
+    "trouble_loop",
+    "weapon",
+    "startup"
+  ],
+  "status": "passed",
+  "first_failure": null,
+  "checks": [
+    {
+      "id": "import",
+      "command": [
+        "/workspace/scratch/e482ae95cb01/runtime/Godot_v4.6.3-stable_linux.x86_64",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "--editor",
+        "--import",
+        "--quit"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/scratch/7be024cc4a55/checks/official/20261021T133843Z-xxdzsimg/import.log",
+      "timeout_seconds": 120,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 5.035,
+      "diagnostic_error_lines": [],
+      "success_marker_found": null
+    },
+    {
+      "id": "view",
+      "command": [
+        "/workspace/scratch/e482ae95cb01/runtime/Godot_v4.6.3-stable_linux.x86_64",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_view.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/scratch/7be024cc4a55/checks/official/20261021T133843Z-xxdzsimg/view.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 44.008,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "items",
+      "command": [
+        "/workspace/scratch/e482ae95cb01/runtime/Godot_v4.6.3-stable_linux.x86_64",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_items.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/scratch/7be024cc4a55/checks/official/20261021T133843Z-xxdzsimg/items.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 24.346,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "rooms",
+      "command": [
+        "/workspace/scratch/e482ae95cb01/runtime/Godot_v4.6.3-stable_linux.x86_64",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_rooms.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/scratch/7be024cc4a55/checks/official/20261021T133843Z-xxdzsimg/rooms.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 71.342,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "cargo",
+      "command": [
+        "/workspace/scratch/e482ae95cb01/runtime/Godot_v4.6.3-stable_linux.x86_64",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_cargo.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/scratch/7be024cc4a55/checks/official/20261021T133843Z-xxdzsimg/cargo.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 63.883,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "cargo_accounting",
+      "command": [
+        "/workspace/scratch/e482ae95cb01/runtime/Godot_v4.6.3-stable_linux.x86_64",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_cargo_accounting.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/scratch/7be024cc4a55/checks/official/20261021T133843Z-xxdzsimg/cargo_accounting.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 14.509,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "save_game",
+      "command": [
+        "/workspace/scratch/e482ae95cb01/runtime/Godot_v4.6.3-stable_linux.x86_64",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_save_game.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/scratch/7be024cc4a55/checks/official/20261021T133843Z-xxdzsimg/save_game.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 5.582,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "trouble_loop",
+      "command": [
+        "/workspace/scratch/e482ae95cb01/runtime/Godot_v4.6.3-stable_linux.x86_64",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_trouble_loop.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/scratch/7be024cc4a55/checks/official/20261021T133843Z-xxdzsimg/trouble_loop.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 12.758,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "weapon",
+      "command": [
+        "/workspace/scratch/e482ae95cb01/runtime/Godot_v4.6.3-stable_linux.x86_64",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_weapon.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/scratch/7be024cc4a55/checks/official/20261021T133843Z-xxdzsimg/weapon.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 2.973,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "startup",
+      "command": [
+        "/workspace/scratch/e482ae95cb01/runtime/Godot_v4.6.3-stable_linux.x86_64",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "--quit-after",
+        "300"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/scratch/7be024cc4a55/checks/official/20261021T133843Z-xxdzsimg/startup.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 4.026,
+      "diagnostic_error_lines": [],
+      "success_marker_found": null
+    }
+  ],
+  "elapsed_wall_seconds": 248.474,
+  "finished_utc": "2026-10-21T13:42:51.631576+00:00",
+  "source_changed_during_run": false
+}

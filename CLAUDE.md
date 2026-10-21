@@ -1091,3 +1091,26 @@ HUD/仲間詳細PNGを成功生成した。Computer Useがネイティブウィ�
 親スレッドで再照合した採用仕様に合わせ、燃料漏れの原因を通常走行の`DRIVE`摩耗ではなく、車体ローカルの後部（論理x=0..70、後方u3/l3外板まで）へ敵攻撃で蓄積した独立値へ変更した。中央（>70..140）・前部（>140..248）は分類するが漏れを蓄積しない。`world.direction`、後退、床／スロープ、クリック選択はこの判定に使わず、地上レーンや移動仕様も変更しない。
 
 暫定しきい値は30。現地・都市・即時応急の各修理は実際に回復した`DRIVE`量だけ蓄積を減らし、速度復帰は従来どおり手動のままとした。`rear_engine_damage`を保存し、旧セーブでフィールドが無い場合は0を補完するので、単に`DRIVE`が低い旧セーブは漏れない。クラウドGodot 4.6.3で重点回帰を実行し、Windows実機でのこの修正の検証は未実施として最終報告で分離する。
+
+
+### 2026-10-21 クラウド：大型グラフィック検証版の起動・配置修正
+
+既存 `/workspace/desert_rats`、対象の既存ブランチ `gpt/large-fortress-graphics-validation`、開始HEAD `4a06a96d90bf26c8197eea79aaa90619be4d7b88`。開始clean、対象originと一致。mainの未共有5コミット/HEAD `022d129fb0c81cf3bb04bdfab3434cc2ce997097` は保持。Notion採用企画を取得して、将来案と今回の起動・描画修正を区別した。
+
+未定義shotsの表示参照、実はしごへの経路、車輪5個の位置・回転、砲塔配置、外殻比率、部屋変更の重ね絵と完成表示、文字化け、中型の初期速度上限を修正。Linux Godot4.6.3の専用3テストと公式10項目成功、Xvfb/OpenGLで実到着と描画を確認。旧テストの引数不足によるweapon2失敗は公式legacy fixtureでは基準main/修正版とも成功。Windows4.7.2/OS入力/音声は未検証。
+
+ローカル未コミット・未push・main未統合。変更8ソース、生成UID、README、このログ、`docs/大型グラフィック_修正検証_2026-10-21.md` と `docs/large-graphics-fix-evidence-2026-10-21/` に保持。継続時はこの検証ブランチの差分を確認し、mainへ自動適用しない。
+
+
+### 2026-10-21 クラウド：採用した工房型ドット外装へ変更
+
+ユーザーの「これいいねえ これに変更！」に従い、既存検証ブランチ `gpt/large-fortress-graphics-validation` / HEAD `4a06a96d90bf26c8197eea79aaa90619be4d7b88` の未コミット修正を保持して外装を追加変更。`assets/fortress_pixel/` の透過本体・タイヤ・砲へ切替え、採用原画は `art_sources/approved_fortress/`。内外装で6輪を共用。既存の内装画像・経路・施設と武器数値は保持し、改造UI全体は新作していない。
+
+Notionの採用企画を再取得。Linux Godot4.6.3で専用3件+公式5件成功、Xvfb/OpenGLで実ゲーム画面を撮影。Windows4.7.2/OS入力/音声は未検証。結果は `docs/採用外装_反映検証_2026-10-21.md` と `docs/pixel-exterior-evidence-2026-10-21/`。変更元は既存 `/workspace/desert_rats`、追加ソースはlayout/base/base_exterior/test_large_vehicle_layout。前回の未コミット差分・mainの未共有5コミットを保持。ローカル反映済み、未コミット・未push・main未統合。
+
+
+### 2026-10-21 クラウド：修正版一式のGitHub共有依頼
+
+ユーザーから修正版を既存 `gpt/large-fortress-graphics-validation` にコミット・pushし、mainを変更しない指示を受領。開始HEAD `4a06a96d90bf26c8197eea79aaa90619be4d7b88`、対象originと0/0。前のゲームソースは最終検査時の全ハッシュと一致、採用素材3点も制作記録と一致。専用3件/公式5件の成功証跡を保持し、ゲーム本体の追加変更はしていない。
+
+今回の共有には、既存の未コミット修正、採用外装の透過素材・原画、実描画PNG、検査ログ/JSON、制作条件、`CLAUDE_REVALIDATION_LARGE_GRAPHICS.md` を含める。過去の未コミット・未push記述は各作業時点の記録として保持。mainローカルHEAD `022d129fb0c81cf3bb04bdfab3434cc2ce997097` とorigin/main `c04407e29765bbfc57d3852a449577c934febc46` は変更しない。共有後の完全SHAとリモート照合結果は作業完了報告に記載する。

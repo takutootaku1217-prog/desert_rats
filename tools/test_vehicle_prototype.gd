@@ -48,6 +48,7 @@ func _initialize() -> void:
 	main.target_speed = 0.0
 	var base = main.base
 	var storage = main.storage
+	check(is_equal_approx(base.speed_limit(), 200.0), "normal start keeps the existing maximum speed")
 	check(base.vehicle_capacity() == CargoDB.CAPACITY and storage.limits_active(), "normal start keeps the existing cargo limit")
 	main.equip_vehicle_part("chassis", "large")
 	check(base.vehicle_capacity() == 520 and storage.max_weight() == 520, "large chassis expands shared cargo capacity")
@@ -98,6 +99,15 @@ func _initialize() -> void:
 	await press_key(KEY_O)
 	await frames(20) # The view cross-fades before applying the exterior renderer.
 	check(base.view_exterior, "O switches the raster fortress to the exterior view")
+	# The six supplied wheels use travel distance/radius, not an animation frame
+	# number. A stopped base must therefore keep its last rotation exactly.
+	main.scroll_speed = LargeVehicleLayout.MOVING_WHEEL_RADIUS
+	var wheel_before: float = base._wheel_angle
+	base._process(1.0)
+	var wheel_after_move: float = base._wheel_angle
+	main.scroll_speed = 0.0
+	base._process(1.0)
+	check(not is_equal_approx(wheel_before, wheel_after_move) and is_equal_approx(wheel_after_move, base._wheel_angle), "six moving-part wheels rotate by travel distance and stop at zero speed")
 	await press_key(KEY_I)
 	await frames(20)
 	check(not base.view_exterior, "I returns the raster fortress to the interior cutaway")
@@ -109,6 +119,10 @@ func _initialize() -> void:
 	main.fire_vehicle_weapon("primary")
 	check(is_equal_approx(enemy.hp, hp_before - 30.0) and base.vehicle_loadout.ammo == ammo_before - 2 \
 		and base.vehicle_weapon_recoil("primary") > 0.0 and base.vehicle_weapon_flash("primary") > 0.0, "primary weapon damages, consumes ammunition, and triggers fortress fire feedback")
+	var secondary_hp: float = enemy.hp
+	var secondary_ammo: int = base.vehicle_loadout.ammo
+	main.fire_vehicle_weapon("secondary")
+	check(is_equal_approx(enemy.hp, secondary_hp - 11.0) and base.vehicle_loadout.ammo == secondary_ammo - 1, "secondary keeps its existing single-hit damage and ammunition cost")
 	# Presentation timers are seconds, so this must not depend on an uncapped
 	# headless renderer producing a particular number of frames.
 	await create_timer(0.25).timeout

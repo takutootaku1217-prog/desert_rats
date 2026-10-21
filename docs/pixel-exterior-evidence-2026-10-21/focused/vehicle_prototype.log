@@ -1,0 +1,25 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+OK normal start keeps the existing maximum speed
+OK normal start keeps the existing cargo limit
+OK large chassis expands shared cargo capacity
+OK large chassis raster sources are readable at their supplied dimensions
+OK chassis swap changes capacity and equipment weight
+OK drive and power change speed cap and fuel use
+OK armor reduces actual incoming hull damage
+OK vehicle panel stays inside the current viewport
+OK vehicle rows fit the vertical scroll width
+OK combat preset uses the readable Japanese label
+OK combat preset applies while the panel is open
+OK vehicle panel closes
+OK Escape closes the reopened vehicle panel
+OK O switches the raster fortress to the exterior view
+OK I returns the raster fortress to the interior cutaway
+OK primary weapon damages, consumes ammunition, and triggers fortress fire feedback
+OK secondary keeps its existing single-hit damage and ammunition cost
+OK fortress fire feedback ends after its short presentation window
+OK crew auto-acquires and damages the same enemy
+OK enemy retaliation reaches crew combat path
+OK combat prototype ignores cargo limits while keeping weight visible
+OK prototype loadout is included in a valid save snapshot
+== vehicle prototype: passed ==

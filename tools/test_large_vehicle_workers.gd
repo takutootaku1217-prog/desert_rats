@@ -30,8 +30,15 @@ func _run() -> void:
 	main.apply_vehicle_combat_preset()
 	# Let the visual walkthrough finish before asserting normal work.  The
 	# later work target is selected only by CharacterAI.
+	var arrivals := {}
 	var walkthrough_done := await _until(func() -> bool:
-		return main.workers.all(func(worker): return worker.prototype_walk_target == null), 4.0)
+		for i in main.workers.size():
+			var worker = main.workers[i]
+			if worker.prototype_walk_target == null and not arrivals.has(i):
+				arrivals[i] = worker.floor_i == 3 and worker.position.distance_to(LargeVehicleLayout.top_room_anchor(i)) <= 4.1
+		return arrivals.size() == main.workers.size(), 4.0)
+	for i in main.workers.size():
+		check(bool(arrivals.get(i, false)), "worker %d finishes walkthrough at its actual upper-deck anchor" % i)
 	check(walkthrough_done, "large chassis walkthrough reaches all three upper-deck anchors")
 	for worker in main.workers:
 		for job in GameData.job_list():

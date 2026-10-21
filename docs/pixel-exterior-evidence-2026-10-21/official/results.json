@@ -1,0 +1,666 @@
+{
+  "schema_version": 1,
+  "run_directory": "/workspace/scratch/7be024cc4a55/checks/pixel-official/20261021T140254Z-_v8qme9x",
+  "started_utc": "2026-10-21T14:02:54.427557+00:00",
+  "metadata": {
+    "platform": "Linux-6.18.55-x86_64-with-glibc2.39",
+    "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+    "python_executable": "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+    "runner_command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+      "tools/run_checks.py",
+      "--godot",
+      "/workspace/scratch/e482ae95cb01/runtime/Godot_v4.6.3-stable_linux.x86_64",
+      "--check",
+      "view",
+      "--check",
+      "save_game",
+      "--check",
+      "weapon",
+      "--check",
+      "startup",
+      "--output-dir",
+      "/workspace/scratch/7be024cc4a55/checks/pixel-official"
+    ],
+    "root": "/workspace/desert_rats",
+    "git_before": {
+      "head": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "rev-parse",
+          "HEAD"
+        ],
+        "returncode": 0,
+        "output": "4a06a96d90bf26c8197eea79aaa90619be4d7b88"
+      },
+      "branch": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "branch",
+          "--show-current"
+        ],
+        "returncode": 0,
+        "output": "gpt/large-fortress-graphics-validation"
+      },
+      "status": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "status",
+          "--porcelain=v1",
+          "--untracked-files=all"
+        ],
+        "returncode": 0,
+        "output": "M CLAUDE.md\n M \"README_\\345\\244\\247\\345\\236\\213\\343\\202\\260\\343\\203\\251\\343\\203\\225\\343\\202\\243\\343\\203\\203\\343\\202\\257\\346\\244\\234\\350\\250\\274\\347\\211\\210.md\"\n M data/large_vehicle_layout.gd\n M data/vehicle_loadout.gd\n M scripts/base.gd\n M scripts/base_exterior.gd\n M scripts/main.gd\n M tools/test_large_vehicle_layout.gd\n M tools/test_large_vehicle_workers.gd\n M tools/test_vehicle_prototype.gd\n?? art_sources/approved_fortress/.gdignore\n?? art_sources/approved_fortress/approved-exterior-mockup.png\n?? assets/fortress_pixel/armored-body.png\n?? assets/fortress_pixel/armored-body.png.import\n?? assets/fortress_pixel/roof-gun.png\n?? assets/fortress_pixel/roof-gun.png.import\n?? assets/fortress_pixel/wheel.png\n?? assets/fortress_pixel/wheel.png.import\n?? docs/large-graphics-fix-evidence-2026-10-21/.gdignore\n?? docs/large-graphics-fix-evidence-2026-10-21/baseline-import.log\n?? docs/large-graphics-fix-evidence-2026-10-21/baseline-main-weapon-legacy.log\n?? docs/large-graphics-fix-evidence-2026-10-21/baseline-main-weapon.log\n?? docs/large-graphics-fix-evidence-2026-10-21/before-exterior.png\n?? docs/large-graphics-fix-evidence-2026-10-21/before-interior.png\n?? docs/large-graphics-fix-evidence-2026-10-21/customization.png\n?? docs/large-graphics-fix-evidence-2026-10-21/exterior.png\n?? docs/large-graphics-fix-evidence-2026-10-21/final-gui.log\n?? docs/large-graphics-fix-evidence-2026-10-21/initial-wrong-fixture-cargo_accounting.log\n?? docs/large-graphics-fix-evidence-2026-10-21/initial-wrong-fixture-rooms.log\n?? docs/large-graphics-fix-evidence-2026-10-21/initial-wrong-fixture-weapon.log\n?? docs/large-graphics-fix-evidence-2026-10-21/interior-arrivals.png\n?? docs/large-graphics-fix-evidence-2026-10-21/interior-normal-ai.png\n?? docs/large-graphics-fix-evidence-2026-10-21/ladder-room-change.png\n?? docs/large-graphics-fix-evidence-2026-10-21/large_vehicle_layout.log\n?? docs/large-graphics-fix-evidence-2026-10-21/large_vehicle_workers.log\n?? docs/large-graphics-fix-evidence-2026-10-21/official/cargo.log\n?? docs/large-graphics-fix-evidence-2026-10-21/official/cargo_accounting.log\n?? docs/large-graphics-fix-evidence-2026-10-21/official/import.log\n?? docs/large-graphics-fix-evidence-2026-10-21/official/items.log\n?? docs/large-graphics-fix-evidence-2026-10-21/official/results.json\n?? docs/large-graphics-fix-evidence-2026-10-21/official/rooms.log\n?? docs/large-graphics-fix-evidence-2026-10-21/official/save_game.log\n?? docs/large-graphics-fix-evidence-2026-10-21/official/startup.log\n?? docs/large-graphics-fix-evidence-2026-10-21/official/trouble_loop.log\n?? docs/large-graphics-fix-evidence-2026-10-21/official/view.log\n?? docs/large-graphics-fix-evidence-2026-10-21/official/weapon.log\n?? docs/large-graphics-fix-evidence-2026-10-21/room-change.png\n?? docs/large-graphics-fix-evidence-2026-10-21/shot_alignment.gd\n?? docs/large-graphics-fix-evidence-2026-10-21/source-before.json\n?? docs/large-graphics-fix-evidence-2026-10-21/vehicle_prototype.log\n?? \"docs/\\345\\244\\247\\345\\236\\213\\343\\202\\260\\343\\203\\251\\343\\203\\225\\343\\202\\243\\343\\203\\203\\343\\202\\257_\\344\\277\\256\\346\\255\\243\\346\\244\\234\\350\\250\\274_2026-10-21.md\"\n?? tools/test_large_vehicle_workers.gd.uid"
+      },
+      "changed_files": [
+        {
+          "path": "CLAUDE.md",
+          "sha256": "a59fe1d127188c68617822fd3879c66d46b40a7e28e5b50ed2f23d9a9832deb1"
+        },
+        {
+          "path": "README_大型グラフィック検証版.md",
+          "sha256": "7c9422fc34a849bcbe9223962809a7600cfd0a53c9ac4219f2ebb5f09e610995"
+        },
+        {
+          "path": "art_sources/approved_fortress/.gdignore",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "art_sources/approved_fortress/approved-exterior-mockup.png",
+          "sha256": "5a199b78b9eb4012ffc3dac75675711f107e9c6ca18534e0cac93be85e8277f2"
+        },
+        {
+          "path": "assets/fortress_pixel/armored-body.png",
+          "sha256": "329c96816f294dad738c295e88a24f88823ad657a028d737efae07aa9d3d02b7"
+        },
+        {
+          "path": "assets/fortress_pixel/armored-body.png.import",
+          "sha256": "576c46b702f30b4aa221def43e0316fc52bee60340170210a9f16ec88e48f751"
+        },
+        {
+          "path": "assets/fortress_pixel/roof-gun.png",
+          "sha256": "08ee2658270c2d166dece5b8d9e781efd37d5d3068e11d7245ff2a59b8405297"
+        },
+        {
+          "path": "assets/fortress_pixel/roof-gun.png.import",
+          "sha256": "e8320a2a7734654d51098d37f4bfefc3334fc8f17843fdca36ef7c149d2c8ab3"
+        },
+        {
+          "path": "assets/fortress_pixel/wheel.png",
+          "sha256": "ee15e292d4a33272abfaa1f9a85897d6a00ce27d780ff55088f72d54cfd07d55"
+        },
+        {
+          "path": "assets/fortress_pixel/wheel.png.import",
+          "sha256": "f8a07315eed8c02b0a046d82c165f4686eb5a25f5fd68dc35a682e1f73ecab2b"
+        },
+        {
+          "path": "data/large_vehicle_layout.gd",
+          "sha256": "ccc67df14ad30e47289f8abe6c66843769009b22fdb7c29a85d911ac242994e3"
+        },
+        {
+          "path": "data/vehicle_loadout.gd",
+          "sha256": "47ac2ac80876a4c6842feca9a107cc64ba4d78abd319f792859ec208800cae41"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/.gdignore",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/baseline-import.log",
+          "sha256": "c2aa8440871ec2474a9733cd10f8688da5f54368f99ec9c643f04f4e36064a75"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/baseline-main-weapon-legacy.log",
+          "sha256": "aaf794ec31679487cba87c4ced468cc6926ac2f7d40aa8348336b9054643c4f4"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/baseline-main-weapon.log",
+          "sha256": "ac8860e2b6bccc05004752ca13d448854f648bcbb5724691e4128c6318fd5563"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/before-exterior.png",
+          "sha256": "9abe73cfa111118a0fd93e90c4bd8fa84e689befc6774998263df161d2e5766a"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/before-interior.png",
+          "sha256": "7b021b67dfbc2b8987cea8a9524786a377e46f946069bde854d7a64a91ea8e3c"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/customization.png",
+          "sha256": "1af2a9992213754f2b87e8db67e1ff357714a91c4b8df0673a8c746cc66a27d6"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/exterior.png",
+          "sha256": "41d22edfd3bab16b88281830c75f67c207c0532e19a8861d9e2b55497c29b0a6"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/final-gui.log",
+          "sha256": "c504020f38ddce55969ba2fb1b65b9b9de683d1bdcc07c2af9abedb44c03216d"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/initial-wrong-fixture-cargo_accounting.log",
+          "sha256": "4419722d853268cfe6ef8e065b35f32c9055cefd7df8cd7565d8384bdaf69993"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/initial-wrong-fixture-rooms.log",
+          "sha256": "ce92afb02356cf11a0feb4687f6cbf6a622b0c0f0b51acb32d517a77f6a0393b"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/initial-wrong-fixture-weapon.log",
+          "sha256": "f8817d6f62e10cdd8eee31f5145c14b376a18bd9d31762f7e96f15d0da4ec0e9"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/interior-arrivals.png",
+          "sha256": "fc22ec74df1ef14c72c9f572bc6205f270fd59ba8dcd166e91fd58747aaf4c1b"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/interior-normal-ai.png",
+          "sha256": "bc73021addecb6f0c2aedb31a0ac5054ef30631b0ae04e81c3b8a4f86626a700"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/ladder-room-change.png",
+          "sha256": "64acfc5caa267b41d40e5aef24abac3a39ae701b898e9c65520aa82d2edc41aa"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/large_vehicle_layout.log",
+          "sha256": "fb8f0e777de85afb5894f7ea2360ffe50b3a24a03cd5dfabd588d600b024bd50"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/large_vehicle_workers.log",
+          "sha256": "ee851dafa298dff3c1f436165a4a0118d321eb2244bfb23fdc8e9a5d99e5f0fa"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/official/cargo.log",
+          "sha256": "511640ed235f7e7935bcfbaf01f6ed20f41474f4d0794dcd6c081c2b374e5bdf"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/official/cargo_accounting.log",
+          "sha256": "97bc2b6ba4c46e5f03060a8c5d8fbbbe4943d01cd9aa9087164c1233c912d75d"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/official/import.log",
+          "sha256": "9506cba8e642b102213ee9c45d3550ce4e0e851cf83b92951d96d26905720e0d"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/official/items.log",
+          "sha256": "b126a5543be7989c5a40552969964c1fcdb35ac4fb31f946a7e03773adcb1985"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/official/results.json",
+          "sha256": "15a8e31a6ed8fa778132811e4d2be175e7da3445839f74d111038bff1e56714a"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/official/rooms.log",
+          "sha256": "e8439899782c21cf1d85eb56744148b01cdbaca9726fbaf99384d4a1e88e5ef9"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/official/save_game.log",
+          "sha256": "26c2f6948e82ea95035f4cc08663c992cfd24bd3c086c1c33c470ea914cebde5"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/official/startup.log",
+          "sha256": "a9912b85473f126d3f4f63ec824170c828df3473a292f866dde86cafda5b66da"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/official/trouble_loop.log",
+          "sha256": "1f3a06f0fa0c097927bc6dacdfd1b6483ca6bf4539842362c0f855607655b7b1"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/official/view.log",
+          "sha256": "23723da760bf1abfbc44030058aa4e39e64a41406243b0499312c74619ba19a3"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/official/weapon.log",
+          "sha256": "ddf70d0e3bb6bde5eaedfe18b9a000e4625681c875b06a8255424919a94668ef"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/room-change.png",
+          "sha256": "80f9e8b758fd315583365fe76bd5b92ae098b70e09690593dd3cb2cc96a0532d"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/shot_alignment.gd",
+          "sha256": "56801b9136cebdbd360100c727e11c704758d447c1bf4cf8a0dfbc4407dc3a7b"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/source-before.json",
+          "sha256": "5849d5a0a03d4ad655bbc44af113de3ac35077e5eee99166bb33fa70ac177f8d"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/vehicle_prototype.log",
+          "sha256": "56fe782dfe8f985767e06fb53c73035b0897b8c2c2eb3ecbe30f4ab26332bd7c"
+        },
+        {
+          "path": "docs/大型グラフィック_修正検証_2026-10-21.md",
+          "sha256": "cded0aef33662a83a27e35f433d1614878c3ce400ed89318687c80b3ff5ef3a3"
+        },
+        {
+          "path": "scripts/base.gd",
+          "sha256": "069f69d592289aeee928b3ca1d95726ed56d64e2b1511e258a960e7598cdc098"
+        },
+        {
+          "path": "scripts/base_exterior.gd",
+          "sha256": "ae2b28234e2aca2fa69756d3022f67eed3e18e394eaaa5944902170d06544608"
+        },
+        {
+          "path": "scripts/main.gd",
+          "sha256": "dc59991dccca1cdd1dd6027d5695db6feced9cb5f451c3dcb63989c0ef0fa303"
+        },
+        {
+          "path": "tools/test_large_vehicle_layout.gd",
+          "sha256": "299809b1368011c82ed119a0446a59766397376a945670ccc002f15fd0f491fa"
+        },
+        {
+          "path": "tools/test_large_vehicle_workers.gd",
+          "sha256": "b9a71adc7457e7596053bdfa58cb13e3644884e554d45349515b38ebb4a66f3e"
+        },
+        {
+          "path": "tools/test_large_vehicle_workers.gd.uid",
+          "sha256": "d110f9488d36ac4ed9150c035a9767d3b23e2dbd93d9505b7a303dc62ec5c2b4"
+        },
+        {
+          "path": "tools/test_vehicle_prototype.gd",
+          "sha256": "5ad6bbf7c33d9ca3cfa36984b92e213f348f3105882b9569f4994184c039f1d2"
+        }
+      ],
+      "dirty": true
+    },
+    "godot_version": {
+      "command": [
+        "/workspace/scratch/e482ae95cb01/runtime/Godot_v4.6.3-stable_linux.x86_64",
+        "--version"
+      ],
+      "returncode": 0,
+      "output": "4.6.3.stable.official.7d41c59c4"
+    },
+    "suite": null,
+    "unverified": [
+      "Windows / Godot 4.7.2",
+      "OS-level input",
+      "Audio"
+    ],
+    "scope_note": "order_flow/production_ui, first_cycle_flow/ecosystem, tool_progression/tool_flow, world_*, batch_*, haul_*, facility_packing, packing_flow and startup use the default map; other gameplay checks explicitly use legacy-world-test fixtures. world_endurance runs up to 60 game minutes with defaults, workbench request and optional 5-minute map trips; ordered_* additionally place finite tool and smelting orders; passed means observation integrity, not survival. Only selected checks; core does not cover extra/endurance or all gameplay conditions.",
+    "git_after": {
+      "head": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "rev-parse",
+          "HEAD"
+        ],
+        "returncode": 0,
+        "output": "4a06a96d90bf26c8197eea79aaa90619be4d7b88"
+      },
+      "branch": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "branch",
+          "--show-current"
+        ],
+        "returncode": 0,
+        "output": "gpt/large-fortress-graphics-validation"
+      },
+      "status": {
+        "command": [
+          "git",
+          "--no-optional-locks",
+          "status",
+          "--porcelain=v1",
+          "--untracked-files=all"
+        ],
+        "returncode": 0,
+        "output": "M CLAUDE.md\n M \"README_\\345\\244\\247\\345\\236\\213\\343\\202\\260\\343\\203\\251\\343\\203\\225\\343\\202\\243\\343\\203\\203\\343\\202\\257\\346\\244\\234\\350\\250\\274\\347\\211\\210.md\"\n M data/large_vehicle_layout.gd\n M data/vehicle_loadout.gd\n M scripts/base.gd\n M scripts/base_exterior.gd\n M scripts/main.gd\n M tools/test_large_vehicle_layout.gd\n M tools/test_large_vehicle_workers.gd\n M tools/test_vehicle_prototype.gd\n?? art_sources/approved_fortress/.gdignore\n?? art_sources/approved_fortress/approved-exterior-mockup.png\n?? assets/fortress_pixel/armored-body.png\n?? assets/fortress_pixel/armored-body.png.import\n?? assets/fortress_pixel/roof-gun.png\n?? assets/fortress_pixel/roof-gun.png.import\n?? assets/fortress_pixel/wheel.png\n?? assets/fortress_pixel/wheel.png.import\n?? docs/large-graphics-fix-evidence-2026-10-21/.gdignore\n?? docs/large-graphics-fix-evidence-2026-10-21/baseline-import.log\n?? docs/large-graphics-fix-evidence-2026-10-21/baseline-main-weapon-legacy.log\n?? docs/large-graphics-fix-evidence-2026-10-21/baseline-main-weapon.log\n?? docs/large-graphics-fix-evidence-2026-10-21/before-exterior.png\n?? docs/large-graphics-fix-evidence-2026-10-21/before-interior.png\n?? docs/large-graphics-fix-evidence-2026-10-21/customization.png\n?? docs/large-graphics-fix-evidence-2026-10-21/exterior.png\n?? docs/large-graphics-fix-evidence-2026-10-21/final-gui.log\n?? docs/large-graphics-fix-evidence-2026-10-21/initial-wrong-fixture-cargo_accounting.log\n?? docs/large-graphics-fix-evidence-2026-10-21/initial-wrong-fixture-rooms.log\n?? docs/large-graphics-fix-evidence-2026-10-21/initial-wrong-fixture-weapon.log\n?? docs/large-graphics-fix-evidence-2026-10-21/interior-arrivals.png\n?? docs/large-graphics-fix-evidence-2026-10-21/interior-normal-ai.png\n?? docs/large-graphics-fix-evidence-2026-10-21/ladder-room-change.png\n?? docs/large-graphics-fix-evidence-2026-10-21/large_vehicle_layout.log\n?? docs/large-graphics-fix-evidence-2026-10-21/large_vehicle_workers.log\n?? docs/large-graphics-fix-evidence-2026-10-21/official/cargo.log\n?? docs/large-graphics-fix-evidence-2026-10-21/official/cargo_accounting.log\n?? docs/large-graphics-fix-evidence-2026-10-21/official/import.log\n?? docs/large-graphics-fix-evidence-2026-10-21/official/items.log\n?? docs/large-graphics-fix-evidence-2026-10-21/official/results.json\n?? docs/large-graphics-fix-evidence-2026-10-21/official/rooms.log\n?? docs/large-graphics-fix-evidence-2026-10-21/official/save_game.log\n?? docs/large-graphics-fix-evidence-2026-10-21/official/startup.log\n?? docs/large-graphics-fix-evidence-2026-10-21/official/trouble_loop.log\n?? docs/large-graphics-fix-evidence-2026-10-21/official/view.log\n?? docs/large-graphics-fix-evidence-2026-10-21/official/weapon.log\n?? docs/large-graphics-fix-evidence-2026-10-21/room-change.png\n?? docs/large-graphics-fix-evidence-2026-10-21/shot_alignment.gd\n?? docs/large-graphics-fix-evidence-2026-10-21/source-before.json\n?? docs/large-graphics-fix-evidence-2026-10-21/vehicle_prototype.log\n?? \"docs/\\345\\244\\247\\345\\236\\213\\343\\202\\260\\343\\203\\251\\343\\203\\225\\343\\202\\243\\343\\203\\203\\343\\202\\257_\\344\\277\\256\\346\\255\\243\\346\\244\\234\\350\\250\\274_2026-10-21.md\"\n?? tools/test_large_vehicle_workers.gd.uid"
+      },
+      "changed_files": [
+        {
+          "path": "CLAUDE.md",
+          "sha256": "a59fe1d127188c68617822fd3879c66d46b40a7e28e5b50ed2f23d9a9832deb1"
+        },
+        {
+          "path": "README_大型グラフィック検証版.md",
+          "sha256": "7c9422fc34a849bcbe9223962809a7600cfd0a53c9ac4219f2ebb5f09e610995"
+        },
+        {
+          "path": "art_sources/approved_fortress/.gdignore",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "art_sources/approved_fortress/approved-exterior-mockup.png",
+          "sha256": "5a199b78b9eb4012ffc3dac75675711f107e9c6ca18534e0cac93be85e8277f2"
+        },
+        {
+          "path": "assets/fortress_pixel/armored-body.png",
+          "sha256": "329c96816f294dad738c295e88a24f88823ad657a028d737efae07aa9d3d02b7"
+        },
+        {
+          "path": "assets/fortress_pixel/armored-body.png.import",
+          "sha256": "576c46b702f30b4aa221def43e0316fc52bee60340170210a9f16ec88e48f751"
+        },
+        {
+          "path": "assets/fortress_pixel/roof-gun.png",
+          "sha256": "08ee2658270c2d166dece5b8d9e781efd37d5d3068e11d7245ff2a59b8405297"
+        },
+        {
+          "path": "assets/fortress_pixel/roof-gun.png.import",
+          "sha256": "e8320a2a7734654d51098d37f4bfefc3334fc8f17843fdca36ef7c149d2c8ab3"
+        },
+        {
+          "path": "assets/fortress_pixel/wheel.png",
+          "sha256": "ee15e292d4a33272abfaa1f9a85897d6a00ce27d780ff55088f72d54cfd07d55"
+        },
+        {
+          "path": "assets/fortress_pixel/wheel.png.import",
+          "sha256": "f8a07315eed8c02b0a046d82c165f4686eb5a25f5fd68dc35a682e1f73ecab2b"
+        },
+        {
+          "path": "data/large_vehicle_layout.gd",
+          "sha256": "ccc67df14ad30e47289f8abe6c66843769009b22fdb7c29a85d911ac242994e3"
+        },
+        {
+          "path": "data/vehicle_loadout.gd",
+          "sha256": "47ac2ac80876a4c6842feca9a107cc64ba4d78abd319f792859ec208800cae41"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/.gdignore",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/baseline-import.log",
+          "sha256": "c2aa8440871ec2474a9733cd10f8688da5f54368f99ec9c643f04f4e36064a75"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/baseline-main-weapon-legacy.log",
+          "sha256": "aaf794ec31679487cba87c4ced468cc6926ac2f7d40aa8348336b9054643c4f4"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/baseline-main-weapon.log",
+          "sha256": "ac8860e2b6bccc05004752ca13d448854f648bcbb5724691e4128c6318fd5563"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/before-exterior.png",
+          "sha256": "9abe73cfa111118a0fd93e90c4bd8fa84e689befc6774998263df161d2e5766a"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/before-interior.png",
+          "sha256": "7b021b67dfbc2b8987cea8a9524786a377e46f946069bde854d7a64a91ea8e3c"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/customization.png",
+          "sha256": "1af2a9992213754f2b87e8db67e1ff357714a91c4b8df0673a8c746cc66a27d6"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/exterior.png",
+          "sha256": "41d22edfd3bab16b88281830c75f67c207c0532e19a8861d9e2b55497c29b0a6"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/final-gui.log",
+          "sha256": "c504020f38ddce55969ba2fb1b65b9b9de683d1bdcc07c2af9abedb44c03216d"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/initial-wrong-fixture-cargo_accounting.log",
+          "sha256": "4419722d853268cfe6ef8e065b35f32c9055cefd7df8cd7565d8384bdaf69993"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/initial-wrong-fixture-rooms.log",
+          "sha256": "ce92afb02356cf11a0feb4687f6cbf6a622b0c0f0b51acb32d517a77f6a0393b"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/initial-wrong-fixture-weapon.log",
+          "sha256": "f8817d6f62e10cdd8eee31f5145c14b376a18bd9d31762f7e96f15d0da4ec0e9"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/interior-arrivals.png",
+          "sha256": "fc22ec74df1ef14c72c9f572bc6205f270fd59ba8dcd166e91fd58747aaf4c1b"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/interior-normal-ai.png",
+          "sha256": "bc73021addecb6f0c2aedb31a0ac5054ef30631b0ae04e81c3b8a4f86626a700"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/ladder-room-change.png",
+          "sha256": "64acfc5caa267b41d40e5aef24abac3a39ae701b898e9c65520aa82d2edc41aa"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/large_vehicle_layout.log",
+          "sha256": "fb8f0e777de85afb5894f7ea2360ffe50b3a24a03cd5dfabd588d600b024bd50"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/large_vehicle_workers.log",
+          "sha256": "ee851dafa298dff3c1f436165a4a0118d321eb2244bfb23fdc8e9a5d99e5f0fa"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/official/cargo.log",
+          "sha256": "511640ed235f7e7935bcfbaf01f6ed20f41474f4d0794dcd6c081c2b374e5bdf"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/official/cargo_accounting.log",
+          "sha256": "97bc2b6ba4c46e5f03060a8c5d8fbbbe4943d01cd9aa9087164c1233c912d75d"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/official/import.log",
+          "sha256": "9506cba8e642b102213ee9c45d3550ce4e0e851cf83b92951d96d26905720e0d"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/official/items.log",
+          "sha256": "b126a5543be7989c5a40552969964c1fcdb35ac4fb31f946a7e03773adcb1985"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/official/results.json",
+          "sha256": "15a8e31a6ed8fa778132811e4d2be175e7da3445839f74d111038bff1e56714a"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/official/rooms.log",
+          "sha256": "e8439899782c21cf1d85eb56744148b01cdbaca9726fbaf99384d4a1e88e5ef9"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/official/save_game.log",
+          "sha256": "26c2f6948e82ea95035f4cc08663c992cfd24bd3c086c1c33c470ea914cebde5"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/official/startup.log",
+          "sha256": "a9912b85473f126d3f4f63ec824170c828df3473a292f866dde86cafda5b66da"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/official/trouble_loop.log",
+          "sha256": "1f3a06f0fa0c097927bc6dacdfd1b6483ca6bf4539842362c0f855607655b7b1"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/official/view.log",
+          "sha256": "23723da760bf1abfbc44030058aa4e39e64a41406243b0499312c74619ba19a3"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/official/weapon.log",
+          "sha256": "ddf70d0e3bb6bde5eaedfe18b9a000e4625681c875b06a8255424919a94668ef"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/room-change.png",
+          "sha256": "80f9e8b758fd315583365fe76bd5b92ae098b70e09690593dd3cb2cc96a0532d"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/shot_alignment.gd",
+          "sha256": "56801b9136cebdbd360100c727e11c704758d447c1bf4cf8a0dfbc4407dc3a7b"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/source-before.json",
+          "sha256": "5849d5a0a03d4ad655bbc44af113de3ac35077e5eee99166bb33fa70ac177f8d"
+        },
+        {
+          "path": "docs/large-graphics-fix-evidence-2026-10-21/vehicle_prototype.log",
+          "sha256": "56fe782dfe8f985767e06fb53c73035b0897b8c2c2eb3ecbe30f4ab26332bd7c"
+        },
+        {
+          "path": "docs/大型グラフィック_修正検証_2026-10-21.md",
+          "sha256": "cded0aef33662a83a27e35f433d1614878c3ce400ed89318687c80b3ff5ef3a3"
+        },
+        {
+          "path": "scripts/base.gd",
+          "sha256": "069f69d592289aeee928b3ca1d95726ed56d64e2b1511e258a960e7598cdc098"
+        },
+        {
+          "path": "scripts/base_exterior.gd",
+          "sha256": "ae2b28234e2aca2fa69756d3022f67eed3e18e394eaaa5944902170d06544608"
+        },
+        {
+          "path": "scripts/main.gd",
+          "sha256": "dc59991dccca1cdd1dd6027d5695db6feced9cb5f451c3dcb63989c0ef0fa303"
+        },
+        {
+          "path": "tools/test_large_vehicle_layout.gd",
+          "sha256": "299809b1368011c82ed119a0446a59766397376a945670ccc002f15fd0f491fa"
+        },
+        {
+          "path": "tools/test_large_vehicle_workers.gd",
+          "sha256": "b9a71adc7457e7596053bdfa58cb13e3644884e554d45349515b38ebb4a66f3e"
+        },
+        {
+          "path": "tools/test_large_vehicle_workers.gd.uid",
+          "sha256": "d110f9488d36ac4ed9150c035a9767d3b23e2dbd93d9505b7a303dc62ec5c2b4"
+        },
+        {
+          "path": "tools/test_vehicle_prototype.gd",
+          "sha256": "5ad6bbf7c33d9ca3cfa36984b92e213f348f3105882b9569f4994184c039f1d2"
+        }
+      ],
+      "dirty": true
+    }
+  },
+  "scope": [
+    "import",
+    "view",
+    "save_game",
+    "weapon",
+    "startup"
+  ],
+  "status": "passed",
+  "first_failure": null,
+  "checks": [
+    {
+      "id": "import",
+      "command": [
+        "/workspace/scratch/e482ae95cb01/runtime/Godot_v4.6.3-stable_linux.x86_64",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "--editor",
+        "--import",
+        "--quit"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/scratch/7be024cc4a55/checks/pixel-official/20261021T140254Z-_v8qme9x/import.log",
+      "timeout_seconds": 120,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 6.005,
+      "diagnostic_error_lines": [],
+      "success_marker_found": null
+    },
+    {
+      "id": "view",
+      "command": [
+        "/workspace/scratch/e482ae95cb01/runtime/Godot_v4.6.3-stable_linux.x86_64",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_view.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/scratch/7be024cc4a55/checks/pixel-official/20261021T140254Z-_v8qme9x/view.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 46.08,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "save_game",
+      "command": [
+        "/workspace/scratch/e482ae95cb01/runtime/Godot_v4.6.3-stable_linux.x86_64",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_save_game.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/scratch/7be024cc4a55/checks/pixel-official/20261021T140254Z-_v8qme9x/save_game.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 6.083,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "weapon",
+      "command": [
+        "/workspace/scratch/e482ae95cb01/runtime/Godot_v4.6.3-stable_linux.x86_64",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "-s",
+        "res://tools/test_weapon.gd",
+        "--",
+        "legacy-world-test"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/scratch/7be024cc4a55/checks/pixel-official/20261021T140254Z-_v8qme9x/weapon.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 2.99,
+      "diagnostic_error_lines": [],
+      "success_marker_found": true
+    },
+    {
+      "id": "startup",
+      "command": [
+        "/workspace/scratch/e482ae95cb01/runtime/Godot_v4.6.3-stable_linux.x86_64",
+        "--headless",
+        "--path",
+        "/workspace/desert_rats",
+        "--fixed-fps",
+        "60",
+        "--quit-after",
+        "300"
+      ],
+      "cwd": "/workspace/desert_rats",
+      "log": "/workspace/scratch/7be024cc4a55/checks/pixel-official/20261021T140254Z-_v8qme9x/startup.log",
+      "timeout_seconds": 180.0,
+      "requested_game_minutes_per_run": null,
+      "requested_repetitions": null,
+      "status": "passed",
+      "returncode": 0,
+      "elapsed_wall_seconds": 5.295,
+      "diagnostic_error_lines": [],
+      "success_marker_found": null
+    }
+  ],
+  "elapsed_wall_seconds": 66.46,
+  "finished_utc": "2026-10-21T14:04:00.888508+00:00",
+  "source_changed_during_run": false
+}
