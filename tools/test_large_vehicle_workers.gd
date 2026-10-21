@@ -55,6 +55,15 @@ func _run() -> void:
 	check(route_seen.lower_ladder and route_seen.middle_deck, "normal hauling uses the lower-deck ladder and middle deck")
 	check(crafted, "normal hauling and processing complete after large chassis switch")
 	check(hauler.position.distance_to(main.processor.position) > 0.0 or main.processor.total_done >= 1, "worker position is advanced by normal AI rather than a fixed interior marker")
+	# SaveGame restores the loadout first; the next regular Base tick must also
+	# restore the matching facility floor coordinates before worker AI runs.
+	var snapshot := SaveGame.capture(main)
+	main.base.vehicle_loadout["chassis"] = "medium"
+	await process_frame
+	check(not GameData.large_three_deck_enabled and is_equal_approx(main.storage.position.y, GameData.LO_Y), "switching back restores ordinary storage floor")
+	check(SaveGame.apply(main, snapshot), "large chassis snapshot applies")
+	await process_frame
+	check(GameData.large_three_deck_enabled and is_equal_approx(main.storage.position.y, LargeVehicleLayout.deck_y(1)), "save restore synchronizes large storage floor before AI resumes")
 	Engine.time_scale = saved_time_scale
 	main.queue_free()
 	print("== large vehicle workers: %s ==" % ("passed" if failures == 0 else "%d failures" % failures))
