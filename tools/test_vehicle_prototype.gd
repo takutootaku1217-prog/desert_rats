@@ -109,7 +109,9 @@ func _initialize() -> void:
 	main.fire_vehicle_weapon("primary")
 	check(is_equal_approx(enemy.hp, hp_before - 30.0) and base.vehicle_loadout.ammo == ammo_before - 2 \
 		and base.vehicle_weapon_recoil("primary") > 0.0 and base.vehicle_weapon_flash("primary") > 0.0, "primary weapon damages, consumes ammunition, and triggers fortress fire feedback")
-	await frames(20)
+	# Presentation timers are seconds, so this must not depend on an uncapped
+	# headless renderer producing a particular number of frames.
+	await create_timer(0.25).timeout
 	check(is_zero_approx(base.vehicle_weapon_recoil("primary")) and is_zero_approx(base.vehicle_weapon_flash("primary")), "fortress fire feedback ends after its short presentation window")
 	# Existing crew AI should use the same non-ecological enemy after it reaches
 	# the base. Keep it alive after vehicle fire and let auto-combat acquire it.

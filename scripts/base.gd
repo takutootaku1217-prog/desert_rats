@@ -126,10 +126,20 @@ func is_large_three_deck() -> bool:
 	return str(vehicle_loadout.get("chassis", "medium")) in ["large", "reinforced_large"]
 
 
+## The room/facility targets are world coordinates.  Switch them together
+## with the three-deck route flag so a worker cannot chase the old floor Y.
+func _sync_large_three_deck_layout() -> void:
+	var enabled := is_large_three_deck()
+	if GameData.large_three_deck_enabled == enabled:
+		return
+	GameData.large_three_deck_enabled = enabled
+	apply_layout()
+
+
 func start_large_interior_walkthrough() -> void:
 	if not is_large_three_deck():
 		return
-	GameData.large_three_deck_enabled = true
+	_sync_large_three_deck_layout()
 	for i in mini(game.workers.size(), LargeVehicleLayout.TOP_DECK_ROOMS.size()):
 		var worker = game.workers[i]
 		if worker != null and not worker.away and not worker.down:
@@ -320,6 +330,8 @@ func equip_vehicle_part(slot: String, id: String) -> bool:
 		vehicle_loadout.last_note = "積載上限を超えるため装着できません（不足 %d）" % -int(preview.left)
 		return false
 	vehicle_loadout[slot] = id
+	if slot == "chassis":
+		_sync_large_three_deck_layout()
 	vehicle_loadout.last_note = "%sを装着。積載 %+d、防御 %d、実被害 %.0f" % [VehicleLoadout.part(slot,id).name, int(preview.delta), int(vehicle_defense()), damage_after_armor(8.0)]
 	queue_redraw()
 	return true
@@ -455,7 +467,7 @@ func heal(amount: float) -> void:
 
 
 func _process(delta: float) -> void:
-	GameData.large_three_deck_enabled = is_large_three_deck()
+	_sync_large_three_deck_layout()
 	hit_timer = maxf(0.0, hit_timer - delta)
 	_primary_fire_fx = maxf(0.0, _primary_fire_fx - delta)
 	_secondary_fire_fx = maxf(0.0, _secondary_fire_fx - delta)
