@@ -1,0 +1,12 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/canyon_recovery/old_checkpoint.png" id="1_checkpoint"]
+
+[node name="CanyonCheckpointRear" type="Node2D"]
+texture_filter = 1
+z_index = 2
+
+[node name="OldCheckpoint" type="Sprite2D" parent="."]
+texture_filter = 1
+position = Vector2(1030, 180)
+texture = ExtResource("1_checkpoint")

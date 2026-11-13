@@ -1,0 +1,12 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/canyon_recovery/mobile_base_front.png" id="1_front"]
+
+[node name="CanyonBaseFront" type="Node2D"]
+texture_filter = 1
+z_index = 5
+
+[node name="MobileBaseFrontOccluder" type="Sprite2D" parent="."]
+texture_filter = 1
+position = Vector2(960, 564)
+texture = ExtResource("1_front")

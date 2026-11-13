@@ -1,0 +1,5315 @@
+{
+	"capture_method": "direct X11 1280x720 video at 10fps plus Godot post-draw observation; no interpolation, copied frames, or manual adapter ticks",
+	"display_server": "X11",
+	"entry": {
+		"dock_count": 1,
+		"gate_closed": true,
+		"outpost_enabled": false,
+		"resources": {
+			"entity_26": {
+				"initial": 10,
+				"item": 5,
+				"remaining": 10
+			},
+			"entity_27": {
+				"initial": 12,
+				"item": 5,
+				"remaining": 12
+			},
+			"entity_28": {
+				"initial": 7,
+				"item": 6,
+				"remaining": 7
+			},
+			"entity_29": {
+				"initial": 10,
+				"item": 4,
+				"remaining": 10
+			}
+		},
+		"roles": {
+			"worker:0": {
+				"carry_limit": 3,
+				"role": "harvest",
+				"support": -1
+			},
+			"worker:1": {
+				"carry_limit": 3,
+				"role": "carry",
+				"support": -1
+			},
+			"worker:2": {
+				"carry_limit": 3,
+				"role": "escort",
+				"support": -1
+			}
+		},
+		"seed": 104729
+	},
+	"manual_adapter_ticks": 0,
+	"mode": "normal_roles",
+	"normal_user_save_touched": false,
+	"observation_fps": 10,
+	"presentation_revision": "v12_harvest_v3",
+	"renderer_provenance": {
+		"crew_views_sha256": "6c0c55d9c349c0358ee8b93ba41ee842d518a06b99e311e4aa3f2f3141403184",
+		"kind": "live-v12-workspace-crew-view"
+	},
+	"runtime_driver": "inherited_adapter_process",
+	"samples": [
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 162.684,
+				"y": 535.0
+			},
+			"engine_fps": 1.0,
+			"engine_process_frames": 12,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "west",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					1117.0,
+					535.0
+				],
+				"frame_index": 0,
+				"frame_name": "walk_west_0",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_west_0.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 0.055,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 39
+			},
+			"wall_msec": 71
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 196.871,
+				"y": 535.0
+			},
+			"engine_fps": 1.0,
+			"engine_process_frames": 13,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "west",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					1083.0,
+					535.0
+				],
+				"frame_index": 1,
+				"frame_name": "walk_west_1",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_west_1.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 0.204,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 39
+			},
+			"wall_msec": 229
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 227.537,
+				"y": 535.0
+			},
+			"engine_fps": 1.0,
+			"engine_process_frames": 15,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "west",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					1052.0,
+					535.0
+				],
+				"frame_index": 3,
+				"frame_name": "walk_west_3",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_west_3.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 0.337,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 39
+			},
+			"wall_msec": 356
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 256.022,
+				"y": 535.0
+			},
+			"engine_fps": 1.0,
+			"engine_process_frames": 17,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "west",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					1024.0,
+					535.0
+				],
+				"frame_index": 0,
+				"frame_name": "walk_west_0",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_west_0.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 0.461,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 39
+			},
+			"wall_msec": 465
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 279.863,
+				"y": 535.0
+			},
+			"engine_fps": 1.0,
+			"engine_process_frames": 19,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "west",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					1000.0,
+					535.0
+				],
+				"frame_index": 1,
+				"frame_name": "walk_west_1",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_west_1.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 0.565,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 39
+			},
+			"wall_msec": 618
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 300.371,
+				"y": 535.0
+			},
+			"engine_fps": 17.0,
+			"engine_process_frames": 20,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "west",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					980.0,
+					535.0
+				],
+				"frame_index": 1,
+				"frame_name": "walk_west_1",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_west_1.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 0.654,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 39
+			},
+			"wall_msec": 674
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 313.761,
+				"y": 535.0
+			},
+			"engine_fps": 17.0,
+			"engine_process_frames": 21,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "west",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					966.0,
+					535.0
+				],
+				"frame_index": 2,
+				"frame_name": "walk_west_2",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_west_2.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 0.712,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 39
+			},
+			"wall_msec": 788
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 340.843,
+				"y": 535.0
+			},
+			"engine_fps": 17.0,
+			"engine_process_frames": 22,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "west",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					939.0,
+					535.0
+				],
+				"frame_index": 3,
+				"frame_name": "walk_west_3",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_west_3.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 0.83,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 39
+			},
+			"wall_msec": 844
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 365.564,
+				"y": 535.0
+			},
+			"engine_fps": 17.0,
+			"engine_process_frames": 24,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "west",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					914.0,
+					535.0
+				],
+				"frame_index": 0,
+				"frame_name": "walk_west_0",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_west_0.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 0.937,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 39
+			},
+			"wall_msec": 961
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 394.287,
+				"y": 535.0
+			},
+			"engine_fps": 17.0,
+			"engine_process_frames": 26,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "west",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					886.0,
+					535.0
+				],
+				"frame_index": 1,
+				"frame_name": "walk_west_1",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_west_1.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 1.062,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 39
+			},
+			"wall_msec": 1090
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 408.343,
+				"y": 535.0
+			},
+			"engine_fps": 17.0,
+			"engine_process_frames": 27,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "west",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					872.0,
+					535.0
+				],
+				"frame_index": 2,
+				"frame_name": "walk_west_2",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_west_2.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 1.123,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 39
+			},
+			"wall_msec": 1148
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 436.318,
+				"y": 535.0
+			},
+			"engine_fps": 17.0,
+			"engine_process_frames": 29,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "west",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					844.0,
+					535.0
+				],
+				"frame_index": 3,
+				"frame_name": "walk_west_3",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_west_3.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 1.245,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 39
+			},
+			"wall_msec": 1248
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 460.291,
+				"y": 535.0
+			},
+			"engine_fps": 17.0,
+			"engine_process_frames": 31,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "west",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					820.0,
+					535.0
+				],
+				"frame_index": 0,
+				"frame_name": "walk_west_0",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_west_0.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 1.349,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 39
+			},
+			"wall_msec": 1363
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 485.326,
+				"y": 535.0
+			},
+			"engine_fps": 17.0,
+			"engine_process_frames": 33,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "west",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					795.0,
+					535.0
+				],
+				"frame_index": 1,
+				"frame_name": "walk_west_1",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_west_1.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 1.458,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 39
+			},
+			"wall_msec": 1462
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 509.403,
+				"y": 535.0
+			},
+			"engine_fps": 17.0,
+			"engine_process_frames": 35,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "west",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					771.0,
+					535.0
+				],
+				"frame_index": 2,
+				"frame_name": "walk_west_2",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_west_2.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 1.563,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 39
+			},
+			"wall_msec": 1570
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 522.704,
+				"y": 535.0
+			},
+			"engine_fps": 16.0,
+			"engine_process_frames": 36,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "west",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					757.0,
+					535.0
+				],
+				"frame_index": 2,
+				"frame_name": "walk_west_2",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_west_2.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 1.62,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 39
+			},
+			"wall_msec": 1631
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 547.758,
+				"y": 535.0
+			},
+			"engine_fps": 16.0,
+			"engine_process_frames": 38,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "west",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					732.0,
+					535.0
+				],
+				"frame_index": 3,
+				"frame_name": "walk_west_3",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_west_3.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 1.729,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 39
+			},
+			"wall_msec": 1754
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 573.633,
+				"y": 535.0
+			},
+			"engine_fps": 16.0,
+			"engine_process_frames": 40,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "west",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					706.0,
+					535.0
+				],
+				"frame_index": 0,
+				"frame_name": "walk_west_0",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_west_0.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 1.842,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 39
+			},
+			"wall_msec": 1857
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 598.724,
+				"y": 535.0
+			},
+			"engine_fps": 16.0,
+			"engine_process_frames": 42,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "west",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					681.0,
+					535.0
+				],
+				"frame_index": 1,
+				"frame_name": "walk_west_1",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_west_1.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 1.951,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 39
+			},
+			"wall_msec": 1963
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 623.223,
+				"y": 535.0
+			},
+			"engine_fps": 16.0,
+			"engine_process_frames": 44,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "west",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					657.0,
+					535.0
+				],
+				"frame_index": 2,
+				"frame_name": "walk_west_2",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_west_2.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 2.057,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 39
+			},
+			"wall_msec": 2053
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 644.465,
+				"y": 535.0
+			},
+			"engine_fps": 16.0,
+			"engine_process_frames": 46,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "west",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					636.0,
+					535.0
+				],
+				"frame_index": 3,
+				"frame_name": "walk_west_3",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_west_3.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 2.15,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 39
+			},
+			"wall_msec": 2157
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 667.465,
+				"y": 535.0
+			},
+			"engine_fps": 16.0,
+			"engine_process_frames": 48,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "west",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					613.0,
+					535.0
+				],
+				"frame_index": 0,
+				"frame_name": "walk_west_0",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_west_0.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 2.25,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 39
+			},
+			"wall_msec": 2262
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 690.465,
+				"y": 535.0
+			},
+			"engine_fps": 16.0,
+			"engine_process_frames": 50,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "west",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					590.0,
+					535.0
+				],
+				"frame_index": 1,
+				"frame_name": "walk_west_1",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_west_1.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 2.35,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 39
+			},
+			"wall_msec": 2357
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 708.509,
+				"y": 527.264
+			},
+			"engine_fps": 16.0,
+			"engine_process_frames": 52,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "northwest",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					571.0,
+					527.0
+				],
+				"frame_index": 2,
+				"frame_name": "walk_northwest_2",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_northwest_2.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 2.45,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 39
+			},
+			"wall_msec": 2448
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 724.308,
+				"y": 512.902
+			},
+			"engine_fps": 16.0,
+			"engine_process_frames": 54,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "northwest",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					556.0,
+					513.0
+				],
+				"frame_index": 2,
+				"frame_name": "walk_northwest_2",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_northwest_2.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 2.543,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 39
+			},
+			"wall_msec": 2548
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 741.09,
+				"y": 497.646
+			},
+			"engine_fps": 19.0,
+			"engine_process_frames": 56,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "northwest",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					539.0,
+					498.0
+				],
+				"frame_index": 3,
+				"frame_name": "walk_northwest_3",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_northwest_3.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 2.641,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 39
+			},
+			"wall_msec": 2651
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 757.399,
+				"y": 482.819
+			},
+			"engine_fps": 19.0,
+			"engine_process_frames": 58,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "northwest",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					523.0,
+					483.0
+				],
+				"frame_index": 0,
+				"frame_name": "walk_northwest_0",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_northwest_0.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 2.737,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 39
+			},
+			"wall_msec": 2753
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 774.417,
+				"y": 467.348
+			},
+			"engine_fps": 19.0,
+			"engine_process_frames": 60,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "northwest",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					506.0,
+					467.0
+				],
+				"frame_index": 1,
+				"frame_name": "walk_northwest_1",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_northwest_1.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 2.837,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 39
+			},
+			"wall_msec": 2854
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 794.369,
+				"y": 449.21
+			},
+			"engine_fps": 19.0,
+			"engine_process_frames": 62,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "northwest",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					486.0,
+					449.0
+				],
+				"frame_index": 2,
+				"frame_name": "walk_northwest_2",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_northwest_2.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 2.954,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 39
+			},
+			"wall_msec": 3017
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 811.291,
+				"y": 433.826
+			},
+			"engine_fps": 19.0,
+			"engine_process_frames": 63,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "northwest",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					469.0,
+					434.0
+				],
+				"frame_index": 3,
+				"frame_name": "walk_northwest_3",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_northwest_3.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 3.054,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 39
+			},
+			"wall_msec": 3102
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 825.473,
+				"y": 420.934
+			},
+			"engine_fps": 19.0,
+			"engine_process_frames": 64,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "northwest",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					455.0,
+					421.0
+				],
+				"frame_index": 0,
+				"frame_name": "walk_northwest_0",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_northwest_0.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 3.137,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 39
+			},
+			"wall_msec": 3147
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 842.492,
+				"y": 405.462
+			},
+			"engine_fps": 19.0,
+			"engine_process_frames": 66,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "northwest",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					438.0,
+					405.0
+				],
+				"frame_index": 1,
+				"frame_name": "walk_northwest_1",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_northwest_1.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 3.237,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 39
+			},
+			"wall_msec": 3250
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 860.363,
+				"y": 389.216
+			},
+			"engine_fps": 19.0,
+			"engine_process_frames": 68,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "northwest",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					420.0,
+					389.0
+				],
+				"frame_index": 2,
+				"frame_name": "walk_northwest_2",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_northwest_2.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 3.342,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 39
+			},
+			"wall_msec": 3351
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 869.439,
+				"y": 380.964
+			},
+			"engine_fps": 19.0,
+			"engine_process_frames": 69,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "northwest",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					411.0,
+					381.0
+				],
+				"frame_index": 2,
+				"frame_name": "walk_northwest_2",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_northwest_2.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 3.395,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 39
+			},
+			"wall_msec": 3444
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 884.257,
+				"y": 367.494
+			},
+			"engine_fps": 19.0,
+			"engine_process_frames": 70,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "northwest",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					396.0,
+					367.0
+				],
+				"frame_index": 3,
+				"frame_name": "walk_northwest_3",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_northwest_3.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 3.483,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 39
+			},
+			"wall_msec": 3529
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 913.403,
+				"y": 340.998
+			},
+			"engine_fps": 17.0,
+			"engine_process_frames": 72,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "northwest",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					367.0,
+					341.0
+				],
+				"frame_index": 0,
+				"frame_name": "walk_northwest_0",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_northwest_0.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 3.654,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 39
+			},
+			"wall_msec": 3706
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 927.585,
+				"y": 328.105
+			},
+			"engine_fps": 17.0,
+			"engine_process_frames": 73,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "northwest",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					352.0,
+					328.0
+				],
+				"frame_index": 1,
+				"frame_name": "walk_northwest_1",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_northwest_1.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 3.737,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 39
+			},
+			"wall_msec": 3793
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 942.417,
+				"y": 314.621
+			},
+			"engine_fps": 17.0,
+			"engine_process_frames": 74,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "northwest",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					338.0,
+					315.0
+				],
+				"frame_index": 2,
+				"frame_name": "walk_northwest_2",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_northwest_2.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 3.824,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 39
+			},
+			"wall_msec": 3888
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 958.357,
+				"y": 300.13
+			},
+			"engine_fps": 17.0,
+			"engine_process_frames": 75,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "northwest",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					322.0,
+					300.0
+				],
+				"frame_index": 3,
+				"frame_name": "walk_northwest_3",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_northwest_3.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 3.918,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 39
+			},
+			"wall_msec": 3988
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 977.282,
+				"y": 282.925
+			},
+			"engine_fps": 17.0,
+			"engine_process_frames": 76,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "northwest",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					303.0,
+					283.0
+				],
+				"frame_index": 0,
+				"frame_name": "walk_northwest_0",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_northwest_0.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 4.029,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 39
+			},
+			"wall_msec": 4044
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 996.171,
+				"y": 265.754
+			},
+			"engine_fps": 17.0,
+			"engine_process_frames": 78,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "northwest",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					284.0,
+					266.0
+				],
+				"frame_index": 1,
+				"frame_name": "walk_northwest_1",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_northwest_1.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 4.14,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 39
+			},
+			"wall_msec": 4164
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 1016.933,
+				"y": 246.879
+			},
+			"engine_fps": 17.0,
+			"engine_process_frames": 80,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "northwest",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					263.0,
+					247.0
+				],
+				"frame_index": 2,
+				"frame_name": "walk_northwest_2",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_northwest_2.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 4.262,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 39
+			},
+			"wall_msec": 4283
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "harvesting",
+				"x": 1030.0,
+				"y": 235.0
+			},
+			"engine_fps": 17.0,
+			"engine_process_frames": 82,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "northwest",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					250.0,
+					235.0
+				],
+				"frame_index": 2,
+				"frame_name": "harvest_2",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/harvest_2.png",
+				"visual_kind": "harvest"
+			},
+			"session_elapsed": 4.374,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 39
+			},
+			"wall_msec": 4372
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "harvesting",
+				"x": 1030.0,
+				"y": 235.0
+			},
+			"engine_fps": 17.0,
+			"engine_process_frames": 83,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "northwest",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					250.0,
+					235.0
+				],
+				"frame_index": 0,
+				"frame_name": "harvest_0",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/harvest_0.png",
+				"visual_kind": "harvest"
+			},
+			"session_elapsed": 4.512,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 39
+			},
+			"wall_msec": 4512
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "harvesting",
+				"x": 1030.0,
+				"y": 235.0
+			},
+			"engine_fps": 12.0,
+			"engine_process_frames": 84,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "northwest",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					250.0,
+					235.0
+				],
+				"frame_index": 0,
+				"frame_name": "harvest_0",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/harvest_0.png",
+				"visual_kind": "harvest"
+			},
+			"session_elapsed": 4.554,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 39
+			},
+			"wall_msec": 4546
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "harvesting",
+				"x": 1030.0,
+				"y": 235.0
+			},
+			"engine_fps": 12.0,
+			"engine_process_frames": 87,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "northwest",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					250.0,
+					235.0
+				],
+				"frame_index": 1,
+				"frame_name": "harvest_1",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/harvest_1.png",
+				"visual_kind": "harvest"
+			},
+			"session_elapsed": 4.658,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 39
+			},
+			"wall_msec": 4658
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "harvesting",
+				"x": 1030.0,
+				"y": 235.0
+			},
+			"engine_fps": 12.0,
+			"engine_process_frames": 90,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "northwest",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					250.0,
+					235.0
+				],
+				"frame_index": 2,
+				"frame_name": "harvest_2",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/harvest_2.png",
+				"visual_kind": "harvest"
+			},
+			"session_elapsed": 4.769,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 39
+			},
+			"wall_msec": 4753
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "harvesting",
+				"x": 1030.0,
+				"y": 235.0
+			},
+			"engine_fps": 12.0,
+			"engine_process_frames": 93,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "northwest",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					250.0,
+					235.0
+				],
+				"frame_index": 2,
+				"frame_name": "harvest_2",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/harvest_2.png",
+				"visual_kind": "harvest"
+			},
+			"session_elapsed": 4.869,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 39
+			},
+			"wall_msec": 4854
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "harvesting",
+				"x": 1030.0,
+				"y": 235.0
+			},
+			"engine_fps": 12.0,
+			"engine_process_frames": 96,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "northwest",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					250.0,
+					235.0
+				],
+				"frame_index": 3,
+				"frame_name": "harvest_3",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/harvest_3.png",
+				"visual_kind": "harvest"
+			},
+			"session_elapsed": 4.967,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 39
+			},
+			"wall_msec": 4966
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "harvesting",
+				"x": 1030.0,
+				"y": 235.0
+			},
+			"engine_fps": 12.0,
+			"engine_process_frames": 98,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "northwest",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					250.0,
+					235.0
+				],
+				"frame_index": 0,
+				"frame_name": "harvest_0",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/harvest_0.png",
+				"visual_kind": "harvest"
+			},
+			"session_elapsed": 5.033,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 39
+			},
+			"wall_msec": 5029
+		},
+		{
+			"actor": {
+				"carry_item": 5,
+				"carry_n": 3,
+				"route": "bypass",
+				"state": "to_relay",
+				"x": 1030.0,
+				"y": 235.0
+			},
+			"engine_fps": 12.0,
+			"engine_process_frames": 101,
+			"presentation": {
+				"cargo_visible": true,
+				"direction": "northwest",
+				"foot_anchor": [
+					28.0,
+					50.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					250.0,
+					235.0
+				],
+				"frame_index": 0,
+				"frame_name": "v2_carry_0",
+				"motion_asset": "v2",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v2/crew_carry.png",
+				"visual_kind": "carry"
+			},
+			"session_elapsed": 5.133,
+			"summary": {
+				"carried": 3,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 5135
+		},
+		{
+			"actor": {
+				"carry_item": 5,
+				"carry_n": 3,
+				"route": "bypass",
+				"state": "to_relay",
+				"x": 1006.574,
+				"y": 256.296
+			},
+			"engine_fps": 12.0,
+			"engine_process_frames": 102,
+			"presentation": {
+				"cargo_visible": true,
+				"direction": "southeast",
+				"foot_anchor": [
+					28.0,
+					50.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					273.0,
+					256.0
+				],
+				"frame_index": 0,
+				"frame_name": "v2_carry_0",
+				"motion_asset": "v2",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v2/crew_carry.png",
+				"visual_kind": "carry"
+			},
+			"session_elapsed": 5.27,
+			"summary": {
+				"carried": 3,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 5270
+		},
+		{
+			"actor": {
+				"carry_item": 5,
+				"carry_n": 3,
+				"route": "bypass",
+				"state": "to_relay",
+				"x": 994.364,
+				"y": 267.396
+			},
+			"engine_fps": 12.0,
+			"engine_process_frames": 104,
+			"presentation": {
+				"cargo_visible": true,
+				"direction": "southeast",
+				"foot_anchor": [
+					28.0,
+					50.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					286.0,
+					267.0
+				],
+				"frame_index": 0,
+				"frame_name": "v2_carry_0",
+				"motion_asset": "v2",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v2/crew_carry.png",
+				"visual_kind": "carry"
+			},
+			"session_elapsed": 5.342,
+			"summary": {
+				"carried": 3,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 5336
+		},
+		{
+			"actor": {
+				"carry_item": 5,
+				"carry_n": 3,
+				"route": "bypass",
+				"state": "to_relay",
+				"x": 971.858,
+				"y": 287.856
+			},
+			"engine_fps": 12.0,
+			"engine_process_frames": 108,
+			"presentation": {
+				"cargo_visible": true,
+				"direction": "southeast",
+				"foot_anchor": [
+					28.0,
+					50.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					308.0,
+					288.0
+				],
+				"frame_index": 0,
+				"frame_name": "v2_carry_0",
+				"motion_asset": "v2",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v2/crew_carry.png",
+				"visual_kind": "carry"
+			},
+			"session_elapsed": 5.474,
+			"summary": {
+				"carried": 3,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 5457
+		},
+		{
+			"actor": {
+				"carry_item": 5,
+				"carry_n": 3,
+				"route": "bypass",
+				"state": "to_relay",
+				"x": 960.824,
+				"y": 297.887
+			},
+			"engine_fps": 12.0,
+			"engine_process_frames": 110,
+			"presentation": {
+				"cargo_visible": true,
+				"direction": "southeast",
+				"foot_anchor": [
+					28.0,
+					50.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					319.0,
+					298.0
+				],
+				"frame_index": 0,
+				"frame_name": "v2_carry_0",
+				"motion_asset": "v2",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v2/crew_carry.png",
+				"visual_kind": "carry"
+			},
+			"session_elapsed": 5.539,
+			"summary": {
+				"carried": 3,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 5530
+		},
+		{
+			"actor": {
+				"carry_item": 5,
+				"carry_n": 3,
+				"route": "bypass",
+				"state": "to_relay",
+				"x": 943.061,
+				"y": 314.035
+			},
+			"engine_fps": 27.0,
+			"engine_process_frames": 113,
+			"presentation": {
+				"cargo_visible": true,
+				"direction": "southeast",
+				"foot_anchor": [
+					28.0,
+					50.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					337.0,
+					314.0
+				],
+				"frame_index": 0,
+				"frame_name": "v2_carry_0",
+				"motion_asset": "v2",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v2/crew_carry.png",
+				"visual_kind": "carry"
+			},
+			"session_elapsed": 5.644,
+			"summary": {
+				"carried": 3,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 5638
+		},
+		{
+			"actor": {
+				"carry_item": 5,
+				"carry_n": 3,
+				"route": "bypass",
+				"state": "to_relay",
+				"x": 924.081,
+				"y": 331.29
+			},
+			"engine_fps": 27.0,
+			"engine_process_frames": 116,
+			"presentation": {
+				"cargo_visible": true,
+				"direction": "southeast",
+				"foot_anchor": [
+					28.0,
+					50.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					356.0,
+					331.0
+				],
+				"frame_index": 0,
+				"frame_name": "v2_carry_0",
+				"motion_asset": "v2",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v2/crew_carry.png",
+				"visual_kind": "carry"
+			},
+			"session_elapsed": 5.755,
+			"summary": {
+				"carried": 3,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 5753
+		},
+		{
+			"actor": {
+				"carry_item": 5,
+				"carry_n": 3,
+				"route": "bypass",
+				"state": "to_relay",
+				"x": 911.553,
+				"y": 342.68
+			},
+			"engine_fps": 27.0,
+			"engine_process_frames": 118,
+			"presentation": {
+				"cargo_visible": true,
+				"direction": "southeast",
+				"foot_anchor": [
+					28.0,
+					50.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					368.0,
+					343.0
+				],
+				"frame_index": 0,
+				"frame_name": "v2_carry_0",
+				"motion_asset": "v2",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v2/crew_carry.png",
+				"visual_kind": "carry"
+			},
+			"session_elapsed": 5.829,
+			"summary": {
+				"carried": 3,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 5839
+		},
+		{
+			"actor": {
+				"carry_item": 5,
+				"carry_n": 3,
+				"route": "bypass",
+				"state": "to_relay",
+				"x": 890.469,
+				"y": 361.847
+			},
+			"engine_fps": 27.0,
+			"engine_process_frames": 121,
+			"presentation": {
+				"cargo_visible": true,
+				"direction": "southeast",
+				"foot_anchor": [
+					28.0,
+					50.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					390.0,
+					362.0
+				],
+				"frame_index": 0,
+				"frame_name": "v2_carry_0",
+				"motion_asset": "v2",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v2/crew_carry.png",
+				"visual_kind": "carry"
+			},
+			"session_elapsed": 5.953,
+			"summary": {
+				"carried": 3,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 5963
+		},
+		{
+			"actor": {
+				"carry_item": 5,
+				"carry_n": 3,
+				"route": "bypass",
+				"state": "to_relay",
+				"x": 877.034,
+				"y": 374.06
+			},
+			"engine_fps": 27.0,
+			"engine_process_frames": 123,
+			"presentation": {
+				"cargo_visible": true,
+				"direction": "southeast",
+				"foot_anchor": [
+					28.0,
+					50.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					403.0,
+					374.0
+				],
+				"frame_index": 0,
+				"frame_name": "v2_carry_0",
+				"motion_asset": "v2",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v2/crew_carry.png",
+				"visual_kind": "carry"
+			},
+			"session_elapsed": 6.032,
+			"summary": {
+				"carried": 3,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 6041
+		},
+		{
+			"actor": {
+				"carry_item": 5,
+				"carry_n": 3,
+				"route": "bypass",
+				"state": "to_relay",
+				"x": 855.87,
+				"y": 393.3
+			},
+			"engine_fps": 27.0,
+			"engine_process_frames": 126,
+			"presentation": {
+				"cargo_visible": true,
+				"direction": "southeast",
+				"foot_anchor": [
+					28.0,
+					50.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					424.0,
+					393.0
+				],
+				"frame_index": 0,
+				"frame_name": "v2_carry_0",
+				"motion_asset": "v2",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v2/crew_carry.png",
+				"visual_kind": "carry"
+			},
+			"session_elapsed": 6.156,
+			"summary": {
+				"carried": 3,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 6170
+		},
+		{
+			"actor": {
+				"carry_item": 5,
+				"carry_n": 3,
+				"route": "bypass",
+				"state": "to_relay",
+				"x": 848.338,
+				"y": 400.148
+			},
+			"engine_fps": 27.0,
+			"engine_process_frames": 127,
+			"presentation": {
+				"cargo_visible": true,
+				"direction": "southeast",
+				"foot_anchor": [
+					28.0,
+					50.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					432.0,
+					400.0
+				],
+				"frame_index": 0,
+				"frame_name": "v2_carry_0",
+				"motion_asset": "v2",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v2/crew_carry.png",
+				"visual_kind": "carry"
+			},
+			"session_elapsed": 6.2,
+			"summary": {
+				"carried": 3,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 6235
+		},
+		{
+			"actor": {
+				"carry_item": 5,
+				"carry_n": 3,
+				"route": "bypass",
+				"state": "to_relay",
+				"x": 819.369,
+				"y": 426.483
+			},
+			"engine_fps": 27.0,
+			"engine_process_frames": 130,
+			"presentation": {
+				"cargo_visible": true,
+				"direction": "southeast",
+				"foot_anchor": [
+					28.0,
+					50.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					461.0,
+					426.0
+				],
+				"frame_index": 0,
+				"frame_name": "v2_carry_0",
+				"motion_asset": "v2",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v2/crew_carry.png",
+				"visual_kind": "carry"
+			},
+			"session_elapsed": 6.37,
+			"summary": {
+				"carried": 3,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 6360
+		},
+		{
+			"actor": {
+				"carry_item": 5,
+				"carry_n": 3,
+				"route": "bypass",
+				"state": "to_relay",
+				"x": 807.065,
+				"y": 437.668
+			},
+			"engine_fps": 27.0,
+			"engine_process_frames": 132,
+			"presentation": {
+				"cargo_visible": true,
+				"direction": "southeast",
+				"foot_anchor": [
+					28.0,
+					50.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					473.0,
+					438.0
+				],
+				"frame_index": 0,
+				"frame_name": "v2_carry_0",
+				"motion_asset": "v2",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v2/crew_carry.png",
+				"visual_kind": "carry"
+			},
+			"session_elapsed": 6.443,
+			"summary": {
+				"carried": 3,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 6434
+		},
+		{
+			"actor": {
+				"carry_item": 5,
+				"carry_n": 3,
+				"route": "bypass",
+				"state": "to_relay",
+				"x": 786.705,
+				"y": 456.177
+			},
+			"engine_fps": 24.0,
+			"engine_process_frames": 135,
+			"presentation": {
+				"cargo_visible": true,
+				"direction": "southeast",
+				"foot_anchor": [
+					28.0,
+					50.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					493.0,
+					456.0
+				],
+				"frame_index": 0,
+				"frame_name": "v2_carry_0",
+				"motion_asset": "v2",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v2/crew_carry.png",
+				"visual_kind": "carry"
+			},
+			"session_elapsed": 6.562,
+			"summary": {
+				"carried": 3,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 6553
+		},
+		{
+			"actor": {
+				"carry_item": 5,
+				"carry_n": 3,
+				"route": "bypass",
+				"state": "to_relay",
+				"x": 768.901,
+				"y": 472.363
+			},
+			"engine_fps": 24.0,
+			"engine_process_frames": 138,
+			"presentation": {
+				"cargo_visible": true,
+				"direction": "southeast",
+				"foot_anchor": [
+					28.0,
+					50.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					511.0,
+					472.0
+				],
+				"frame_index": 0,
+				"frame_name": "v2_carry_0",
+				"motion_asset": "v2",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v2/crew_carry.png",
+				"visual_kind": "carry"
+			},
+			"session_elapsed": 6.667,
+			"summary": {
+				"carried": 3,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 6656
+		},
+		{
+			"actor": {
+				"carry_item": 5,
+				"carry_n": 3,
+				"route": "bypass",
+				"state": "to_relay",
+				"x": 756.137,
+				"y": 483.966
+			},
+			"engine_fps": 24.0,
+			"engine_process_frames": 140,
+			"presentation": {
+				"cargo_visible": true,
+				"direction": "southeast",
+				"foot_anchor": [
+					28.0,
+					50.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					524.0,
+					484.0
+				],
+				"frame_index": 0,
+				"frame_name": "v2_carry_0",
+				"motion_asset": "v2",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v2/crew_carry.png",
+				"visual_kind": "carry"
+			},
+			"session_elapsed": 6.742,
+			"summary": {
+				"carried": 3,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 6741
+		},
+		{
+			"actor": {
+				"carry_item": 5,
+				"carry_n": 3,
+				"route": "bypass",
+				"state": "to_relay",
+				"x": 737.445,
+				"y": 500.96
+			},
+			"engine_fps": 24.0,
+			"engine_process_frames": 143,
+			"presentation": {
+				"cargo_visible": true,
+				"direction": "southeast",
+				"foot_anchor": [
+					28.0,
+					50.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					543.0,
+					501.0
+				],
+				"frame_index": 0,
+				"frame_name": "v2_carry_0",
+				"motion_asset": "v2",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v2/crew_carry.png",
+				"visual_kind": "carry"
+			},
+			"session_elapsed": 6.852,
+			"summary": {
+				"carried": 3,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 6835
+		},
+		{
+			"actor": {
+				"carry_item": 5,
+				"carry_n": 3,
+				"route": "bypass",
+				"state": "to_relay",
+				"x": 716.689,
+				"y": 519.828
+			},
+			"engine_fps": 24.0,
+			"engine_process_frames": 147,
+			"presentation": {
+				"cargo_visible": true,
+				"direction": "southeast",
+				"foot_anchor": [
+					28.0,
+					50.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					563.0,
+					520.0
+				],
+				"frame_index": 0,
+				"frame_name": "v2_carry_0",
+				"motion_asset": "v2",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v2/crew_carry.png",
+				"visual_kind": "carry"
+			},
+			"session_elapsed": 6.974,
+			"summary": {
+				"carried": 3,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 6957
+		},
+		{
+			"actor": {
+				"carry_item": 5,
+				"carry_n": 3,
+				"route": "bypass",
+				"state": "to_relay",
+				"x": 701.049,
+				"y": 534.046
+			},
+			"engine_fps": 24.0,
+			"engine_process_frames": 150,
+			"presentation": {
+				"cargo_visible": true,
+				"direction": "southeast",
+				"foot_anchor": [
+					28.0,
+					50.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					579.0,
+					534.0
+				],
+				"frame_index": 0,
+				"frame_name": "v2_carry_0",
+				"motion_asset": "v2",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v2/crew_carry.png",
+				"visual_kind": "carry"
+			},
+			"session_elapsed": 7.066,
+			"summary": {
+				"carried": 3,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 7048
+		},
+		{
+			"actor": {
+				"carry_item": 5,
+				"carry_n": 3,
+				"route": "bypass",
+				"state": "to_relay",
+				"x": 687.506,
+				"y": 527.266
+			},
+			"engine_fps": 24.0,
+			"engine_process_frames": 153,
+			"presentation": {
+				"cargo_visible": true,
+				"direction": "east",
+				"foot_anchor": [
+					28.0,
+					50.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					592.0,
+					527.0
+				],
+				"frame_index": 0,
+				"frame_name": "v2_carry_0",
+				"motion_asset": "v2",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v2/crew_carry.png",
+				"visual_kind": "carry"
+			},
+			"session_elapsed": 7.159,
+			"summary": {
+				"carried": 3,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 7148
+		},
+		{
+			"actor": {
+				"carry_item": 5,
+				"carry_n": 3,
+				"route": "bypass",
+				"state": "to_relay",
+				"x": 668.765,
+				"y": 515.664
+			},
+			"engine_fps": 24.0,
+			"engine_process_frames": 156,
+			"presentation": {
+				"cargo_visible": true,
+				"direction": "east",
+				"foot_anchor": [
+					28.0,
+					50.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					611.0,
+					516.0
+				],
+				"frame_index": 0,
+				"frame_name": "v2_carry_0",
+				"motion_asset": "v2",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v2/crew_carry.png",
+				"visual_kind": "carry"
+			},
+			"session_elapsed": 7.255,
+			"summary": {
+				"carried": 3,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 7241
+		},
+		{
+			"actor": {
+				"carry_item": 5,
+				"carry_n": 3,
+				"route": "bypass",
+				"state": "to_relay",
+				"x": 650.051,
+				"y": 504.079
+			},
+			"engine_fps": 24.0,
+			"engine_process_frames": 159,
+			"presentation": {
+				"cargo_visible": true,
+				"direction": "east",
+				"foot_anchor": [
+					28.0,
+					50.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					630.0,
+					504.0
+				],
+				"frame_index": 0,
+				"frame_name": "v2_carry_0",
+				"motion_asset": "v2",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v2/crew_carry.png",
+				"visual_kind": "carry"
+			},
+			"session_elapsed": 7.35,
+			"summary": {
+				"carried": 3,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 7341
+		},
+		{
+			"actor": {
+				"carry_item": 5,
+				"carry_n": 3,
+				"route": "bypass",
+				"state": "to_relay",
+				"x": 631.443,
+				"y": 492.56
+			},
+			"engine_fps": 24.0,
+			"engine_process_frames": 162,
+			"presentation": {
+				"cargo_visible": true,
+				"direction": "east",
+				"foot_anchor": [
+					28.0,
+					50.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					649.0,
+					493.0
+				],
+				"frame_index": 0,
+				"frame_name": "v2_carry_0",
+				"motion_asset": "v2",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v2/crew_carry.png",
+				"visual_kind": "carry"
+			},
+			"session_elapsed": 7.446,
+			"summary": {
+				"carried": 3,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 7438
+		},
+		{
+			"actor": {
+				"carry_item": 5,
+				"carry_n": 3,
+				"route": "bypass",
+				"state": "to_relay",
+				"x": 612.865,
+				"y": 481.059
+			},
+			"engine_fps": 30.0,
+			"engine_process_frames": 165,
+			"presentation": {
+				"cargo_visible": true,
+				"direction": "east",
+				"foot_anchor": [
+					28.0,
+					50.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					667.0,
+					481.0
+				],
+				"frame_index": 0,
+				"frame_name": "v2_carry_0",
+				"motion_asset": "v2",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v2/crew_carry.png",
+				"visual_kind": "carry"
+			},
+			"session_elapsed": 7.541,
+			"summary": {
+				"carried": 3,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 7540
+		},
+		{
+			"actor": {
+				"carry_item": 5,
+				"carry_n": 3,
+				"route": "bypass",
+				"state": "to_relay",
+				"x": 593.393,
+				"y": 469.005
+			},
+			"engine_fps": 30.0,
+			"engine_process_frames": 168,
+			"presentation": {
+				"cargo_visible": true,
+				"direction": "east",
+				"foot_anchor": [
+					28.0,
+					50.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					687.0,
+					469.0
+				],
+				"frame_index": 0,
+				"frame_name": "v2_carry_0",
+				"motion_asset": "v2",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v2/crew_carry.png",
+				"visual_kind": "carry"
+			},
+			"session_elapsed": 7.64,
+			"summary": {
+				"carried": 3,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 7638
+		},
+		{
+			"actor": {
+				"carry_item": 5,
+				"carry_n": 3,
+				"route": "bypass",
+				"state": "to_relay",
+				"x": 572.858,
+				"y": 456.293
+			},
+			"engine_fps": 30.0,
+			"engine_process_frames": 171,
+			"presentation": {
+				"cargo_visible": true,
+				"direction": "east",
+				"foot_anchor": [
+					28.0,
+					50.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					707.0,
+					456.0
+				],
+				"frame_index": 0,
+				"frame_name": "v2_carry_0",
+				"motion_asset": "v2",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v2/crew_carry.png",
+				"visual_kind": "carry"
+			},
+			"session_elapsed": 7.745,
+			"summary": {
+				"carried": 3,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 7744
+		},
+		{
+			"actor": {
+				"carry_item": 5,
+				"carry_n": 3,
+				"route": "bypass",
+				"state": "to_relay",
+				"x": 553.302,
+				"y": 444.187
+			},
+			"engine_fps": 30.0,
+			"engine_process_frames": 174,
+			"presentation": {
+				"cargo_visible": true,
+				"direction": "east",
+				"foot_anchor": [
+					28.0,
+					50.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					727.0,
+					444.0
+				],
+				"frame_index": 0,
+				"frame_name": "v2_carry_0",
+				"motion_asset": "v2",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v2/crew_carry.png",
+				"visual_kind": "carry"
+			},
+			"session_elapsed": 7.845,
+			"summary": {
+				"carried": 3,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 7841
+		},
+		{
+			"actor": {
+				"carry_item": 5,
+				"carry_n": 3,
+				"route": "bypass",
+				"state": "to_relay",
+				"x": 533.746,
+				"y": 432.081
+			},
+			"engine_fps": 30.0,
+			"engine_process_frames": 177,
+			"presentation": {
+				"cargo_visible": true,
+				"direction": "east",
+				"foot_anchor": [
+					28.0,
+					50.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					746.0,
+					432.0
+				],
+				"frame_index": 0,
+				"frame_name": "v2_carry_0",
+				"motion_asset": "v2",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v2/crew_carry.png",
+				"visual_kind": "carry"
+			},
+			"session_elapsed": 7.945,
+			"summary": {
+				"carried": 3,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 7941
+		},
+		{
+			"actor": {
+				"carry_item": 5,
+				"carry_n": 3,
+				"route": "bypass",
+				"state": "to_relay",
+				"x": 514.19,
+				"y": 419.975
+			},
+			"engine_fps": 30.0,
+			"engine_process_frames": 180,
+			"presentation": {
+				"cargo_visible": true,
+				"direction": "east",
+				"foot_anchor": [
+					28.0,
+					50.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					766.0,
+					420.0
+				],
+				"frame_index": 0,
+				"frame_name": "v2_carry_0",
+				"motion_asset": "v2",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v2/crew_carry.png",
+				"visual_kind": "carry"
+			},
+			"session_elapsed": 8.045,
+			"summary": {
+				"carried": 3,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 8030
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 490.0,
+				"y": 405.0
+			},
+			"engine_fps": 30.0,
+			"engine_process_frames": 184,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "east",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					790.0,
+					405.0
+				],
+				"frame_index": 1,
+				"frame_name": "walk_east_1",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_east_1.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 8.174,
+			"summary": {
+				"carried": 3,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 8157
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 508.135,
+				"y": 416.226
+			},
+			"engine_fps": 30.0,
+			"engine_process_frames": 187,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "west",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					772.0,
+					416.0
+				],
+				"frame_index": 2,
+				"frame_name": "walk_west_2",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_west_2.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 8.267,
+			"summary": {
+				"carried": 3,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 8262
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 521.102,
+				"y": 424.254
+			},
+			"engine_fps": 30.0,
+			"engine_process_frames": 189,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "west",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					759.0,
+					424.0
+				],
+				"frame_index": 3,
+				"frame_name": "walk_west_3",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_west_3.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 8.333,
+			"summary": {
+				"carried": 3,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 1,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 8344
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 543.04,
+				"y": 437.835
+			},
+			"engine_fps": 30.0,
+			"engine_process_frames": 192,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "west",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					737.0,
+					438.0
+				],
+				"frame_index": 0,
+				"frame_name": "walk_west_0",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_west_0.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 8.446,
+			"summary": {
+				"carried": 3,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 1,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 8445
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 563.51,
+				"y": 450.506
+			},
+			"engine_fps": 30.0,
+			"engine_process_frames": 195,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "west",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					716.0,
+					451.0
+				],
+				"frame_index": 0,
+				"frame_name": "walk_west_0",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_west_0.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 8.55,
+			"summary": {
+				"carried": 3,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 1,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 8555
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 584.308,
+				"y": 463.381
+			},
+			"engine_fps": 30.0,
+			"engine_process_frames": 198,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "west",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					696.0,
+					463.0
+				],
+				"frame_index": 1,
+				"frame_name": "walk_west_1",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_west_1.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 8.657,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 3,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 8666
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 613.087,
+				"y": 481.197
+			},
+			"engine_fps": 30.0,
+			"engine_process_frames": 199,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "west",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					667.0,
+					481.0
+				],
+				"frame_index": 3,
+				"frame_name": "walk_west_3",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_west_3.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 8.804,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 3,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 8812
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 622.865,
+				"y": 487.25
+			},
+			"engine_fps": 30.0,
+			"engine_process_frames": 200,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "west",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					657.0,
+					487.0
+				],
+				"frame_index": 3,
+				"frame_name": "walk_west_3",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_west_3.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 8.854,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 3,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 8846
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 642.422,
+				"y": 499.356
+			},
+			"engine_fps": 30.0,
+			"engine_process_frames": 203,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "west",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					638.0,
+					499.0
+				],
+				"frame_index": 0,
+				"frame_name": "walk_west_0",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_west_0.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 8.954,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 3,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 8956
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 656.926,
+				"y": 508.335
+			},
+			"engine_fps": 30.0,
+			"engine_process_frames": 205,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "west",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					623.0,
+					508.0
+				],
+				"frame_index": 1,
+				"frame_name": "walk_west_1",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_west_1.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 9.028,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 3,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 9030
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 678.296,
+				"y": 521.564
+			},
+			"engine_fps": 30.0,
+			"engine_process_frames": 208,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "west",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					602.0,
+					522.0
+				],
+				"frame_index": 2,
+				"frame_name": "walk_west_2",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_west_2.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 9.137,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 3,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 9145
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 700.0,
+				"y": 535.0
+			},
+			"engine_fps": 30.0,
+			"engine_process_frames": 211,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "west",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					580.0,
+					535.0
+				],
+				"frame_index": 3,
+				"frame_name": "walk_west_3",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_west_3.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 9.264,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 3,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 9258
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 717.7,
+				"y": 518.909
+			},
+			"engine_fps": 30.0,
+			"engine_process_frames": 214,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "northwest",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					562.0,
+					519.0
+				],
+				"frame_index": 0,
+				"frame_name": "walk_northwest_0",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_northwest_0.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 9.368,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 3,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 9354
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 734.719,
+				"y": 503.437
+			},
+			"engine_fps": 30.0,
+			"engine_process_frames": 217,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "northwest",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					545.0,
+					503.0
+				],
+				"frame_index": 1,
+				"frame_name": "walk_northwest_1",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_northwest_1.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 9.468,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 3,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 9456
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 751.465,
+				"y": 488.213
+			},
+			"engine_fps": 25.0,
+			"engine_process_frames": 220,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "northwest",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					529.0,
+					488.0
+				],
+				"frame_index": 2,
+				"frame_name": "walk_northwest_2",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_northwest_2.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 9.567,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 3,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 9549
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 765.953,
+				"y": 475.042
+			},
+			"engine_fps": 25.0,
+			"engine_process_frames": 223,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "northwest",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					514.0,
+					475.0
+				],
+				"frame_index": 2,
+				"frame_name": "walk_northwest_2",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_northwest_2.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 9.652,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 3,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 9638
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 781.908,
+				"y": 460.538
+			},
+			"engine_fps": 25.0,
+			"engine_process_frames": 226,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "northwest",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					498.0,
+					461.0
+				],
+				"frame_index": 3,
+				"frame_name": "walk_northwest_3",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_northwest_3.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 9.745,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 3,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 9732
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 797.902,
+				"y": 445.998
+			},
+			"engine_fps": 25.0,
+			"engine_process_frames": 229,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "northwest",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					482.0,
+					446.0
+				],
+				"frame_index": 0,
+				"frame_name": "walk_northwest_0",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_northwest_0.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 9.839,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 3,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 9834
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 813.976,
+				"y": 431.386
+			},
+			"engine_fps": 25.0,
+			"engine_process_frames": 232,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "northwest",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					466.0,
+					431.0
+				],
+				"frame_index": 1,
+				"frame_name": "walk_northwest_1",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_northwest_1.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 9.934,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 3,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 9932
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 830.369,
+				"y": 416.483
+			},
+			"engine_fps": 25.0,
+			"engine_process_frames": 235,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "northwest",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					450.0,
+					416.0
+				],
+				"frame_index": 2,
+				"frame_name": "walk_northwest_2",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_northwest_2.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 10.03,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 3,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 10038
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 848.366,
+				"y": 400.122
+			},
+			"engine_fps": 25.0,
+			"engine_process_frames": 238,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "northwest",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					432.0,
+					400.0
+				],
+				"frame_index": 3,
+				"frame_name": "walk_northwest_3",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_northwest_3.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 10.136,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 3,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 10137
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 868.419,
+				"y": 381.891
+			},
+			"engine_fps": 25.0,
+			"engine_process_frames": 242,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "northwest",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					412.0,
+					382.0
+				],
+				"frame_index": 0,
+				"frame_name": "walk_northwest_0",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_northwest_0.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 10.254,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 3,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 10252
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 884.665,
+				"y": 367.123
+			},
+			"engine_fps": 25.0,
+			"engine_process_frames": 245,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "northwest",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					395.0,
+					367.0
+				],
+				"frame_index": 1,
+				"frame_name": "walk_northwest_1",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_northwest_1.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 10.349,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 3,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 10349
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 900.91,
+				"y": 352.355
+			},
+			"engine_fps": 25.0,
+			"engine_process_frames": 248,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "northwest",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					379.0,
+					352.0
+				],
+				"frame_index": 2,
+				"frame_name": "walk_northwest_2",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_northwest_2.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 10.445,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 3,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 10444
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 917.155,
+				"y": 337.587
+			},
+			"engine_fps": 31.0,
+			"engine_process_frames": 251,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "northwest",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					363.0,
+					338.0
+				],
+				"frame_index": 2,
+				"frame_name": "walk_northwest_2",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_northwest_2.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 10.54,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 3,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 10537
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 933.4,
+				"y": 322.818
+			},
+			"engine_fps": 31.0,
+			"engine_process_frames": 254,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "northwest",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					347.0,
+					323.0
+				],
+				"frame_index": 3,
+				"frame_name": "walk_northwest_3",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_northwest_3.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 10.636,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 3,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 10636
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 950.201,
+				"y": 307.545
+			},
+			"engine_fps": 31.0,
+			"engine_process_frames": 257,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "northwest",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					330.0,
+					308.0
+				],
+				"frame_index": 0,
+				"frame_name": "walk_northwest_0",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_northwest_0.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 10.734,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 3,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 10735
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 971.861,
+				"y": 287.854
+			},
+			"engine_fps": 31.0,
+			"engine_process_frames": 261,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "northwest",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					308.0,
+					288.0
+				],
+				"frame_index": 1,
+				"frame_name": "walk_northwest_1",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_northwest_1.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 10.862,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 3,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 10856
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 982.691,
+				"y": 278.008
+			},
+			"engine_fps": 31.0,
+			"engine_process_frames": 263,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "northwest",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					297.0,
+					278.0
+				],
+				"frame_index": 2,
+				"frame_name": "walk_northwest_2",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_northwest_2.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 10.925,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 3,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 10931
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 1000.112,
+				"y": 262.171
+			},
+			"engine_fps": 31.0,
+			"engine_process_frames": 266,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "northwest",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					280.0,
+					262.0
+				],
+				"frame_index": 3,
+				"frame_name": "walk_northwest_3",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_northwest_3.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 11.028,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 3,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 11032
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "to_resource",
+				"x": 1022.928,
+				"y": 241.429
+			},
+			"engine_fps": 31.0,
+			"engine_process_frames": 270,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "northwest",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					257.0,
+					241.0
+				],
+				"frame_index": 0,
+				"frame_name": "walk_northwest_0",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/walk_northwest_0.png",
+				"visual_kind": "walk"
+			},
+			"session_elapsed": 11.162,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 3,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 11156
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "harvesting",
+				"x": 1030.0,
+				"y": 235.0
+			},
+			"engine_fps": 31.0,
+			"engine_process_frames": 273,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "west",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					250.0,
+					235.0
+				],
+				"frame_index": 2,
+				"frame_name": "harvest_2",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/harvest_2.png",
+				"visual_kind": "harvest"
+			},
+			"session_elapsed": 11.258,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 3,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 11249
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "harvesting",
+				"x": 1030.0,
+				"y": 235.0
+			},
+			"engine_fps": 31.0,
+			"engine_process_frames": 276,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "west",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					250.0,
+					235.0
+				],
+				"frame_index": 2,
+				"frame_name": "harvest_2",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/harvest_2.png",
+				"visual_kind": "harvest"
+			},
+			"session_elapsed": 11.352,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 3,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 11338
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "harvesting",
+				"x": 1030.0,
+				"y": 235.0
+			},
+			"engine_fps": 31.0,
+			"engine_process_frames": 280,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "west",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					250.0,
+					235.0
+				],
+				"frame_index": 3,
+				"frame_name": "harvest_3",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/harvest_3.png",
+				"visual_kind": "harvest"
+			},
+			"session_elapsed": 11.472,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 3,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 11453
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "harvesting",
+				"x": 1030.0,
+				"y": 235.0
+			},
+			"engine_fps": 32.0,
+			"engine_process_frames": 283,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "west",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					250.0,
+					235.0
+				],
+				"frame_index": 0,
+				"frame_name": "harvest_0",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/harvest_0.png",
+				"visual_kind": "harvest"
+			},
+			"session_elapsed": 11.557,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 3,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 11542
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "harvesting",
+				"x": 1030.0,
+				"y": 235.0
+			},
+			"engine_fps": 32.0,
+			"engine_process_frames": 286,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "west",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					250.0,
+					235.0
+				],
+				"frame_index": 1,
+				"frame_name": "harvest_1",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/harvest_1.png",
+				"visual_kind": "harvest"
+			},
+			"session_elapsed": 11.646,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 3,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 11630
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "harvesting",
+				"x": 1030.0,
+				"y": 235.0
+			},
+			"engine_fps": 32.0,
+			"engine_process_frames": 290,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "west",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					250.0,
+					235.0
+				],
+				"frame_index": 2,
+				"frame_name": "harvest_2",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/harvest_2.png",
+				"visual_kind": "harvest"
+			},
+			"session_elapsed": 11.764,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 3,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 11757
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "harvesting",
+				"x": 1030.0,
+				"y": 235.0
+			},
+			"engine_fps": 32.0,
+			"engine_process_frames": 293,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "west",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					250.0,
+					235.0
+				],
+				"frame_index": 2,
+				"frame_name": "harvest_2",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/harvest_2.png",
+				"visual_kind": "harvest"
+			},
+			"session_elapsed": 11.854,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 3,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 11854
+		},
+		{
+			"actor": {
+				"carry_item": -1,
+				"carry_n": 0,
+				"route": "bypass",
+				"state": "harvesting",
+				"x": 1030.0,
+				"y": 235.0
+			},
+			"engine_fps": 32.0,
+			"engine_process_frames": 296,
+			"presentation": {
+				"cargo_visible": false,
+				"direction": "west",
+				"foot_anchor": [
+					32.0,
+					60.0
+				],
+				"foot_error": 0.0,
+				"foot_point": [
+					250.0,
+					235.0
+				],
+				"frame_index": 3,
+				"frame_name": "harvest_3",
+				"motion_asset": "v3",
+				"scale": [
+					1.0,
+					1.0
+				],
+				"texture_path": "res://assets/canyon_recovery/v3/harvest_3.png",
+				"visual_kind": "harvest"
+			},
+			"session_elapsed": 11.955,
+			"summary": {
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 3,
+				"dock_queue": 0,
+				"relay": 0,
+				"source_remaining": 36
+			},
+			"wall_msec": 11957
+		}
+	],
+	"schema": 1,
+	"screenshots": {
+		"carry": "res://prototypes/recovery_map_lab/evidence/normal_crew_motion_runtime_v12/after/normal_crew_motion_after_carry.png",
+		"depot": "res://prototypes/recovery_map_lab/evidence/normal_crew_motion_runtime_v12/after/normal_crew_motion_after_depot.png",
+		"harvest": "res://prototypes/recovery_map_lab/evidence/normal_crew_motion_runtime_v12/after/normal_crew_motion_after_harvest.png",
+		"walk": "res://prototypes/recovery_map_lab/evidence/normal_crew_motion_runtime_v12/after/normal_crew_motion_after_walk.png"
+	},
+	"single_worker_demo": false,
+	"tag": "after",
+	"timing": {
+		"engine_process_frame_span": 285,
+		"max_foot_error": 0.0,
+		"scale_variant_count": 1,
+		"session_elapsed_span": 11.9,
+		"wall_elapsed_seconds": 11.957
+	},
+	"video": "res://prototypes/recovery_map_lab/evidence/normal_crew_motion_runtime_v12/after/normal_crew_motion_after.mp4",
+	"video_capture_fps": 10
+}

@@ -1,0 +1,1280 @@
+class_name CharacterAI
+extends RefCounted
+## キャラクターの状態機械。
+## SEARCH で「優先度の高い仕事から順に」できる仕事を探し、対応する状態列に入る。
+##   狩猟: HUNT_MOVE -> HUNT_ATTACK -> (倒すと獲物) MOVE_TO_RESOURCE -> GATHER -> MOVE_TO_STORAGE -> STORE(解体)
+##   採取: NOTICE -> MOVE_TO_RESOURCE -> GATHER -> MOVE_TO_STORAGE -> STORE
+##   運搬: 燃料補給 REFUEL_TAKE -> REFUEL_MOVE -> REFUEL
+##         材料運び HAUL_TAKE(材料一式) -> HAUL_MOVE(加工設備へ)
+##   加工: MOVE_TO_MACHINE -> PROCESS -> MOVE_TO_STORAGE -> STORE
+##   修理: REPAIR_TAKE(修理資材) -> REPAIR_MOVE -> REPAIR
+##   食事: EAT_TAKE(倉庫の食料) -> EAT（満腹度が下がったとき、仕事より先に。scripts/crew_status.gd・data/crew_status.gd）
+##   運搬の依頼（プレイヤーが頼んだ 倉庫 ⇄ 作業場）: XFER_TAKE(元の置き場) -> XFER_MOVE(行き先)。運搬の仕事（HAUL）の一部。同時に1人だけ（Main.transfer_worker）
+## 新しい仕事は _try_start() に分岐を足し、状態を増やすだけで拡張できる。
+
+enum State {
+	IDLE, SEARCH, NOTICE, MOVE_TO_RESOURCE, GATHER, MOVE_TO_STORAGE, STORE,
+	HAUL_TAKE, HAUL_MOVE, MOVE_TO_MACHINE, PROCESS,
+	COMBAT_MOVE, COMBAT, REPAIR_TAKE, REPAIR_MOVE, REPAIR,
+	REST_MOVE, REST,
+	REFUEL_TAKE, REFUEL_MOVE, REFUEL,
+	HUNT_MOVE, HUNT_ATTACK,
+	EAT_TAKE, EAT, DOWN, REST_HERE, XFER_TAKE, XFER_MOVE, RETURN_BASE,
+	MISSION_RECOVERY_MOVE, MISSION_RECOVERY_LOAD, MISSION_RECOVERY_RETURN,
+	# Keep these at the end: saved integer values of every pre-existing state remain stable.
+	RESCUE_MOVE, RESCUE_LIFT, RESCUE_RETURN, RESCUE_RECOVER,
+}
+
+const STATE_TEXT := {
+	State.RETURN_BASE: "出発前の帰還・待機",
+	State.IDLE: "待機中",
+	State.SEARCH: "探し中…",
+	State.NOTICE: "資源を発見！",
+	State.MOVE_TO_RESOURCE: "資源へ移動",
+	State.GATHER: "採取中",
+	State.MOVE_TO_STORAGE: "倉庫へ運搬",
+	State.STORE: "収納中",
+	State.HAUL_TAKE: "材料を取りに行く",
+	State.HAUL_MOVE: "加工設備へ運搬",
+	State.MOVE_TO_MACHINE: "加工設備へ移動",
+	State.PROCESS: "加工中",
+	State.COMBAT_MOVE: "敵へ向かう",
+	State.COMBAT: "攻撃中！",
+	State.REPAIR_TAKE: "応急修理板を取りに行く",
+	State.REPAIR_MOVE: "修理へ向かう",
+	State.REPAIR: "修理中",
+	State.REST_MOVE: "ベッドへ向かう",
+	State.REST: "休憩中",
+	State.REFUEL_TAKE: "燃料を取りに行く",
+	State.REFUEL_MOVE: "機関室へ運搬",
+	State.REFUEL: "燃料を補給中",
+	State.HUNT_MOVE: "獲物を追う",
+	State.HUNT_ATTACK: "狩り中！",
+	State.EAT_TAKE: "食料を取りに行く",
+	State.EAT: "食事中",
+	State.DOWN: "倒れている",
+	State.REST_HERE: "その場で休憩",
+	State.XFER_TAKE: "素材を取りに行く（運搬の依頼）",
+	State.XFER_MOVE: "素材を運ぶ（運搬の依頼）",
+	State.MISSION_RECOVERY_MOVE: "遺失物の回収へ移動",
+	State.MISSION_RECOVERY_LOAD: "遺失物を回収中",
+	State.MISSION_RECOVERY_RETURN: "遺失物を拠点へ運搬中",
+	State.RESCUE_MOVE: "戦闘不能の仲間へ救助に向かう",
+	State.RESCUE_LIFT: "仲間を担ぎ上げている",
+	State.RESCUE_RETURN: "戦闘不能の仲間を搬送中",
+	State.RESCUE_RECOVER: "救助後の回復中",
+}
+
+var ch      # Worker
+var game    # Main
+var state: int = State.IDLE
+var timer := 0.0
+var res = null          # 対象の ResourceNode
+var haul_item := -1
+var haul_recipe := {}   # 運搬中のレシピ
+var repair_part := -1
+var gather_ev := {}     # 採取ポイントを掘っている間の結果（GatherDB.evaluate。1回の袋ごとに決める）
+var bag_limit := 1      # この袋に入れる最大の個数（倉庫の空き枠と袋の大きさで決まる）
+var bag_frac := 0.0     # 取れる割合の端数（1.0 たまるごとに1個）
+var enemy = null        # 対象の Enemy（戦闘用・現段階では未使用）
+var prey = null         # 狩りの対象の Creature
+const ATTACK_DPS := 14.0
+const HUNT_DPS := 16.0
+const HUNT_REACH := 44.0
+const REPAIR_TIME := 1.2
+const REFUEL_TIME := 0.6
+## 休憩の基準は data/crew_status.gd（CrewStatusDB）にまとめてある（疲労度・HP）
+var eat_wait := 0.0      # 食料が取れなかったあと、食べに行き直すまでの待ち（食事のループにならないように）
+var xfer_item := -1      # 運搬の依頼で運んでいるアイテムと向き（Main.request_transfer）
+var xfer_dir := ""
+var _eat_claimed := false   # 食料の在庫を1つ取り置いている（食べに向かっている間）
+var safe_after := 0.0
+var retreating := false
+var danger_hold := false
+var manual_attack := false # 明示対象のみ。自動仕事の戦闘と区別して保存する。
+var process_slot := 0
+var current_job := -1
+var manual_job := -1              # One-shot direct work order; completion returns to priority AI.
+var life_request: String = ""   # プレイヤーの促し（rest / eat）。安全な区切りで1回だけ評価する。受理時は物資・ベッドを予約しない
+var return_request := false       # 個人への帰還指示。荷物を安全に届けた後、既存の RETURN_BASE を使う。
+## HP30%以下の自動退避は、プレイヤーの永続帰還命令とは分離して保存する。
+var low_hp_retreat := false
+
+
+func setup(worker, g) -> void:
+	ch = worker
+	game = g
+	_set_state(State.SEARCH)
+
+
+func status_text() -> String:
+	if ch.away:
+		return "遠征中"
+	var rescue_phase: String = game.operations.rescue_carrier_phase(ch) if game != null and game.operations != null else ""
+	if rescue_phase == "assigned":
+		return "救助へ向かう"
+	if rescue_phase == "carried":
+		return "救助搬送中（救助期限停止・世界進行）"
+	var target_phase: String = game.operations.rescue_phase_for(ch) if game != null and game.operations != null else ""
+	if target_phase == "incapacitated":
+		return "長期行動不能（回復まで %.0f秒）" % float(game.operations.rescue_case_for(ch).get("left", 0.0))
+	if target_phase == "recovering":
+		return "救助後の回復中（HP75%まで）"
+	var current: String = STATE_TEXT[state]
+	if return_request:
+		return "退却命令・" + current
+	if manual_job == GameData.Job.REPAIR and state not in [State.REPAIR_TAKE, State.REPAIR_MOVE, State.REPAIR]:
+		return "修理指示待ち・" + current
+	return current
+
+
+func _set_state(s: int) -> void:
+	state = s
+	ch.state_changed.emit()
+
+
+## 生活行動を促せない理由。UIは理由と受付だけを使い、状態・在庫・予約には触らない。
+func life_action_reason(action: String) -> String:
+	if action not in ["rest", "eat"]:
+		return "この生活行動は促せません"
+	if ch.away:
+		return "遠征中は促せません"
+	if ch.down or state == State.DOWN:
+		return "戦闘不能のため促せません"
+	if action == "rest" and _is_rest_state():
+		return "すでに休憩しています"
+	if action == "eat" and _is_eat_state():
+		return "すでに食事に向かっています"
+	if life_request == action:
+		return "すでに%sを促しています" % ("休憩" if action == "rest" else "食事")
+	if life_request != "":
+		return "別の生活行動の促しを待っています"
+	return _requested_need_reason(action)
+
+
+func request_life_action(action: String) -> bool:
+	if life_action_reason(action) != "":
+		return false
+	life_request = action
+	return true
+
+
+## 個人だけを拠点内へ戻す。全員撤退（FieldOperations の stance）には触れない。
+## 受付時に作業・予約・持ち物を直接変えず、既存の _recall_tick が安全な区切りで処理する。
+func return_action_reason() -> String:
+	if ch.away:
+		return "遠征中は帰還を指示できません"
+	if game != null and game.operations != null and game.operations.rescue_carrier_phase(ch) in ["assigned", "carried"]:
+		return ""
+	if ch.down or state == State.DOWN:
+		return "戦闘不能のため帰還を指示できません"
+	if return_request:
+		return "すでに帰還を指示しています"
+	return ""
+
+
+func request_return() -> bool:
+	if game != null and game.operations != null and game.operations.defer_return_for_carrier(ch):
+		return true
+	if not return_action_reason().is_empty():
+		return false
+	return_request = true
+	return true
+
+
+func cancel_return() -> bool:
+	if not return_request:
+		return false
+	return_request = false
+	if state == State.RETURN_BASE and ch.floor_i != 0 and game.operations.stance != "recall":
+		_set_state(State.SEARCH)
+	return true
+
+
+func manual_repair_reason() -> String:
+	if ch.away:
+		return "派遣中の仲間には修理を依頼できません"
+	if ch.down or state == State.DOWN:
+		return "戦闘不能中の仲間には修理を依頼できません"
+	if return_request or game.operations.stance == "recall":
+		return "退却命令中のため修理依頼は待機させています"
+	if manual_job == GameData.Job.REPAIR:
+		return "すでに修理を依頼しています"
+	if game.base.part_to_repair() < 0:
+		return "現地修理が必要な部位はありません"
+	if game.storage.count_of(GameData.Item.REPAIR_KIT) < 1:
+		return "修理キットが1個必要です（不足）"
+	return ""
+
+
+func request_manual_repair() -> bool:
+	if not manual_repair_reason().is_empty():
+		return false
+	manual_job = GameData.Job.REPAIR
+	if state in [State.IDLE, State.SEARCH]:
+		_set_state(State.SEARCH)
+	return true
+
+
+func cancel_manual_repair() -> bool:
+	if manual_job != GameData.Job.REPAIR:
+		return false
+	manual_job = -1
+	if state in [State.REPAIR_TAKE, State.REPAIR_MOVE, State.REPAIR]:
+		if ch.carrying == GameData.Item.REPAIR_KIT:
+			ch.unload_owned()
+		_release_task()
+		_set_state(State.SEARCH)
+	return true
+
+
+## 促しの必要・利用可能な物資は、受付時と実際に始める時の両方で確認する。
+func _requested_need_reason(action: String) -> String:
+	if action == "rest":
+		return "今は休憩の必要がありません" if CrewStatus.rest_done(ch) else ""
+	if ch.hunger >= CrewStatusDB.MAX_HUNGER:
+		return "満腹なので食事の必要がありません"
+	if eat_wait > 0.0:
+		return "食料を確認し直すまで少し待っています"
+	if game.food_for_eating() <= 0:
+		return "食事に使える食料がありません（他の仲間の取り置き分を除く）"
+	return ""
+
+
+func _is_rest_state() -> bool:
+	return state in [State.REST_MOVE, State.REST, State.REST_HERE]
+
+
+func _is_eat_state() -> bool:
+	return state in [State.EAT_TAKE, State.EAT]
+
+
+## 生活行動へ移るための安全な中断。持っている材料は強制返却せず、通常の届け先まで運ぶ。
+func _interrupt_for_life_need() -> bool:
+	if state in [State.SEARCH, State.DOWN] or _is_rest_state() or _is_eat_state():
+		return false
+	if life_request != "" and _requested_need_reason(life_request) != "":
+		life_request = ""
+	if not _urgent_life_need() and life_request == "":
+		return false
+	if ch._climb_dest != null:
+		return false                                      # 斜路・ハシゴの途中では、まず今の移動を終える
+	if ch.carrying >= 0 or game.town.recovery_carried_by(ch):
+		if state == State.GATHER:
+			_finish_trip()                              # 掘った分を通常どおり倉庫へ届けてから生活行動へ
+			return true
+		return false                                     # 運搬・補給・修理は、持っている物を届けてからSEARCHに戻る
+	_release_task()
+	_set_state(State.SEARCH)
+	return true
+
+
+func tick(delta: float) -> void:
+	if ch.away:
+		return
+	if _rescue_tick(delta):
+		return
+	if manual_attack and (state not in [State.COMBAT_MOVE,State.COMBAT] or not _enemy_valid()):manual_attack=false
+	if manual_attack and (ch.hp<FieldOperations.RECOVER_HP or _urgent_life_need()):begin_retreat()
+	if ch.floor_i == 0 and not ch.down and not manual_attack:
+		for e in game.enemies_root.get_children():
+			if e.ecological and not e.dead and e.threatens(ch) and ch.position.distance_to(e.position) < FieldOperations.NOTICE_DISTANCE:
+				retreating = true
+				danger_hold = true
+				safe_after = game.director.elapsed + FieldOperations.RETRY_SECONDS
+				break
+	if retreating and ch.floor_i != 0 and ch._climb_dest == null: retreating = false
+	# 専用荷物を持った回収役は、既存の呼戻しでも荷物を失わず拠点へ納める。
+	if (retreating or game.operations.stance == "recall" or game.world.recalling() or game.quarry.recalling()) and game.town.recovery_carried_by(ch):
+		ch.target = game.storage.access_point() + ch.slot_offset
+		if ch.move_to_target(delta):
+			game.town.recovery_stowed(ch)
+			_set_state(State.SEARCH)
+		return
+	# A personal withdrawal is an explicit, persistent order. It can interrupt
+	# meals and field repairs; group recall retains its existing safe boundaries.
+	var personal_withdrawal: bool = return_request and (ch.floor_i == 0 or ch._climb_dest != null or state in [State.NOTICE, State.MOVE_TO_RESOURCE, State.GATHER, State.MOVE_TO_STORAGE, State.STORE, State.HAUL_TAKE, State.HAUL_MOVE, State.MOVE_TO_MACHINE, State.PROCESS, State.XFER_TAKE, State.XFER_MOVE, State.REFUEL_TAKE, State.REFUEL_MOVE, State.REFUEL, State.HUNT_MOVE, State.HUNT_ATTACK, State.COMBAT_MOVE, State.COMBAT, State.MISSION_RECOVERY_MOVE, State.MISSION_RECOVERY_LOAD, State.MISSION_RECOVERY_RETURN, State.REPAIR_TAKE, State.REPAIR_MOVE, State.REPAIR, State.EAT_TAKE, State.EAT, State.REST_MOVE, State.REST, State.REST_HERE])
+	var group_recall: bool = (retreating or game.operations.stance == "recall") and (ch.floor_i == 0 or ch._climb_dest != null or state in [State.NOTICE,State.MOVE_TO_RESOURCE,State.GATHER,State.HUNT_MOVE,State.HUNT_ATTACK,State.COMBAT_MOVE,State.COMBAT,State.MISSION_RECOVERY_MOVE,State.MISSION_RECOVERY_LOAD,State.MISSION_RECOVERY_RETURN])
+	if personal_withdrawal or group_recall:
+		if _recall_tick(delta): return
+	if state == State.RETURN_BASE and not game.world.recalling() and not game.quarry.recalling() and not return_request and ch.floor_i != 0:
+		_set_state(State.SEARCH)
+	if eat_wait > 0.0:
+		eat_wait -= delta
+	if (game.quarry.recalling() or game.world.recalling()) and _recall_tick(delta):
+		return
+	if _interrupt_for_life_need():
+		return
+	match state:
+		State.IDLE:
+			ch.move_to_target(delta)
+			timer -= delta
+			if timer <= 0.0:
+				_set_state(State.SEARCH)
+		State.SEARCH:
+			_search()
+		State.NOTICE:
+			timer -= delta
+			if not _res_valid():
+				_release_task()
+				_set_state(State.SEARCH)
+			elif timer <= 0.0:
+				_set_state(State.MOVE_TO_RESOURCE)
+		State.MOVE_TO_RESOURCE:
+			if not _res_valid():
+				_release_task()
+				_set_state(State.SEARCH)
+				return
+			ch.target = _res_target()
+			if ch.move_to_target(delta):
+				_set_state(State.GATHER)
+		State.GATHER:
+			if not _res_valid():
+				if ch.carrying >= 0:                                # 対象が解放済みでも、既に掘った物資は倉庫へ運ぶ
+					_finish_trip()             # 天候などで中断しても、掘った分は倉庫へ運ぶ
+					return
+				_release_task()
+				_set_state(State.SEARCH)
+				return
+			if res is GatherPoint and ch.priorities.get(GameData.Job.COMBAT, 0) > 0 and game.director.raid_pressing():
+				# 敵が拠点を攻撃している間、戦闘担当は採取を切り上げる（掘った分は倉庫へ。何もなければすぐ迎撃へ）
+				if ch.carrying >= 0:
+					_finish_trip()
+				else:
+					_release_task()
+					_set_state(State.SEARCH)
+				return
+			ch.target = _res_target()
+			ch.move_to_target(delta)   # 流れる資源に付いていく
+			ch.pose = "pick"
+			if res is GatherPoint:
+				_work_point(delta)         # 採取ポイント: 道具と能力で掘る（data/gathering.gd）
+				return
+			res.gather_progress += delta * ch.skill_mult(GameData.Job.GATHER) * game.director.outdoor_mult()
+			if res.gather_progress >= ResourceNode.GATHER_TIME:
+				if res.item == GameData.Item.CARCASS:
+					var drops: Dictionary = GameData.CREATURES[res.species]["drops"]
+					var room: int = game.storage.max_weight() - game.storage.current_weight() - game.storage.processing_reserve()
+					for it in drops:
+						var got: int = int(drops[it]) if not game.storage.enforce else mini(int(drops[it]), maxi(0, room / CargoDB.size_of(it)))
+						if got > 0:
+							ch.carcass_cargo[it] = got
+							room -= got * CargoDB.size_of(it)
+						if got < int(drops[it]): game.keep_outside(it, int(drops[it]) - got, res.position)
+				elif game.storage.free_for(res.item) < 1:
+					_release_task()
+					_set_state(State.SEARCH)
+					return
+				ch.carrying = res.item
+				ch.carry_source = Inventory.SOURCE_HUNT if res.item == GameData.Item.CARCASS else Inventory.SOURCE_ENVIRONMENT
+				ch.carrying_species = res.species
+				ch.carry_n = 1
+				game.total_gathered += 1
+				game.world.consume(res)
+				res.queue_free()
+				res = null
+				_go_storage()
+		State.MOVE_TO_STORAGE:
+			ch.target = game.storage.access_point() + ch.slot_offset
+			if ch.move_to_target(delta):
+				timer = 0.35
+				_set_state(State.STORE)
+		State.STORE:
+			timer -= delta
+			if timer <= 0.0:
+				ch.unload_owned()
+				game.update_procurement()
+				_set_state(State.SEARCH)
+
+		# ---- 狩猟 ----
+		State.HUNT_MOVE:
+			if not _prey_valid():
+				_release_task()
+				_set_state(State.SEARCH)
+				return
+			ch.target = _prey_target()
+			ch.move_to_target(delta)
+			if ch.position.distance_to(prey.position) <= HUNT_REACH:
+				_set_state(State.HUNT_ATTACK)
+		State.HUNT_ATTACK:
+			if not _prey_valid():
+				_release_task()
+				_set_state(State.SEARCH)
+				return
+			ch.target = _prey_target()
+			ch.move_to_target(delta)
+			if ch.position.distance_to(prey.position) > HUNT_REACH + 16.0:
+				_set_state(State.HUNT_MOVE)
+				return
+			ch.attacking = true
+			var p = prey
+			p.take_damage(HUNT_DPS * ch.skill_mult(GameData.Job.HUNT) * game.director.outdoor_mult() * delta)
+			if p.dead:
+				prey = null
+				CrewStatus.hunt_injury(ch, p.species)                 # 狩りの事故（確率で少しケガをする。HP が尽きたら倒れる）
+				if ch.down:
+					return                                            # 獲物は落ちたまま。ほかの仲間が拾う
+				# 倒した獲物は、そのまま自分で拠点へ運ぶ
+				res = game.last_carcass
+				if _res_valid():
+					res.claimed_by = ch
+					_set_state(State.MOVE_TO_RESOURCE)
+				else:
+					res = null
+					_set_state(State.SEARCH)
+
+		# ---- 運搬: 材料を加工設備へ ----
+		State.HAUL_TAKE:
+			ch.target = game.storage.access_point() + ch.slot_offset
+			if ch.move_to_target(delta):
+				if (not haul_recipe.get("automatic",false) or AutoCraftGuard.allows(game,haul_recipe,ch)) and game.storage.take_set(haul_recipe["in"]):
+					ch.carrying = haul_recipe["in"].keys()[0]
+					ch.carry_source = Inventory.SOURCE_TRANSFER
+					_set_state(State.HAUL_MOVE)
+				else:
+					game.processor.cancel_reservation(haul_recipe)
+					haul_recipe = {}
+					_set_state(State.SEARCH)
+		State.HAUL_MOVE:
+			ch.target = game.processor.station_point(haul_recipe) + ch.slot_offset   # そのレシピの設備（加工設備／ワークベンチ）へ
+			if ch.move_to_target(delta):
+				game.processor.receive(haul_recipe)
+				haul_recipe = {}
+				ch.carrying = -1
+				_set_state(State.SEARCH)
+
+		# ---- 運搬: 燃料の補給 ----
+		State.REFUEL_TAKE:
+			ch.target = game.storage.access_point() + ch.slot_offset
+			if ch.move_to_target(delta):
+				if game.storage.take_item(haul_item):
+					ch.carrying = haul_item
+					ch.carry_source = Inventory.SOURCE_TRANSFER
+					_set_state(State.REFUEL_MOVE)
+				else:
+					game.base.refuel_reserved = false
+					_set_state(State.SEARCH)
+		State.REFUEL_MOVE:
+			ch.target = game.base.engine_point() + ch.slot_offset
+			if ch.move_to_target(delta):
+				timer = REFUEL_TIME
+				_set_state(State.REFUEL)
+		State.REFUEL:
+			timer -= delta
+			ch.pose = "work"
+			if timer <= 0.0:
+				game.base.add_fuel(ch.carrying)
+				game.base.refuel_reserved = false
+				ch.carrying = -1
+				_set_state(State.SEARCH)
+
+		# ---- 加工 ----
+		State.MOVE_TO_MACHINE:
+			ch.target = game.processor.lane(process_slot).work_point() + ch.slot_offset      # 次に作る物の設備（加工設備／ワークベンチ）へ
+			if ch.move_to_target(delta):
+				_set_state(State.PROCESS)
+		State.PROCESS:
+			var p: BaseProcessor = game.processor.lane(process_slot)
+			if not p.output.is_empty() and not p.continue_batch(ch.carry_limit()):
+				if p.packed_output_blocked():
+					p.worker = null
+					_set_state(State.SEARCH)
+					return
+				var stack: Dictionary = p.take_output_stack(ch.carry_limit())
+				ch.carrying = stack["item"]
+				ch.carry_n = stack["n"]
+				ch.carry_bonus = {}
+				ch.carry_source = Inventory.SOURCE_PROCESSING
+				p.worker = null
+				_go_storage()
+			elif not p.current.is_empty() or (not p.orders.is_empty() and not p.only_blocked()):
+				ch.target = p.work_point() + ch.slot_offset               # 設備が変わったら（加工設備 ⇄ ワークベンチ）そこへ歩く
+				if ch.move_to_target(delta):
+					p.work(delta, func(f): return ch.field_mult(f))
+					ch.pose = "work"
+			else:
+				p.worker = null
+				_set_state(State.SEARCH)
+
+		# ---- 修理 ----
+		State.REPAIR_TAKE:
+			ch.target = game.storage.access_point() + ch.slot_offset
+			if ch.move_to_target(delta):
+				if game.storage.take_item(GameData.Item.REPAIR_KIT):
+					ch.carrying = GameData.Item.REPAIR_KIT
+					ch.carry_source = Inventory.SOURCE_TRANSFER
+					_set_state(State.REPAIR_MOVE)
+				else:
+					game.base.repair_reserved.erase(repair_part)
+					repair_part = -1
+					if manual_job == GameData.Job.REPAIR:
+						manual_job = -1
+					_set_state(State.SEARCH)
+		State.REPAIR_MOVE:
+			ch.target = game.base.part_point(repair_part) + ch.slot_offset
+			if ch.move_to_target(delta):
+				timer = REPAIR_TIME
+				_set_state(State.REPAIR)
+		State.REPAIR:
+			timer -= delta
+			ch.pose = "work"
+			if timer <= 0.0:
+				game.base.repair(repair_part)
+				repair_part = -1
+				ch.carrying = -1
+				if manual_job == GameData.Job.REPAIR:
+					manual_job = -1
+				_set_state(State.SEARCH)
+
+		# ---- 食事 ----
+		State.EAT_TAKE:
+			ch.target = game.storage.access_point() + ch.slot_offset
+			if ch.move_to_target(delta):
+				_release_eat_claim()
+				if game.storage.take_item(GameData.Item.FOOD):
+					ch.carrying = GameData.Item.FOOD
+					ch.carry_source = Inventory.SOURCE_TRANSFER
+					timer = CrewStatusDB.EAT_SECONDS
+					_set_state(State.EAT)
+				else:
+					eat_wait = CrewStatusDB.EAT_RETRY_SECONDS       # 取り合いで食料がなくなっていた。しばらく仕事を続ける
+					_set_state(State.SEARCH)
+		State.EAT:
+			timer -= delta                                          # 食料を持って、しばらく食べる（手に食料が見える）
+			if timer <= 0.0:
+				CrewStatus.eat(ch, ch.carrying)
+				game.total_eaten += 1
+				ch.carrying = -1
+				_set_state(State.SEARCH)
+
+		# ---- 運搬の依頼（倉庫 ⇄ 作業場）----
+		State.XFER_TAKE:
+			ch.target = _xfer_point(true) + ch.slot_offset
+			if ch.move_to_target(delta):
+				var got: int = game.begin_transfer_trip(xfer_item, xfer_dir, ch)
+				if got > 0:
+					ch.carrying = xfer_item
+					ch.carry_source = Inventory.SOURCE_TRANSFER
+					ch.carry_n = got
+					ch.carry_bonus = {}
+					_set_state(State.XFER_MOVE)
+				else:
+					_release_task()                                    # 元にもう材料がなかった
+					_set_state(State.SEARCH)
+		State.XFER_MOVE:
+			ch.target = _xfer_point(false) + ch.slot_offset
+			if ch.move_to_target(delta):
+				var amount: int = ch.carry_n
+				ch.carrying = -1
+				ch.carry_n = 1
+				game.finish_transfer_trip(xfer_item, xfer_dir, amount)
+				_release_task()
+				_set_state(State.SEARCH)
+
+		# ---- サブクエスト：遺失物回収（専用荷物は通常素材ではない）----
+		State.MISSION_RECOVERY_MOVE:
+			if game.town.recovery != "loading" or game.town.recovery_worker != game.workers.find(ch):
+				_set_state(State.SEARCH)
+				return
+			ch.target = TownDB.RECOVERY_POINT
+			if ch.move_to_target(delta):
+				timer = 0.8
+				_set_state(State.MISSION_RECOVERY_LOAD)
+		State.MISSION_RECOVERY_LOAD:
+			ch.pose = "pick"
+			timer -= delta
+			if timer <= 0.0:
+				if game.town.recovery_loaded(ch):
+					_set_state(State.MISSION_RECOVERY_RETURN)
+				else:
+					_set_state(State.SEARCH)
+		State.MISSION_RECOVERY_RETURN:
+			if not game.town.recovery_carried_by(ch):
+				_set_state(State.SEARCH)
+				return
+			ch.target = game.storage.access_point() + ch.slot_offset
+			if ch.move_to_target(delta):
+				game.town.recovery_stowed(ch)
+				_set_state(State.SEARCH)
+
+		# ---- ベッドが使えないときの簡易休憩（その場で休む。回復は遅い）----
+		State.REST_HERE:
+			ch.resting = true
+			if not CrewStatus.rest_done(ch) and game.base.has_free_bed() and _try_start_rest(true):
+				return
+			if CrewStatus.rest_done(ch) or (CrewStatus.needs_to_eat_now(ch) and _wants_to_eat()):
+				_release_task()
+				_set_state(State.SEARCH)
+
+		# ---- 戦闘不能（HP 0）。倒れて動けない。HP が戻ると起き上がる ----
+		State.DOWN:
+			if not ch.down:
+				_set_state(State.SEARCH)
+
+		# ---- 戦闘（現段階では未使用） ----
+		State.COMBAT_MOVE:
+			if not _enemy_valid():
+				_release_task()
+				_set_state(State.SEARCH)
+				return
+			var desired_range: float = ch.weapon_range()
+			ch.target = enemy.position + Vector2(-desired_range * 0.75, 0)
+			if ch.position.distance_to(enemy.position) <= desired_range:
+				_set_state(State.COMBAT)
+			else:
+				ch.move_to_target(delta)
+		State.COMBAT:
+			if not _enemy_valid():
+				_release_task()
+				_set_state(State.SEARCH)
+				return
+			var desired_range: float = ch.weapon_range()
+			ch.target = enemy.position + Vector2(-desired_range * 0.75, 0)
+			if ch.position.distance_to(enemy.position) > desired_range:
+				_set_state(State.COMBAT_MOVE)
+				return
+			if ch.weapon_is_ranged() and ch.position.distance_to(enemy.position) < desired_range * 0.45:
+				ch.move_to_target(delta)
+			ch.attacking = true
+			enemy.take_damage(ATTACK_DPS * ch.skill_mult(GameData.Job.COMBAT) * ch.weapon_mult() * delta, ch)
+			ch.fatigue = minf(CrewStatusDB.MAX_FATIGUE, ch.fatigue + CrewStatusDB.FATIGUE_COMBAT_GAIN * delta)
+
+		# ---- 休憩 ----
+		State.REST_MOVE:
+			ch.target = game.base.bed_point(ch.bed_index)
+			if ch.move_to_target(delta):
+				_set_state(State.REST)
+		State.REST:
+			ch.sleeping = true
+			ch.target = game.base.bed_point(ch.bed_index)
+			if CrewStatus.rest_done(ch) or (CrewStatus.needs_to_eat_now(ch) and _wants_to_eat()):
+				_release_task()                                     # 回復しきった（疲労度・HP）。とても空腹なら、先に食べに行く
+				_set_state(State.SEARCH)
+
+
+## 採取ポイントを掘る（1フレームぶん）。完成した1単位につき残量1を袋の主素材1へ移す。
+## 袋がいっぱい・残量が尽きたら倉庫へ運ぶ。1単位を掘る基準時間・速度倍率は 採取ポイント × 道具 × 自分の能力（data/gathering.gd）。
+func _work_point(delta: float) -> void:
+	var pt: GatherPoint = res
+	# 保存された旧性能キャッシュで採取条件を迂回しない。荷物・地点の途中進捗は維持。
+	gather_ev = ch.gather_eval(pt.kind)
+	var efficiency: float = float(gather_ev["eff"])
+	if efficiency <= 0.0:
+		if _bag_n() > 0: _finish_trip()
+		else:
+			_release_task()
+			_set_state(State.SEARCH)
+		return
+	if game.storage.free_for(pt.item) < 1:
+		if _bag_n() > 0: _finish_trip()
+		else:
+			_release_task()
+			_set_state(State.SEARCH)
+		return
+	# 効率は採取速度。残量1につき主素材を必ず1個取得。未完の仕事は地点に保持。
+	pt.work += delta * game.director.outdoor_mult() * efficiency / maxf(0.05, float(gather_ev["seconds"]))
+	while pt.work >= 1.0 and pt.remaining > 0 and _bag_n() < bag_limit:
+		if game.storage.free_for(pt.item) < 1:
+			if _bag_n() > 0: _finish_trip()
+			else:
+				_release_task()
+				_set_state(State.SEARCH)
+			return
+		pt.work -= 1.0
+		pt.remaining -= 1
+		game.quarry.record_generated(pt.item, 1, pt.has_meta("quarry_id"))
+		if ch.carrying < 0:
+			ch.carrying = pt.item
+			ch.carry_source = Inventory.SOURCE_ENVIRONMENT
+			ch.carry_n = 1
+		else: ch.carry_n += 1
+		for it in gather_ev["bonus"]:
+			if randf() < float(gather_ev["bonus"][it]):
+				game.quarry.record_generated(it, 1, pt.has_meta("quarry_id"))
+				if game.storage.free_for(it) > 0:
+					ch.carry_bonus[it] = int(ch.carry_bonus.get(it, 0)) + 1
+				elif game.quarry.sheltered():
+					game.quarry.keep_overflow(it, 1)
+				else:
+					var extra := ResourceNode.new()
+					extra.game = game
+					extra.item = it
+					extra.position = pt.position
+					game.resources_root.add_child(extra)
+	if _bag_n() >= bag_limit or (pt.remaining <= 0 and _bag_n() > 0):
+		_finish_trip()
+	elif pt.remaining <= 0:
+		_release_task()                                          # 掘り尽くしたが、1個も取れなかった
+		_set_state(State.SEARCH)
+
+
+## いま袋に入っている個数（何も持っていなければ 0）
+func _bag_n() -> int:
+	return ch.carry_n if ch.carrying >= 0 else 0
+
+
+## 掘るのを終えて、袋の中身を倉庫へ運ぶ。
+func _finish_trip() -> void:
+	game.total_gathered += ch.carry_n
+	if res != null and is_instance_valid(res) and res.claimed_by == ch:
+		res.claimed_by = null
+		res.reserved = 1
+	res = null
+	gather_ev = {}
+	bag_frac = 0.0
+	_go_storage()
+
+
+## 流れていく資源 r に、画面の外へ出る前に追いつけるか。資源は scroll_speed で左へ流れ、仲間は current_speed で追う。
+## 資源が自分より左にあるときは、追いつく速さ＝仲間の速さ − 流れる速さ（速度が速いと追いつけない）。
+## 拠点の中にいるときは、斜路の下（地面への出口）まで歩く時間も数える。追いつけない資源を選ぶと、
+## 「見つけては取り消す」を繰り返して、何も回収できない（特に速度を上げたとき）。
+func _can_reach(r) -> bool:
+	var vs: float = game.scroll_speed
+	if vs <= 1.0:
+		return true
+	var vw: float = maxf(1.0, ch.current_speed())
+	var start: Vector2 = ch.position
+	var t0 := 0.0
+	if ch.floor_i != 0:
+		start = GameData.RAMP_FOOT
+		t0 = ch.position.distance_to(GameData.RAMP_FOOT) / vw          # 出口まで歩く間にも資源は流れる
+	var to := Vector2(r.position.x - 40.0 - vs * t0, r.position.y)     # 仲間が向かう位置（資源の少し手前）
+	var closing: float = vw + vs if to.x > start.x else vw - vs
+	if closing < vw * 0.2:
+		return false
+	var t_reach: float = t0 + start.distance_to(to) / closing
+	var work := 1.5                                                    # 拾う・掘り始めるのに要る時間の目安
+	return t_reach + work < (r.position.x - 60.0) / vs
+
+
+func _res_target() -> Vector2:
+	# 資源の少し手前（拠点側）。地面の範囲に収める。
+	var p: Vector2 = res.position + Vector2(-40, 0)
+	p.y = clampf(p.y, GameData.GROUND_Y_MIN, GameData.GROUND_Y_MAX)
+	return p
+
+
+func _prey_target() -> Vector2:
+	var p: Vector2 = prey.position + Vector2(-30, 0)
+	p.y = clampf(p.y, GameData.GROUND_Y_MIN, GameData.GROUND_Y_MAX)
+	return p
+
+
+func begin_retreat() -> void:
+	manual_attack=false
+	retreating=true
+	danger_hold=true
+	safe_after=game.director.elapsed+FieldOperations.RETRY_SECONDS
+
+
+## The automatic 30% retreat uses the established retreat route but does not set a
+## permanent player command. FieldOperations clears this only after the adopted 75% gate.
+func begin_low_hp_retreat() -> void:
+	low_hp_retreat = true
+	begin_retreat()
+
+
+func finish_low_hp_retreat() -> void:
+	low_hp_retreat = false
+	danger_hold = false
+	retreating = false
+	if state == State.RETURN_BASE and not return_request:
+		_set_state(State.SEARCH)
+
+
+## Take over only while this worker has a rescue role. Existing town lost-parcel
+## recovery remains in its separate MISSION_RECOVERY_* states.
+func _rescue_tick(delta: float) -> bool:
+	if game == null or game.operations == null:
+		return false
+	var carrier_phase: String = game.operations.rescue_carrier_phase(ch)
+	if carrier_phase in ["assigned", "carried"]:
+		var target = game.operations.rescue_target_for(ch)
+		if target == null:
+			_set_state(State.SEARCH)
+			return false
+		if carrier_phase == "assigned":
+			if state not in [State.RESCUE_MOVE, State.RESCUE_LIFT]:
+				begin_rescue()
+			if state == State.RESCUE_MOVE:
+				ch.target = target.position
+				if ch.move_to_target(delta):
+					timer = 0.35
+					_set_state(State.RESCUE_LIFT)
+			else:
+				ch.pose = "pick"
+				timer -= delta
+				if timer <= 0.0 and game.operations.pickup_rescue(ch):
+					_set_state(State.RESCUE_RETURN)
+			return true
+		# Low HP deliberately does not drop a carried teammate. The normal return
+		# route is retained until the target is delivered.
+		if state != State.RESCUE_RETURN:
+			_set_state(State.RESCUE_RETURN)
+		game.operations.follow_carrier(ch)
+		ch.target = game.storage.access_point() + ch.slot_offset
+		if ch.move_to_target(delta):
+			game.operations.deliver_rescue(ch)
+			_set_state(State.SEARCH)
+		return true
+	if game.operations.rescue_phase_for(ch) == "recovering":
+		if state != State.RESCUE_RECOVER:
+			_set_state(State.RESCUE_RECOVER)
+		# Reuse the established in-place rest recovery; no rescue-specific heal rate is invented.
+		ch.resting = true
+		if ch.hp >= FieldOperations.RECOVER_HP:
+			game.operations.finish_rescue_recovery(ch)
+			_set_state(State.SEARCH)
+		return true
+	return false
+
+
+## Called exactly once when a valid manual rescue assignment is accepted.
+## Current cargo and claims take the same safe return-to-storage path used by a DOWN event.
+func begin_rescue() -> void:
+	if ch.carrying >= 0 or not ch.carry_bonus.is_empty():
+		ch.unload_owned()
+	_release_task()
+	_set_state(State.RESCUE_MOVE)
+
+func order_attack(target) -> bool:
+	if not is_instance_valid(target) or target.dead or not target.present or ch.carrying>=0 or ch.away or ch.down or retreating or return_request or _urgent_life_need() or game.operations.stance=="recall" or ch.hp<FieldOperations.RECOVER_HP:return false
+	if ch.position.distance_to(target.position)>FieldOperations.NOTICE_DISTANCE:return false
+	_release_task();enemy=target;manual_attack=true;danger_hold=false
+	_set_state(State.COMBAT_MOVE)
+	return true
+
+func _enemy_valid() -> bool:
+	if is_instance_valid(enemy) and enemy.ecological and (not enemy.present or ch.position.distance_to(enemy.position)>FieldOperations.NOTICE_DISTANCE+40.0 or absf(ch.position.x-enemy.home_x)>enemy.territory()): return false
+	return enemy != null and is_instance_valid(enemy) and not enemy.dead
+
+
+func _prey_valid() -> bool:
+	# A player can cancel the bounded species request while a hunter is already
+	# moving or attacking.  Recheck the same authorization here so cancel is
+	# not merely a UI change that still permits one more kill.
+	if not _prey_reachable(prey):
+		return false
+	return game.hunt_allowed(prey.species)
+
+
+func _prey_reachable(prey) -> bool:
+	if prey == null or not is_instance_valid(prey) or prey.dead or game.director.outdoor_blocked():
+		return false
+	# 逃走相手との距離が縮まらないなら追跡をやめる。移動中は地面の流れも考慮。
+	# 既に攻撃が届く場合と、追いつける遅い個体の狩猟は維持する。
+	if prey._fleeing and prey.position.x > ch.position.x and ch.position.distance_to(prey.position) > HUNT_REACH + 16.0 \
+			and prey._flee_speed - game.scroll_speed >= ch.current_speed():
+		return false
+	return true
+
+
+func _go_storage() -> void:
+	_set_state(State.MOVE_TO_STORAGE)
+
+
+func _res_valid() -> bool:
+	return res != null and is_instance_valid(res) and res.position.x > 30.0 and not game.director.outdoor_blocked()
+
+
+## 優先度の高い仕事から順に、着手できるものを探す。
+func _search() -> void:
+	var jobs: Array = GameData.job_list()
+	jobs.erase(GameData.Job.REST)                              # 休憩は仕事の星から独立した生活行動
+	jobs.sort_custom(func(a, b):
+		var pa: int = ch.priorities.get(a, 0)
+		var pb: int = ch.priorities.get(b, 0)
+		if pa != pb:
+			return pa > pb
+		return a < b)
+	# 依頼された遺失物は既存の画面内生物確認・警戒/撤退方針を通してから取りに行く。
+	var recovery_job:int=game.town.recovery_job_for(ch)
+	if recovery_job == 1:
+		_set_state(State.MISSION_RECOVERY_MOVE)
+		return
+	if recovery_job == 2:
+		_set_state(State.MISSION_RECOVERY_RETURN)
+		return
+	# 自動の生活の必要を促しや仕事より先に見る。食料がないときは仕事を続ける。休憩はベッドがなくてもできる
+	if _try_life_need():
+		return
+	if _try_life_request():
+		return
+	if manual_job == GameData.Job.REPAIR:
+		if _try_start(GameData.Job.REPAIR):
+			current_job = GameData.Job.REPAIR
+			return
+		# The target or kit can disappear while this order waits; do not leave a stuck order.
+		if game.base.part_to_repair() < 0 or game.storage.count_of(GameData.Item.REPAIR_KIT) < 1:
+			manual_job = -1
+	# 拠点の部位が壊れかけていたら（修理が0でなければ）まず直す
+	if ch.priorities.get(GameData.Job.REPAIR, 0) > 0 and game.base.has_critical_part() and _try_start(GameData.Job.REPAIR):
+		current_job = GameData.Job.REPAIR
+		return
+	# 敵が拠点を攻撃している間は、戦闘の優先度が0でない仲間は、まず迎え撃つ（戦闘が0なら非戦闘員）
+	if ch.priorities.get(GameData.Job.COMBAT, 0) > 0 and game.director.raid_pressing() and _try_start(GameData.Job.COMBAT):
+		current_job = GameData.Job.COMBAT
+		return
+	for j in jobs:
+		if ch.priorities.get(j, 0) <= 0:
+			continue
+		if _try_start(j):
+			current_job = j
+			return
+	if _can_start_rest():                                     # 仕事がないときは、従来の通常休憩の基準で自分から休む
+		_start_rest()
+		return
+	current_job = -1
+	timer = 0.8
+	ch.target = Vector2(randf_range(540.0, 860.0), GameData.LO_Y)
+	_set_state(State.IDLE)
+
+
+## 生活の必要（CrewStatus.life_needs の順）のうち、いま実際に行けるものを始める。始めたら true
+func _try_life_need() -> bool:
+	if danger_hold and ch.hp < FieldOperations.RECOVER_HP and ch.floor_i != 0:
+		if _wants_to_eat() and _try_start_eat(): return true
+		_start_rest(true)
+		return true
+	for need in CrewStatus.life_needs(ch):
+		if need == "eat":
+			if _try_start_eat():
+				return true
+		elif _can_start_rest():
+			_start_rest()
+			return true
+	return false
+
+
+## 自動で休憩を始められるか。仕事の星に関係なく、従来の休むべき状態を見る
+func _can_start_rest() -> bool:
+	return CrewStatus.can_rest(ch)
+
+
+func _try_life_request() -> bool:
+	if life_request == "":
+		return false
+	var action := life_request
+	if _requested_need_reason(action) != "":
+		life_request = ""                                     # 物資・必要性が変わっていたら、予約せず通常の行動へ戻る
+		return false
+	if action == "eat":
+		return _try_start_eat(true)
+	_start_rest(true)
+	return true
+
+
+## 自動の休憩と早めの促しで、同じベッド・簡易休憩の経路を使う。
+func _start_rest(early := false) -> void:
+	if not _try_start_rest(early):
+		_start_rest_here()
+
+
+func _try_start_rest(early := false) -> bool:
+	if (CrewStatus.rest_done(ch) if early else not CrewStatus.can_rest(ch)):
+		return false
+	var bi: int = game.base.claim_bed(ch)
+	if bi < 0:
+		return false
+	ch.bed_index = bi
+	current_job = GameData.Job.REST
+	if life_request == "rest":
+		life_request = ""
+	_set_state(State.REST_MOVE)
+	return true
+
+
+## その場で簡易休憩を始める（ベッドが使えないとき。回復はベッドより遅い: CrewStatusDB.REST_IN_PLACE_RATE）
+func _start_rest_here() -> void:
+	current_job = GameData.Job.REST
+	if life_request == "rest":
+		life_request = ""
+	_set_state(State.REST_HERE)
+
+
+## 運搬の依頼の、元の置き場（from_source = true）／行き先（false）の位置。倉庫 → 作業場（to_workshop）または 作業場 → 倉庫（to_storage）
+func _xfer_point(from_source: bool) -> Vector2:
+	var to_workshop: bool = xfer_dir == "to_workshop"
+	if to_workshop == from_source:
+		return game.storage.access_point()
+	return game.processor.access_point()
+
+
+## HP が 0 になった（戦闘不能）。仕事を中断して（荷物は倉庫へ戻し、予約は解放して）、その場に倒れる。
+func on_down() -> void:
+	# Capture rescue resume information before stop_work clears one-shot commands.
+	# If this worker was carrying someone, FieldOperations puts that target back into
+	# the waiting state with its remaining time before the carrier becomes DOWN too.
+	game.operations.on_worker_down(ch)
+	ch.stop_work()
+	_set_state(State.DOWN)
+
+
+## 食べに行けるか（空腹で、食べられる食料が倉庫にあり、食べに行き直す待ちでもない）
+func _wants_to_eat() -> bool:
+	return CrewStatus.wants_to_eat(ch) and eat_wait <= 0.0 and game.food_for_eating() > 0
+
+
+## 食事に向かう。食料の在庫を1つ取り置く（同じ1個に2人が向かわない）。
+func _try_start_eat(early := false) -> bool:
+	if (_requested_need_reason("eat") != "" if early else not _wants_to_eat()):
+		return false
+	game.food_claims += 1
+	_eat_claimed = true
+	if life_request == "eat":
+		life_request = ""
+	_set_state(State.EAT_TAKE)
+	return true
+
+
+func _release_eat_claim() -> void:
+	if _eat_claimed:
+		_eat_claimed = false
+		game.food_claims = maxi(0, game.food_claims - 1)
+
+
+## 加工などの途中でも、先に済ませるべき生活の必要があるか（とても空腹で食べられる食料がある／休みが危険なほど必要）
+func _urgent_life_need() -> bool:
+	if CrewStatus.needs_to_eat_now(ch) and _wants_to_eat():
+		return true
+	return CrewStatus.rest_critical(ch) and _can_start_rest()
+
+
+func _try_start(job: int) -> bool:
+	if return_request or game.quarry.recalling():
+		return false
+	match job:
+		GameData.Job.HUNT:
+			if game.director.outdoor_blocked():
+				return false               # 天候で屋外に出られない
+			var best = null
+			var best_d := INF
+			for c in game.creatures_root.get_children():
+				if not game.operations.can_depart(ch,c.position) or not _prey_reachable(c): continue
+				if c.dead or c.hunted_by != null or c.position.x < 60.0 or c.position.x > 1180.0:
+					continue
+				if not game.hunt_allowed(c.species) or not game.hunt_has_room(c.species):
+					continue                   # 見逃す設定、または倒しても素材が倉庫に入らない
+				var d: float = c.position.distance_to(ch.position)
+				if d < best_d:
+					best_d = d
+					best = c
+			if best == null:
+				return false
+			game.operations.start_outing()
+			prey = best
+			prey.hunted_by = ch
+			_set_state(State.HUNT_MOVE)
+			return true
+		GameData.Job.GATHER:
+			if game.director.outdoor_blocked():
+				return false               # 天候で屋外に出られない
+			# 回収の方針（★）が高いほど、遠くても優先する。★0 の資源は拾わない。獲物は常に拾う。
+			var best = null
+			var best_score := 0.0
+			var inflight: Dictionary = game.gather_room()
+			for r in game.resources_root.get_children():
+				if not game.operations.can_depart(ch,r.position): continue
+				if not game.quarry.allowed_resource(r):
+					continue
+				if r.claimed_by != null or r.position.x < 60.0 or r.position.x > 1250.0:
+					continue
+				var w: float = game.gather_weight(r.item)
+				if w <= 0.0:
+					continue
+				if not game.has_room_for(r, inflight):
+					continue               # 倉庫の枠がいっぱい（積載量）。拾っても置き場がない
+				if not _can_reach(r):
+					continue               # 画面の外へ流れ去る前に追いつけない（追っては取り消す往復を防ぐ）
+				if r is GatherPoint:
+					# 採取ポイント: 掘り尽くされていない・自分の道具と能力で取れる割合が低すぎない（無駄になる）こと。
+					# 取れる割合が高いポイントほど優先（道具や能力に合った仕事を選ぶ）
+					if not r.available():
+						continue
+					var eff: float = ch.gather_eval(r.kind)["eff"]
+					if eff < GatherDB.MIN_EFF:
+						continue
+					w *= clampf(eff, 0.3, 1.3)
+				var score: float = w / (120.0 + r.position.distance_to(ch.position))
+				# Preference changes ranking only; tool, capacity, reachability and
+				# field eligibility above remain authoritative.
+				if ch.gather_focus_item == r.item:
+					score += 1000.0
+				if score > best_score:
+					best_score = score
+					best = r
+			if best == null:
+				return false
+			game.operations.start_outing()
+			res = best
+			res.claimed_by = ch
+			if res is GatherPoint:
+				# 袋の大きさ: 倉庫の空き枠（ほかの人が運んでいる分を除く）と袋の上限のうち小さいほう
+				bag_limit = clampi(game.gather_free_for(res.item, inflight), 1, ch.carry_limit())
+				res.reserved = bag_limit
+				gather_ev = {}
+				bag_frac = 0.0
+			timer = 0.4
+			_set_state(State.NOTICE)
+			return true
+		GameData.Job.HAUL:
+			# 1) 燃料の補給（倉庫の燃料 → 機関室）。拠点を動かし続けるため最優先。
+			for fi in GameData.FUEL_ITEMS:
+				if game.storage.count_of(fi) > 0 and game.base.wants_fuel(fi):
+					haul_item = fi
+					game.base.refuel_reserved = true
+					_set_state(State.REFUEL_TAKE)
+					return true
+			# 2) プレイヤーが頼んだ運搬（倉庫 ⇄ 作業場）。同時に CraftDB.TRANSFER_WORKERS 人だけ引き受ける（ほかの仲間は、これまでの仕事を続ける）
+			var xf: Dictionary = game.next_transfer()
+			if not xf.is_empty() and (game.transfer_worker == null or game.transfer_worker == ch):
+				xfer_item = int(xf["item"])
+				xfer_dir = String(xf["dir"])
+				game.transfer_worker = ch
+				_set_state(State.XFER_TAKE)
+				return true
+			# 3) 加工の方針に従って、材料一式を加工設備へ
+			var p: BaseProcessor = game.processor
+			if p.free_slots() <= 0:
+				return false
+			var r: Dictionary = game.choose_recipe()
+			if r.is_empty():
+				return false
+			if r.has("build"):
+				game.claim_build(r["build"])       # 建設の依頼を待ちから外す（運搬をやめたら Processor.cancel_reservation が戻す）
+			if r.get("player_order",false): game.claim_order(r.id)
+			haul_recipe = r
+			p.reserve(r)
+			_set_state(State.HAUL_TAKE)
+			return true
+		GameData.Job.PROCESS:
+			var available: int = game.processor.free_lane()
+			if available >= 0:
+				process_slot = available
+				game.processor.lane(process_slot).worker = ch
+				_set_state(State.MOVE_TO_MACHINE)
+				return true
+			return false
+		GameData.Job.REPAIR:
+			if game.storage.count_of(GameData.Item.REPAIR_KIT) <= 0:
+				return false
+			var part: int = game.base.part_to_repair()
+			if part < 0:
+				return false
+			repair_part = part
+			game.base.repair_reserved[part] = ch
+			_set_state(State.REPAIR_TAKE)
+			return true
+		GameData.Job.REST:
+			return _try_start_rest()
+		GameData.Job.COMBAT:
+			var best = null
+			var best_d := INF
+			for e in game.enemies_root.get_children():
+				if game.operations.stance == "recall" or retreating or return_request or danger_hold: continue
+				if e.ecological and (ch.hp < FieldOperations.RECOVER_HP or not e.threatens(ch) or ch.position.distance_to(e.position)>FieldOperations.NOTICE_DISTANCE): continue
+				if e.dead or e.position.x > 1270.0:
+					continue
+				var d: float = e.position.distance_to(ch.position)
+				if d < best_d:
+					best_d = d
+					best = e
+			if best == null:
+				return false
+			enemy = best
+			_set_state(State.COMBAT_MOVE)
+			return true
+	return false
+
+
+## 途中の仕事を破棄して予約を解放する（荷物を持っていない時のみ呼ぶ）。
+func _release_task() -> void:
+	if state in [State.MISSION_RECOVERY_MOVE,State.MISSION_RECOVERY_LOAD,State.MISSION_RECOVERY_RETURN]:
+		game.town.release_recovery_worker(ch)
+	manual_attack=false
+	if res != null and is_instance_valid(res) and res.claimed_by == ch:
+		res.claimed_by = null
+		res.reserved = 1
+	res = null
+	gather_ev = {}
+	bag_frac = 0.0
+	if prey != null and is_instance_valid(prey) and prey.hunted_by == ch:
+		prey.hunted_by = null
+	prey = null
+	enemy = null
+	game.base.release_bed(ch)
+	ch.bed_index = -1
+	_release_eat_claim()
+	if game.transfer_worker == ch:
+		game.transfer_worker = null                                     # 運搬の依頼の取り置き（同時に1人だけ）を返す
+	if state == State.HAUL_TAKE and not haul_recipe.is_empty():
+		game.processor.cancel_reservation(haul_recipe)
+		haul_recipe = {}
+	if state in [State.REFUEL_TAKE, State.REFUEL_MOVE, State.REFUEL]:
+		game.base.refuel_reserved = false
+	if state in [State.REPAIR_TAKE, State.REPAIR_MOVE, State.REPAIR] and repair_part >= 0:
+		game.base.repair_reserved.erase(repair_part)
+		repair_part = -1
+	for p in game.processor.lanes():
+		if p.worker == ch: p.worker = null
+
+
+## 寝室が別の区画へ移ったとき（部屋の変更）。眠っていた仲間は、新しいベッドの位置へ歩き直す。
+func on_bedroom_moved() -> void:
+	if state == State.REST:
+		_set_state(State.REST_MOVE)
+
+
+## 仕事の優先度が変わったら、荷物を持っていない仕事は選び直す。生活行動は中断しない。
+func on_priority_changed() -> void:
+	if ch.carrying >= 0 or ch.down or ch.away or _is_rest_state() or _is_eat_state():
+		return
+	if state in [State.IDLE, State.SEARCH]:
+		_set_state(State.SEARCH)
+		return
+	_release_task()
+	_set_state(State.SEARCH)
+
+
+## 出発時だけの集合。持ち物は通常の届け先へ。生活・気絶は既存の回復条件を使う。
+func _recall_tick(delta: float) -> bool:
+	# Direct withdrawal overrides a meal or repair. Group recall is intentionally
+	# left at its established safe boundary so existing shipments can finish.
+	if return_request and state in [State.REPAIR_TAKE, State.REPAIR_MOVE, State.REPAIR, State.EAT_TAKE, State.EAT, State.REST_MOVE, State.REST, State.REST_HERE, State.REFUEL_TAKE, State.REFUEL_MOVE, State.REFUEL]:
+		if ch.carrying >= 0:
+			ch.unload_owned()
+		_release_task()
+		current_job = -1
+		_set_state(State.RETURN_BASE)
+		ch.target = game.storage.access_point() + ch.slot_offset
+		ch.move_to_target(delta)
+		return true
+	if ch.carrying >= 0:
+		if state == State.GATHER:
+			_finish_trip()
+		return false
+	if ch.down or _is_rest_state() or _is_eat_state():
+		return false
+	if state != State.RETURN_BASE:
+		_release_task()
+		if not return_request and not (retreating and ch.floor_i==0) and _try_life_need():
+			return true
+		current_job = -1
+		_set_state(State.RETURN_BASE)
+	# 待機が長引いたときも空腹や疲労を無視しない。
+	if not return_request and not (retreating and ch.floor_i==0) and _try_life_need():
+		return true
+	ch.target = game.storage.access_point() + ch.slot_offset
+	ch.move_to_target(delta)
+		# 個人指示の到着だけを解除する。全員撤退・危険退避の待機は既存どおり保持する。
+	return true
+
+
+func store_now() -> bool:
+	if ch.carrying<0 or ch.down or ch.away or retreating or return_request or manual_attack or game.operations.stance=="recall": return false
+	if state==State.GATHER:
+		_finish_trip()
+		return true
+	if state in [State.MOVE_TO_STORAGE,State.STORE]: return true
+	return false

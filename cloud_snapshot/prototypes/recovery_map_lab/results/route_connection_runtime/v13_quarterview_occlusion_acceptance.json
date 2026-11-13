@@ -1,0 +1,112 @@
+{
+	"actual_viewport": true,
+	"bridge_samples": {
+		"deck": {
+			"actor_id": "worker:0",
+			"bridge_collision": true,
+			"carry_n": 0,
+			"deck_progress": 0.039,
+			"display_walkable": true,
+			"foot_point": [
+				500.0,
+				404.0
+			],
+			"painted_path": true,
+			"source": [
+				804.659,
+				439.855
+			],
+			"source_walkable": true,
+			"state": "to_resource",
+			"surface": "deck"
+		},
+		"dock": {
+			"actor_id": "worker:0",
+			"bridge_collision": false,
+			"carry_n": 3,
+			"deck_progress": -1.0,
+			"display_walkable": true,
+			"foot_point": [
+				712.0,
+				630.0
+			],
+			"painted_path": false,
+			"source": [
+				150.005,
+				535.0
+			],
+			"source_walkable": true,
+			"state": "dock_wait",
+			"surface": "service_apron"
+		},
+		"entry": {
+			"actor_id": "worker:0",
+			"bridge_collision": false,
+			"carry_n": 0,
+			"deck_progress": -1.0,
+			"display_walkable": true,
+			"foot_point": [
+				580.0,
+				500.0
+			],
+			"painted_path": true,
+			"source": [
+				700.0,
+				535.0
+			],
+			"source_walkable": true,
+			"state": "to_resource",
+			"surface": "approach_near"
+		},
+		"exit": {
+			"actor_id": "worker:0",
+			"bridge_collision": true,
+			"carry_n": 0,
+			"deck_progress": -1.0,
+			"display_walkable": true,
+			"foot_point": [
+				316.0,
+				312.0
+			],
+			"painted_path": true,
+			"source": [
+				955.356,
+				302.858
+			],
+			"source_walkable": true,
+			"state": "to_resource",
+			"surface": "approach_far"
+		}
+	},
+	"display_server": "X11",
+	"generic_y_sort_applied": false,
+	"layers": {
+		"base_front": 5,
+		"base_rear": 2,
+		"bridge": 2,
+		"cargo_yard": 5,
+		"checkpoint_front": 5,
+		"checkpoint_rear": 2,
+		"crew": 4
+	},
+	"mode": "single_worker_demo",
+	"mode_note": "Existing one-worker bridge verification path; normal-role roster and balance are not changed by this observation.",
+	"native_projected_workers_hidden": true,
+	"normal_user_save_touched": false,
+	"occlusion_issue_reproduced": false,
+	"production_depth_fix_applied": false,
+	"rock_crossing_not_tested": true,
+	"rock_crossing_note": "Existing session routes avoid decorative foreground-rock footprints. Forcing an actor through one would be invalid evidence.",
+	"schema": 1,
+	"snapshots": {
+		"deck": "res://prototypes/recovery_map_lab/evidence/v13_quarterview_occlusion_acceptance/quarterview_deck.png",
+		"dock": "res://prototypes/recovery_map_lab/evidence/v13_quarterview_occlusion_acceptance/quarterview_dock.png",
+		"entry": "res://prototypes/recovery_map_lab/evidence/v13_quarterview_occlusion_acceptance/quarterview_entry.png",
+		"exit": "res://prototypes/recovery_map_lab/evidence/v13_quarterview_occlusion_acceptance/quarterview_exit.png"
+	},
+	"verification_mode": true,
+	"video": "res://prototypes/recovery_map_lab/evidence/v13_quarterview_occlusion_acceptance/quarterview_bridge_observation.mp4",
+	"video_capture_fps": 10,
+	"video_capture_note": "Direct X11 1280x720 recording at 10fps; no AI interpolation, copied frames, or manual session ticks.",
+	"visible_worker_node": "CanyonCrewViews"
+}

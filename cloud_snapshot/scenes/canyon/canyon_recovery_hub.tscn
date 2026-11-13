@@ -1,0 +1,55 @@
+[gd_scene load_steps=17 format=3]
+
+[ext_resource type="Script" path="res://scenes/canyon/canyon_recovery_hub.gd" id="1_hub"]
+[ext_resource type="PackedScene" path="res://scenes/canyon/components/canyon_terrain.tscn" id="2_terrain"]
+[ext_resource type="PackedScene" path="res://scenes/canyon/components/canyon_cliffs.tscn" id="3_cliffs"]
+[ext_resource type="PackedScene" path="res://scenes/canyon/components/canyon_quarry.tscn" id="4_quarry"]
+[ext_resource type="PackedScene" path="res://scenes/canyon/components/canyon_bridge.tscn" id="5_bridge"]
+[ext_resource type="PackedScene" path="res://scenes/canyon/components/canyon_base_rear.tscn" id="6_base_rear"]
+[ext_resource type="PackedScene" path="res://scenes/canyon/components/canyon_checkpoint_rear.tscn" id="7_checkpoint_rear"]
+[ext_resource type="PackedScene" path="res://scenes/canyon/components/canyon_props.tscn" id="8_props"]
+[ext_resource type="PackedScene" path="res://scenes/canyon/components/canyon_base_front.tscn" id="9_base_front"]
+[ext_resource type="PackedScene" path="res://scenes/canyon/components/canyon_checkpoint_front.tscn" id="10_checkpoint_front"]
+[ext_resource type="PackedScene" path="res://scenes/canyon/components/canyon_activity_overlay.tscn" id="11_activity"]
+[ext_resource type="PackedScene" path="res://scenes/canyon/components/canyon_cargo_yard.tscn" id="12_cargo_yard"]
+[ext_resource type="PackedScene" path="res://scenes/canyon/components/canyon_occupancy.tscn" id="13_occupancy"]
+[ext_resource type="PackedScene" path="res://scenes/canyon/components/canyon_crew_views.tscn" id="14_crew"]
+[ext_resource type="PackedScene" path="res://scenes/canyon/components/canyon_ground_modules.tscn" id="15_ground"]
+[ext_resource type="PackedScene" path="res://scenes/canyon/components/canyon_cliff_modules.tscn" id="16_cliff"]
+[ext_resource type="PackedScene" path="res://scenes/canyon/components/canyon_parking_overlay.tscn" id="17_parking"]
+
+[node name="CanyonRecoveryHub" type="Node2D"]
+texture_filter = 1
+script = ExtResource("1_hub")
+
+[node name="Terrain" parent="." instance=ExtResource("2_terrain")]
+
+[node name="GroundModules" parent="." instance=ExtResource("15_ground")]
+
+[node name="Cliffs" parent="." instance=ExtResource("3_cliffs")]
+
+[node name="CliffModules" parent="." instance=ExtResource("16_cliff")]
+
+[node name="Occupancy" parent="." instance=ExtResource("13_occupancy")]
+
+[node name="Quarry" parent="." instance=ExtResource("4_quarry")]
+
+[node name="Bridge" parent="." instance=ExtResource("5_bridge")]
+
+[node name="BaseRear" parent="." instance=ExtResource("6_base_rear")]
+
+[node name="CheckpointRear" parent="." instance=ExtResource("7_checkpoint_rear")]
+
+[node name="Props" parent="." instance=ExtResource("8_props")]
+
+[node name="ParkingOverlay" parent="." instance=ExtResource("17_parking")]
+
+[node name="CanyonCrewViews" parent="." instance=ExtResource("14_crew")]
+
+[node name="BaseFront" parent="." instance=ExtResource("9_base_front")]
+
+[node name="CheckpointFront" parent="." instance=ExtResource("10_checkpoint_front")]
+
+[node name="ActivityOverlay" parent="." instance=ExtResource("11_activity")]
+
+[node name="CargoYard" parent="." instance=ExtResource("12_cargo_yard")]

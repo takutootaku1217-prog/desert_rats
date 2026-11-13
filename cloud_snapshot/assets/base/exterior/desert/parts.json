@@ -1,0 +1,351 @@
+{
+ "arch_y": 78,
+ "arches": [
+  30,
+  94,
+  126,
+  186,
+  218
+ ],
+ "at": {
+  "antenna_comm": [
+   85,
+   -6
+  ],
+  "antenna_mast": [
+   87,
+   -3
+  ],
+  "antenna_small": [
+   90,
+   0
+  ],
+  "armor_front": [
+   240,
+   60
+  ],
+  "armor_side": [
+   142,
+   48
+  ],
+  "canopy": [
+   146,
+   1
+  ],
+  "cloth_roll": [
+   126,
+   6
+  ],
+  "crates_big": [
+   108,
+   -1
+  ],
+  "crates_small": [
+   108,
+   2
+  ],
+  "deck_rail": [
+   67,
+   6
+  ],
+  "flag": [
+   70,
+   0
+  ],
+  "fuel_port": [
+   64,
+   0
+  ],
+  "fuel_tank_roof": [
+   206,
+   1
+  ],
+  "rear_rack": [
+   51,
+   45
+  ],
+  "roof_vent": [
+   64,
+   2
+  ],
+  "sign_cross": [
+   64,
+   0
+  ],
+  "stack_a": [
+   183,
+   2
+  ],
+  "stack_b": [
+   191,
+   2
+  ],
+  "tool_rack": [
+   120,
+   49
+  ],
+  "wash_line": [
+   185,
+   15
+  ],
+  "water_tank": [
+   125,
+   1
+  ]
+ },
+ "body": {
+  "file": "body.png",
+  "units": [
+   248,
+   80
+  ]
+ },
+ "cab_side": [
+  208,
+  18,
+  27,
+  12
+ ],
+ "foot_row": 9,
+ "fuel_port_fallback_x": 203,
+ "fuel_port_row": 56,
+ "hull_size": [
+  248,
+  80
+ ],
+ "roof_vent_x": {
+  "l1": 199,
+  "l2": 232,
+  "l3": 40,
+  "u1": 199,
+  "u2": 232,
+  "u3": 40
+ },
+ "sheets": {
+  "armor": {
+   "file": "armor.png",
+   "frames": {
+    "armor_front": [
+     31,
+     2,
+     8,
+     18
+    ],
+    "armor_side": [
+     2,
+     2,
+     27,
+     21
+    ]
+   },
+   "units": [
+    41,
+    25
+   ]
+  },
+  "roof_parts": {
+   "file": "roof_parts.png",
+   "frames": {
+    "antenna_comm": [
+     238,
+     2,
+     19,
+     16
+    ],
+    "antenna_mast": [
+     221,
+     2,
+     15,
+     13
+    ],
+    "antenna_small": [
+     210,
+     2,
+     9,
+     10
+    ],
+    "canopy": [
+     331,
+     2,
+     32,
+     9
+    ],
+    "cloth_roll": [
+     298,
+     2,
+     11,
+     4
+    ],
+    "crates_big": [
+     275,
+     2,
+     21,
+     11
+    ],
+    "crates_small": [
+     259,
+     2,
+     14,
+     8
+    ],
+    "deck_rail": [
+     2,
+     2,
+     176,
+     4
+    ],
+    "flag": [
+     198,
+     2,
+     10,
+     10
+    ],
+    "fuel_tank_roof": [
+     365,
+     2,
+     25,
+     9
+    ],
+    "roof_vent": [
+     392,
+     2,
+     7,
+     8
+    ],
+    "stack_a": [
+     180,
+     2,
+     7,
+     8
+    ],
+    "stack_b": [
+     189,
+     2,
+     7,
+     8
+    ],
+    "water_tank": [
+     311,
+     2,
+     18,
+     9
+    ]
+   },
+   "units": [
+    401,
+    20
+   ]
+  },
+  "wall_parts": {
+   "file": "wall_parts.png",
+   "frames": {
+    "fuel_port": [
+     47,
+     2,
+     9,
+     6
+    ],
+    "rear_rack": [
+     58,
+     2,
+     16,
+     27
+    ],
+    "sign_cross": [
+     36,
+     2,
+     9,
+     9
+    ],
+    "tool_rack": [
+     2,
+     2,
+     14,
+     13
+    ],
+    "wash_line": [
+     18,
+     2,
+     16,
+     12
+    ]
+   },
+   "units": [
+    76,
+    31
+   ]
+  },
+  "windows": {
+   "file": "windows.png",
+   "frames": {
+    "cab_side": [
+     42,
+     2,
+     27,
+     12
+    ],
+    "win": [
+     2,
+     2,
+     18,
+     10
+    ],
+    "win_low": [
+     22,
+     2,
+     18,
+     9
+    ]
+   },
+   "units": [
+    71,
+    16
+   ]
+  }
+ },
+ "slot_offsets": {
+  "sign_cross": [
+   5,
+   10
+  ]
+ },
+ "style": "desert",
+ "windows": {
+  "l1": [
+   94,
+   46,
+   18,
+   9
+  ],
+  "l2": [
+   171,
+   46,
+   18,
+   9
+  ],
+  "l3": [
+   30,
+   46,
+   18,
+   9
+  ],
+  "u1": [
+   94,
+   20,
+   18,
+   10
+  ],
+  "u2": [
+   164,
+   20,
+   18,
+   10
+  ],
+  "u3": [
+   30,
+   20,
+   18,
+   10
+  ]
+ }
+}

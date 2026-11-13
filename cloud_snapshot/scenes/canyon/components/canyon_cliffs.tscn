@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/canyon/components/canyon_cliffs.gd" id="1_cliffs"]
+
+[node name="CanyonCliffs" type="Node2D"]
+texture_filter = 1
+z_index = 1
+script = ExtResource("1_cliffs")

@@ -1,0 +1,1963 @@
+{
+  "LEDGER": [
+    {
+      "credits": 0,
+      "director_seconds": 0.0,
+      "earned": 0,
+      "eaten": 0,
+      "events": [],
+      "food": 8,
+      "fuel": 100.0,
+      "fuel_spent": 0,
+      "game_over": false,
+      "hunger": [
+        100.0,
+        100.0,
+        100.0
+      ],
+      "hunt_meat": 0,
+      "hunted": 0,
+      "meat": 0,
+      "parts": {
+        "0": 100.0,
+        "1": 100.0,
+        "2": 100.0
+      },
+      "phase": "stopped",
+      "region": "a_start",
+      "repair_spent": 0,
+      "seconds": 0.0,
+      "spent": 0,
+      "stage": "normal_start",
+      "vehicle": {
+        "cargo_species": "",
+        "progress": 0.0,
+        "range": 460.0,
+        "stage": "idle",
+        "text": "狩猟依頼なし"
+      }
+    },
+    {
+      "credits": 0,
+      "director_seconds": 20.2,
+      "earned": 0,
+      "eaten": 0,
+      "events": [
+        {
+          "at": 20.0,
+          "text": "停車：B 近郊の森"
+        }
+      ],
+      "food": 8,
+      "fuel": 97.7777777777774,
+      "fuel_spent": 0,
+      "game_over": false,
+      "hunger": [
+        98.65,
+        98.65,
+        98.65
+      ],
+      "hunt_meat": 0,
+      "hunted": 0,
+      "meat": 0,
+      "parts": {
+        "0": 98.5860000000004,
+        "1": 97.3333333333329,
+        "2": 100.0
+      },
+      "phase": "stopped",
+      "region": "b_forest",
+      "repair_spent": 0,
+      "seconds": 20.2,
+      "spent": 0,
+      "stage": "arrive_b_forest",
+      "vehicle": {
+        "cargo_species": "",
+        "progress": 0.0,
+        "range": 460.0,
+        "stage": "stopped",
+        "text": "車上狩猟は走行中のみ"
+      }
+    },
+    {
+      "credits": 0,
+      "director_seconds": 40.2,
+      "earned": 0,
+      "eaten": 0,
+      "events": [
+        {
+          "at": 20.0,
+          "text": "停車：B 近郊の森"
+        },
+        {
+          "at": 40.2,
+          "text": "停車：A はじまりの街"
+        }
+      ],
+      "food": 8,
+      "fuel": 95.5555555555549,
+      "fuel_spent": 0,
+      "game_over": false,
+      "hunger": [
+        97.31,
+        97.31,
+        97.31
+      ],
+      "hunt_meat": 0,
+      "hunted": 0,
+      "meat": 0,
+      "parts": {
+        "0": 97.1720000000008,
+        "1": 94.6666666666658,
+        "2": 100.0
+      },
+      "phase": "stopped",
+      "region": "a_start",
+      "repair_spent": 0,
+      "seconds": 40.4,
+      "spent": 0,
+      "stage": "arrive_a_start",
+      "vehicle": {
+        "cargo_species": "",
+        "progress": 0.0,
+        "range": 460.0,
+        "stage": "stopped",
+        "text": "車上狩猟は走行中のみ"
+      }
+    },
+    {
+      "credits": 0,
+      "director_seconds": 60.4000000000003,
+      "earned": 0,
+      "eaten": 0,
+      "events": [
+        {
+          "at": 20.0,
+          "text": "停車：B 近郊の森"
+        },
+        {
+          "at": 40.2,
+          "text": "停車：A はじまりの街"
+        },
+        {
+          "at": 60.2000000000003,
+          "text": "停車：B 近郊の森"
+        }
+      ],
+      "food": 8,
+      "fuel": 93.3333333333323,
+      "fuel_spent": 0,
+      "game_over": false,
+      "hunger": [
+        95.96,
+        95.96,
+        95.96
+      ],
+      "hunt_meat": 1,
+      "hunted": 1,
+      "meat": 0,
+      "parts": {
+        "0": 95.7580000000013,
+        "1": 91.9999999999987,
+        "2": 98.9500000000001
+      },
+      "phase": "stopped",
+      "region": "b_forest",
+      "repair_spent": 0,
+      "seconds": 60.6000000000003,
+      "spent": 0,
+      "stage": "arrive_b_forest",
+      "vehicle": {
+        "cargo_species": "",
+        "progress": 0.0,
+        "range": 460.0,
+        "stage": "stopped",
+        "text": "車上狩猟は走行中のみ"
+      }
+    },
+    {
+      "credits": 0,
+      "director_seconds": 484.599999999981,
+      "earned": 0,
+      "eaten": 0,
+      "events": [
+        {
+          "at": 252.999999999994,
+          "text": "遺跡を見つけた！（崩れた見張り台）調査隊を出せる"
+        },
+        {
+          "at": 270.799999999993,
+          "text": "寒さが和らいだ"
+        },
+        {
+          "at": 355.599999999988,
+          "text": "車体の外板が裂けた！車体が損傷（-24）"
+        },
+        {
+          "at": 402.799999999986,
+          "text": "遺跡は遠ざかってしまった"
+        },
+        {
+          "at": 438.399999999984,
+          "text": "車体の外板が裂けた！車体が損傷（-37）"
+        },
+        {
+          "at": 484.399999999981,
+          "text": "停車：C 古い採石場"
+        }
+      ],
+      "food": 11,
+      "fuel": 77.1191111111107,
+      "fuel_spent": 0,
+      "game_over": false,
+      "hunger": [
+        65.99,
+        65.99,
+        65.99
+      ],
+      "hunt_meat": 2,
+      "hunted": 2,
+      "meat": 0,
+      "parts": {
+        "0": 52.831239047439,
+        "1": 89.3333333333317,
+        "2": 98.0400000000002
+      },
+      "phase": "stopped",
+      "region": "c_quarry",
+      "repair_spent": 0,
+      "seconds": 484.799999999981,
+      "spent": 0,
+      "stage": "arrive_c_quarry",
+      "vehicle": {
+        "cargo_species": "",
+        "progress": 0.0,
+        "range": 460.0,
+        "stage": "stopped",
+        "text": "車上狩猟は走行中のみ"
+      }
+    },
+    {
+      "credits": 0,
+      "director_seconds": 506.39999999998,
+      "earned": 0,
+      "eaten": 0,
+      "events": [
+        {
+          "at": 270.799999999993,
+          "text": "寒さが和らいだ"
+        },
+        {
+          "at": 355.599999999988,
+          "text": "車体の外板が裂けた！車体が損傷（-24）"
+        },
+        {
+          "at": 402.799999999986,
+          "text": "遺跡は遠ざかってしまった"
+        },
+        {
+          "at": 438.399999999984,
+          "text": "車体の外板が裂けた！車体が損傷（-37）"
+        },
+        {
+          "at": 484.399999999981,
+          "text": "停車：C 古い採石場"
+        },
+        {
+          "at": 506.19999999998,
+          "text": "停車：D 廃貨物ヤード"
+        }
+      ],
+      "food": 12,
+      "fuel": 74.8968888888881,
+      "fuel_spent": 0,
+      "game_over": false,
+      "hunger": [
+        64.54,
+        64.54,
+        64.54
+      ],
+      "hunt_meat": 3,
+      "hunted": 3,
+      "meat": 0,
+      "parts": {
+        "0": 51.3052390474386,
+        "1": 86.6666666666646,
+        "2": 98.0400000000002
+      },
+      "phase": "stopped",
+      "region": "d_yard",
+      "repair_spent": 0,
+      "seconds": 506.59999999998,
+      "spent": 0,
+      "stage": "arrive_d_yard",
+      "vehicle": {
+        "cargo_species": "",
+        "progress": 0.0,
+        "range": 460.0,
+        "stage": "stopped",
+        "text": "車上狩猟は走行中のみ"
+      }
+    },
+    {
+      "credits": 0,
+      "director_seconds": 527.799999999983,
+      "earned": 0,
+      "eaten": 0,
+      "events": [
+        {
+          "at": 355.599999999988,
+          "text": "車体の外板が裂けた！車体が損傷（-24）"
+        },
+        {
+          "at": 402.799999999986,
+          "text": "遺跡は遠ざかってしまった"
+        },
+        {
+          "at": 438.399999999984,
+          "text": "車体の外板が裂けた！車体が損傷（-37）"
+        },
+        {
+          "at": 484.399999999981,
+          "text": "停車：C 古い採石場"
+        },
+        {
+          "at": 506.19999999998,
+          "text": "停車：D 廃貨物ヤード"
+        },
+        {
+          "at": 527.799999999983,
+          "text": "停車：A はじまりの街"
+        }
+      ],
+      "food": 14,
+      "fuel": 97.6746666666656,
+      "fuel_spent": 0,
+      "game_over": false,
+      "hunger": [
+        63.1,
+        63.1,
+        63.1
+      ],
+      "hunt_meat": 4,
+      "hunted": 4,
+      "meat": 0,
+      "parts": {
+        "0": 49.7932390474383,
+        "1": 83.9999999999975,
+        "2": 97.1300000000003
+      },
+      "phase": "stopped",
+      "region": "a_start",
+      "repair_spent": 0,
+      "seconds": 528.199999999983,
+      "spent": 0,
+      "stage": "arrive_a_start",
+      "vehicle": {
+        "cargo_species": "",
+        "progress": 0.0,
+        "range": 460.0,
+        "stage": "stopped",
+        "text": "車上狩猟は走行中のみ"
+      }
+    },
+    {
+      "credits": 0,
+      "director_seconds": 527.799999999983,
+      "earned": 0,
+      "eaten": 0,
+      "events": [
+        {
+          "at": 355.599999999988,
+          "text": "車体の外板が裂けた！車体が損傷（-24）"
+        },
+        {
+          "at": 402.799999999986,
+          "text": "遺跡は遠ざかってしまった"
+        },
+        {
+          "at": 438.399999999984,
+          "text": "車体の外板が裂けた！車体が損傷（-37）"
+        },
+        {
+          "at": 484.399999999981,
+          "text": "停車：C 古い採石場"
+        },
+        {
+          "at": 506.19999999998,
+          "text": "停車：D 廃貨物ヤード"
+        },
+        {
+          "at": 527.799999999983,
+          "text": "停車：A はじまりの街"
+        }
+      ],
+      "food": 14,
+      "fuel": 97.6746666666656,
+      "fuel_spent": 0,
+      "game_over": false,
+      "hunger": [
+        63.1,
+        63.1,
+        63.1
+      ],
+      "hunt_meat": 4,
+      "hunted": 4,
+      "meat": 0,
+      "parts": {
+        "0": 49.7932390474383,
+        "1": 83.9999999999975,
+        "2": 97.1300000000003
+      },
+      "phase": "stopped",
+      "region": "a_start",
+      "repair_spent": 0,
+      "seconds": 528.199999999983,
+      "spent": 0,
+      "stage": "lap_1_before_market",
+      "vehicle": {
+        "cargo_species": "",
+        "progress": 0.0,
+        "range": 460.0,
+        "stage": "stopped",
+        "text": "車上狩猟は走行中のみ"
+      }
+    },
+    {
+      "credits": 3,
+      "director_seconds": 527.799999999983,
+      "earned": 16,
+      "eaten": 0,
+      "events": [
+        {
+          "at": 355.599999999988,
+          "text": "車体の外板が裂けた！車体が損傷（-24）"
+        },
+        {
+          "at": 402.799999999986,
+          "text": "遺跡は遠ざかってしまった"
+        },
+        {
+          "at": 438.399999999984,
+          "text": "車体の外板が裂けた！車体が損傷（-37）"
+        },
+        {
+          "at": 484.399999999981,
+          "text": "停車：C 古い採石場"
+        },
+        {
+          "at": 506.19999999998,
+          "text": "停車：D 廃貨物ヤード"
+        },
+        {
+          "at": 527.799999999983,
+          "text": "停車：A はじまりの街"
+        }
+      ],
+      "food": 15,
+      "fuel": 100.0,
+      "fuel_spent": 1,
+      "game_over": false,
+      "hunger": [
+        63.1,
+        63.1,
+        63.1
+      ],
+      "hunt_meat": 4,
+      "hunted": 4,
+      "meat": 0,
+      "parts": {
+        "0": 74.7932390474383,
+        "1": 83.9999999999975,
+        "2": 97.1300000000003
+      },
+      "phase": "stopped",
+      "region": "a_start",
+      "repair_spent": 8,
+      "seconds": 528.199999999983,
+      "spent": 13,
+      "stage": "lap_1_complete",
+      "vehicle": {
+        "cargo_species": "",
+        "progress": 0.0,
+        "range": 460.0,
+        "stage": "stopped",
+        "text": "車上狩猟は走行中のみ"
+      }
+    },
+    {
+      "credits": 3,
+      "director_seconds": 549.399999999988,
+      "earned": 16,
+      "eaten": 0,
+      "events": [
+        {
+          "at": 402.799999999986,
+          "text": "遺跡は遠ざかってしまった"
+        },
+        {
+          "at": 438.399999999984,
+          "text": "車体の外板が裂けた！車体が損傷（-37）"
+        },
+        {
+          "at": 484.399999999981,
+          "text": "停車：C 古い採石場"
+        },
+        {
+          "at": 506.19999999998,
+          "text": "停車：D 廃貨物ヤード"
+        },
+        {
+          "at": 527.799999999983,
+          "text": "停車：A はじまりの街"
+        },
+        {
+          "at": 549.199999999988,
+          "text": "停車：B 近郊の森"
+        }
+      ],
+      "food": 17,
+      "fuel": 97.7777777777774,
+      "fuel_spent": 1,
+      "game_over": false,
+      "hunger": [
+        61.66,
+        61.66,
+        61.66
+      ],
+      "hunt_meat": 5,
+      "hunted": 5,
+      "meat": 0,
+      "parts": {
+        "0": 73.2812390474388,
+        "1": 81.3333333333304,
+        "2": 96.0100000000004
+      },
+      "phase": "stopped",
+      "region": "b_forest",
+      "repair_spent": 8,
+      "seconds": 549.799999999988,
+      "spent": 13,
+      "stage": "arrive_b_forest",
+      "vehicle": {
+        "cargo_species": "",
+        "progress": 0.0,
+        "range": 460.0,
+        "stage": "stopped",
+        "text": "車上狩猟は走行中のみ"
+      }
+    },
+    {
+      "credits": 3,
+      "director_seconds": 893.000000000066,
+      "earned": 16,
+      "eaten": 0,
+      "events": [
+        {
+          "at": 779.80000000004,
+          "text": "砂嵐が過ぎ去った"
+        },
+        {
+          "at": 813.200000000048,
+          "text": "砂嵐が近づいている…"
+        },
+        {
+          "at": 838.400000000054,
+          "text": "砂嵐が来た！"
+        },
+        {
+          "at": 888.800000000065,
+          "text": "砂嵐が過ぎ去った"
+        },
+        {
+          "at": 892.200000000066,
+          "text": "急に冷え込んできた…"
+        },
+        {
+          "at": 892.800000000066,
+          "text": "停車：C 古い採石場"
+        }
+      ],
+      "food": 20,
+      "fuel": 95.555555555556,
+      "fuel_spent": 1,
+      "game_over": false,
+      "hunger": [
+        38.75,
+        38.75,
+        38.75
+      ],
+      "hunt_meat": 6,
+      "hunted": 6,
+      "meat": 0,
+      "parts": {
+        "0": 46.8100390474401,
+        "1": 78.2453333333295,
+        "2": 93.7000000000006
+      },
+      "phase": "stopped",
+      "region": "c_quarry",
+      "repair_spent": 8,
+      "seconds": 893.400000000066,
+      "spent": 13,
+      "stage": "arrive_c_quarry",
+      "vehicle": {
+        "cargo_species": "",
+        "progress": 0.0,
+        "range": 460.0,
+        "stage": "stopped",
+        "text": "車上狩猟は走行中のみ"
+      }
+    },
+    {
+      "credits": 3,
+      "director_seconds": 913.200000000071,
+      "earned": 16,
+      "eaten": 0,
+      "events": [
+        {
+          "at": 813.200000000048,
+          "text": "砂嵐が近づいている…"
+        },
+        {
+          "at": 838.400000000054,
+          "text": "砂嵐が来た！"
+        },
+        {
+          "at": 888.800000000065,
+          "text": "砂嵐が過ぎ去った"
+        },
+        {
+          "at": 892.200000000066,
+          "text": "急に冷え込んできた…"
+        },
+        {
+          "at": 892.800000000066,
+          "text": "停車：C 古い採石場"
+        },
+        {
+          "at": 913.000000000071,
+          "text": "停車：D 廃貨物ヤード"
+        }
+      ],
+      "food": 21,
+      "fuel": 93.3333333333334,
+      "fuel_spent": 1,
+      "game_over": false,
+      "hunger": [
+        37.4,
+        37.4,
+        37.4
+      ],
+      "hunt_meat": 7,
+      "hunted": 7,
+      "meat": 0,
+      "parts": {
+        "0": 45.3960390474398,
+        "1": 75.5786666666624,
+        "2": 93.7000000000006
+      },
+      "phase": "stopped",
+      "region": "d_yard",
+      "repair_spent": 8,
+      "seconds": 913.600000000071,
+      "spent": 13,
+      "stage": "arrive_d_yard",
+      "vehicle": {
+        "cargo_species": "",
+        "progress": 0.0,
+        "range": 460.0,
+        "stage": "stopped",
+        "text": "車上狩猟は走行中のみ"
+      }
+    },
+    {
+      "credits": 3,
+      "director_seconds": 945.600000000078,
+      "earned": 16,
+      "eaten": 0,
+      "events": [
+        {
+          "at": 888.800000000065,
+          "text": "砂嵐が過ぎ去った"
+        },
+        {
+          "at": 892.200000000066,
+          "text": "急に冷え込んできた…"
+        },
+        {
+          "at": 892.800000000066,
+          "text": "停車：C 古い採石場"
+        },
+        {
+          "at": 913.000000000071,
+          "text": "停車：D 廃貨物ヤード"
+        },
+        {
+          "at": 922.400000000073,
+          "text": "寒波が来た！"
+        },
+        {
+          "at": 945.600000000078,
+          "text": "停車：A はじまりの街"
+        }
+      ],
+      "food": 24,
+      "fuel": 85.9631111111112,
+      "fuel_spent": 1,
+      "game_over": false,
+      "hunger": [
+        34.6,
+        34.6,
+        34.6
+      ],
+      "hunt_meat": 8,
+      "hunted": 8,
+      "meat": 0,
+      "parts": {
+        "0": 43.1140390474393,
+        "1": 72.9119999999951,
+        "2": 91.6000000000008
+      },
+      "phase": "stopped",
+      "region": "a_start",
+      "repair_spent": 8,
+      "seconds": 946.200000000078,
+      "spent": 13,
+      "stage": "arrive_a_start",
+      "vehicle": {
+        "cargo_species": "",
+        "progress": 0.0,
+        "range": 460.0,
+        "stage": "stopped",
+        "text": "車上狩猟は走行中のみ"
+      }
+    },
+    {
+      "credits": 3,
+      "director_seconds": 945.600000000078,
+      "earned": 16,
+      "eaten": 0,
+      "events": [
+        {
+          "at": 888.800000000065,
+          "text": "砂嵐が過ぎ去った"
+        },
+        {
+          "at": 892.200000000066,
+          "text": "急に冷え込んできた…"
+        },
+        {
+          "at": 892.800000000066,
+          "text": "停車：C 古い採石場"
+        },
+        {
+          "at": 913.000000000071,
+          "text": "停車：D 廃貨物ヤード"
+        },
+        {
+          "at": 922.400000000073,
+          "text": "寒波が来た！"
+        },
+        {
+          "at": 945.600000000078,
+          "text": "停車：A はじまりの街"
+        }
+      ],
+      "food": 24,
+      "fuel": 85.9631111111112,
+      "fuel_spent": 1,
+      "game_over": false,
+      "hunger": [
+        34.6,
+        34.6,
+        34.6
+      ],
+      "hunt_meat": 8,
+      "hunted": 8,
+      "meat": 0,
+      "parts": {
+        "0": 43.1140390474393,
+        "1": 72.9119999999951,
+        "2": 91.6000000000008
+      },
+      "phase": "stopped",
+      "region": "a_start",
+      "repair_spent": 8,
+      "seconds": 946.200000000078,
+      "spent": 13,
+      "stage": "lap_2_before_market",
+      "vehicle": {
+        "cargo_species": "",
+        "progress": 0.0,
+        "range": 460.0,
+        "stage": "stopped",
+        "text": "車上狩猟は走行中のみ"
+      }
+    },
+    {
+      "credits": 6,
+      "director_seconds": 945.600000000078,
+      "earned": 32,
+      "eaten": 0,
+      "events": [
+        {
+          "at": 888.800000000065,
+          "text": "砂嵐が過ぎ去った"
+        },
+        {
+          "at": 892.200000000066,
+          "text": "急に冷え込んできた…"
+        },
+        {
+          "at": 892.800000000066,
+          "text": "停車：C 古い採石場"
+        },
+        {
+          "at": 913.000000000071,
+          "text": "停車：D 廃貨物ヤード"
+        },
+        {
+          "at": 922.400000000073,
+          "text": "寒波が来た！"
+        },
+        {
+          "at": 945.600000000078,
+          "text": "停車：A はじまりの街"
+        }
+      ],
+      "food": 24,
+      "fuel": 100.0,
+      "fuel_spent": 6,
+      "game_over": false,
+      "hunger": [
+        34.6,
+        34.6,
+        34.6
+      ],
+      "hunt_meat": 8,
+      "hunted": 8,
+      "meat": 0,
+      "parts": {
+        "0": 68.1140390474393,
+        "1": 72.9119999999951,
+        "2": 91.6000000000008
+      },
+      "phase": "stopped",
+      "region": "a_start",
+      "repair_spent": 16,
+      "seconds": 946.200000000078,
+      "spent": 26,
+      "stage": "lap_2_complete",
+      "vehicle": {
+        "cargo_species": "",
+        "progress": 0.0,
+        "range": 460.0,
+        "stage": "stopped",
+        "text": "車上狩猟は走行中のみ"
+      }
+    },
+    {
+      "credits": 6,
+      "director_seconds": 979.200000000086,
+      "earned": 32,
+      "eaten": 0,
+      "events": [
+        {
+          "at": 892.800000000066,
+          "text": "停車：C 古い採石場"
+        },
+        {
+          "at": 913.000000000071,
+          "text": "停車：D 廃貨物ヤード"
+        },
+        {
+          "at": 922.400000000073,
+          "text": "寒波が来た！"
+        },
+        {
+          "at": 945.600000000078,
+          "text": "停車：A はじまりの街"
+        },
+        {
+          "at": 962.600000000082,
+          "text": "車軸に亀裂が入った！走行装置が損傷（-25）"
+        },
+        {
+          "at": 979.000000000086,
+          "text": "停車：B 近郊の森"
+        }
+      ],
+      "food": 25,
+      "fuel": 90.385777777778,
+      "fuel_spent": 6,
+      "game_over": false,
+      "hunger": [
+        31.46,
+        31.46,
+        31.46
+      ],
+      "hunt_meat": 9,
+      "hunted": 9,
+      "meat": 1,
+      "parts": {
+        "0": 65.76203904744,
+        "1": 44.6769758120349,
+        "2": 91.6000000000008
+      },
+      "phase": "stopped",
+      "region": "b_forest",
+      "repair_spent": 16,
+      "seconds": 979.800000000086,
+      "spent": 26,
+      "stage": "arrive_b_forest",
+      "vehicle": {
+        "cargo_species": "",
+        "progress": 0.0,
+        "range": 460.0,
+        "stage": "stopped",
+        "text": "車上狩猟は走行中のみ"
+      }
+    },
+    {
+      "credits": 6,
+      "director_seconds": 1238.00000000014,
+      "earned": 32,
+      "eaten": 3,
+      "events": [
+        {
+          "at": 995.000000000089,
+          "text": "寒さが和らいだ"
+        },
+        {
+          "at": 1069.40000000011,
+          "text": "遺跡を見つけた！（古代の遺跡）調査隊を出せる"
+        },
+        {
+          "at": 1142.20000000012,
+          "text": "急に冷え込んできた…"
+        },
+        {
+          "at": 1172.40000000013,
+          "text": "寒波が来た！"
+        },
+        {
+          "at": 1232.80000000014,
+          "text": "車体の外板が裂けた！車体が損傷（-35）"
+        },
+        {
+          "at": 1237.80000000014,
+          "text": "停車：C 古い採石場"
+        }
+      ],
+      "food": 24,
+      "fuel": 95.2115555555567,
+      "fuel_spent": 6,
+      "game_over": false,
+      "hunger": [
+        42.04,
+        42.04,
+        42.04
+      ],
+      "hunt_meat": 10,
+      "hunted": 10,
+      "meat": 1,
+      "parts": {
+        "0": 12.300073824371,
+        "1": 42.0103091453686,
+        "2": 90.5500000000009
+      },
+      "phase": "stopped",
+      "region": "c_quarry",
+      "repair_spent": 16,
+      "seconds": 1238.60000000014,
+      "spent": 26,
+      "stage": "arrive_c_quarry",
+      "vehicle": {
+        "cargo_species": "",
+        "progress": 0.0,
+        "range": 460.0,
+        "stage": "stopped",
+        "text": "車上狩猟は走行中のみ"
+      }
+    },
+    {
+      "credits": 6,
+      "director_seconds": 1264.20000000015,
+      "earned": 32,
+      "eaten": 3,
+      "events": [
+        {
+          "at": 1172.40000000013,
+          "text": "寒波が来た！"
+        },
+        {
+          "at": 1232.80000000014,
+          "text": "車体の外板が裂けた！車体が損傷（-35）"
+        },
+        {
+          "at": 1237.80000000014,
+          "text": "停車：C 古い採石場"
+        },
+        {
+          "at": 1249.40000000015,
+          "text": "遺跡は遠ざかってしまった"
+        },
+        {
+          "at": 1253.00000000015,
+          "text": "寒さが和らいだ"
+        },
+        {
+          "at": 1264.00000000015,
+          "text": "停車：D 廃貨物ヤード"
+        }
+      ],
+      "food": 24,
+      "fuel": 89.6893333333343,
+      "fuel_spent": 6,
+      "game_over": false,
+      "hunger": [
+        39.9,
+        39.9,
+        39.9
+      ],
+      "hunt_meat": 11,
+      "hunted": 11,
+      "meat": 2,
+      "parts": {
+        "0": 10.4660738243711,
+        "1": 39.3436424787022,
+        "2": 90.5500000000009
+      },
+      "phase": "stopped",
+      "region": "d_yard",
+      "repair_spent": 16,
+      "seconds": 1264.80000000015,
+      "spent": 26,
+      "stage": "arrive_d_yard",
+      "vehicle": {
+        "cargo_species": "",
+        "progress": 0.0,
+        "range": 460.0,
+        "stage": "stopped",
+        "text": "車上狩猟は走行中のみ"
+      }
+    },
+    {
+      "credits": 6,
+      "director_seconds": 1284.20000000015,
+      "earned": 32,
+      "eaten": 3,
+      "events": [
+        {
+          "at": 1232.80000000014,
+          "text": "車体の外板が裂けた！車体が損傷（-35）"
+        },
+        {
+          "at": 1237.80000000014,
+          "text": "停車：C 古い採石場"
+        },
+        {
+          "at": 1249.40000000015,
+          "text": "遺跡は遠ざかってしまった"
+        },
+        {
+          "at": 1253.00000000015,
+          "text": "寒さが和らいだ"
+        },
+        {
+          "at": 1264.00000000015,
+          "text": "停車：D 廃貨物ヤード"
+        },
+        {
+          "at": 1284.20000000015,
+          "text": "停車：A はじまりの街"
+        }
+      ],
+      "food": 24,
+      "fuel": 87.4671111111117,
+      "fuel_spent": 6,
+      "game_over": false,
+      "hunger": [
+        38.55,
+        38.55,
+        38.55
+      ],
+      "hunt_meat": 12,
+      "hunted": 12,
+      "meat": 3,
+      "parts": {
+        "0": 9.05207382437114,
+        "1": 36.6769758120358,
+        "2": 90.5500000000009
+      },
+      "phase": "stopped",
+      "region": "a_start",
+      "repair_spent": 16,
+      "seconds": 1285.00000000016,
+      "spent": 26,
+      "stage": "arrive_a_start",
+      "vehicle": {
+        "cargo_species": "",
+        "progress": 0.0,
+        "range": 460.0,
+        "stage": "stopped",
+        "text": "車上狩猟は走行中のみ"
+      }
+    },
+    {
+      "credits": 6,
+      "director_seconds": 1284.20000000015,
+      "earned": 32,
+      "eaten": 3,
+      "events": [
+        {
+          "at": 1232.80000000014,
+          "text": "車体の外板が裂けた！車体が損傷（-35）"
+        },
+        {
+          "at": 1237.80000000014,
+          "text": "停車：C 古い採石場"
+        },
+        {
+          "at": 1249.40000000015,
+          "text": "遺跡は遠ざかってしまった"
+        },
+        {
+          "at": 1253.00000000015,
+          "text": "寒さが和らいだ"
+        },
+        {
+          "at": 1264.00000000015,
+          "text": "停車：D 廃貨物ヤード"
+        },
+        {
+          "at": 1284.20000000015,
+          "text": "停車：A はじまりの街"
+        }
+      ],
+      "food": 24,
+      "fuel": 87.4671111111117,
+      "fuel_spent": 6,
+      "game_over": false,
+      "hunger": [
+        38.55,
+        38.55,
+        38.55
+      ],
+      "hunt_meat": 12,
+      "hunted": 12,
+      "meat": 3,
+      "parts": {
+        "0": 9.05207382437114,
+        "1": 36.6769758120358,
+        "2": 90.5500000000009
+      },
+      "phase": "stopped",
+      "region": "a_start",
+      "repair_spent": 16,
+      "seconds": 1285.00000000016,
+      "spent": 26,
+      "stage": "lap_3_before_market",
+      "vehicle": {
+        "cargo_species": "",
+        "progress": 0.0,
+        "range": 460.0,
+        "stage": "stopped",
+        "text": "車上狩猟は走行中のみ"
+      }
+    },
+    {
+      "credits": 9,
+      "director_seconds": 1284.20000000015,
+      "earned": 48,
+      "eaten": 3,
+      "events": [
+        {
+          "at": 1232.80000000014,
+          "text": "車体の外板が裂けた！車体が損傷（-35）"
+        },
+        {
+          "at": 1237.80000000014,
+          "text": "停車：C 古い採石場"
+        },
+        {
+          "at": 1249.40000000015,
+          "text": "遺跡は遠ざかってしまった"
+        },
+        {
+          "at": 1253.00000000015,
+          "text": "寒さが和らいだ"
+        },
+        {
+          "at": 1264.00000000015,
+          "text": "停車：D 廃貨物ヤード"
+        },
+        {
+          "at": 1284.20000000015,
+          "text": "停車：A はじまりの街"
+        }
+      ],
+      "food": 24,
+      "fuel": 100.0,
+      "fuel_spent": 11,
+      "game_over": false,
+      "hunger": [
+        38.55,
+        38.55,
+        38.55
+      ],
+      "hunt_meat": 12,
+      "hunted": 12,
+      "meat": 3,
+      "parts": {
+        "0": 34.0520738243711,
+        "1": 36.6769758120358,
+        "2": 90.5500000000009
+      },
+      "phase": "stopped",
+      "region": "a_start",
+      "repair_spent": 24,
+      "seconds": 1285.00000000016,
+      "spent": 39,
+      "stage": "lap_3_complete",
+      "vehicle": {
+        "cargo_species": "",
+        "progress": 0.0,
+        "range": 460.0,
+        "stage": "stopped",
+        "text": "車上狩猟は走行中のみ"
+      }
+    },
+    {
+      "credits": 3,
+      "director_seconds": 1284.20000000015,
+      "earned": 50,
+      "eaten": 3,
+      "events": [
+        {
+          "at": 1232.80000000014,
+          "text": "車体の外板が裂けた！車体が損傷（-35）"
+        },
+        {
+          "at": 1237.80000000014,
+          "text": "停車：C 古い採石場"
+        },
+        {
+          "at": 1249.40000000015,
+          "text": "遺跡は遠ざかってしまった"
+        },
+        {
+          "at": 1253.00000000015,
+          "text": "寒さが和らいだ"
+        },
+        {
+          "at": 1264.00000000015,
+          "text": "停車：D 廃貨物ヤード"
+        },
+        {
+          "at": 1284.20000000015,
+          "text": "停車：A はじまりの街"
+        }
+      ],
+      "food": 24,
+      "fuel": 100.0,
+      "fuel_spent": 11,
+      "game_over": false,
+      "hunger": [
+        38.55,
+        38.55,
+        38.55
+      ],
+      "hunt_meat": 12,
+      "hunted": 12,
+      "meat": 2,
+      "parts": {
+        "0": 34.0520738243711,
+        "1": 61.6769758120358,
+        "2": 90.5500000000009
+      },
+      "phase": "stopped",
+      "region": "a_start",
+      "repair_spent": 32,
+      "seconds": 1285.00000000016,
+      "spent": 47,
+      "stage": "running_gear_repaired",
+      "vehicle": {
+        "cargo_species": "",
+        "progress": 0.0,
+        "range": 460.0,
+        "stage": "stopped",
+        "text": "車上狩猟は走行中のみ"
+      }
+    },
+    {
+      "credits": 3,
+      "director_seconds": 1304.40000000016,
+      "earned": 50,
+      "eaten": 3,
+      "events": [
+        {
+          "at": 1237.80000000014,
+          "text": "停車：C 古い採石場"
+        },
+        {
+          "at": 1249.40000000015,
+          "text": "遺跡は遠ざかってしまった"
+        },
+        {
+          "at": 1253.00000000015,
+          "text": "寒さが和らいだ"
+        },
+        {
+          "at": 1264.00000000015,
+          "text": "停車：D 廃貨物ヤード"
+        },
+        {
+          "at": 1284.20000000015,
+          "text": "停車：A はじまりの街"
+        },
+        {
+          "at": 1304.20000000016,
+          "text": "停車：B 近郊の森"
+        }
+      ],
+      "food": 24,
+      "fuel": 97.7777777777774,
+      "fuel_spent": 11,
+      "game_over": false,
+      "hunger": [
+        37.21,
+        37.21,
+        37.21
+      ],
+      "hunt_meat": 13,
+      "hunted": 13,
+      "meat": 3,
+      "parts": {
+        "0": 32.6380738243708,
+        "1": 59.0103091453695,
+        "2": 90.5500000000009
+      },
+      "phase": "stopped",
+      "region": "b_forest",
+      "repair_spent": 32,
+      "seconds": 1305.20000000016,
+      "spent": 47,
+      "stage": "arrive_b_forest",
+      "vehicle": {
+        "cargo_species": "",
+        "progress": 0.0,
+        "range": 460.0,
+        "stage": "stopped",
+        "text": "車上狩猟は走行中のみ"
+      }
+    },
+    {
+      "credits": 3,
+      "director_seconds": 1304.40000000016,
+      "earned": 50,
+      "eaten": 3,
+      "events": [
+        {
+          "at": 1237.80000000014,
+          "text": "停車：C 古い採石場"
+        },
+        {
+          "at": 1249.40000000015,
+          "text": "遺跡は遠ざかってしまった"
+        },
+        {
+          "at": 1253.00000000015,
+          "text": "寒さが和らいだ"
+        },
+        {
+          "at": 1264.00000000015,
+          "text": "停車：D 廃貨物ヤード"
+        },
+        {
+          "at": 1284.20000000015,
+          "text": "停車：A はじまりの街"
+        },
+        {
+          "at": 1304.20000000016,
+          "text": "停車：B 近郊の森"
+        }
+      ],
+      "food": 24,
+      "fuel": 97.7777777777774,
+      "fuel_spent": 11,
+      "game_over": false,
+      "hunger": [
+        37.21,
+        37.21,
+        37.21
+      ],
+      "hunt_meat": 13,
+      "hunted": 13,
+      "meat": 3,
+      "parts": {
+        "0": 32.6380738243708,
+        "1": 59.0103091453695,
+        "2": 90.5500000000009
+      },
+      "phase": "stopped",
+      "region": "b_forest",
+      "repair_spent": 32,
+      "seconds": 1305.20000000016,
+      "spent": 47,
+      "stage": "final",
+      "vehicle": {
+        "cargo_species": "",
+        "progress": 0.0,
+        "range": 460.0,
+        "stage": "stopped",
+        "text": "車上狩猟は走行中のみ"
+      }
+    }
+  ],
+  "KILL": [
+    {
+      "id": "entity_14",
+      "respawn_at": 152.8,
+      "road": "ab",
+      "species": "dodo",
+      "time": 47.8000000000001
+    },
+    {
+      "id": "entity_29",
+      "respawn_at": 573.399999999982,
+      "road": "bc",
+      "species": "dodo",
+      "time": 468.399999999982
+    },
+    {
+      "id": "entity_45",
+      "respawn_at": 601.39999999998,
+      "road": "cd",
+      "species": "dodo",
+      "time": 496.39999999998
+    },
+    {
+      "id": "entity_60",
+      "respawn_at": 620.39999999998,
+      "road": "da",
+      "species": "dodo",
+      "time": 515.39999999998
+    },
+    {
+      "id": "entity_14",
+      "respawn_at": 646.199999999986,
+      "road": "ab",
+      "species": "dodo",
+      "time": 541.199999999986
+    },
+    {
+      "id": "entity_29",
+      "respawn_at": 979.800000000062,
+      "road": "bc",
+      "species": "dodo",
+      "time": 874.800000000062
+    },
+    {
+      "id": "entity_45",
+      "respawn_at": 1009.40000000007,
+      "road": "cd",
+      "species": "dodo",
+      "time": 904.400000000069
+    },
+    {
+      "id": "entity_60",
+      "respawn_at": 1028.60000000007,
+      "road": "da",
+      "species": "dodo",
+      "time": 923.600000000073
+    },
+    {
+      "id": "entity_14",
+      "respawn_at": 1075.00000000008,
+      "road": "ab",
+      "species": "dodo",
+      "time": 970.000000000084
+    },
+    {
+      "id": "entity_29",
+      "respawn_at": 1326.60000000014,
+      "road": "bc",
+      "species": "dodo",
+      "time": 1221.60000000014
+    },
+    {
+      "id": "entity_45",
+      "respawn_at": 1360.40000000015,
+      "road": "cd",
+      "species": "dodo",
+      "time": 1255.40000000015
+    },
+    {
+      "id": "entity_60",
+      "respawn_at": 1380.60000000015,
+      "road": "da",
+      "species": "dodo",
+      "time": 1275.60000000015
+    },
+    {
+      "id": "entity_14",
+      "respawn_at": 1401.80000000016,
+      "road": "ab",
+      "species": "dodo",
+      "time": 1296.80000000016
+    }
+  ],
+  "HUNT_MEAT": [
+    {
+      "amount": 1,
+      "phase": "travel",
+      "road": "ab",
+      "time": 51.0000000000002
+    },
+    {
+      "amount": 1,
+      "phase": "travel",
+      "road": "bc",
+      "time": 471.599999999982
+    },
+    {
+      "amount": 1,
+      "phase": "travel",
+      "road": "cd",
+      "time": 499.59999999998
+    },
+    {
+      "amount": 1,
+      "phase": "travel",
+      "road": "da",
+      "time": 518.599999999981
+    },
+    {
+      "amount": 1,
+      "phase": "travel",
+      "road": "ab",
+      "time": 544.599999999987
+    },
+    {
+      "amount": 1,
+      "phase": "travel",
+      "road": "bc",
+      "time": 878.200000000063
+    },
+    {
+      "amount": 1,
+      "phase": "travel",
+      "road": "cd",
+      "time": 907.800000000069
+    },
+    {
+      "amount": 1,
+      "phase": "travel",
+      "road": "da",
+      "time": 927.000000000074
+    },
+    {
+      "amount": 1,
+      "phase": "travel",
+      "road": "ab",
+      "time": 973.600000000084
+    },
+    {
+      "amount": 1,
+      "phase": "travel",
+      "road": "bc",
+      "time": 1225.20000000014
+    },
+    {
+      "amount": 1,
+      "phase": "travel",
+      "road": "cd",
+      "time": 1259.00000000015
+    },
+    {
+      "amount": 1,
+      "phase": "travel",
+      "road": "da",
+      "time": 1279.20000000015
+    },
+    {
+      "amount": 1,
+      "phase": "travel",
+      "road": "ab",
+      "time": 1300.60000000016
+    }
+  ],
+  "MEAL": [
+    {
+      "eaten": 1,
+      "hunger_after": 54.8213333333262,
+      "hunger_before": 24.8346666666595,
+      "region": "b_forest",
+      "seconds": 1073.00000000011
+    },
+    {
+      "eaten": 2,
+      "hunger_after": 54.7946666666595,
+      "hunger_before": 24.8079999999929,
+      "region": "b_forest",
+      "seconds": 1073.40000000011
+    },
+    {
+      "eaten": 3,
+      "hunger_after": 54.7813333333262,
+      "hunger_before": 24.7946666666595,
+      "region": "b_forest",
+      "seconds": 1073.60000000011
+    }
+  ],
+  "TRADE": [
+    {
+      "action": "sell",
+      "credits_after": 8,
+      "credits_before": 0,
+      "fuel": 97.6746666666656,
+      "item": 1,
+      "n": 4
+    },
+    {
+      "action": "sell",
+      "credits_after": 16,
+      "credits_before": 8,
+      "fuel": 97.6746666666656,
+      "item": 2,
+      "n": 4
+    },
+    {
+      "action": "buy",
+      "credits_after": 12,
+      "credits_before": 16,
+      "fuel": 97.6746666666656,
+      "item": 8,
+      "n": 1
+    },
+    {
+      "action": "fuel_cash",
+      "credits_after": 11,
+      "credits_before": 12,
+      "fuel": 100.0,
+      "item": -1,
+      "n": 1
+    },
+    {
+      "action": "repair_cash",
+      "credits_after": 3,
+      "credits_before": 11,
+      "fuel": 100.0,
+      "item": 0,
+      "n": 1
+    },
+    {
+      "action": "sell",
+      "credits_after": 11,
+      "credits_before": 3,
+      "fuel": 85.9631111111112,
+      "item": 1,
+      "n": 4
+    },
+    {
+      "action": "sell",
+      "credits_after": 19,
+      "credits_before": 11,
+      "fuel": 85.9631111111112,
+      "item": 2,
+      "n": 4
+    },
+    {
+      "action": "fuel_cash",
+      "credits_after": 14,
+      "credits_before": 19,
+      "fuel": 100.0,
+      "item": -1,
+      "n": 1
+    },
+    {
+      "action": "repair_cash",
+      "credits_after": 6,
+      "credits_before": 14,
+      "fuel": 100.0,
+      "item": 0,
+      "n": 1
+    },
+    {
+      "action": "sell",
+      "credits_after": 14,
+      "credits_before": 6,
+      "fuel": 87.4671111111117,
+      "item": 1,
+      "n": 4
+    },
+    {
+      "action": "sell",
+      "credits_after": 22,
+      "credits_before": 14,
+      "fuel": 87.4671111111117,
+      "item": 2,
+      "n": 4
+    },
+    {
+      "action": "fuel_cash",
+      "credits_after": 17,
+      "credits_before": 22,
+      "fuel": 100.0,
+      "item": -1,
+      "n": 1
+    },
+    {
+      "action": "repair_cash",
+      "credits_after": 9,
+      "credits_before": 17,
+      "fuel": 100.0,
+      "item": 0,
+      "n": 1
+    },
+    {
+      "action": "sell",
+      "credits_after": 11,
+      "credits_before": 9,
+      "fuel": 100.0,
+      "item": 0,
+      "n": 1
+    },
+    {
+      "action": "repair_cash",
+      "credits_after": 3,
+      "credits_before": 11,
+      "fuel": 100.0,
+      "item": 1,
+      "n": 1
+    }
+  ],
+  "LAP_BALANCE": [
+    {
+      "before": {
+        "credits": 0,
+        "earned": 0,
+        "eaten": 0,
+        "fuel_spent": 0,
+        "hunted": 0,
+        "parts": {
+          "0": 97.1720000000008,
+          "1": 94.6666666666658,
+          "2": 100.0
+        },
+        "repair_spent": 0,
+        "spent": 0
+      },
+      "cost": 13,
+      "eaten": 0,
+      "fuel_cost": 1,
+      "hunted": 4,
+      "income": 16,
+      "lap": 1,
+      "net": 3,
+      "parts_after_repair": {
+        "0": 74.7932390474383,
+        "1": 83.9999999999975,
+        "2": 97.1300000000003
+      },
+      "parts_before_repair": {
+        "0": 49.7932390474383,
+        "1": 83.9999999999975,
+        "2": 97.1300000000003
+      },
+      "repair_cost": 8
+    },
+    {
+      "before": {
+        "credits": 3,
+        "earned": 16,
+        "eaten": 0,
+        "fuel_spent": 1,
+        "hunted": 4,
+        "parts": {
+          "0": 74.7932390474383,
+          "1": 83.9999999999975,
+          "2": 97.1300000000003
+        },
+        "repair_spent": 8,
+        "spent": 13
+      },
+      "cost": 13,
+      "eaten": 0,
+      "fuel_cost": 5,
+      "hunted": 4,
+      "income": 16,
+      "lap": 2,
+      "net": 3,
+      "parts_after_repair": {
+        "0": 68.1140390474393,
+        "1": 72.9119999999951,
+        "2": 91.6000000000008
+      },
+      "parts_before_repair": {
+        "0": 43.1140390474393,
+        "1": 72.9119999999951,
+        "2": 91.6000000000008
+      },
+      "repair_cost": 8
+    },
+    {
+      "before": {
+        "credits": 6,
+        "earned": 32,
+        "eaten": 0,
+        "fuel_spent": 6,
+        "hunted": 8,
+        "parts": {
+          "0": 68.1140390474393,
+          "1": 72.9119999999951,
+          "2": 91.6000000000008
+        },
+        "repair_spent": 16,
+        "spent": 26
+      },
+      "cost": 13,
+      "eaten": 3,
+      "fuel_cost": 5,
+      "hunted": 4,
+      "income": 16,
+      "lap": 3,
+      "net": 3,
+      "parts_after_repair": {
+        "0": 34.0520738243711,
+        "1": 36.6769758120358,
+        "2": 90.5500000000009
+      },
+      "parts_before_repair": {
+        "0": 9.05207382437114,
+        "1": 36.6769758120358,
+        "2": 90.5500000000009
+      },
+      "repair_cost": 8
+    }
+  ],
+  "BALANCE": [
+    {
+      "cooked_meat": 9,
+      "earned": 50,
+      "eaten": 3,
+      "food_owned": 24,
+      "hunt_meat": 13,
+      "initial_food": 8,
+      "kills": [
+        {
+          "id": "entity_14",
+          "respawn_at": 152.8,
+          "road": "ab",
+          "species": "dodo",
+          "time": 47.8000000000001
+        },
+        {
+          "id": "entity_29",
+          "respawn_at": 573.399999999982,
+          "road": "bc",
+          "species": "dodo",
+          "time": 468.399999999982
+        },
+        {
+          "id": "entity_45",
+          "respawn_at": 601.39999999998,
+          "road": "cd",
+          "species": "dodo",
+          "time": 496.39999999998
+        },
+        {
+          "id": "entity_60",
+          "respawn_at": 620.39999999998,
+          "road": "da",
+          "species": "dodo",
+          "time": 515.39999999998
+        },
+        {
+          "id": "entity_14",
+          "respawn_at": 646.199999999986,
+          "road": "ab",
+          "species": "dodo",
+          "time": 541.199999999986
+        },
+        {
+          "id": "entity_29",
+          "respawn_at": 979.800000000062,
+          "road": "bc",
+          "species": "dodo",
+          "time": 874.800000000062
+        },
+        {
+          "id": "entity_45",
+          "respawn_at": 1009.40000000007,
+          "road": "cd",
+          "species": "dodo",
+          "time": 904.400000000069
+        },
+        {
+          "id": "entity_60",
+          "respawn_at": 1028.60000000007,
+          "road": "da",
+          "species": "dodo",
+          "time": 923.600000000073
+        },
+        {
+          "id": "entity_14",
+          "respawn_at": 1075.00000000008,
+          "road": "ab",
+          "species": "dodo",
+          "time": 970.000000000084
+        },
+        {
+          "id": "entity_29",
+          "respawn_at": 1326.60000000014,
+          "road": "bc",
+          "species": "dodo",
+          "time": 1221.60000000014
+        },
+        {
+          "id": "entity_45",
+          "respawn_at": 1360.40000000015,
+          "road": "cd",
+          "species": "dodo",
+          "time": 1255.40000000015
+        },
+        {
+          "id": "entity_60",
+          "respawn_at": 1380.60000000015,
+          "road": "da",
+          "species": "dodo",
+          "time": 1275.60000000015
+        },
+        {
+          "id": "entity_14",
+          "respawn_at": 1401.80000000016,
+          "road": "ab",
+          "species": "dodo",
+          "time": 1296.80000000016
+        }
+      ],
+      "purchased_food": 1,
+      "sold_meat": 1,
+      "spent": 47,
+      "unprocessed_meat": 3
+    }
+  ],
+  "scope": {
+    "input": "headless system/API simulation, not GUI or Windows",
+    "director_enabled": true,
+    "seed": 104729,
+    "save_disabled": true,
+    "stock_or_money_injected": false,
+    "explicit_hunts_only": true,
+    "unsafe_site_retreat_threshold_hull": 50,
+    "town_wait_used": false,
+    "finite_three_laps_and_next_leg_only": true,
+    "quarterview_hunt_tested": false,
+    "third_lap_food_target_reduced_from_30_to_24_to_preserve_saleable_meat": true,
+    "remaining_hull_needs_attention": 32.6380738243708,
+    "exit_code": 0
+  }
+}

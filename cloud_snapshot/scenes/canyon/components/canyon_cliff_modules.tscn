@@ -1,0 +1,22 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/canyon_recovery/v2/cliff_module.png" id="1_cliff"]
+
+[node name="CanyonCliffModules" type="Node2D"]
+texture_filter = 1
+z_index = 1
+
+[node name="QuarryBackWall" type="Sprite2D" parent="."]
+texture_filter = 1
+position = Vector2(194, 132)
+texture = ExtResource("1_cliff")
+
+[node name="TransportRidge" type="Sprite2D" parent="."]
+texture_filter = 1
+position = Vector2(620, 126)
+texture = ExtResource("1_cliff")
+
+[node name="CheckpointRidge" type="Sprite2D" parent="."]
+texture_filter = 1
+position = Vector2(1060, 143)
+texture = ExtResource("1_cliff")

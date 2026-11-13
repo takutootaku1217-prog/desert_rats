@@ -1,0 +1,270 @@
+{
+  "engine": "Godot 4.6.3 Linux headless",
+  "test": "tools/test_full_survival_market_cycle.gd",
+  "exit_code": 0,
+  "witness_kind": "deterministic real-system API simulation, not ordinary GUI input",
+  "baseline_archive_sha256": "447f650186626958fad8e40186c05b32fe1847ec816e6b854657d8af9416e99b",
+  "fixture_controls": [
+    "SaveGame.disabled = true; HOME/XDG isolated /tmp",
+    "first-region-A normal initial stock, diagnostic_seed104729",
+    "Main process disabled; ordered explicit Main/Creature/Worker ticks at0.2 seconds",
+    "Director random events disabled for bounded deterministic witness",
+    "Gather worker priority0; automatic recipes disabled until raw meat reaches storage; then normal FOOD target12",
+    "C route bridge outpost disabled, then regular recall and idempotent commit"
+  ],
+  "no_injection": [
+    "No currency or resource additions",
+    "No direct creature kill, carcass creation, raw meat or cooked output injection",
+    "No hunger assignment to force a meal"
+  ],
+  "proved": [
+    "A->B travel",
+    "B stopped-horizontal explicit dodo hunt: actual carcass carried to warehouse, raw meat1",
+    "raw meat1->food2, process output observed",
+    "normal hunger-driven food consumption and hunger gain",
+    "C quarter-view real quarry session ore3, recall and exactly-once commit",
+    "C->B->A, recovered iron ore2 sold for6Cr, food1 bought for4Cr",
+    "Cancel/duplicate ticket/insufficient-credit guards (reused core economy witness)",
+    "A->B next expedition; final food8+eaten3=initial8+cooked2+bought1; credits2, ironore1"
+  ],
+  "not_proved": [
+    "Quarter-view wildlife hunting is not implemented in the inspected C session; hunt happened in stopped horizontal B",
+    "No running-road hunt because outdoor dispatch is gated during travel",
+    "Event raid combat/drop path not tested; ENABLE_RAIDS true but director disabled for this bounded test",
+    "No Windows or ordinary mouse-input test",
+    "No claim of sustainable long-run food balance or difficulty balance",
+    "C bridge world hunger/fuel clock does not advance in this deterministic route-session fixture; quarterview_seconds separate from main simulation seconds"
+  ],
+  "ledger": [
+    {
+      "carcass_cargo_seen": false,
+      "credits": 0,
+      "eaten": 0,
+      "food": 8,
+      "food_output_seen": false,
+      "fuel": 100.0,
+      "hunger": [
+        100.0,
+        100.0,
+        100.0
+      ],
+      "hunted": 0,
+      "iron_ore": 0,
+      "meal_hunger_gain_seen": false,
+      "meat": 0,
+      "meat_stock_seen": false,
+      "phase": "stopped",
+      "quarterview_seconds": 0.0,
+      "region": "a_start",
+      "seconds": 0.0,
+      "stage": "normal_initial_state"
+    },
+    {
+      "carcass_cargo_seen": false,
+      "credits": 0,
+      "eaten": 0,
+      "food": 8,
+      "food_output_seen": false,
+      "fuel": 97.78,
+      "hunger": [
+        98.65,
+        98.65,
+        98.65
+      ],
+      "hunted": 0,
+      "iron_ore": 0,
+      "meal_hunger_gain_seen": false,
+      "meat": 0,
+      "meat_stock_seen": false,
+      "phase": "stopped",
+      "quarterview_seconds": 0.0,
+      "region": "b_forest",
+      "seconds": 20.2,
+      "stage": "arrive_B_stopped_horizontal"
+    },
+    {
+      "carcass_cargo_seen": true,
+      "credits": 0,
+      "eaten": 0,
+      "food": 8,
+      "food_output_seen": false,
+      "fuel": 97.78,
+      "hunger": [
+        97.96,
+        97.96,
+        97.96
+      ],
+      "hunted": 1,
+      "iron_ore": 0,
+      "meal_hunger_gain_seen": false,
+      "meat": 1,
+      "meat_stock_seen": true,
+      "phase": "stopped",
+      "quarterview_seconds": 0.0,
+      "region": "b_forest",
+      "seconds": 30.6,
+      "stage": "hunted_and_meat_stored"
+    },
+    {
+      "carcass_cargo_seen": true,
+      "credits": 0,
+      "eaten": 0,
+      "food": 10,
+      "food_output_seen": true,
+      "fuel": 97.78,
+      "hunger": [
+        96.75,
+        96.75,
+        96.75
+      ],
+      "hunted": 1,
+      "iron_ore": 0,
+      "meal_hunger_gain_seen": false,
+      "meat": 0,
+      "meat_stock_seen": true,
+      "phase": "stopped",
+      "quarterview_seconds": 0.0,
+      "region": "b_forest",
+      "seconds": 48.8,
+      "stage": "cooked_food_stored"
+    },
+    {
+      "carcass_cargo_seen": true,
+      "credits": 0,
+      "eaten": 2,
+      "food": 7,
+      "food_output_seen": true,
+      "fuel": 97.78,
+      "hunger": [
+        24.8,
+        54.8,
+        54.8
+      ],
+      "hunted": 1,
+      "iron_ore": 0,
+      "meal_hunger_gain_seen": true,
+      "meat": 0,
+      "meat_stock_seen": true,
+      "phase": "stopped",
+      "quarterview_seconds": 0.0,
+      "region": "b_forest",
+      "seconds": 1128.0,
+      "stage": "normal_meal_consumed"
+    },
+    {
+      "carcass_cargo_seen": true,
+      "credits": 0,
+      "eaten": 3,
+      "food": 7,
+      "food_output_seen": true,
+      "fuel": 95.56,
+      "hunger": [
+        53.39,
+        53.39,
+        53.39
+      ],
+      "hunted": 1,
+      "iron_ore": 0,
+      "meal_hunger_gain_seen": true,
+      "meat": 0,
+      "meat_stock_seen": true,
+      "phase": "stopped",
+      "quarterview_seconds": 0.0,
+      "region": "c_quarry",
+      "seconds": 1149.2,
+      "stage": "arrive_C_before_quarterview_session"
+    },
+    {
+      "carcass_cargo_seen": true,
+      "credits": 0,
+      "eaten": 3,
+      "food": 7,
+      "food_output_seen": true,
+      "fuel": 95.56,
+      "hunger": [
+        53.39,
+        53.39,
+        53.39
+      ],
+      "hunted": 1,
+      "iron_ore": 3,
+      "meal_hunger_gain_seen": true,
+      "meat": 0,
+      "meat_stock_seen": true,
+      "phase": "stopped",
+      "quarterview_seconds": 72.8,
+      "region": "c_quarry",
+      "seconds": 1149.2,
+      "stage": "C_ore_committed_once"
+    },
+    {
+      "carcass_cargo_seen": true,
+      "credits": 0,
+      "eaten": 3,
+      "food": 7,
+      "food_output_seen": true,
+      "fuel": 91.11,
+      "hunger": [
+        50.69,
+        50.69,
+        50.69
+      ],
+      "hunted": 1,
+      "iron_ore": 3,
+      "meal_hunger_gain_seen": true,
+      "meat": 0,
+      "meat_stock_seen": true,
+      "phase": "stopped",
+      "quarterview_seconds": 72.8,
+      "region": "a_start",
+      "seconds": 1189.6,
+      "stage": "A_town_market"
+    },
+    {
+      "carcass_cargo_seen": true,
+      "credits": 2,
+      "eaten": 3,
+      "food": 8,
+      "food_output_seen": true,
+      "fuel": 91.11,
+      "hunger": [
+        50.69,
+        50.69,
+        50.69
+      ],
+      "hunted": 1,
+      "iron_ore": 1,
+      "meal_hunger_gain_seen": true,
+      "meat": 0,
+      "meat_stock_seen": true,
+      "phase": "stopped",
+      "quarterview_seconds": 72.8,
+      "region": "a_start",
+      "seconds": 1189.6,
+      "stage": "sale_purchase_complete"
+    },
+    {
+      "carcass_cargo_seen": true,
+      "credits": 2,
+      "eaten": 3,
+      "food": 8,
+      "food_output_seen": true,
+      "fuel": 88.89,
+      "hunger": [
+        49.35,
+        49.35,
+        49.35
+      ],
+      "hunted": 1,
+      "iron_ore": 1,
+      "meal_hunger_gain_seen": true,
+      "meat": 0,
+      "meat_stock_seen": true,
+      "phase": "stopped",
+      "quarterview_seconds": 72.8,
+      "region": "b_forest",
+      "seconds": 1209.8,
+      "stage": "next_departure_arrived_B"
+    }
+  ]
+}

@@ -1,0 +1,269 @@
+{
+	"actors": {
+		"worker:0": {
+			"attack_per_second": 14.63,
+			"calm": 10.0,
+			"carry_item": -1,
+			"carry_limit": 3,
+			"carry_n": 0,
+			"combat_target": "",
+			"direct_depot_loop": false,
+			"down": false,
+			"entry_fatigue": 0.0,
+			"entry_field_tool_kit": {
+
+			},
+			"entry_gather_ability": 1.3225,
+			"entry_gather_rank": 3,
+			"entry_hp": 100.0,
+			"entry_stress": 0.0,
+			"entry_tools": {
+
+			},
+			"entry_weapon": -1,
+			"entry_work_support": -1,
+			"fatigue": 2.0,
+			"field_tool_kit": {
+
+			},
+			"hp": 100.0,
+			"hunger": 99.3333333333332,
+			"life_move_mult": 1.0,
+			"mental": 1,
+			"name": "ネズ吉",
+			"path": [
+				[
+					700.0,
+					325.0
+				],
+				[
+					1030.0,
+					235.0
+				]
+			],
+			"path_index": 1,
+			"path_speed": 230.0,
+			"presentation_hidden": false,
+			"resource_id": "",
+			"resume_state": "",
+			"role": "harvest",
+			"route": "main",
+			"seen_route_revision": 0,
+			"state": "to_resource",
+			"stress": 0.0,
+			"tools": {
+
+			},
+			"wait_reason": "",
+			"weapon": -1,
+			"weapon_range": 42.0,
+			"work_left": -0.05,
+			"work_support": -1,
+			"worker_index": 0,
+			"x": 1010.65405273438,
+			"y": 240.276184082031
+		},
+		"worker:1": {
+			"attack_per_second": 16.17,
+			"calm": 10.0,
+			"carry_item": -1,
+			"carry_limit": 3,
+			"carry_n": 0,
+			"combat_target": "",
+			"direct_depot_loop": false,
+			"down": false,
+			"entry_fatigue": 0.0,
+			"entry_field_tool_kit": {
+
+			},
+			"entry_gather_ability": 1.2075,
+			"entry_gather_rank": 2,
+			"entry_hp": 100.0,
+			"entry_stress": 0.0,
+			"entry_tools": {
+
+			},
+			"entry_weapon": -1,
+			"entry_work_support": -1,
+			"fatigue": 0.359999999999999,
+			"field_tool_kit": {
+
+			},
+			"hp": 100.0,
+			"hunger": 99.3333333333332,
+			"life_move_mult": 1.0,
+			"mental": 1,
+			"name": "チュー太",
+			"path": [],
+			"path_index": 0,
+			"path_speed": 230.0,
+			"presentation_hidden": false,
+			"resource_id": "",
+			"resume_state": "",
+			"role": "carry",
+			"route": "local",
+			"seen_route_revision": 0,
+			"state": "wait_relay",
+			"stress": 0.0,
+			"tools": {
+
+			},
+			"wait_reason": "",
+			"weapon": -1,
+			"weapon_range": 42.0,
+			"work_left": 0.0,
+			"work_support": -1,
+			"worker_index": 1,
+			"x": 490.0,
+			"y": 405.0
+		},
+		"worker:2": {
+			"attack_per_second": 12.782,
+			"calm": 10.0,
+			"carry_item": -1,
+			"carry_limit": 3,
+			"carry_n": 0,
+			"combat_target": "",
+			"direct_depot_loop": false,
+			"down": false,
+			"entry_fatigue": 0.0,
+			"entry_field_tool_kit": {
+
+			},
+			"entry_gather_ability": 0.9545,
+			"entry_gather_rank": 0,
+			"entry_hp": 100.0,
+			"entry_stress": 0.0,
+			"entry_tools": {
+
+			},
+			"entry_weapon": -1,
+			"entry_work_support": -1,
+			"fatigue": 2.0,
+			"field_tool_kit": {
+
+			},
+			"hp": 100.0,
+			"hunger": 99.3333333333332,
+			"life_move_mult": 1.0,
+			"mental": 1,
+			"name": "モモ",
+			"path": [],
+			"path_index": 0,
+			"presentation_hidden": false,
+			"resource_id": "",
+			"resume_state": "",
+			"role": "escort",
+			"route": "",
+			"seen_route_revision": -1,
+			"state": "escort",
+			"stress": 0.0,
+			"tools": {
+
+			},
+			"wait_reason": "",
+			"weapon": -1,
+			"weapon_range": 42.0,
+			"work_left": 0.0,
+			"work_support": -1,
+			"worker_index": 2,
+			"x": 976.654052734375,
+			"y": 260.276184082031
+		}
+	},
+	"all_routes_closed": false,
+	"capacity_paused": false,
+	"commit_summary": {
+
+	},
+	"committed": false,
+	"depot_stock": {
+		"5": 3
+	},
+	"dock_busy": {
+
+	},
+	"dock_count": 1,
+	"dock_queue": [],
+	"elapsed": 10.0,
+	"entry_director_elapsed": 40.4,
+	"event_log": [
+		{
+			"at": 0.0,
+			"text": "C 古い採石場へ既存仲間3人で入場"
+		},
+		{
+			"at": 5.0,
+			"text": "worker:0 が有限資源を3個回収"
+		}
+	],
+	"field_capacity_limit_weight": 1000000000,
+	"field_frame_exchange": {
+
+	},
+	"field_tool_swap": {
+
+	},
+	"gate_closed": false,
+	"intermediate_access": "blocked",
+	"life_clock_paid": 10.0,
+	"life_clock_token": "1794162625:2440465:128614139314",
+	"maintenance_actor_id": "",
+	"mine_path_engineering": false,
+	"outpost_cleared": true,
+	"outpost_enabled": false,
+	"outpost_enemies": {
+
+	},
+	"outpost_retreats": 0,
+	"parking_slot": "entry",
+	"path_requests": 5,
+	"phase": "local",
+	"relay_stock": {
+
+	},
+	"reposition_seconds_left": 0.0,
+	"reposition_target_slot": "",
+	"reservations": {
+
+	},
+	"resources": {
+		"entity_29": {
+			"initial": 13,
+			"item": 5,
+			"kind": "rock",
+			"remaining": 10,
+			"reservation": ""
+		},
+		"entity_30": {
+			"initial": 11,
+			"item": 5,
+			"kind": "rock",
+			"remaining": 11,
+			"reservation": ""
+		},
+		"entity_31": {
+			"initial": 9,
+			"item": 6,
+			"kind": "vein",
+			"remaining": 9,
+			"reservation": ""
+		},
+		"entity_32": {
+			"initial": 12,
+			"item": 4,
+			"kind": "tree",
+			"remaining": 12,
+			"reservation": ""
+		}
+	},
+	"return_handcart_exchange": {
+
+	},
+	"route_revision": 0,
+	"schema": 8,
+	"session_id": "life-test",
+	"single_worker_actor_id": "",
+	"single_worker_demo": false,
+	"vertical_slice": false
+}

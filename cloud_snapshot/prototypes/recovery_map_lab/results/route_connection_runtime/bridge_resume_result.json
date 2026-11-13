@@ -1,0 +1,34 @@
+{
+	"checks": [
+		{
+			"name": "fresh processでA→Cを既存WorldTripにより再到達",
+			"passed": true
+		},
+		{
+			"name": "project-local bridge fixtureを読込",
+			"passed": true
+		},
+		{
+			"name": "仲間ID・名前・装備を照合して投影",
+			"passed": true
+		},
+		{
+			"name": "読込直後の資源保存則",
+			"passed": true
+		},
+		{
+			"name": "読込後に予約・手持ち・relay・入口列を解消",
+			"passed": true
+		},
+		{
+			"name": "fresh processで一回だけ本編へ搬入",
+			"passed": true
+		},
+		{
+			"name": "offscreen投影後も仲間手持ちと数量を二重処理しない",
+			"passed": true
+		}
+	],
+	"normal_user_save_touched": false,
+	"passed": true
+}

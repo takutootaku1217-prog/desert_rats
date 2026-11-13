@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scenes/canyon/components/canyon_bridge.gd" id="1_bridge"]
+[ext_resource type="Texture2D" path="res://assets/canyon_recovery/v2/route_bridge.png" id="2_bridge_art"]
+
+[node name="CanyonBridge" type="Node2D"]
+texture_filter = 1
+z_index = 2
+script = ExtResource("1_bridge")
+
+[node name="DiagonalRavineBridge" type="Sprite2D" parent="."]
+texture_filter = 1
+position = Vector2(415, 385)
+texture = ExtResource("2_bridge_art")

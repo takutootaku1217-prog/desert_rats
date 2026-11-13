@@ -1,0 +1,343 @@
+{
+	"capture_method": "real X11 Godot viewport; deterministic 0.2-second session ticks; still PNGs only, no generated/interpolated frames",
+	"comparison": {
+		"baseline": {
+			"carried": 3.0,
+			"carrier_loaded_departures": 3.0,
+			"carrier_wait_relay_seconds": 14.0,
+			"conservation_ok": true,
+			"depot": 4.0,
+			"depot_gain_events": 4.0,
+			"dock_queue": 0.0,
+			"dock_unloads": 2.0,
+			"elapsed": 20.0,
+			"harvester_loaded_departures": 3.0,
+			"path_requests": 12.0,
+			"peak_dock_queue": 1.0,
+			"peak_relay": 0.0,
+			"relay": 0.0,
+			"source_remaining": 7.0,
+			"state_seconds": {
+				"carry:dock_wait": 0.4,
+				"carry:to_base": 2.4,
+				"carry:to_relay": 3.2,
+				"carry:wait_relay": 14.0,
+				"escort:escort": 20.0,
+				"harvest:harvesting": 2.4,
+				"harvest:to_relay": 7.8,
+				"harvest:to_resource": 9.8
+			},
+			"ticks": 100.0,
+			"transitions": {
+				"carry:dock_wait→to_relay": 2.0,
+				"carry:to_base→dock_wait": 2.0,
+				"carry:to_relay→wait_relay": 2.0,
+				"carry:wait_relay→to_base": 3.0,
+				"harvest:harvesting→to_relay": 3.0,
+				"harvest:to_relay→to_resource": 3.0,
+				"harvest:to_resource→harvesting": 3.0
+			}
+		},
+		"carrier_frame": {
+			"carried": 3.0,
+			"carrier_loaded_departures": 3.0,
+			"carrier_wait_relay_seconds": 14.0,
+			"conservation_ok": true,
+			"depot": 4.0,
+			"depot_gain_events": 4.0,
+			"dock_queue": 0.0,
+			"dock_unloads": 2.0,
+			"elapsed": 20.0,
+			"harvester_loaded_departures": 3.0,
+			"path_requests": 12.0,
+			"peak_dock_queue": 1.0,
+			"peak_relay": 0.0,
+			"relay": 0.0,
+			"source_remaining": 7.0,
+			"state_seconds": {
+				"carry:dock_wait": 0.4,
+				"carry:to_base": 2.4,
+				"carry:to_relay": 3.2,
+				"carry:wait_relay": 14.0,
+				"escort:escort": 20.0,
+				"harvest:harvesting": 2.4,
+				"harvest:to_relay": 7.8,
+				"harvest:to_resource": 9.8
+			},
+			"ticks": 100.0,
+			"transitions": {
+				"carry:dock_wait→to_relay": 2.0,
+				"carry:to_base→dock_wait": 2.0,
+				"carry:to_relay→wait_relay": 2.0,
+				"carry:wait_relay→to_base": 3.0,
+				"harvest:harvesting→to_relay": 3.0,
+				"harvest:to_relay→to_resource": 3.0,
+				"harvest:to_resource→harvesting": 3.0
+			}
+		},
+		"harvester_frame": {
+			"carried": 0.0,
+			"carrier_loaded_departures": 4.0,
+			"carrier_wait_relay_seconds": 8.2,
+			"conservation_ok": true,
+			"depot": 9.0,
+			"depot_gain_events": 9.0,
+			"dock_queue": 0.0,
+			"dock_unloads": 4.0,
+			"elapsed": 20.0,
+			"harvester_loaded_departures": 3.0,
+			"path_requests": 15.0,
+			"peak_dock_queue": 1.0,
+			"peak_relay": 5.0,
+			"relay": 5.0,
+			"source_remaining": 0.0,
+			"state_seconds": {
+				"carry:dock_wait": 0.8,
+				"carry:to_base": 5.0,
+				"carry:to_relay": 6.0,
+				"carry:wait_relay": 8.2,
+				"escort:escort": 20.0,
+				"harvest:harvesting": 2.4,
+				"harvest:to_relay": 7.8,
+				"harvest:to_resource": 9.8
+			},
+			"ticks": 100.0,
+			"transitions": {
+				"carry:dock_wait→to_relay": 4.0,
+				"carry:to_base→dock_wait": 4.0,
+				"carry:to_relay→wait_relay": 3.0,
+				"carry:wait_relay→to_base": 4.0,
+				"harvest:harvesting→to_relay": 3.0,
+				"harvest:to_relay→to_resource": 3.0,
+				"harvest:to_resource→harvesting": 3.0
+			}
+		}
+	},
+	"conservation_ok": true,
+	"depot_before": 0,
+	"depot_observation": {
+		"actor": {
+			"carry_limit": 5,
+			"id": "worker:0",
+			"name": "ネズ吉",
+			"role": "harvest",
+			"work_support": 22
+		},
+		"carried": 0,
+		"conservation_ok": true,
+		"depot": 3,
+		"elapsed": 8.0,
+		"relay": 1,
+		"source_remaining": 10,
+		"state": "to_resource"
+	},
+	"display_server": "X11",
+	"entry_actor": {
+		"carry_limit": 5,
+		"id": "worker:0",
+		"name": "ネズ吉",
+		"role": "harvest",
+		"work_support": 22
+	},
+	"entry_dock_count": 1,
+	"entry_resources": {
+		"entity_28": {
+			"initial": 4,
+			"item": 6,
+			"remaining": 4
+		},
+		"entity_29": {
+			"initial": 10,
+			"item": 4,
+			"remaining": 10
+		}
+	},
+	"entry_roles": {
+		"worker:0": {
+			"carry_limit": 5,
+			"direct_depot_loop": false,
+			"presentation_hidden": false,
+			"role": "harvest",
+			"support": 22
+		},
+		"worker:1": {
+			"carry_limit": 3,
+			"direct_depot_loop": false,
+			"presentation_hidden": false,
+			"role": "carry",
+			"support": -1
+		},
+		"worker:2": {
+			"carry_limit": 3,
+			"direct_depot_loop": false,
+			"presentation_hidden": false,
+			"role": "escort",
+			"support": -1
+		}
+	},
+	"entry_seed": 104729,
+	"first_sortie": {
+		"conservation_ok": true,
+		"depot": {
+			"5": 22,
+			"6": 3
+		},
+		"elapsed": 60.8000000000003,
+		"mode": "normal_roles",
+		"ok": true,
+		"source_after": {
+			"entity_26": {
+				"initial": 10,
+				"item": 5,
+				"remaining": 0
+			},
+			"entity_27": {
+				"initial": 12,
+				"item": 5,
+				"remaining": 0
+			},
+			"entity_28": {
+				"initial": 7,
+				"item": 6,
+				"remaining": 4
+			},
+			"entity_29": {
+				"initial": 10,
+				"item": 4,
+				"remaining": 10
+			}
+		},
+		"source_before": {
+			"entity_26": {
+				"initial": 10,
+				"item": 5,
+				"remaining": 10
+			},
+			"entity_27": {
+				"initial": 12,
+				"item": 5,
+				"remaining": 12
+			},
+			"entity_28": {
+				"initial": 7,
+				"item": 6,
+				"remaining": 7
+			},
+			"entity_29": {
+				"initial": 10,
+				"item": 4,
+				"remaining": 10
+			}
+		},
+		"storage_delta": 25
+	},
+	"loaded_observation": {
+		"actor": {
+			"carry_limit": 5,
+			"id": "worker:0",
+			"name": "ネズ吉",
+			"role": "harvest",
+			"work_support": 22
+		},
+		"carried": 4,
+		"conservation_ok": true,
+		"depot": 0,
+		"elapsed": 5.0,
+		"relay": 0,
+		"source_remaining": 10,
+		"state": "to_relay"
+	},
+	"mode": "normal_roles",
+	"normal_mode": true,
+	"normal_user_save_touched": false,
+	"prepared_checkpoint": {
+		"fuel": "初期の既存車体タンクをC由来鉄鉱石の精錬で3消費",
+		"not_quarry_loot": [
+			"hide",
+			"iron"
+		],
+		"seeded_before_first_sortie": {
+			"hide": 1.0,
+			"wood": 5.0
+		},
+		"source": "既存進行の狩猟由来の皮と、ワークベンチ＋フレーム用に残した木材を持つ開始状態",
+		"workbench": "最初の帰還後に既存request_buildで建設"
+	},
+	"schema": 1,
+	"screenshot_error": 0,
+	"screenshots": {
+		"res://prototypes/recovery_map_lab/evidence/normal_haul_frame_runtime_v11/normal_haul_frame_depot_after_unload.png": {
+			"error": 0,
+			"render_signature": "canyon-ore-and-amber-base",
+			"world_phase": "stopped",
+			"world_region": "c_quarry"
+		},
+		"res://prototypes/recovery_map_lab/evidence/normal_haul_frame_runtime_v11/normal_haul_frame_harvester_loaded.png": {
+			"error": 0,
+			"render_signature": "canyon-ore-and-amber-base",
+			"world_phase": "stopped",
+			"world_region": "c_quarry"
+		},
+		"res://prototypes/recovery_map_lab/evidence/normal_haul_frame_runtime_v11/normal_haul_frame_hud_departure.png": {
+			"error": 0,
+			"render_signature": "canyon-ore-and-amber-base",
+			"world_phase": "stopped",
+			"world_region": "c_quarry"
+		}
+	},
+	"selection": {
+		"baseline_depot": 4.0,
+		"candidates": [
+			{
+				"carrier_wait_relay_delta": 5.79999999999998,
+				"case": "harvester_frame",
+				"depot": 9.0,
+				"depot_delta": 5.0,
+				"source_remaining_delta": 7.0
+			},
+			{
+				"carrier_wait_relay_delta": 0.0,
+				"case": "carrier_frame",
+				"depot": 4.0,
+				"depot_delta": 0.0,
+				"source_remaining_delta": 0.0
+			}
+		],
+		"case": "harvester_frame",
+		"criterion": "同一20.0秒で本編へ確定可能なdepot量がbaselineを上回ること",
+		"no_improvement_reason": "",
+		"ok": true,
+		"recorded": true
+	},
+	"session": {
+		"carried": 0,
+		"conservation_ok": true,
+		"depot": 3,
+		"dock_queue": 0,
+		"outpost_cleared": true,
+		"outpost_enabled": false,
+		"outpost_remaining": 0,
+		"outpost_retreats": 0,
+		"outpost_total": 0,
+		"path_requests": 5,
+		"phase": "local",
+		"relay": 1,
+		"reservations": 0,
+		"source_remaining": 10,
+		"tracked_worker_id": "",
+		"workflow_mode": "normal_roles"
+	},
+	"upgrade": {
+		"cost": {
+			"haul_frame_hide": 1,
+			"haul_frame_iron": 1,
+			"haul_frame_wood": 2,
+			"smelt_tank_fuel": 3,
+			"workbench_wood": 3
+		},
+		"equipped_limit": 5,
+		"equipped_name": "ネズ吉",
+		"equipped_worker": 0,
+		"ok": true
+	}
+}

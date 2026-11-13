@@ -1,0 +1,38 @@
+{
+	"checks": [
+		{
+			"name": "fresh processでA→Cを既存WorldTripにより再到達",
+			"passed": true
+		},
+		{
+			"name": "project-local前哨地fixtureを読込",
+			"passed": true
+		},
+		{
+			"name": "戦闘中の既存敵HP状態を復元",
+			"passed": true
+		},
+		{
+			"name": "仲間の名前・既存装備を照合して投影",
+			"passed": true
+		},
+		{
+			"name": "読込直後の資源・cargo保存則",
+			"passed": true
+		},
+		{
+			"name": "未対処の前哨地から全班を撤退して現地台帳を解消",
+			"passed": true
+		},
+		{
+			"name": "fresh processで一回だけ本編へ確定",
+			"passed": true
+		},
+		{
+			"name": "撤退後も仲間手持ち・資源・貨物を二重処理しない",
+			"passed": true
+		}
+	],
+	"normal_user_save_touched": false,
+	"passed": true
+}

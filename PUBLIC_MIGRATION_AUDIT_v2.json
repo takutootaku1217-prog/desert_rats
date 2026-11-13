@@ -1,0 +1,26 @@
+{
+  "status": "prepared_not_pushed_not_runtime_retested",
+  "baseline_zip_sha256": "4022f9fb91c61ac3ca4089ef7358837ebdc66baf528b7fa6366ddd110e52ebe0",
+  "candidate_version": 2,
+  "candidate_files": 1180,
+  "excluded_logs": [
+    "prototypes/recovery_map_lab/results/vehicle_hunt_survival_20261102/vehicle_cycle_attempt4.log",
+    "prototypes/recovery_map_lab/results/vehicle_hunt_survival_20261102/vehicle_cycle_attempt2.log",
+    "prototypes/recovery_map_lab/results/vehicle_hunt_survival_20261102/vehicle_cycle_red.log",
+    "prototypes/recovery_map_lab/results/vehicle_hunt_survival_20261102/vehicle_cycle_final.log",
+    "prototypes/recovery_map_lab/results/vehicle_hunt_survival_20261102/vehicle_cycle_attempt1.log",
+    "prototypes/recovery_map_lab/results/vehicle_hunt_survival_20261102/vehicle_cycle_attempt3.log",
+    "prototypes/recovery_map_lab/results/vehicle_hunt_survival_20261102/vehicle_cycle_redeparture.log",
+    "prototypes/recovery_map_lab/results/cloud_survival_cycle_20261102/full_cycle_attempt2.log"
+  ],
+  "redactions_vs_v1": [
+    "prototypes/recovery_map_lab/README.md",
+    "prototypes/recovery_map_lab/OUTPOST_ROUTE_REPORT.md",
+    "prototypes/recovery_map_lab/results/route_connection_runtime/v13_gui_save_load_acceptance.json"
+  ],
+  "absolute_personal_path_scan_hits": [],
+  "new_missing_literal_res_refs": [],
+  "fixture_path_note": "Stored historical absolute location replaced with project-relative res URI. Tests consume result flags, not this metadata field. Game code unchanged.",
+  "placement": "cloud_snapshot/; retain main files and AGENTS.md/CLAUDE.md, no existing files deleted",
+  "limitations": "Static pattern scan is not exhaustive. Godot 4.7.2 tests and GUI not rerun. Git push authentication unavailable; no remote writes."
+}

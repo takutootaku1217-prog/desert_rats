@@ -1,0 +1,67 @@
+{
+  "schema_version": 5,
+  "kind": "cloud_delta_v10_single_worker_three_cycle_capture",
+  "created_utc": "2026-10-28T06:25:00Z",
+  "baseline": {
+    "branch": "codex/recovery-map-scale-lab",
+    "commit": "1348700c775822108df91ed48a21ea73bbd9792a",
+    "restoration_zip": "recovery-route-bridge-1348700.zip",
+    "restoration_zip_sha256": "72dd15252606eeae67e8b55c8a4cbaf8bcc2fc9c72c366771b91457f5350c79d",
+    "restoration_manifest_files_verified": 532,
+    "history_note": "The restored archive intentionally contains no .git. This is a checked overlay manifest, not reconstructed history."
+  },
+  "revision": {
+    "name": "v10-single-worker-three-cycle-runtime-capture",
+    "supersedes": "v4-single-worker-continuous-runtime-capture",
+    "status": "Paused at the user's requested safe checkpoint after successful v10 audit; no follow-up recording or feature work is included.",
+    "mode_scope": "single_worker_demo is an opt-in verification mode. Normal multi-role session creation, world/map content, growth rules, and normal user saves remain unchanged.",
+    "preserved_prior_outputs": [
+      "canyon_recovery_hub_cloud_delta_v4_continuous_capture_20261028.zip",
+      "rejected v8/v9 MP4 and JSON originals retained locally and excluded from this accepted overlay"
+    ]
+  },
+  "archive": {
+    "expected_filename": "canyon_recovery_hub_cloud_delta_v10_three_cycle_capture_20261028.zip",
+    "layout": "Every content entry is rooted at project/. SHA256SUMS.txt is archive-root metadata. The archive SHA-256 is stored in a sibling .zip.sha256 file rather than recursively inside the ZIP.",
+    "sha256_manifest": "SHA256SUMS.txt",
+    "included_project_file_count": 204,
+    "excludes": [
+      ".git, .godot, normal user:// saves, temporary X11 review crops, and unrelated fixtures",
+      "rejected v8/v9 media and JSON, which remain locally preserved and documented rather than being mixed into accepted v10 evidence",
+      "Godot 4.6.3 generated baseline import rewrites outside selected canyon assets"
+    ]
+  },
+  "accepted_evidence": {
+    "mp4": {
+      "path": "project/prototypes/recovery_map_lab/evidence/canyon_single_worker_continuous_v10/canyon_single_worker_continuous_v10.mp4",
+      "sha256": "9df645c0724a56e8db59bdab54f17cd6816bff55faacae4f99ce44d41ae71260"
+    },
+    "observer_json": {
+      "path": "project/prototypes/recovery_map_lab/results/route_connection_runtime/canyon_single_worker_continuous_v10.json",
+      "sha256": "134f9939e4488dd5b44739dc2e5d568549c3af04a2a52ec26c00e76953c9a091"
+    },
+    "runtime": "Linux Godot 4.6.3 X11 viewport, direct x11grab, H.264 video-only, 1280x720, 10fps, 360 frames, 36.000 seconds.",
+    "video_window": "Three deposits inside the 1,000–35,000ms safe window: 0→3 at 10.025s, 3→6 at 19.835s, 6→9 at 29.733s.",
+    "contract": "Strict calibrated bridge witnesses pass for outbound and loaded return on all three cycles; 394 samples conserve source + carried + depot = 39."
+  },
+  "verification": {
+    "focused_single_worker": "Godot 4.6.3 focused test exited 0 after the v10 source changes. It covers three conserved cycles, save/restore, closure/reopen, recall, capacity rejection, and normal-mode isolation.",
+    "selected_checks": [
+      "import",
+      "canyon_recovery_hub",
+      "a_recovery_bridge",
+      "a_recovery_outpost"
+    ],
+    "selected_check_result": "Each selected Godot diagnostic exited 0. tools/run_checks.py reports overall metadata verification failed only because the supplied restoration lacks .git.",
+    "unverified": "Windows/Godot 4.7.2, OS-level mouse input, audio, performance, final worker-art adoption, and final all-direction animation remain unverified."
+  },
+  "resume": {
+    "do_not_overwrite": [
+      "accepted v10 MP4/JSON",
+      "rejected v8/v9 originals",
+      "normal user saves",
+      "baseline source history"
+    ],
+    "next_capture_identity": "Use a new v11 identity if another direct runtime movie is required; do not reuse v10 paths."
+  }
+}

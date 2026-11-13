@@ -1,0 +1,30 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/canyon/components/canyon_occupancy.gd" id="1_occupancy"]
+
+[node name="CanyonOccupancy" type="Node2D"]
+texture_filter = 1
+script = ExtResource("1_occupancy")
+
+[node name="TerrainSolids" type="StaticBody2D" parent="."]
+collision_layer = 0
+collision_mask = 0
+
+[node name="BackCliffSolid" type="CollisionPolygon2D" parent="TerrainSolids"]
+polygon = PackedVector2Array(18, 73, 232, 31, 384, 77, 351, 172, 186, 212, 18, 176)
+
+[node name="UpperCliffSolid" type="CollisionPolygon2D" parent="TerrainSolids"]
+polygon = PackedVector2Array(365, 59, 565, 27, 678, 72, 638, 142, 487, 184, 355, 151)
+
+[node name="CheckpointRidgeSolid" type="CollisionPolygon2D" parent="TerrainSolids"]
+polygon = PackedVector2Array(936, 69, 1229, 39, 1258, 151, 1103, 197, 944, 161)
+
+[node name="RavineSolid" type="CollisionPolygon2D" parent="TerrainSolids"]
+polygon = PackedVector2Array(310, 290, 500, 430, 540, 470, 550, 600, 505, 590, 450, 520, 280, 350)
+
+[node name="BridgeConnection" type="StaticBody2D" parent="."]
+collision_layer = 0
+collision_mask = 0
+
+[node name="Deck" type="CollisionPolygon2D" parent="BridgeConnection"]
+polygon = PackedVector2Array(550, 435, 325, 255, 270, 320, 505, 510)

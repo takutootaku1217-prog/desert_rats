@@ -1,0 +1,305 @@
+{
+	"actors": {
+		"worker:0": {
+			"attack_per_second": 15.3615,
+			"calm": 79.0086333333339,
+			"carry_item": -1,
+			"carry_limit": 5,
+			"carry_n": 0,
+			"combat_target": "",
+			"direct_depot_loop": false,
+			"down": false,
+			"entry_fatigue": 8.56172666666666,
+			"entry_field_tool_kit": {},
+			"entry_gather_ability": 1.388625,
+			"entry_gather_rank": 3,
+			"entry_hp": 100.0,
+			"entry_stress": 0.0,
+			"entry_tools": {},
+			"entry_weapon": -1,
+			"entry_work_support": 22,
+			"fatigue": 8.56172666666666,
+			"field_tool_kit": {},
+			"hp": 100.0,
+			"hunger": 94.732757777777,
+			"mental": 0,
+			"name": "ネズ吉",
+			"path": [
+				[
+					700.0,
+					325.0
+				],
+				[
+					1030.0,
+					235.0
+				]
+			],
+			"path_index": 0,
+			"path_speed": 230.0,
+			"presentation_hidden": false,
+			"resource_id": "",
+			"resume_state": "",
+			"role": "harvest",
+			"route": "main",
+			"seen_route_revision": 2,
+			"state": "to_resource",
+			"stress": 0.0,
+			"tools": {},
+			"wait_reason": "",
+			"weapon": -1,
+			"weapon_range": 42.0,
+			"work_left": -0.05,
+			"work_support": 22,
+			"worker_index": 0,
+			"x": 575.972900390625,
+			"y": 372.248413085938
+		},
+		"worker:1": {
+			"attack_per_second": 16.9785,
+			"calm": 79.0086333333339,
+			"carry_item": -1,
+			"carry_limit": 3,
+			"carry_n": 0,
+			"combat_target": "",
+			"direct_depot_loop": false,
+			"down": false,
+			"entry_fatigue": 9.40172666666664,
+			"entry_field_tool_kit": {},
+			"entry_gather_ability": 1.267875,
+			"entry_gather_rank": 2,
+			"entry_hp": 100.0,
+			"entry_stress": 0.0,
+			"entry_tools": {},
+			"entry_weapon": -1,
+			"entry_work_support": -1,
+			"fatigue": 9.40172666666664,
+			"field_tool_kit": {},
+			"hp": 100.0,
+			"hunger": 94.732757777777,
+			"mental": 0,
+			"name": "チュー太",
+			"path": [
+				[
+					490.0,
+					405.0
+				]
+			],
+			"path_index": 0,
+			"path_speed": 230.0,
+			"presentation_hidden": false,
+			"resource_id": "",
+			"resume_state": "",
+			"role": "carry",
+			"route": "local",
+			"seen_route_revision": 2,
+			"state": "to_relay",
+			"stress": 0.0,
+			"tools": {},
+			"wait_reason": "",
+			"weapon": -1,
+			"weapon_range": 42.0,
+			"work_left": 0.0,
+			"work_support": -1,
+			"worker_index": 1,
+			"x": 150.0,
+			"y": 535.0
+		},
+		"worker:2": {
+			"attack_per_second": 13.4211,
+			"calm": 79.0086333333339,
+			"carry_item": -1,
+			"carry_limit": 3,
+			"carry_n": 0,
+			"combat_target": "",
+			"direct_depot_loop": false,
+			"down": false,
+			"entry_fatigue": 2.6,
+			"entry_field_tool_kit": {},
+			"entry_gather_ability": 1.002225,
+			"entry_gather_rank": 0,
+			"entry_hp": 100.0,
+			"entry_stress": 0.0,
+			"entry_tools": {},
+			"entry_weapon": -1,
+			"entry_work_support": -1,
+			"fatigue": 2.6,
+			"field_tool_kit": {},
+			"hp": 100.0,
+			"hunger": 94.732757777777,
+			"mental": 0,
+			"name": "モモ",
+			"path": [],
+			"path_index": 0,
+			"presentation_hidden": false,
+			"resource_id": "",
+			"resume_state": "",
+			"role": "escort",
+			"route": "",
+			"seen_route_revision": -1,
+			"state": "escort",
+			"stress": 0.0,
+			"tools": {},
+			"wait_reason": "",
+			"weapon": -1,
+			"weapon_range": 42.0,
+			"work_left": 0.0,
+			"work_support": -1,
+			"worker_index": 2,
+			"x": 541.972900390625,
+			"y": 392.248413085938
+		}
+	},
+	"all_routes_closed": false,
+	"capacity_paused": false,
+	"commit_summary": {},
+	"committed": false,
+	"depot_stock": {
+		"5": 1
+	},
+	"dock_busy": {},
+	"dock_count": 1,
+	"dock_queue": [],
+	"elapsed": 12.4,
+	"encounter_entry": {},
+	"encounter_id": "",
+	"entry_director_elapsed": 187.799999999997,
+	"event_log": [
+		{
+			"at": 0.0,
+			"text": "C 古い採石場へ既存仲間3人で入場"
+		},
+		{
+			"at": 0.0,
+			"text": "全経路を閉鎖。到達不能は安全待機"
+		},
+		{
+			"at": 4.2,
+			"text": "迂回路を再開"
+		},
+		{
+			"at": 9.4,
+			"text": "worker:0 が有限資源を1個回収"
+		}
+	],
+	"field_capacity_limit_weight": 1000000000,
+	"field_frame_exchange": {},
+	"field_tool_swap": {},
+	"gate_closed": false,
+	"intermediate_access": "blocked",
+	"life_clock_paid": 0.0,
+	"life_clock_token": "",
+	"maintenance_actor_id": "",
+	"mine_path_engineering": false,
+	"outpost_cleared": true,
+	"outpost_enabled": false,
+	"outpost_enemies": {},
+	"outpost_retreats": 0,
+	"parking_slot": "entry",
+	"path_requests": 6,
+	"phase": "local",
+	"relay_stock": {},
+	"reposition_seconds_left": 0.0,
+	"reposition_target_slot": "",
+	"rescue": {
+		"cases": {},
+		"schema": 1
+	},
+	"reservations": {},
+	"resources": {
+		"entity_29": {
+			"entry_regeneration": {
+				"capacity": 12,
+				"credit": 22.3999999999987,
+				"last": 187.799999999997,
+				"revision": 1,
+				"version": 1
+			},
+			"initial": 1,
+			"item": 5,
+			"kind": "rock",
+			"regenerated": 0,
+			"regeneration": {
+				"capacity": 12,
+				"credit": 34.7999999999987,
+				"last": 200.199999999997,
+				"revision": 1,
+				"version": 1
+			},
+			"remaining": 0,
+			"reservation": ""
+		},
+		"entity_30": {
+			"entry_regeneration": {
+				"capacity": 13,
+				"credit": 118.399999999997,
+				"last": 187.799999999997,
+				"revision": 0,
+				"version": 1
+			},
+			"initial": 0,
+			"item": 5,
+			"kind": "rock",
+			"regenerated": 1,
+			"regeneration": {
+				"capacity": 13,
+				"credit": 10.8,
+				"last": 200.199999999997,
+				"revision": 1,
+				"version": 1
+			},
+			"remaining": 1,
+			"reservation": ""
+		},
+		"entity_31": {
+			"entry_regeneration": {
+				"capacity": 6,
+				"credit": 88.399999999997,
+				"last": 187.799999999997,
+				"revision": 0,
+				"version": 1
+			},
+			"initial": 3,
+			"item": 6,
+			"kind": "vein",
+			"regenerated": 0,
+			"regeneration": {
+				"capacity": 6,
+				"credit": 100.799999999997,
+				"last": 200.199999999997,
+				"revision": 0,
+				"version": 1
+			},
+			"remaining": 3,
+			"reservation": ""
+		},
+		"entity_32": {
+			"entry_regeneration": {
+				"capacity": 12,
+				"credit": 0.0,
+				"last": 187.799999999997,
+				"revision": 0,
+				"version": 1
+			},
+			"initial": 12,
+			"item": 4,
+			"kind": "tree",
+			"regenerated": 0,
+			"regeneration": {
+				"capacity": 12,
+				"credit": 0.0,
+				"last": 200.199999999997,
+				"revision": 0,
+				"version": 1
+			},
+			"remaining": 12,
+			"reservation": ""
+		}
+	},
+	"return_handcart_exchange": {},
+	"route_revision": 2,
+	"schema": 11,
+	"session_id": "normal-haul-frame-boundary-harvester_frame",
+	"single_worker_actor_id": "",
+	"single_worker_demo": false,
+	"vertical_slice": false
+}

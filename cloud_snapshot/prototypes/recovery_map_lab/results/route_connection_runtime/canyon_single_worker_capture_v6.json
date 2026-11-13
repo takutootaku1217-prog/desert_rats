@@ -1,0 +1,8025 @@
+{
+	"actor_id": "worker:0",
+	"bridge_snapshot": {
+		"direction": "northwest",
+		"elapsed": 3.29332166666667,
+		"foot_point": [
+			430.0,
+			399.0
+		],
+		"frame": "walk_northwest_1",
+		"presentation_deck": true,
+		"screenshot": "res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_bypass_bridge.png",
+		"state": "to_resource"
+	},
+	"captured_frames": {
+		"carry": [
+			{
+				"direction": "northwest",
+				"elapsed": 5.151983,
+				"frame": "carry_northwest_0",
+				"frame_index": 0,
+				"screenshot": "res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_carry_01.png",
+				"state": "to_base"
+			},
+			{
+				"direction": "southeast",
+				"elapsed": 5.29004033333333,
+				"frame": "carry_southeast_3",
+				"frame_index": 3,
+				"screenshot": "res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_carry_02.png",
+				"state": "to_base"
+			},
+			{
+				"direction": "southeast",
+				"elapsed": 5.41642566666667,
+				"frame": "carry_southeast_0",
+				"frame_index": 0,
+				"screenshot": "res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_carry_03.png",
+				"state": "to_base"
+			},
+			{
+				"direction": "southeast",
+				"elapsed": 5.55492966666667,
+				"frame": "carry_southeast_1",
+				"frame_index": 1,
+				"screenshot": "res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_carry_04.png",
+				"state": "to_base"
+			},
+			{
+				"direction": "southeast",
+				"elapsed": 5.67992966666667,
+				"frame": "carry_southeast_3",
+				"frame_index": 3,
+				"screenshot": "res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_carry_05.png",
+				"state": "to_base"
+			},
+			{
+				"direction": "southeast",
+				"elapsed": 5.81881855555555,
+				"frame": "carry_southeast_0",
+				"frame_index": 0,
+				"screenshot": "res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_carry_06.png",
+				"state": "to_base"
+			},
+			{
+				"direction": "southeast",
+				"elapsed": 5.956707,
+				"frame": "carry_southeast_1",
+				"frame_index": 1,
+				"screenshot": "res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_carry_07.png",
+				"state": "to_base"
+			},
+			{
+				"direction": "southeast",
+				"elapsed": 6.08866533333333,
+				"frame": "carry_southeast_2",
+				"frame_index": 2,
+				"screenshot": "res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_carry_08.png",
+				"state": "to_base"
+			}
+		],
+		"harvest": [
+			{
+				"direction": "northwest",
+				"elapsed": 4.38538166666667,
+				"frame": "harvest_3",
+				"frame_index": 3,
+				"screenshot": "res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_harvest_01.png",
+				"state": "harvesting"
+			},
+			{
+				"direction": "northwest",
+				"elapsed": 4.51671866666667,
+				"frame": "harvest_0",
+				"frame_index": 0,
+				"screenshot": "res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_harvest_02.png",
+				"state": "harvesting"
+			},
+			{
+				"direction": "northwest",
+				"elapsed": 4.64369,
+				"frame": "harvest_1",
+				"frame_index": 1,
+				"screenshot": "res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_harvest_03.png",
+				"state": "harvesting"
+			}
+		],
+		"unload": [
+			{
+				"direction": "east",
+				"elapsed": 9.51089333333332,
+				"frame": "unload_2",
+				"frame_index": 2,
+				"screenshot": "res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_unload_01.png",
+				"state": "dock_wait"
+			},
+			{
+				"direction": "east",
+				"elapsed": 9.63195699999999,
+				"frame": "unload_0",
+				"frame_index": 0,
+				"screenshot": "res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_unload_02.png",
+				"state": "dock_wait"
+			},
+			{
+				"direction": "east",
+				"elapsed": 9.77337366666666,
+				"frame": "unload_1",
+				"frame_index": 1,
+				"screenshot": "res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_unload_03.png",
+				"state": "dock_wait"
+			}
+		],
+		"walk": [
+			{
+				"direction": "northwest",
+				"elapsed": 0.284843333333333,
+				"frame": "walk_northwest_2",
+				"frame_index": 2,
+				"screenshot": "res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_walk_01.png",
+				"state": "to_resource"
+			},
+			{
+				"direction": "northwest",
+				"elapsed": 0.423373666666667,
+				"frame": "walk_northwest_3",
+				"frame_index": 3,
+				"screenshot": "res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_walk_02.png",
+				"state": "to_resource"
+			},
+			{
+				"direction": "northwest",
+				"elapsed": 0.551292333333333,
+				"frame": "walk_northwest_0",
+				"frame_index": 0,
+				"screenshot": "res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_walk_03.png",
+				"state": "to_resource"
+			},
+			{
+				"direction": "northwest",
+				"elapsed": 0.677959,
+				"frame": "walk_northwest_2",
+				"frame_index": 2,
+				"screenshot": "res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_walk_04.png",
+				"state": "to_resource"
+			},
+			{
+				"direction": "northwest",
+				"elapsed": 0.808248,
+				"frame": "walk_northwest_3",
+				"frame_index": 3,
+				"screenshot": "res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_walk_05.png",
+				"state": "to_resource"
+			},
+			{
+				"direction": "northwest",
+				"elapsed": 0.952692444444444,
+				"frame": "walk_northwest_0",
+				"frame_index": 0,
+				"screenshot": "res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_walk_06.png",
+				"state": "to_resource"
+			},
+			{
+				"direction": "northwest",
+				"elapsed": 1.08047022222222,
+				"frame": "walk_northwest_1",
+				"frame_index": 1,
+				"screenshot": "res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_walk_07.png",
+				"state": "to_resource"
+			}
+		]
+	},
+	"completed_animation_sequences": {
+		"carry": {
+			"direction": "southeast",
+			"state": "to_base",
+			"steps": [
+				{
+					"direction": "southeast",
+					"elapsed": 5.67992966666667,
+					"frame": "carry_southeast_3",
+					"frame_index": 3,
+					"screenshot": "res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_carry_05.png",
+					"state": "to_base"
+				},
+				{
+					"direction": "southeast",
+					"elapsed": 5.81881855555555,
+					"frame": "carry_southeast_0",
+					"frame_index": 0,
+					"screenshot": "res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_carry_06.png",
+					"state": "to_base"
+				},
+				{
+					"direction": "southeast",
+					"elapsed": 5.956707,
+					"frame": "carry_southeast_1",
+					"frame_index": 1,
+					"screenshot": "res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_carry_07.png",
+					"state": "to_base"
+				},
+				{
+					"direction": "southeast",
+					"elapsed": 6.08866533333333,
+					"frame": "carry_southeast_2",
+					"frame_index": 2,
+					"screenshot": "res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_carry_08.png",
+					"state": "to_base"
+				}
+			]
+		},
+		"harvest": {
+			"direction": "northwest",
+			"state": "harvesting",
+			"steps": [
+				{
+					"direction": "northwest",
+					"elapsed": 4.38538166666667,
+					"frame": "harvest_3",
+					"frame_index": 3,
+					"screenshot": "res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_harvest_01.png",
+					"state": "harvesting"
+				},
+				{
+					"direction": "northwest",
+					"elapsed": 4.51671866666667,
+					"frame": "harvest_0",
+					"frame_index": 0,
+					"screenshot": "res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_harvest_02.png",
+					"state": "harvesting"
+				},
+				{
+					"direction": "northwest",
+					"elapsed": 4.64369,
+					"frame": "harvest_1",
+					"frame_index": 1,
+					"screenshot": "res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_harvest_03.png",
+					"state": "harvesting"
+				}
+			]
+		},
+		"unload": {
+			"direction": "east",
+			"state": "dock_wait",
+			"steps": [
+				{
+					"direction": "east",
+					"elapsed": 9.51089333333332,
+					"frame": "unload_2",
+					"frame_index": 2,
+					"screenshot": "res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_unload_01.png",
+					"state": "dock_wait"
+				},
+				{
+					"direction": "east",
+					"elapsed": 9.63195699999999,
+					"frame": "unload_0",
+					"frame_index": 0,
+					"screenshot": "res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_unload_02.png",
+					"state": "dock_wait"
+				},
+				{
+					"direction": "east",
+					"elapsed": 9.77337366666666,
+					"frame": "unload_1",
+					"frame_index": 1,
+					"screenshot": "res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_unload_03.png",
+					"state": "dock_wait"
+				}
+			]
+		},
+		"walk": {
+			"direction": "northwest",
+			"state": "to_resource",
+			"steps": [
+				{
+					"direction": "northwest",
+					"elapsed": 0.677959,
+					"frame": "walk_northwest_2",
+					"frame_index": 2,
+					"screenshot": "res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_walk_04.png",
+					"state": "to_resource"
+				},
+				{
+					"direction": "northwest",
+					"elapsed": 0.808248,
+					"frame": "walk_northwest_3",
+					"frame_index": 3,
+					"screenshot": "res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_walk_05.png",
+					"state": "to_resource"
+				},
+				{
+					"direction": "northwest",
+					"elapsed": 0.952692444444444,
+					"frame": "walk_northwest_0",
+					"frame_index": 0,
+					"screenshot": "res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_walk_06.png",
+					"state": "to_resource"
+				},
+				{
+					"direction": "northwest",
+					"elapsed": 1.08047022222222,
+					"frame": "walk_northwest_1",
+					"frame_index": 1,
+					"screenshot": "res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_walk_07.png",
+					"state": "to_resource"
+				}
+			]
+		}
+	},
+	"cycle_log": [
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"cycle": 1,
+			"depot_after": 3,
+			"depot_before": 0,
+			"elapsed": 9.90670699999999,
+			"source_remaining": 36,
+			"state": "to_resource"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"cycle": 2,
+			"depot_after": 6,
+			"depot_before": 3,
+			"elapsed": 19.8181176666667,
+			"source_remaining": 33,
+			"state": "to_resource"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"cycle": 3,
+			"depot_after": 9,
+			"depot_before": 6,
+			"elapsed": 29.6328497777777,
+			"source_remaining": 30,
+			"state": "to_resource"
+		}
+	],
+	"display_server": "X11",
+	"input_evidence": "No OS-level click injection attempted; capture configures the explicit verification mode/session directly.",
+	"mode": "single_worker_demo",
+	"normal_user_save_touched": false,
+	"screenshot_error": 0,
+	"screenshots": {
+		"res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_bypass_bridge.png": {
+			"error": 0,
+			"render_signature": "canyon-single-worker-hud"
+		},
+		"res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_carry_01.png": {
+			"error": 0,
+			"render_signature": "canyon-single-worker-hud"
+		},
+		"res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_carry_02.png": {
+			"error": 0,
+			"render_signature": "canyon-single-worker-hud"
+		},
+		"res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_carry_03.png": {
+			"error": 0,
+			"render_signature": "canyon-single-worker-hud"
+		},
+		"res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_carry_04.png": {
+			"error": 0,
+			"render_signature": "canyon-single-worker-hud"
+		},
+		"res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_carry_05.png": {
+			"error": 0,
+			"render_signature": "canyon-single-worker-hud"
+		},
+		"res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_carry_06.png": {
+			"error": 0,
+			"render_signature": "canyon-single-worker-hud"
+		},
+		"res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_carry_07.png": {
+			"error": 0,
+			"render_signature": "canyon-single-worker-hud"
+		},
+		"res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_carry_08.png": {
+			"error": 0,
+			"render_signature": "canyon-single-worker-hud"
+		},
+		"res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_depot_after_unload.png": {
+			"error": 0,
+			"render_signature": "canyon-single-worker-hud"
+		},
+		"res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_harvest_01.png": {
+			"error": 0,
+			"render_signature": "canyon-single-worker-hud"
+		},
+		"res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_harvest_02.png": {
+			"error": 0,
+			"render_signature": "canyon-single-worker-hud"
+		},
+		"res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_harvest_03.png": {
+			"error": 0,
+			"render_signature": "canyon-single-worker-hud"
+		},
+		"res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_hud_departure.png": {
+			"error": 0,
+			"render_signature": "canyon-single-worker-hud"
+		},
+		"res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_unload_01.png": {
+			"error": 0,
+			"render_signature": "canyon-single-worker-hud"
+		},
+		"res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_unload_02.png": {
+			"error": 0,
+			"render_signature": "canyon-single-worker-hud"
+		},
+		"res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_unload_03.png": {
+			"error": 0,
+			"render_signature": "canyon-single-worker-hud"
+		},
+		"res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_walk_01.png": {
+			"error": 0,
+			"render_signature": "canyon-single-worker-hud"
+		},
+		"res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_walk_02.png": {
+			"error": 0,
+			"render_signature": "canyon-single-worker-hud"
+		},
+		"res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_walk_03.png": {
+			"error": 0,
+			"render_signature": "canyon-single-worker-hud"
+		},
+		"res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_walk_04.png": {
+			"error": 0,
+			"render_signature": "canyon-single-worker-hud"
+		},
+		"res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_walk_05.png": {
+			"error": 0,
+			"render_signature": "canyon-single-worker-hud"
+		},
+		"res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_walk_06.png": {
+			"error": 0,
+			"render_signature": "canyon-single-worker-hud"
+		},
+		"res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_walk_07.png": {
+			"error": 0,
+			"render_signature": "canyon-single-worker-hud"
+		}
+	},
+	"session": {
+		"carried": 0,
+		"conservation_ok": true,
+		"depot": 9,
+		"dock_queue": 0,
+		"outpost_cleared": true,
+		"outpost_enabled": false,
+		"outpost_remaining": 0,
+		"outpost_retreats": 0,
+		"outpost_total": 0,
+		"path_requests": 7,
+		"phase": "local",
+		"relay": 0,
+		"reservations": 0,
+		"source_remaining": 30,
+		"tracked_worker_id": "worker:0",
+		"workflow_mode": "single_worker_demo"
+	},
+	"state_trace": [
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "northwest",
+			"elapsed": 0.284843333333333,
+			"foot_point": [
+				696.0,
+				619.0
+			],
+			"frame": "walk_northwest_2",
+			"frame_index": 2,
+			"screenshot": "res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_walk_01.png",
+			"source_remaining": 39,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "northwest",
+			"elapsed": 0.423373666666667,
+			"foot_point": [
+				689.0,
+				613.0
+			],
+			"frame": "walk_northwest_3",
+			"frame_index": 3,
+			"screenshot": "res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_walk_02.png",
+			"source_remaining": 39,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "northwest",
+			"elapsed": 0.551292333333333,
+			"foot_point": [
+				682.0,
+				608.0
+			],
+			"frame": "walk_northwest_0",
+			"frame_index": 0,
+			"screenshot": "res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_walk_03.png",
+			"source_remaining": 39,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "northwest",
+			"elapsed": 0.677959,
+			"foot_point": [
+				675.0,
+				603.0
+			],
+			"frame": "walk_northwest_2",
+			"frame_index": 2,
+			"screenshot": "res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_walk_04.png",
+			"source_remaining": 39,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "northwest",
+			"elapsed": 0.808248,
+			"foot_point": [
+				667.0,
+				598.0
+			],
+			"frame": "walk_northwest_3",
+			"frame_index": 3,
+			"screenshot": "res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_walk_05.png",
+			"source_remaining": 39,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "northwest",
+			"elapsed": 0.952692444444444,
+			"foot_point": [
+				659.0,
+				592.0
+			],
+			"frame": "walk_northwest_0",
+			"frame_index": 0,
+			"screenshot": "res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_walk_06.png",
+			"source_remaining": 39,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "northwest",
+			"elapsed": 1.08047022222222,
+			"foot_point": [
+				652.0,
+				587.0
+			],
+			"frame": "walk_northwest_1",
+			"frame_index": 1,
+			"screenshot": "res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_walk_07.png",
+			"source_remaining": 39,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "northwest",
+			"elapsed": 1.208248,
+			"foot_point": [
+				645.0,
+				582.0
+			],
+			"frame": "walk_northwest_2",
+			"frame_index": 2,
+			"source_remaining": 39,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "northwest",
+			"elapsed": 1.256707,
+			"foot_point": [
+				643.0,
+				580.0
+			],
+			"frame": "walk_northwest_3",
+			"frame_index": 3,
+			"source_remaining": 39,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "west",
+			"elapsed": 1.34004033333333,
+			"foot_point": [
+				638.0,
+				577.0
+			],
+			"frame": "walk_west_0",
+			"frame_index": 0,
+			"source_remaining": 39,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "northwest",
+			"elapsed": 1.39004033333333,
+			"foot_point": [
+				635.0,
+				575.0
+			],
+			"frame": "walk_northwest_0",
+			"frame_index": 0,
+			"source_remaining": 39,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "northwest",
+			"elapsed": 1.47876233333333,
+			"foot_point": [
+				630.0,
+				571.0
+			],
+			"frame": "walk_northwest_1",
+			"frame_index": 1,
+			"source_remaining": 39,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "northwest",
+			"elapsed": 1.57337366666667,
+			"foot_point": [
+				625.0,
+				567.0
+			],
+			"frame": "walk_northwest_2",
+			"frame_index": 2,
+			"source_remaining": 39,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "west",
+			"elapsed": 1.61861176190476,
+			"foot_point": [
+				623.0,
+				566.0
+			],
+			"frame": "walk_west_2",
+			"frame_index": 2,
+			"source_remaining": 39,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "northwest",
+			"elapsed": 1.66532566666667,
+			"foot_point": [
+				620.0,
+				564.0
+			],
+			"frame": "walk_northwest_2",
+			"frame_index": 2,
+			"source_remaining": 39,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "northwest",
+			"elapsed": 1.71192566666667,
+			"foot_point": [
+				618.0,
+				562.0
+			],
+			"frame": "walk_northwest_3",
+			"frame_index": 3,
+			"source_remaining": 39,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "northwest",
+			"elapsed": 1.80321354545455,
+			"foot_point": [
+				612.0,
+				558.0
+			],
+			"frame": "walk_northwest_0",
+			"frame_index": 0,
+			"source_remaining": 39,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "west",
+			"elapsed": 1.84866809090909,
+			"foot_point": [
+				610.0,
+				557.0
+			],
+			"frame": "walk_west_0",
+			"frame_index": 0,
+			"source_remaining": 39,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "northwest",
+			"elapsed": 1.89412263636364,
+			"foot_point": [
+				607.0,
+				555.0
+			],
+			"frame": "walk_northwest_1",
+			"frame_index": 1,
+			"source_remaining": 39,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "northwest",
+			"elapsed": 2.03098533333333,
+			"foot_point": [
+				600.0,
+				549.0
+			],
+			"frame": "walk_northwest_2",
+			"frame_index": 2,
+			"source_remaining": 39,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "northwest",
+			"elapsed": 2.12951266666667,
+			"foot_point": [
+				594.0,
+				545.0
+			],
+			"frame": "walk_northwest_3",
+			"frame_index": 3,
+			"source_remaining": 39,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "west",
+			"elapsed": 2.17337366666667,
+			"foot_point": [
+				592.0,
+				544.0
+			],
+			"frame": "walk_west_3",
+			"frame_index": 3,
+			"source_remaining": 39,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "northwest",
+			"elapsed": 2.20850133333333,
+			"foot_point": [
+				590.0,
+				542.0
+			],
+			"frame": "walk_northwest_3",
+			"frame_index": 3,
+			"source_remaining": 39,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "northwest",
+			"elapsed": 2.23676133333333,
+			"foot_point": [
+				589.0,
+				541.0
+			],
+			"frame": "walk_northwest_0",
+			"frame_index": 0,
+			"source_remaining": 39,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "west",
+			"elapsed": 2.26476533333333,
+			"foot_point": [
+				587.0,
+				540.0
+			],
+			"frame": "walk_west_0",
+			"frame_index": 0,
+			"source_remaining": 39,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "northwest",
+			"elapsed": 2.32678333333333,
+			"foot_point": [
+				584.0,
+				538.0
+			],
+			"frame": "walk_northwest_0",
+			"frame_index": 0,
+			"source_remaining": 39,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "northwest",
+			"elapsed": 2.35791033333333,
+			"foot_point": [
+				582.0,
+				536.0
+			],
+			"frame": "walk_northwest_1",
+			"frame_index": 1,
+			"source_remaining": 39,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "west",
+			"elapsed": 2.38540933333333,
+			"foot_point": [
+				580.0,
+				535.0
+			],
+			"frame": "walk_west_1",
+			"frame_index": 1,
+			"source_remaining": 39,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "west",
+			"elapsed": 2.41466333333333,
+			"foot_point": [
+				580.0,
+				535.0
+			],
+			"frame": "idle_west_0",
+			"frame_index": 0,
+			"source_remaining": 39,
+			"state": "to_resource",
+			"visual_kind": "idle"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "northwest",
+			"elapsed": 2.44180133333333,
+			"foot_point": [
+				575.0,
+				531.0
+			],
+			"frame": "walk_northwest_1",
+			"frame_index": 1,
+			"source_remaining": 39,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "northwest",
+			"elapsed": 2.46797533333333,
+			"foot_point": [
+				571.0,
+				527.0
+			],
+			"frame": "walk_northwest_2",
+			"frame_index": 2,
+			"source_remaining": 39,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "northwest",
+			"elapsed": 2.57540388888889,
+			"foot_point": [
+				553.0,
+				510.0
+			],
+			"frame": "walk_northwest_3",
+			"frame_index": 3,
+			"source_remaining": 39,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "northwest",
+			"elapsed": 2.68546683838384,
+			"foot_point": [
+				534.0,
+				493.0
+			],
+			"frame": "walk_northwest_0",
+			"frame_index": 0,
+			"source_remaining": 39,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "northwest",
+			"elapsed": 2.79458578787879,
+			"foot_point": [
+				515.0,
+				476.0
+			],
+			"frame": "walk_northwest_1",
+			"frame_index": 1,
+			"source_remaining": 39,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "northwest",
+			"elapsed": 2.9036766969697,
+			"foot_point": [
+				497.0,
+				459.0
+			],
+			"frame": "walk_northwest_2",
+			"frame_index": 2,
+			"source_remaining": 39,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "northwest",
+			"elapsed": 3.01204633333333,
+			"foot_point": [
+				478.0,
+				443.0
+			],
+			"frame": "walk_northwest_3",
+			"frame_index": 3,
+			"source_remaining": 39,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "northwest",
+			"elapsed": 3.11763066666667,
+			"foot_point": [
+				460.0,
+				426.0
+			],
+			"frame": "walk_northwest_0",
+			"frame_index": 0,
+			"source_remaining": 39,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "northwest",
+			"elapsed": 3.22929566666667,
+			"foot_point": [
+				441.0,
+				409.0
+			],
+			"frame": "walk_northwest_1",
+			"frame_index": 1,
+			"source_remaining": 39,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "northwest",
+			"elapsed": 3.42337366666667,
+			"foot_point": [
+				408.0,
+				379.0
+			],
+			"frame": "walk_northwest_2",
+			"frame_index": 2,
+			"source_remaining": 39,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "northwest",
+			"elapsed": 3.458039,
+			"foot_point": [
+				402.0,
+				374.0
+			],
+			"frame": "walk_northwest_3",
+			"frame_index": 3,
+			"source_remaining": 39,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "northwest",
+			"elapsed": 3.58325666666667,
+			"foot_point": [
+				381.0,
+				354.0
+			],
+			"frame": "walk_northwest_0",
+			"frame_index": 0,
+			"source_remaining": 39,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "northwest",
+			"elapsed": 3.66931966666667,
+			"foot_point": [
+				366.0,
+				341.0
+			],
+			"frame": "walk_northwest_1",
+			"frame_index": 1,
+			"source_remaining": 39,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "northwest",
+			"elapsed": 3.79431966666667,
+			"foot_point": [
+				345.0,
+				322.0
+			],
+			"frame": "walk_northwest_2",
+			"frame_index": 2,
+			"source_remaining": 39,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "northwest",
+			"elapsed": 3.92140166666667,
+			"foot_point": [
+				324.0,
+				302.0
+			],
+			"frame": "walk_northwest_3",
+			"frame_index": 3,
+			"source_remaining": 39,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "northwest",
+			"elapsed": 4.01819366666667,
+			"foot_point": [
+				307.0,
+				287.0
+			],
+			"frame": "walk_northwest_0",
+			"frame_index": 0,
+			"source_remaining": 39,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "northwest",
+			"elapsed": 4.15115144444444,
+			"foot_point": [
+				284.0,
+				266.0
+			],
+			"frame": "walk_northwest_1",
+			"frame_index": 1,
+			"source_remaining": 39,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "northwest",
+			"elapsed": 4.24142922222222,
+			"foot_point": [
+				269.0,
+				252.0
+			],
+			"frame": "walk_northwest_2",
+			"frame_index": 2,
+			"source_remaining": 39,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "northwest",
+			"elapsed": 4.33339066666667,
+			"foot_point": [
+				253.0,
+				238.0
+			],
+			"frame": "walk_northwest_3",
+			"frame_index": 3,
+			"source_remaining": 39,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "northwest",
+			"elapsed": 4.38538166666667,
+			"foot_point": [
+				250.0,
+				235.0
+			],
+			"frame": "harvest_3",
+			"frame_index": 3,
+			"screenshot": "res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_harvest_01.png",
+			"source_remaining": 39,
+			"state": "harvesting",
+			"visual_kind": "harvest"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "northwest",
+			"elapsed": 4.51671866666667,
+			"foot_point": [
+				250.0,
+				235.0
+			],
+			"frame": "harvest_0",
+			"frame_index": 0,
+			"screenshot": "res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_harvest_02.png",
+			"source_remaining": 39,
+			"state": "harvesting",
+			"visual_kind": "harvest"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "northwest",
+			"elapsed": 4.64369,
+			"foot_point": [
+				250.0,
+				235.0
+			],
+			"frame": "harvest_1",
+			"frame_index": 1,
+			"screenshot": "res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_harvest_03.png",
+			"source_remaining": 39,
+			"state": "harvesting",
+			"visual_kind": "harvest"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "northwest",
+			"elapsed": 4.77337366666667,
+			"foot_point": [
+				250.0,
+				235.0
+			],
+			"frame": "harvest_2",
+			"frame_index": 2,
+			"source_remaining": 39,
+			"state": "harvesting",
+			"visual_kind": "harvest"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "northwest",
+			"elapsed": 4.89004033333333,
+			"foot_point": [
+				250.0,
+				235.0
+			],
+			"frame": "harvest_3",
+			"frame_index": 3,
+			"source_remaining": 39,
+			"state": "harvesting",
+			"visual_kind": "harvest"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "northwest",
+			"elapsed": 5.01864966666667,
+			"foot_point": [
+				250.0,
+				235.0
+			],
+			"frame": "harvest_0",
+			"frame_index": 0,
+			"source_remaining": 39,
+			"state": "harvesting",
+			"visual_kind": "harvest"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "northwest",
+			"elapsed": 5.151983,
+			"foot_point": [
+				250.0,
+				235.0
+			],
+			"frame": "carry_northwest_0",
+			"frame_index": 0,
+			"screenshot": "res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_carry_01.png",
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "southeast",
+			"elapsed": 5.29004033333333,
+			"foot_point": [
+				273.0,
+				256.0
+			],
+			"frame": "carry_southeast_3",
+			"frame_index": 3,
+			"screenshot": "res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_carry_02.png",
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "southeast",
+			"elapsed": 5.41642566666667,
+			"foot_point": [
+				295.0,
+				276.0
+			],
+			"frame": "carry_southeast_0",
+			"frame_index": 0,
+			"screenshot": "res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_carry_03.png",
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "southeast",
+			"elapsed": 5.55492966666667,
+			"foot_point": [
+				319.0,
+				297.0
+			],
+			"frame": "carry_southeast_1",
+			"frame_index": 1,
+			"screenshot": "res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_carry_04.png",
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "southeast",
+			"elapsed": 5.67992966666667,
+			"foot_point": [
+				340.0,
+				317.0
+			],
+			"frame": "carry_southeast_3",
+			"frame_index": 3,
+			"screenshot": "res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_carry_05.png",
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "southeast",
+			"elapsed": 5.81881855555555,
+			"foot_point": [
+				363.0,
+				338.0
+			],
+			"frame": "carry_southeast_0",
+			"frame_index": 0,
+			"screenshot": "res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_carry_06.png",
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "southeast",
+			"elapsed": 5.956707,
+			"foot_point": [
+				387.0,
+				360.0
+			],
+			"frame": "carry_southeast_1",
+			"frame_index": 1,
+			"screenshot": "res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_carry_07.png",
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "southeast",
+			"elapsed": 6.08866533333333,
+			"foot_point": [
+				409.0,
+				380.0
+			],
+			"frame": "carry_southeast_2",
+			"frame_index": 2,
+			"screenshot": "res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_carry_08.png",
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "southeast",
+			"elapsed": 6.22067333333333,
+			"foot_point": [
+				432.0,
+				400.0
+			],
+			"frame": "carry_southeast_3",
+			"frame_index": 3,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "southeast",
+			"elapsed": 6.244664,
+			"foot_point": [
+				436.0,
+				404.0
+			],
+			"frame": "carry_southeast_0",
+			"frame_index": 0,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "southeast",
+			"elapsed": 6.34406533333333,
+			"foot_point": [
+				453.0,
+				419.0
+			],
+			"frame": "carry_southeast_1",
+			"frame_index": 1,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "southeast",
+			"elapsed": 6.47739866666666,
+			"foot_point": [
+				476.0,
+				440.0
+			],
+			"frame": "carry_southeast_2",
+			"frame_index": 2,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "southeast",
+			"elapsed": 6.57447933333333,
+			"foot_point": [
+				492.0,
+				455.0
+			],
+			"frame": "carry_southeast_3",
+			"frame_index": 3,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "southeast",
+			"elapsed": 6.67031266666666,
+			"foot_point": [
+				508.0,
+				470.0
+			],
+			"frame": "carry_southeast_0",
+			"frame_index": 0,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "southeast",
+			"elapsed": 6.80136666666666,
+			"foot_point": [
+				531.0,
+				490.0
+			],
+			"frame": "carry_southeast_1",
+			"frame_index": 1,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "southeast",
+			"elapsed": 6.90136666666666,
+			"foot_point": [
+				548.0,
+				506.0
+			],
+			"frame": "carry_southeast_2",
+			"frame_index": 2,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "southeast",
+			"elapsed": 7.03331111111111,
+			"foot_point": [
+				570.0,
+				526.0
+			],
+			"frame": "carry_southeast_3",
+			"frame_index": 3,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "east",
+			"elapsed": 7.131585,
+			"foot_point": [
+				582.0,
+				536.0
+			],
+			"frame": "carry_east_0",
+			"frame_index": 0,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "southeast",
+			"elapsed": 7.16491833333333,
+			"foot_point": [
+				584.0,
+				538.0
+			],
+			"frame": "carry_southeast_0",
+			"frame_index": 0,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "east",
+			"elapsed": 7.23019611111111,
+			"foot_point": [
+				587.0,
+				540.0
+			],
+			"frame": "carry_east_1",
+			"frame_index": 1,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "southeast",
+			"elapsed": 7.29004033333333,
+			"foot_point": [
+				591.0,
+				543.0
+			],
+			"frame": "carry_southeast_1",
+			"frame_index": 1,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "east",
+			"elapsed": 7.35392922222222,
+			"foot_point": [
+				594.0,
+				545.0
+			],
+			"frame": "carry_east_2",
+			"frame_index": 2,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "southeast",
+			"elapsed": 7.42028099999999,
+			"foot_point": [
+				598.0,
+				548.0
+			],
+			"frame": "carry_southeast_2",
+			"frame_index": 2,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "east",
+			"elapsed": 7.45360899999999,
+			"foot_point": [
+				600.0,
+				549.0
+			],
+			"frame": "carry_east_3",
+			"frame_index": 3,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "southeast",
+			"elapsed": 7.48583299999999,
+			"foot_point": [
+				601.0,
+				550.0
+			],
+			"frame": "carry_southeast_3",
+			"frame_index": 3,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "east",
+			"elapsed": 7.55249966666666,
+			"foot_point": [
+				605.0,
+				553.0
+			],
+			"frame": "carry_east_3",
+			"frame_index": 3,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "east",
+			"elapsed": 7.58583299999999,
+			"foot_point": [
+				607.0,
+				554.0
+			],
+			"frame": "carry_east_0",
+			"frame_index": 0,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "southeast",
+			"elapsed": 7.61777744444444,
+			"foot_point": [
+				609.0,
+				556.0
+			],
+			"frame": "carry_southeast_0",
+			"frame_index": 0,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "east",
+			"elapsed": 7.68402333333333,
+			"foot_point": [
+				612.0,
+				558.0
+			],
+			"frame": "carry_east_1",
+			"frame_index": 1,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "southeast",
+			"elapsed": 7.71720599999999,
+			"foot_point": [
+				614.0,
+				560.0
+			],
+			"frame": "carry_southeast_1",
+			"frame_index": 1,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "east",
+			"elapsed": 7.74915044444444,
+			"foot_point": [
+				616.0,
+				561.0
+			],
+			"frame": "carry_east_1",
+			"frame_index": 1,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "east",
+			"elapsed": 7.78109488888888,
+			"foot_point": [
+				618.0,
+				562.0
+			],
+			"frame": "carry_east_2",
+			"frame_index": 2,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "southeast",
+			"elapsed": 7.81303933333333,
+			"foot_point": [
+				619.0,
+				563.0
+			],
+			"frame": "carry_southeast_2",
+			"frame_index": 2,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "east",
+			"elapsed": 7.8783171111111,
+			"foot_point": [
+				623.0,
+				566.0
+			],
+			"frame": "carry_east_2",
+			"frame_index": 2,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "east",
+			"elapsed": 7.91165044444444,
+			"foot_point": [
+				625.0,
+				567.0
+			],
+			"frame": "carry_east_3",
+			"frame_index": 3,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "southeast",
+			"elapsed": 7.94498377777777,
+			"foot_point": [
+				627.0,
+				569.0
+			],
+			"frame": "carry_southeast_3",
+			"frame_index": 3,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "east",
+			"elapsed": 7.9783171111111,
+			"foot_point": [
+				629.0,
+				570.0
+			],
+			"frame": "carry_east_3",
+			"frame_index": 3,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "southeast",
+			"elapsed": 8.01165044444444,
+			"foot_point": [
+				630.0,
+				571.0
+			],
+			"frame": "carry_southeast_0",
+			"frame_index": 0,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "east",
+			"elapsed": 8.0783171111111,
+			"foot_point": [
+				634.0,
+				574.0
+			],
+			"frame": "carry_east_0",
+			"frame_index": 0,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "east",
+			"elapsed": 8.11165044444444,
+			"foot_point": [
+				636.0,
+				575.0
+			],
+			"frame": "carry_east_1",
+			"frame_index": 1,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "southeast",
+			"elapsed": 8.18095866666666,
+			"foot_point": [
+				640.0,
+				578.0
+			],
+			"frame": "carry_southeast_1",
+			"frame_index": 1,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "southeast",
+			"elapsed": 8.22553666666666,
+			"foot_point": [
+				642.0,
+				580.0
+			],
+			"frame": "carry_southeast_2",
+			"frame_index": 2,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "east",
+			"elapsed": 8.36964299999999,
+			"foot_point": [
+				650.0,
+				585.0
+			],
+			"frame": "carry_east_3",
+			"frame_index": 3,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "southeast",
+			"elapsed": 8.41408744444444,
+			"foot_point": [
+				653.0,
+				587.0
+			],
+			"frame": "carry_southeast_3",
+			"frame_index": 3,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "southeast",
+			"elapsed": 8.45822933333332,
+			"foot_point": [
+				655.0,
+				589.0
+			],
+			"frame": "carry_southeast_0",
+			"frame_index": 0,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "east",
+			"elapsed": 8.49218733333332,
+			"foot_point": [
+				657.0,
+				590.0
+			],
+			"frame": "carry_east_0",
+			"frame_index": 0,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "southeast",
+			"elapsed": 8.52707233333332,
+			"foot_point": [
+				659.0,
+				592.0
+			],
+			"frame": "carry_southeast_0",
+			"frame_index": 0,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "east",
+			"elapsed": 8.56264033333332,
+			"foot_point": [
+				661.0,
+				593.0
+			],
+			"frame": "carry_east_1",
+			"frame_index": 1,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "southeast",
+			"elapsed": 8.59930699999999,
+			"foot_point": [
+				663.0,
+				595.0
+			],
+			"frame": "carry_southeast_1",
+			"frame_index": 1,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "east",
+			"elapsed": 8.64004033333332,
+			"foot_point": [
+				665.0,
+				596.0
+			],
+			"frame": "carry_east_1",
+			"frame_index": 1,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "southeast",
+			"elapsed": 8.68816666666666,
+			"foot_point": [
+				668.0,
+				598.0
+			],
+			"frame": "carry_southeast_2",
+			"frame_index": 2,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "southeast",
+			"elapsed": 8.77920033333332,
+			"foot_point": [
+				673.0,
+				602.0
+			],
+			"frame": "carry_southeast_3",
+			"frame_index": 3,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "east",
+			"elapsed": 8.82086699999999,
+			"foot_point": [
+				675.0,
+				603.0
+			],
+			"frame": "carry_east_3",
+			"frame_index": 3,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "southeast",
+			"elapsed": 8.86253366666666,
+			"foot_point": [
+				677.0,
+				605.0
+			],
+			"frame": "carry_southeast_3",
+			"frame_index": 3,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "southeast",
+			"elapsed": 8.90420033333332,
+			"foot_point": [
+				680.0,
+				607.0
+			],
+			"frame": "carry_southeast_0",
+			"frame_index": 0,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "east",
+			"elapsed": 8.94586699999999,
+			"foot_point": [
+				682.0,
+				608.0
+			],
+			"frame": "carry_east_0",
+			"frame_index": 0,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "southeast",
+			"elapsed": 8.98993766666666,
+			"foot_point": [
+				684.0,
+				610.0
+			],
+			"frame": "carry_southeast_0",
+			"frame_index": 0,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "southeast",
+			"elapsed": 9.03160433333332,
+			"foot_point": [
+				687.0,
+				612.0
+			],
+			"frame": "carry_southeast_1",
+			"frame_index": 1,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "east",
+			"elapsed": 9.07327099999999,
+			"foot_point": [
+				689.0,
+				613.0
+			],
+			"frame": "carry_east_1",
+			"frame_index": 1,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "southeast",
+			"elapsed": 9.11160433333332,
+			"foot_point": [
+				691.0,
+				615.0
+			],
+			"frame": "carry_southeast_2",
+			"frame_index": 2,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "east",
+			"elapsed": 9.15023733333332,
+			"foot_point": [
+				693.0,
+				616.0
+			],
+			"frame": "carry_east_2",
+			"frame_index": 2,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "southeast",
+			"elapsed": 9.17879333333332,
+			"foot_point": [
+				695.0,
+				618.0
+			],
+			"frame": "carry_southeast_2",
+			"frame_index": 2,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "east",
+			"elapsed": 9.23974166666666,
+			"foot_point": [
+				698.0,
+				620.0
+			],
+			"frame": "carry_east_3",
+			"frame_index": 3,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "southeast",
+			"elapsed": 9.29814233333332,
+			"foot_point": [
+				701.0,
+				622.0
+			],
+			"frame": "carry_southeast_3",
+			"frame_index": 3,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "east",
+			"elapsed": 9.36449866666666,
+			"foot_point": [
+				705.0,
+				625.0
+			],
+			"frame": "carry_east_0",
+			"frame_index": 0,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "southeast",
+			"elapsed": 9.45468133333332,
+			"foot_point": [
+				710.0,
+				629.0
+			],
+			"frame": "carry_southeast_1",
+			"frame_index": 1,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "east",
+			"elapsed": 9.48506333333332,
+			"foot_point": [
+				712.0,
+				630.0
+			],
+			"frame": "carry_east_1",
+			"frame_index": 1,
+			"source_remaining": 36,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "east",
+			"elapsed": 9.51089333333332,
+			"foot_point": [
+				712.0,
+				630.0
+			],
+			"frame": "unload_2",
+			"frame_index": 2,
+			"screenshot": "res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_unload_01.png",
+			"source_remaining": 36,
+			"state": "dock_wait",
+			"visual_kind": "unload"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "east",
+			"elapsed": 9.63195699999999,
+			"foot_point": [
+				712.0,
+				630.0
+			],
+			"frame": "unload_0",
+			"frame_index": 0,
+			"screenshot": "res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_unload_02.png",
+			"source_remaining": 36,
+			"state": "dock_wait",
+			"visual_kind": "unload"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 0,
+			"direction": "east",
+			"elapsed": 9.77337366666666,
+			"foot_point": [
+				712.0,
+				630.0
+			],
+			"frame": "unload_1",
+			"frame_index": 1,
+			"screenshot": "res://prototypes/recovery_map_lab/evidence/canyon_single_worker_runtime_v6/single_worker_unload_03.png",
+			"source_remaining": 36,
+			"state": "dock_wait",
+			"visual_kind": "unload"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "east",
+			"elapsed": 9.90670699999999,
+			"foot_point": [
+				712.0,
+				630.0
+			],
+			"frame": "idle_west_0",
+			"frame_index": 0,
+			"source_remaining": 36,
+			"state": "to_resource",
+			"visual_kind": "idle"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "northwest",
+			"elapsed": 10.034194,
+			"foot_point": [
+				705.0,
+				625.0
+			],
+			"frame": "walk_northwest_2",
+			"frame_index": 2,
+			"source_remaining": 36,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "west",
+			"elapsed": 10.106707,
+			"foot_point": [
+				701.0,
+				622.0
+			],
+			"frame": "walk_west_2",
+			"frame_index": 2,
+			"source_remaining": 36,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "west",
+			"elapsed": 10.1400403333333,
+			"foot_point": [
+				699.0,
+				621.0
+			],
+			"frame": "walk_west_3",
+			"frame_index": 3,
+			"source_remaining": 36,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "northwest",
+			"elapsed": 10.1728713333333,
+			"foot_point": [
+				697.0,
+				619.0
+			],
+			"frame": "walk_northwest_3",
+			"frame_index": 3,
+			"source_remaining": 36,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "west",
+			"elapsed": 10.2062046666667,
+			"foot_point": [
+				695.0,
+				618.0
+			],
+			"frame": "walk_west_3",
+			"frame_index": 3,
+			"source_remaining": 36,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "northwest",
+			"elapsed": 10.2733736666667,
+			"foot_point": [
+				692.0,
+				615.0
+			],
+			"frame": "walk_northwest_0",
+			"frame_index": 0,
+			"source_remaining": 36,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "west",
+			"elapsed": 10.3698503333333,
+			"foot_point": [
+				686.0,
+				612.0
+			],
+			"frame": "walk_west_1",
+			"frame_index": 1,
+			"source_remaining": 36,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "northwest",
+			"elapsed": 10.395806,
+			"foot_point": [
+				685.0,
+				611.0
+			],
+			"frame": "walk_northwest_1",
+			"frame_index": 1,
+			"source_remaining": 36,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "west",
+			"elapsed": 10.465518,
+			"foot_point": [
+				681.0,
+				608.0
+			],
+			"frame": "walk_west_2",
+			"frame_index": 2,
+			"source_remaining": 36,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "northwest",
+			"elapsed": 10.5021846666667,
+			"foot_point": [
+				679.0,
+				606.0
+			],
+			"frame": "walk_northwest_2",
+			"frame_index": 2,
+			"source_remaining": 36,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "west",
+			"elapsed": 10.535518,
+			"foot_point": [
+				677.0,
+				605.0
+			],
+			"frame": "walk_west_2",
+			"frame_index": 2,
+			"source_remaining": 36,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "west",
+			"elapsed": 10.5688513333333,
+			"foot_point": [
+				675.0,
+				604.0
+			],
+			"frame": "walk_west_3",
+			"frame_index": 3,
+			"source_remaining": 36,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "northwest",
+			"elapsed": 10.6021846666667,
+			"foot_point": [
+				674.0,
+				602.0
+			],
+			"frame": "walk_northwest_3",
+			"frame_index": 3,
+			"source_remaining": 36,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "west",
+			"elapsed": 10.635518,
+			"foot_point": [
+				672.0,
+				601.0
+			],
+			"frame": "walk_west_3",
+			"frame_index": 3,
+			"source_remaining": 36,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "west",
+			"elapsed": 10.670518,
+			"foot_point": [
+				670.0,
+				600.0
+			],
+			"frame": "walk_west_0",
+			"frame_index": 0,
+			"source_remaining": 36,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "northwest",
+			"elapsed": 10.7188166666667,
+			"foot_point": [
+				667.0,
+				598.0
+			],
+			"frame": "walk_northwest_0",
+			"frame_index": 0,
+			"source_remaining": 36,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "northwest",
+			"elapsed": 10.818927,
+			"foot_point": [
+				662.0,
+				594.0
+			],
+			"frame": "walk_northwest_1",
+			"frame_index": 1,
+			"source_remaining": 36,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "northwest",
+			"elapsed": 10.9011514444444,
+			"foot_point": [
+				657.0,
+				590.0
+			],
+			"frame": "walk_northwest_2",
+			"frame_index": 2,
+			"source_remaining": 36,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "west",
+			"elapsed": 10.9383103333333,
+			"foot_point": [
+				655.0,
+				589.0
+			],
+			"frame": "walk_west_2",
+			"frame_index": 2,
+			"source_remaining": 36,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "northwest",
+			"elapsed": 10.9784933333333,
+			"foot_point": [
+				653.0,
+				587.0
+			],
+			"frame": "walk_northwest_2",
+			"frame_index": 2,
+			"source_remaining": 36,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "west",
+			"elapsed": 11.0233736666667,
+			"foot_point": [
+				650.0,
+				586.0
+			],
+			"frame": "walk_west_3",
+			"frame_index": 3,
+			"source_remaining": 36,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "northwest",
+			"elapsed": 11.0981666666667,
+			"foot_point": [
+				646.0,
+				583.0
+			],
+			"frame": "walk_northwest_3",
+			"frame_index": 3,
+			"source_remaining": 36,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "northwest",
+			"elapsed": 11.2400403333333,
+			"foot_point": [
+				638.0,
+				577.0
+			],
+			"frame": "walk_northwest_1",
+			"frame_index": 1,
+			"source_remaining": 36,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "northwest",
+			"elapsed": 11.3657343333333,
+			"foot_point": [
+				631.0,
+				572.0
+			],
+			"frame": "walk_northwest_2",
+			"frame_index": 2,
+			"source_remaining": 36,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "northwest",
+			"elapsed": 11.4743313333333,
+			"foot_point": [
+				625.0,
+				568.0
+			],
+			"frame": "walk_northwest_3",
+			"frame_index": 3,
+			"source_remaining": 36,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "northwest",
+			"elapsed": 11.556707,
+			"foot_point": [
+				621.0,
+				564.0
+			],
+			"frame": "walk_northwest_0",
+			"frame_index": 0,
+			"source_remaining": 36,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "west",
+			"elapsed": 11.678203,
+			"foot_point": [
+				614.0,
+				560.0
+			],
+			"frame": "walk_west_1",
+			"frame_index": 1,
+			"source_remaining": 36,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "northwest",
+			"elapsed": 11.728203,
+			"foot_point": [
+				611.0,
+				558.0
+			],
+			"frame": "walk_northwest_1",
+			"frame_index": 1,
+			"source_remaining": 36,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "northwest",
+			"elapsed": 11.8328833333333,
+			"foot_point": [
+				606.0,
+				553.0
+			],
+			"frame": "walk_northwest_2",
+			"frame_index": 2,
+			"source_remaining": 36,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "northwest",
+			"elapsed": 11.8900403333333,
+			"foot_point": [
+				603.0,
+				551.0
+			],
+			"frame": "walk_northwest_3",
+			"frame_index": 3,
+			"source_remaining": 36,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "northwest",
+			"elapsed": 12.0400403333333,
+			"foot_point": [
+				594.0,
+				545.0
+			],
+			"frame": "walk_northwest_0",
+			"frame_index": 0,
+			"source_remaining": 36,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "northwest",
+			"elapsed": 12.156707,
+			"foot_point": [
+				588.0,
+				541.0
+			],
+			"frame": "walk_northwest_1",
+			"frame_index": 1,
+			"source_remaining": 36,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "northwest",
+			"elapsed": 12.2457586666667,
+			"foot_point": [
+				583.0,
+				537.0
+			],
+			"frame": "walk_northwest_2",
+			"frame_index": 2,
+			"source_remaining": 36,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "northwest",
+			"elapsed": 12.3645313333333,
+			"foot_point": [
+				570.0,
+				526.0
+			],
+			"frame": "walk_northwest_3",
+			"frame_index": 3,
+			"source_remaining": 36,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "northwest",
+			"elapsed": 12.506707,
+			"foot_point": [
+				546.0,
+				504.0
+			],
+			"frame": "walk_northwest_0",
+			"frame_index": 0,
+			"source_remaining": 36,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "northwest",
+			"elapsed": 12.6352206666667,
+			"foot_point": [
+				524.0,
+				484.0
+			],
+			"frame": "walk_northwest_1",
+			"frame_index": 1,
+			"source_remaining": 36,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "northwest",
+			"elapsed": 12.7300646666667,
+			"foot_point": [
+				508.0,
+				470.0
+			],
+			"frame": "walk_northwest_2",
+			"frame_index": 2,
+			"source_remaining": 36,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "northwest",
+			"elapsed": 12.8718983333333,
+			"foot_point": [
+				484.0,
+				448.0
+			],
+			"frame": "walk_northwest_3",
+			"frame_index": 3,
+			"source_remaining": 36,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "northwest",
+			"elapsed": 12.9400403333333,
+			"foot_point": [
+				472.0,
+				437.0
+			],
+			"frame": "walk_northwest_0",
+			"frame_index": 0,
+			"source_remaining": 36,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "northwest",
+			"elapsed": 13.0900403333333,
+			"foot_point": [
+				447.0,
+				414.0
+			],
+			"frame": "walk_northwest_1",
+			"frame_index": 1,
+			"source_remaining": 36,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "northwest",
+			"elapsed": 13.1298133333333,
+			"foot_point": [
+				440.0,
+				408.0
+			],
+			"frame": "walk_northwest_2",
+			"frame_index": 2,
+			"source_remaining": 36,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "northwest",
+			"elapsed": 13.3400403333333,
+			"foot_point": [
+				404.0,
+				375.0
+			],
+			"frame": "walk_northwest_0",
+			"frame_index": 0,
+			"source_remaining": 36,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "northwest",
+			"elapsed": 13.4733736666667,
+			"foot_point": [
+				381.0,
+				354.0
+			],
+			"frame": "walk_northwest_1",
+			"frame_index": 1,
+			"source_remaining": 36,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "northwest",
+			"elapsed": 13.5900403333333,
+			"foot_point": [
+				362.0,
+				336.0
+			],
+			"frame": "walk_northwest_2",
+			"frame_index": 2,
+			"source_remaining": 36,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "northwest",
+			"elapsed": 13.7010553333333,
+			"foot_point": [
+				343.0,
+				319.0
+			],
+			"frame": "walk_northwest_3",
+			"frame_index": 3,
+			"source_remaining": 36,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "northwest",
+			"elapsed": 13.8035983333333,
+			"foot_point": [
+				325.0,
+				303.0
+			],
+			"frame": "walk_northwest_0",
+			"frame_index": 0,
+			"source_remaining": 36,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "northwest",
+			"elapsed": 13.9377113333333,
+			"foot_point": [
+				302.0,
+				283.0
+			],
+			"frame": "walk_northwest_1",
+			"frame_index": 1,
+			"source_remaining": 36,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "northwest",
+			"elapsed": 14.0570233333333,
+			"foot_point": [
+				282.0,
+				264.0
+			],
+			"frame": "walk_northwest_2",
+			"frame_index": 2,
+			"source_remaining": 36,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "northwest",
+			"elapsed": 14.191752,
+			"foot_point": [
+				259.0,
+				243.0
+			],
+			"frame": "walk_northwest_3",
+			"frame_index": 3,
+			"source_remaining": 36,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "northwest",
+			"elapsed": 14.3351863333333,
+			"foot_point": [
+				250.0,
+				235.0
+			],
+			"frame": "harvest_2",
+			"frame_index": 2,
+			"source_remaining": 36,
+			"state": "harvesting",
+			"visual_kind": "harvest"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "northwest",
+			"elapsed": 14.4733736666667,
+			"foot_point": [
+				250.0,
+				235.0
+			],
+			"frame": "harvest_3",
+			"frame_index": 3,
+			"source_remaining": 36,
+			"state": "harvesting",
+			"visual_kind": "harvest"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "northwest",
+			"elapsed": 14.5956246666667,
+			"foot_point": [
+				250.0,
+				235.0
+			],
+			"frame": "harvest_0",
+			"frame_index": 0,
+			"source_remaining": 36,
+			"state": "harvesting",
+			"visual_kind": "harvest"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "northwest",
+			"elapsed": 14.7287896666667,
+			"foot_point": [
+				250.0,
+				235.0
+			],
+			"frame": "harvest_1",
+			"frame_index": 1,
+			"source_remaining": 36,
+			"state": "harvesting",
+			"visual_kind": "harvest"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "northwest",
+			"elapsed": 14.8727346666667,
+			"foot_point": [
+				250.0,
+				235.0
+			],
+			"frame": "harvest_2",
+			"frame_index": 2,
+			"source_remaining": 36,
+			"state": "harvesting",
+			"visual_kind": "harvest"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "northwest",
+			"elapsed": 15.0050186666667,
+			"foot_point": [
+				250.0,
+				235.0
+			],
+			"frame": "harvest_0",
+			"frame_index": 0,
+			"source_remaining": 36,
+			"state": "harvesting",
+			"visual_kind": "harvest"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "northwest",
+			"elapsed": 15.1400403333333,
+			"foot_point": [
+				250.0,
+				235.0
+			],
+			"frame": "carry_northwest_0",
+			"frame_index": 0,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "southeast",
+			"elapsed": 15.262235,
+			"foot_point": [
+				271.0,
+				254.0
+			],
+			"frame": "carry_southeast_1",
+			"frame_index": 1,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "southeast",
+			"elapsed": 15.340897,
+			"foot_point": [
+				284.0,
+				266.0
+			],
+			"frame": "carry_southeast_2",
+			"frame_index": 2,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "southeast",
+			"elapsed": 15.4448543333333,
+			"foot_point": [
+				302.0,
+				282.0
+			],
+			"frame": "carry_southeast_3",
+			"frame_index": 3,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "southeast",
+			"elapsed": 15.587017,
+			"foot_point": [
+				326.0,
+				304.0
+			],
+			"frame": "carry_southeast_0",
+			"frame_index": 0,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "southeast",
+			"elapsed": 15.6929813333333,
+			"foot_point": [
+				344.0,
+				321.0
+			],
+			"frame": "carry_southeast_1",
+			"frame_index": 1,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "southeast",
+			"elapsed": 15.784673,
+			"foot_point": [
+				360.0,
+				335.0
+			],
+			"frame": "carry_southeast_2",
+			"frame_index": 2,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "southeast",
+			"elapsed": 15.906707,
+			"foot_point": [
+				380.0,
+				354.0
+			],
+			"frame": "carry_southeast_3",
+			"frame_index": 3,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "southeast",
+			"elapsed": 16.0012173333333,
+			"foot_point": [
+				397.0,
+				368.0
+			],
+			"frame": "carry_southeast_0",
+			"frame_index": 0,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "southeast",
+			"elapsed": 16.1400403333333,
+			"foot_point": [
+				420.0,
+				390.0
+			],
+			"frame": "carry_southeast_1",
+			"frame_index": 1,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "southeast",
+			"elapsed": 16.244839,
+			"foot_point": [
+				438.0,
+				406.0
+			],
+			"frame": "carry_southeast_2",
+			"frame_index": 2,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "southeast",
+			"elapsed": 16.403239,
+			"foot_point": [
+				465.0,
+				430.0
+			],
+			"frame": "carry_southeast_3",
+			"frame_index": 3,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "southeast",
+			"elapsed": 16.4461753333333,
+			"foot_point": [
+				472.0,
+				437.0
+			],
+			"frame": "carry_southeast_0",
+			"frame_index": 0,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "southeast",
+			"elapsed": 16.5795086666667,
+			"foot_point": [
+				495.0,
+				458.0
+			],
+			"frame": "carry_southeast_1",
+			"frame_index": 1,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "southeast",
+			"elapsed": 16.694698,
+			"foot_point": [
+				515.0,
+				476.0
+			],
+			"frame": "carry_southeast_2",
+			"frame_index": 2,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "southeast",
+			"elapsed": 16.7900403333333,
+			"foot_point": [
+				531.0,
+				490.0
+			],
+			"frame": "carry_southeast_3",
+			"frame_index": 3,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "southeast",
+			"elapsed": 16.9287523333333,
+			"foot_point": [
+				554.0,
+				512.0
+			],
+			"frame": "carry_southeast_0",
+			"frame_index": 0,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "southeast",
+			"elapsed": 17.0400403333333,
+			"foot_point": [
+				573.0,
+				529.0
+			],
+			"frame": "carry_southeast_1",
+			"frame_index": 1,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "southeast",
+			"elapsed": 17.1212903333333,
+			"foot_point": [
+				582.0,
+				537.0
+			],
+			"frame": "carry_southeast_2",
+			"frame_index": 2,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "east",
+			"elapsed": 17.1608736666667,
+			"foot_point": [
+				584.0,
+				538.0
+			],
+			"frame": "carry_east_2",
+			"frame_index": 2,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "southeast",
+			"elapsed": 17.1990953333333,
+			"foot_point": [
+				586.0,
+				540.0
+			],
+			"frame": "carry_southeast_2",
+			"frame_index": 2,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "east",
+			"elapsed": 17.2302293333333,
+			"foot_point": [
+				588.0,
+				541.0
+			],
+			"frame": "carry_east_3",
+			"frame_index": 3,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "southeast",
+			"elapsed": 17.3257303333333,
+			"foot_point": [
+				593.0,
+				545.0
+			],
+			"frame": "carry_southeast_3",
+			"frame_index": 3,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "east",
+			"elapsed": 17.3587353333333,
+			"foot_point": [
+				595.0,
+				546.0
+			],
+			"frame": "carry_east_0",
+			"frame_index": 0,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "southeast",
+			"elapsed": 17.4217176666667,
+			"foot_point": [
+				599.0,
+				549.0
+			],
+			"frame": "carry_southeast_0",
+			"frame_index": 0,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "east",
+			"elapsed": 17.4536513333333,
+			"foot_point": [
+				601.0,
+				550.0
+			],
+			"frame": "carry_east_1",
+			"frame_index": 1,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "southeast",
+			"elapsed": 17.4836833333333,
+			"foot_point": [
+				602.0,
+				551.0
+			],
+			"frame": "carry_southeast_1",
+			"frame_index": 1,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "east",
+			"elapsed": 17.5131403333333,
+			"foot_point": [
+				604.0,
+				552.0
+			],
+			"frame": "carry_east_1",
+			"frame_index": 1,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "southeast",
+			"elapsed": 17.5754643333333,
+			"foot_point": [
+				607.0,
+				555.0
+			],
+			"frame": "carry_southeast_2",
+			"frame_index": 2,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "east",
+			"elapsed": 17.6074087777778,
+			"foot_point": [
+				609.0,
+				556.0
+			],
+			"frame": "carry_east_2",
+			"frame_index": 2,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "southeast",
+			"elapsed": 17.6740754444444,
+			"foot_point": [
+				613.0,
+				559.0
+			],
+			"frame": "carry_southeast_3",
+			"frame_index": 3,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "east",
+			"elapsed": 17.707174,
+			"foot_point": [
+				615.0,
+				560.0
+			],
+			"frame": "carry_east_3",
+			"frame_index": 3,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "southeast",
+			"elapsed": 17.7405073333333,
+			"foot_point": [
+				616.0,
+				561.0
+			],
+			"frame": "carry_southeast_3",
+			"frame_index": 3,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "east",
+			"elapsed": 17.808558,
+			"foot_point": [
+				620.0,
+				564.0
+			],
+			"frame": "carry_east_0",
+			"frame_index": 0,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "southeast",
+			"elapsed": 17.8778296666667,
+			"foot_point": [
+				624.0,
+				567.0
+			],
+			"frame": "carry_southeast_0",
+			"frame_index": 0,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "east",
+			"elapsed": 17.911163,
+			"foot_point": [
+				626.0,
+				568.0
+			],
+			"frame": "carry_east_1",
+			"frame_index": 1,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "southeast",
+			"elapsed": 17.9764407777778,
+			"foot_point": [
+				629.0,
+				571.0
+			],
+			"frame": "carry_southeast_1",
+			"frame_index": 1,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "east",
+			"elapsed": 18.0083852222222,
+			"foot_point": [
+				631.0,
+				572.0
+			],
+			"frame": "carry_east_2",
+			"frame_index": 2,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "southeast",
+			"elapsed": 18.106707,
+			"foot_point": [
+				637.0,
+				576.0
+			],
+			"frame": "carry_southeast_2",
+			"frame_index": 2,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "east",
+			"elapsed": 18.1460896666667,
+			"foot_point": [
+				639.0,
+				577.0
+			],
+			"frame": "carry_east_3",
+			"frame_index": 3,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "southeast",
+			"elapsed": 18.1812676666667,
+			"foot_point": [
+				641.0,
+				579.0
+			],
+			"frame": "carry_southeast_3",
+			"frame_index": 3,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "east",
+			"elapsed": 18.2180956666667,
+			"foot_point": [
+				643.0,
+				580.0
+			],
+			"frame": "carry_east_3",
+			"frame_index": 3,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "east",
+			"elapsed": 18.251429,
+			"foot_point": [
+				645.0,
+				581.0
+			],
+			"frame": "carry_east_0",
+			"frame_index": 0,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "southeast",
+			"elapsed": 18.2847623333333,
+			"foot_point": [
+				646.0,
+				583.0
+			],
+			"frame": "carry_southeast_0",
+			"frame_index": 0,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "east",
+			"elapsed": 18.3180956666667,
+			"foot_point": [
+				648.0,
+				584.0
+			],
+			"frame": "carry_east_0",
+			"frame_index": 0,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "east",
+			"elapsed": 18.351429,
+			"foot_point": [
+				650.0,
+				585.0
+			],
+			"frame": "carry_east_1",
+			"frame_index": 1,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "southeast",
+			"elapsed": 18.3847623333333,
+			"foot_point": [
+				652.0,
+				587.0
+			],
+			"frame": "carry_southeast_1",
+			"frame_index": 1,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "east",
+			"elapsed": 18.4180956666667,
+			"foot_point": [
+				654.0,
+				588.0
+			],
+			"frame": "carry_east_1",
+			"frame_index": 1,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "east",
+			"elapsed": 18.451429,
+			"foot_point": [
+				656.0,
+				589.0
+			],
+			"frame": "carry_east_2",
+			"frame_index": 2,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "southeast",
+			"elapsed": 18.4847623333333,
+			"foot_point": [
+				657.0,
+				591.0
+			],
+			"frame": "carry_southeast_2",
+			"frame_index": 2,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "east",
+			"elapsed": 18.5127873333333,
+			"foot_point": [
+				659.0,
+				592.0
+			],
+			"frame": "carry_east_2",
+			"frame_index": 2,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "southeast",
+			"elapsed": 18.5713933333333,
+			"foot_point": [
+				662.0,
+				594.0
+			],
+			"frame": "carry_southeast_3",
+			"frame_index": 3,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "east",
+			"elapsed": 18.5997643333333,
+			"foot_point": [
+				664.0,
+				595.0
+			],
+			"frame": "carry_east_3",
+			"frame_index": 3,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "southeast",
+			"elapsed": 18.6284673333333,
+			"foot_point": [
+				665.0,
+				596.0
+			],
+			"frame": "carry_southeast_3",
+			"frame_index": 3,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "east",
+			"elapsed": 18.6923562222222,
+			"foot_point": [
+				669.0,
+				599.0
+			],
+			"frame": "carry_east_0",
+			"frame_index": 0,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "southeast",
+			"elapsed": 18.7529293333333,
+			"foot_point": [
+				672.0,
+				601.0
+			],
+			"frame": "carry_southeast_0",
+			"frame_index": 0,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "southeast",
+			"elapsed": 18.7826853333333,
+			"foot_point": [
+				674.0,
+				603.0
+			],
+			"frame": "carry_southeast_1",
+			"frame_index": 1,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "east",
+			"elapsed": 18.8132408888889,
+			"foot_point": [
+				676.0,
+				604.0
+			],
+			"frame": "carry_east_1",
+			"frame_index": 1,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "southeast",
+			"elapsed": 18.8437964444445,
+			"foot_point": [
+				677.0,
+				605.0
+			],
+			"frame": "carry_southeast_1",
+			"frame_index": 1,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "east",
+			"elapsed": 18.874352,
+			"foot_point": [
+				679.0,
+				606.0
+			],
+			"frame": "carry_east_1",
+			"frame_index": 1,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "east",
+			"elapsed": 18.9046143333333,
+			"foot_point": [
+				681.0,
+				607.0
+			],
+			"frame": "carry_east_2",
+			"frame_index": 2,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "southeast",
+			"elapsed": 18.9343213333333,
+			"foot_point": [
+				682.0,
+				609.0
+			],
+			"frame": "carry_southeast_2",
+			"frame_index": 2,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "east",
+			"elapsed": 18.9625233333333,
+			"foot_point": [
+				684.0,
+				610.0
+			],
+			"frame": "carry_east_2",
+			"frame_index": 2,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "southeast",
+			"elapsed": 18.9916573333333,
+			"foot_point": [
+				685.0,
+				611.0
+			],
+			"frame": "carry_southeast_2",
+			"frame_index": 2,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "east",
+			"elapsed": 19.0191603333333,
+			"foot_point": [
+				687.0,
+				612.0
+			],
+			"frame": "carry_east_3",
+			"frame_index": 3,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "southeast",
+			"elapsed": 19.076959962963,
+			"foot_point": [
+				690.0,
+				614.0
+			],
+			"frame": "carry_southeast_3",
+			"frame_index": 3,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "east",
+			"elapsed": 19.106707,
+			"foot_point": [
+				692.0,
+				615.0
+			],
+			"frame": "carry_east_3",
+			"frame_index": 3,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "southeast",
+			"elapsed": 19.1417876666667,
+			"foot_point": [
+				694.0,
+				617.0
+			],
+			"frame": "carry_southeast_0",
+			"frame_index": 0,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "east",
+			"elapsed": 19.2030966666667,
+			"foot_point": [
+				697.0,
+				619.0
+			],
+			"frame": "carry_east_0",
+			"frame_index": 0,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "east",
+			"elapsed": 19.2330966666667,
+			"foot_point": [
+				699.0,
+				620.0
+			],
+			"frame": "carry_east_1",
+			"frame_index": 1,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "southeast",
+			"elapsed": 19.2630966666667,
+			"foot_point": [
+				700.0,
+				622.0
+			],
+			"frame": "carry_southeast_1",
+			"frame_index": 1,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "east",
+			"elapsed": 19.2930966666667,
+			"foot_point": [
+				702.0,
+				623.0
+			],
+			"frame": "carry_east_1",
+			"frame_index": 1,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "southeast",
+			"elapsed": 19.3530966666667,
+			"foot_point": [
+				705.0,
+				625.0
+			],
+			"frame": "carry_southeast_2",
+			"frame_index": 2,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "east",
+			"elapsed": 19.3830966666667,
+			"foot_point": [
+				707.0,
+				626.0
+			],
+			"frame": "carry_east_2",
+			"frame_index": 2,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "southeast",
+			"elapsed": 19.4130966666667,
+			"foot_point": [
+				709.0,
+				628.0
+			],
+			"frame": "carry_southeast_2",
+			"frame_index": 2,
+			"source_remaining": 33,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "east",
+			"elapsed": 19.4820606666667,
+			"foot_point": [
+				712.0,
+				630.0
+			],
+			"frame": "unload_2",
+			"frame_index": 2,
+			"source_remaining": 33,
+			"state": "dock_wait",
+			"visual_kind": "unload"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "east",
+			"elapsed": 19.5126162222222,
+			"foot_point": [
+				712.0,
+				630.0
+			],
+			"frame": "unload_0",
+			"frame_index": 0,
+			"source_remaining": 33,
+			"state": "dock_wait",
+			"visual_kind": "unload"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "east",
+			"elapsed": 19.6276936666667,
+			"foot_point": [
+				712.0,
+				630.0
+			],
+			"frame": "unload_1",
+			"frame_index": 1,
+			"source_remaining": 33,
+			"state": "dock_wait",
+			"visual_kind": "unload"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 3,
+			"direction": "east",
+			"elapsed": 19.7041856666667,
+			"foot_point": [
+				712.0,
+				630.0
+			],
+			"frame": "unload_2",
+			"frame_index": 2,
+			"source_remaining": 33,
+			"state": "dock_wait",
+			"visual_kind": "unload"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "east",
+			"elapsed": 19.8181176666667,
+			"foot_point": [
+				712.0,
+				630.0
+			],
+			"frame": "idle_west_0",
+			"frame_index": 0,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "idle"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 19.882077,
+			"foot_point": [
+				708.0,
+				627.0
+			],
+			"frame": "walk_northwest_2",
+			"frame_index": 2,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "west",
+			"elapsed": 19.9233736666667,
+			"foot_point": [
+				706.0,
+				626.0
+			],
+			"frame": "walk_west_3",
+			"frame_index": 3,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 19.9664793333333,
+			"foot_point": [
+				704.0,
+				624.0
+			],
+			"frame": "walk_northwest_3",
+			"frame_index": 3,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "west",
+			"elapsed": 20.0022763333333,
+			"foot_point": [
+				702.0,
+				623.0
+			],
+			"frame": "walk_west_0",
+			"frame_index": 0,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 20.0384083333333,
+			"foot_point": [
+				700.0,
+				621.0
+			],
+			"frame": "walk_northwest_0",
+			"frame_index": 0,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "west",
+			"elapsed": 20.0759083333333,
+			"foot_point": [
+				698.0,
+				620.0
+			],
+			"frame": "walk_west_0",
+			"frame_index": 0,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 20.1147972222222,
+			"foot_point": [
+				696.0,
+				618.0
+			],
+			"frame": "walk_northwest_1",
+			"frame_index": 1,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "west",
+			"elapsed": 20.1528924603175,
+			"foot_point": [
+				694.0,
+				617.0
+			],
+			"frame": "walk_west_1",
+			"frame_index": 1,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 20.1917813492064,
+			"foot_point": [
+				691.0,
+				615.0
+			],
+			"frame": "walk_northwest_1",
+			"frame_index": 1,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "west",
+			"elapsed": 20.2306702380952,
+			"foot_point": [
+				689.0,
+				614.0
+			],
+			"frame": "walk_west_2",
+			"frame_index": 2,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 20.2695591269841,
+			"foot_point": [
+				687.0,
+				612.0
+			],
+			"frame": "walk_northwest_2",
+			"frame_index": 2,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "west",
+			"elapsed": 20.3078924603175,
+			"foot_point": [
+				685.0,
+				611.0
+			],
+			"frame": "walk_west_2",
+			"frame_index": 2,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 20.3467813492064,
+			"foot_point": [
+				683.0,
+				609.0
+			],
+			"frame": "walk_northwest_3",
+			"frame_index": 3,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "west",
+			"elapsed": 20.4233736666667,
+			"foot_point": [
+				679.0,
+				606.0
+			],
+			"frame": "walk_west_3",
+			"frame_index": 3,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 20.461707,
+			"foot_point": [
+				676.0,
+				604.0
+			],
+			"frame": "walk_northwest_0",
+			"frame_index": 0,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "west",
+			"elapsed": 20.5005958888889,
+			"foot_point": [
+				674.0,
+				603.0
+			],
+			"frame": "walk_west_0",
+			"frame_index": 0,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 20.5394847777778,
+			"foot_point": [
+				672.0,
+				601.0
+			],
+			"frame": "walk_northwest_0",
+			"frame_index": 0,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "west",
+			"elapsed": 20.5819696666667,
+			"foot_point": [
+				670.0,
+				600.0
+			],
+			"frame": "walk_west_1",
+			"frame_index": 1,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 20.6208585555556,
+			"foot_point": [
+				668.0,
+				598.0
+			],
+			"frame": "walk_northwest_1",
+			"frame_index": 1,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "west",
+			"elapsed": 20.656707,
+			"foot_point": [
+				666.0,
+				597.0
+			],
+			"frame": "walk_west_1",
+			"frame_index": 1,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 20.6955958888889,
+			"foot_point": [
+				664.0,
+				595.0
+			],
+			"frame": "walk_northwest_2",
+			"frame_index": 2,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "west",
+			"elapsed": 20.7344847777778,
+			"foot_point": [
+				661.0,
+				594.0
+			],
+			"frame": "walk_west_2",
+			"frame_index": 2,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 20.7734246666667,
+			"foot_point": [
+				659.0,
+				592.0
+			],
+			"frame": "walk_northwest_2",
+			"frame_index": 2,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 20.8131376666667,
+			"foot_point": [
+				657.0,
+				590.0
+			],
+			"frame": "walk_northwest_3",
+			"frame_index": 3,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "west",
+			"elapsed": 20.8520265555556,
+			"foot_point": [
+				655.0,
+				589.0
+			],
+			"frame": "walk_west_3",
+			"frame_index": 3,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 20.8915346666667,
+			"foot_point": [
+				653.0,
+				587.0
+			],
+			"frame": "walk_northwest_0",
+			"frame_index": 0,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "west",
+			"elapsed": 20.9309286060606,
+			"foot_point": [
+				651.0,
+				586.0
+			],
+			"frame": "walk_west_0",
+			"frame_index": 0,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 20.9703225454545,
+			"foot_point": [
+				648.0,
+				584.0
+			],
+			"frame": "walk_northwest_0",
+			"frame_index": 0,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "west",
+			"elapsed": 21.0097164848485,
+			"foot_point": [
+				646.0,
+				583.0
+			],
+			"frame": "walk_west_1",
+			"frame_index": 1,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 21.0486053737374,
+			"foot_point": [
+				644.0,
+				581.0
+			],
+			"frame": "walk_northwest_1",
+			"frame_index": 1,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "west",
+			"elapsed": 21.0879993131313,
+			"foot_point": [
+				642.0,
+				580.0
+			],
+			"frame": "walk_west_1",
+			"frame_index": 1,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 21.1268882020202,
+			"foot_point": [
+				640.0,
+				578.0
+			],
+			"frame": "walk_northwest_2",
+			"frame_index": 2,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "west",
+			"elapsed": 21.1585093333333,
+			"foot_point": [
+				638.0,
+				577.0
+			],
+			"frame": "walk_west_2",
+			"frame_index": 2,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 21.2155223333333,
+			"foot_point": [
+				635.0,
+				574.0
+			],
+			"frame": "walk_northwest_2",
+			"frame_index": 2,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "west",
+			"elapsed": 21.2419933333333,
+			"foot_point": [
+				633.0,
+				573.0
+			],
+			"frame": "walk_west_3",
+			"frame_index": 3,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 21.2697711111111,
+			"foot_point": [
+				632.0,
+				572.0
+			],
+			"frame": "walk_northwest_3",
+			"frame_index": 3,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "west",
+			"elapsed": 21.2975488888889,
+			"foot_point": [
+				630.0,
+				571.0
+			],
+			"frame": "walk_west_3",
+			"frame_index": 3,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 21.326138,
+			"foot_point": [
+				629.0,
+				570.0
+			],
+			"frame": "walk_northwest_3",
+			"frame_index": 3,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "west",
+			"elapsed": 21.356707,
+			"foot_point": [
+				627.0,
+				569.0
+			],
+			"frame": "walk_west_0",
+			"frame_index": 0,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 21.4144450952381,
+			"foot_point": [
+				624.0,
+				567.0
+			],
+			"frame": "walk_northwest_0",
+			"frame_index": 0,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 21.4733736666667,
+			"foot_point": [
+				621.0,
+				564.0
+			],
+			"frame": "walk_northwest_1",
+			"frame_index": 1,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "west",
+			"elapsed": 21.5021615454545,
+			"foot_point": [
+				619.0,
+				563.0
+			],
+			"frame": "walk_west_1",
+			"frame_index": 1,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 21.5597373030303,
+			"foot_point": [
+				616.0,
+				561.0
+			],
+			"frame": "walk_northwest_2",
+			"frame_index": 2,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "west",
+			"elapsed": 21.588903969697,
+			"foot_point": [
+				614.0,
+				560.0
+			],
+			"frame": "walk_west_2",
+			"frame_index": 2,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 21.6176918484848,
+			"foot_point": [
+				613.0,
+				559.0
+			],
+			"frame": "walk_northwest_2",
+			"frame_index": 2,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "west",
+			"elapsed": 21.6752676060606,
+			"foot_point": [
+				609.0,
+				556.0
+			],
+			"frame": "walk_west_3",
+			"frame_index": 3,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 21.7040554848485,
+			"foot_point": [
+				608.0,
+				555.0
+			],
+			"frame": "walk_northwest_3",
+			"frame_index": 3,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "west",
+			"elapsed": 21.7328433636363,
+			"foot_point": [
+				606.0,
+				554.0
+			],
+			"frame": "walk_west_3",
+			"frame_index": 3,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 21.7616312424242,
+			"foot_point": [
+				605.0,
+				553.0
+			],
+			"frame": "walk_northwest_3",
+			"frame_index": 3,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "west",
+			"elapsed": 21.7904191212121,
+			"foot_point": [
+				603.0,
+				552.0
+			],
+			"frame": "walk_west_0",
+			"frame_index": 0,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 21.819207,
+			"foot_point": [
+				602.0,
+				551.0
+			],
+			"frame": "walk_northwest_0",
+			"frame_index": 0,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "west",
+			"elapsed": 21.8767827575757,
+			"foot_point": [
+				598.0,
+				548.0
+			],
+			"frame": "walk_west_0",
+			"frame_index": 0,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 21.9036073333333,
+			"foot_point": [
+				597.0,
+				547.0
+			],
+			"frame": "walk_northwest_1",
+			"frame_index": 1,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "west",
+			"elapsed": 21.9314203333333,
+			"foot_point": [
+				595.0,
+				546.0
+			],
+			"frame": "walk_west_1",
+			"frame_index": 1,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 21.9583403333333,
+			"foot_point": [
+				594.0,
+				545.0
+			],
+			"frame": "walk_northwest_1",
+			"frame_index": 1,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "west",
+			"elapsed": 21.9833653333333,
+			"foot_point": [
+				592.0,
+				544.0
+			],
+			"frame": "walk_west_1",
+			"frame_index": 1,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 22.0078383333333,
+			"foot_point": [
+				591.0,
+				543.0
+			],
+			"frame": "walk_northwest_2",
+			"frame_index": 2,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "west",
+			"elapsed": 22.0625973333333,
+			"foot_point": [
+				588.0,
+				541.0
+			],
+			"frame": "walk_west_2",
+			"frame_index": 2,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 22.0903751111111,
+			"foot_point": [
+				587.0,
+				540.0
+			],
+			"frame": "walk_northwest_2",
+			"frame_index": 2,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "west",
+			"elapsed": 22.1181528888889,
+			"foot_point": [
+				585.0,
+				539.0
+			],
+			"frame": "walk_west_3",
+			"frame_index": 3,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 22.1466616666666,
+			"foot_point": [
+				583.0,
+				537.0
+			],
+			"frame": "walk_northwest_3",
+			"frame_index": 3,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "west",
+			"elapsed": 22.2048044444444,
+			"foot_point": [
+				580.0,
+				535.0
+			],
+			"frame": "walk_west_3",
+			"frame_index": 3,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "west",
+			"elapsed": 22.2325822222222,
+			"foot_point": [
+				580.0,
+				535.0
+			],
+			"frame": "idle_west_0",
+			"frame_index": 0,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "idle"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 22.2606296666666,
+			"foot_point": [
+				575.0,
+				531.0
+			],
+			"frame": "walk_northwest_0",
+			"frame_index": 0,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 22.3559793333333,
+			"foot_point": [
+				559.0,
+				516.0
+			],
+			"frame": "walk_northwest_1",
+			"frame_index": 1,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 22.472646,
+			"foot_point": [
+				539.0,
+				498.0
+			],
+			"frame": "walk_northwest_2",
+			"frame_index": 2,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 22.5606089629629,
+			"foot_point": [
+				524.0,
+				484.0
+			],
+			"frame": "walk_northwest_3",
+			"frame_index": 3,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 22.6791274814814,
+			"foot_point": [
+				504.0,
+				466.0
+			],
+			"frame": "walk_northwest_0",
+			"frame_index": 0,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 22.7995722962963,
+			"foot_point": [
+				484.0,
+				447.0
+			],
+			"frame": "walk_northwest_1",
+			"frame_index": 1,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 22.9180908148148,
+			"foot_point": [
+				463.0,
+				429.0
+			],
+			"frame": "walk_northwest_2",
+			"frame_index": 2,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 23.0065167407407,
+			"foot_point": [
+				448.0,
+				415.0
+			],
+			"frame": "walk_northwest_3",
+			"frame_index": 3,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 23.1256189259259,
+			"foot_point": [
+				428.0,
+				397.0
+			],
+			"frame": "walk_northwest_0",
+			"frame_index": 0,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 23.2263146666666,
+			"foot_point": [
+				411.0,
+				381.0
+			],
+			"frame": "walk_northwest_1",
+			"frame_index": 1,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 23.3498617619047,
+			"foot_point": [
+				390.0,
+				362.0
+			],
+			"frame": "walk_northwest_2",
+			"frame_index": 2,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 23.4679853333333,
+			"foot_point": [
+				370.0,
+				344.0
+			],
+			"frame": "walk_northwest_3",
+			"frame_index": 3,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 23.5782318888888,
+			"foot_point": [
+				351.0,
+				327.0
+			],
+			"frame": "walk_northwest_0",
+			"frame_index": 0,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 23.6690026666666,
+			"foot_point": [
+				336.0,
+				313.0
+			],
+			"frame": "walk_northwest_1",
+			"frame_index": 1,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 23.7870036666666,
+			"foot_point": [
+				315.0,
+				295.0
+			],
+			"frame": "walk_northwest_2",
+			"frame_index": 2,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 23.9044626666666,
+			"foot_point": [
+				295.0,
+				276.0
+			],
+			"frame": "walk_northwest_3",
+			"frame_index": 3,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 24.0233002962962,
+			"foot_point": [
+				275.0,
+				258.0
+			],
+			"frame": "walk_northwest_0",
+			"frame_index": 0,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 24.1134092962962,
+			"foot_point": [
+				260.0,
+				244.0
+			],
+			"frame": "walk_northwest_1",
+			"frame_index": 1,
+			"source_remaining": 33,
+			"state": "to_resource",
+			"visual_kind": "walk"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 24.1751036969696,
+			"foot_point": [
+				250.0,
+				235.0
+			],
+			"frame": "harvest_1",
+			"frame_index": 1,
+			"source_remaining": 33,
+			"state": "harvesting",
+			"visual_kind": "harvest"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 24.2733736666666,
+			"foot_point": [
+				250.0,
+				235.0
+			],
+			"frame": "harvest_2",
+			"frame_index": 2,
+			"source_remaining": 33,
+			"state": "harvesting",
+			"visual_kind": "harvest"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 24.3983736666666,
+			"foot_point": [
+				250.0,
+				235.0
+			],
+			"frame": "harvest_3",
+			"frame_index": 3,
+			"source_remaining": 33,
+			"state": "harvesting",
+			"visual_kind": "harvest"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 24.5153673333333,
+			"foot_point": [
+				250.0,
+				235.0
+			],
+			"frame": "harvest_0",
+			"frame_index": 0,
+			"source_remaining": 33,
+			"state": "harvesting",
+			"visual_kind": "harvest"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 24.6334987142857,
+			"foot_point": [
+				250.0,
+				235.0
+			],
+			"frame": "harvest_1",
+			"frame_index": 1,
+			"source_remaining": 33,
+			"state": "harvesting",
+			"visual_kind": "harvest"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 24.7534987142857,
+			"foot_point": [
+				250.0,
+				235.0
+			],
+			"frame": "harvest_2",
+			"frame_index": 2,
+			"source_remaining": 33,
+			"state": "harvesting",
+			"visual_kind": "harvest"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 24.8793536666666,
+			"foot_point": [
+				250.0,
+				235.0
+			],
+			"frame": "harvest_3",
+			"frame_index": 3,
+			"source_remaining": 33,
+			"state": "harvesting",
+			"visual_kind": "harvest"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "northwest",
+			"elapsed": 24.9457346666666,
+			"foot_point": [
+				250.0,
+				235.0
+			],
+			"frame": "carry_northwest_0",
+			"frame_index": 0,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "southeast",
+			"elapsed": 24.9888286666666,
+			"foot_point": [
+				257.0,
+				242.0
+			],
+			"frame": "carry_southeast_0",
+			"frame_index": 0,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "southeast",
+			"elapsed": 25.0203101481481,
+			"foot_point": [
+				263.0,
+				247.0
+			],
+			"frame": "carry_southeast_1",
+			"frame_index": 1,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "southeast",
+			"elapsed": 25.1423216666666,
+			"foot_point": [
+				283.0,
+				265.0
+			],
+			"frame": "carry_southeast_2",
+			"frame_index": 2,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "southeast",
+			"elapsed": 25.2444223333333,
+			"foot_point": [
+				301.0,
+				281.0
+			],
+			"frame": "carry_southeast_3",
+			"frame_index": 3,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "southeast",
+			"elapsed": 25.3630757777777,
+			"foot_point": [
+				321.0,
+				300.0
+			],
+			"frame": "carry_southeast_0",
+			"frame_index": 0,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "southeast",
+			"elapsed": 25.4700406666666,
+			"foot_point": [
+				339.0,
+				316.0
+			],
+			"frame": "carry_southeast_1",
+			"frame_index": 1,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "southeast",
+			"elapsed": 25.5984916666666,
+			"foot_point": [
+				361.0,
+				336.0
+			],
+			"frame": "carry_southeast_2",
+			"frame_index": 2,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "southeast",
+			"elapsed": 25.7027726666666,
+			"foot_point": [
+				379.0,
+				352.0
+			],
+			"frame": "carry_southeast_3",
+			"frame_index": 3,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "southeast",
+			"elapsed": 25.8136373333333,
+			"foot_point": [
+				398.0,
+				369.0
+			],
+			"frame": "carry_southeast_0",
+			"frame_index": 0,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "southeast",
+			"elapsed": 25.901968,
+			"foot_point": [
+				413.0,
+				383.0
+			],
+			"frame": "carry_southeast_1",
+			"frame_index": 1,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "southeast",
+			"elapsed": 26.021185,
+			"foot_point": [
+				433.0,
+				401.0
+			],
+			"frame": "carry_southeast_2",
+			"frame_index": 2,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "southeast",
+			"elapsed": 26.114075,
+			"foot_point": [
+				449.0,
+				416.0
+			],
+			"frame": "carry_southeast_3",
+			"frame_index": 3,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "southeast",
+			"elapsed": 26.2333615555555,
+			"foot_point": [
+				469.0,
+				434.0
+			],
+			"frame": "carry_southeast_0",
+			"frame_index": 0,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "southeast",
+			"elapsed": 26.356707,
+			"foot_point": [
+				490.0,
+				453.0
+			],
+			"frame": "carry_southeast_1",
+			"frame_index": 1,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "southeast",
+			"elapsed": 26.4483736666666,
+			"foot_point": [
+				506.0,
+				467.0
+			],
+			"frame": "carry_southeast_2",
+			"frame_index": 2,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "southeast",
+			"elapsed": 26.558676,
+			"foot_point": [
+				525.0,
+				485.0
+			],
+			"frame": "carry_southeast_3",
+			"frame_index": 3,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "southeast",
+			"elapsed": 26.6830032962962,
+			"foot_point": [
+				546.0,
+				504.0
+			],
+			"frame": "carry_southeast_0",
+			"frame_index": 0,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "southeast",
+			"elapsed": 26.8018335555555,
+			"foot_point": [
+				566.0,
+				522.0
+			],
+			"frame": "carry_southeast_1",
+			"frame_index": 1,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "southeast",
+			"elapsed": 26.8907224444444,
+			"foot_point": [
+				580.0,
+				535.0
+			],
+			"frame": "carry_southeast_2",
+			"frame_index": 2,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "east",
+			"elapsed": 26.920352074074,
+			"foot_point": [
+				582.0,
+				536.0
+			],
+			"frame": "carry_east_2",
+			"frame_index": 2,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "southeast",
+			"elapsed": 26.9499817037036,
+			"foot_point": [
+				583.0,
+				537.0
+			],
+			"frame": "carry_southeast_2",
+			"frame_index": 2,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "southeast",
+			"elapsed": 27.0084249999999,
+			"foot_point": [
+				586.0,
+				540.0
+			],
+			"frame": "carry_southeast_3",
+			"frame_index": 3,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "east",
+			"elapsed": 27.0379469999999,
+			"foot_point": [
+				588.0,
+				541.0
+			],
+			"frame": "carry_east_3",
+			"frame_index": 3,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "southeast",
+			"elapsed": 27.0963696296296,
+			"foot_point": [
+				591.0,
+				543.0
+			],
+			"frame": "carry_southeast_3",
+			"frame_index": 3,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "east",
+			"elapsed": 27.1259992592592,
+			"foot_point": [
+				593.0,
+				544.0
+			],
+			"frame": "carry_east_0",
+			"frame_index": 0,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "southeast",
+			"elapsed": 27.1567069999999,
+			"foot_point": [
+				595.0,
+				546.0
+			],
+			"frame": "carry_southeast_0",
+			"frame_index": 0,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "east",
+			"elapsed": 27.2142739999999,
+			"foot_point": [
+				598.0,
+				548.0
+			],
+			"frame": "carry_east_0",
+			"frame_index": 0,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "southeast",
+			"elapsed": 27.2419899999999,
+			"foot_point": [
+				599.0,
+				549.0
+			],
+			"frame": "carry_southeast_1",
+			"frame_index": 1,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "east",
+			"elapsed": 27.2711566666666,
+			"foot_point": [
+				601.0,
+				550.0
+			],
+			"frame": "carry_east_1",
+			"frame_index": 1,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "southeast",
+			"elapsed": 27.2978159999999,
+			"foot_point": [
+				602.0,
+				551.0
+			],
+			"frame": "carry_southeast_1",
+			"frame_index": 1,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "east",
+			"elapsed": 27.3269826666666,
+			"foot_point": [
+				604.0,
+				552.0
+			],
+			"frame": "carry_east_1",
+			"frame_index": 1,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "southeast",
+			"elapsed": 27.3567069999999,
+			"foot_point": [
+				606.0,
+				554.0
+			],
+			"frame": "carry_southeast_2",
+			"frame_index": 2,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "east",
+			"elapsed": 27.4150403333333,
+			"foot_point": [
+				609.0,
+				556.0
+			],
+			"frame": "carry_east_2",
+			"frame_index": 2,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "southeast",
+			"elapsed": 27.4733736666666,
+			"foot_point": [
+				612.0,
+				558.0
+			],
+			"frame": "carry_southeast_3",
+			"frame_index": 3,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "east",
+			"elapsed": 27.5021615454545,
+			"foot_point": [
+				614.0,
+				559.0
+			],
+			"frame": "carry_east_3",
+			"frame_index": 3,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "southeast",
+			"elapsed": 27.5309494242424,
+			"foot_point": [
+				615.0,
+				560.0
+			],
+			"frame": "carry_southeast_3",
+			"frame_index": 3,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "east",
+			"elapsed": 27.5564039999999,
+			"foot_point": [
+				617.0,
+				561.0
+			],
+			"frame": "carry_east_0",
+			"frame_index": 0,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "southeast",
+			"elapsed": 27.5841817777777,
+			"foot_point": [
+				618.0,
+				563.0
+			],
+			"frame": "carry_southeast_0",
+			"frame_index": 0,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "east",
+			"elapsed": 27.6119595555555,
+			"foot_point": [
+				620.0,
+				564.0
+			],
+			"frame": "carry_east_0",
+			"frame_index": 0,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "southeast",
+			"elapsed": 27.6397373333333,
+			"foot_point": [
+				621.0,
+				565.0
+			],
+			"frame": "carry_southeast_0",
+			"frame_index": 0,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "east",
+			"elapsed": 27.667515111111,
+			"foot_point": [
+				623.0,
+				566.0
+			],
+			"frame": "carry_east_1",
+			"frame_index": 1,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "southeast",
+			"elapsed": 27.6952928888888,
+			"foot_point": [
+				624.0,
+				567.0
+			],
+			"frame": "carry_southeast_1",
+			"frame_index": 1,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "east",
+			"elapsed": 27.7230706666666,
+			"foot_point": [
+				626.0,
+				568.0
+			],
+			"frame": "carry_east_1",
+			"frame_index": 1,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "southeast",
+			"elapsed": 27.7508484444444,
+			"foot_point": [
+				627.0,
+				569.0
+			],
+			"frame": "carry_southeast_1",
+			"frame_index": 1,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "east",
+			"elapsed": 27.7786262222222,
+			"foot_point": [
+				629.0,
+				570.0
+			],
+			"frame": "carry_east_2",
+			"frame_index": 2,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "southeast",
+			"elapsed": 27.8341817777777,
+			"foot_point": [
+				632.0,
+				572.0
+			],
+			"frame": "carry_southeast_2",
+			"frame_index": 2,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "southeast",
+			"elapsed": 27.8902928888888,
+			"foot_point": [
+				635.0,
+				575.0
+			],
+			"frame": "carry_southeast_3",
+			"frame_index": 3,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "east",
+			"elapsed": 27.9190613333333,
+			"foot_point": [
+				637.0,
+				576.0
+			],
+			"frame": "carry_east_3",
+			"frame_index": 3,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "southeast",
+			"elapsed": 27.9480373333333,
+			"foot_point": [
+				638.0,
+				577.0
+			],
+			"frame": "carry_southeast_3",
+			"frame_index": 3,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "east",
+			"elapsed": 27.9763706666666,
+			"foot_point": [
+				640.0,
+				578.0
+			],
+			"frame": "carry_east_3",
+			"frame_index": 3,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "southeast",
+			"elapsed": 28.0047039999999,
+			"foot_point": [
+				641.0,
+				579.0
+			],
+			"frame": "carry_southeast_0",
+			"frame_index": 0,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "east",
+			"elapsed": 28.0355853333333,
+			"foot_point": [
+				643.0,
+				580.0
+			],
+			"frame": "carry_east_0",
+			"frame_index": 0,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "southeast",
+			"elapsed": 28.0639186666666,
+			"foot_point": [
+				645.0,
+				582.0
+			],
+			"frame": "carry_southeast_0",
+			"frame_index": 0,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "east",
+			"elapsed": 28.1258643333333,
+			"foot_point": [
+				648.0,
+				584.0
+			],
+			"frame": "carry_east_1",
+			"frame_index": 1,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "southeast",
+			"elapsed": 28.1876098888888,
+			"foot_point": [
+				652.0,
+				587.0
+			],
+			"frame": "carry_southeast_1",
+			"frame_index": 1,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "east",
+			"elapsed": 28.2487209999999,
+			"foot_point": [
+				655.0,
+				589.0
+			],
+			"frame": "carry_east_2",
+			"frame_index": 2,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "southeast",
+			"elapsed": 28.3087209999999,
+			"foot_point": [
+				658.0,
+				591.0
+			],
+			"frame": "carry_southeast_2",
+			"frame_index": 2,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "southeast",
+			"elapsed": 28.3387209999999,
+			"foot_point": [
+				660.0,
+				593.0
+			],
+			"frame": "carry_southeast_3",
+			"frame_index": 3,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "east",
+			"elapsed": 28.3687209999999,
+			"foot_point": [
+				662.0,
+				594.0
+			],
+			"frame": "carry_east_3",
+			"frame_index": 3,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "southeast",
+			"elapsed": 28.3987209999999,
+			"foot_point": [
+				663.0,
+				595.0
+			],
+			"frame": "carry_southeast_3",
+			"frame_index": 3,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "east",
+			"elapsed": 28.4287209999999,
+			"foot_point": [
+				665.0,
+				596.0
+			],
+			"frame": "carry_east_3",
+			"frame_index": 3,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "east",
+			"elapsed": 28.4587209999999,
+			"foot_point": [
+				667.0,
+				597.0
+			],
+			"frame": "carry_east_0",
+			"frame_index": 0,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "southeast",
+			"elapsed": 28.4882809999999,
+			"foot_point": [
+				668.0,
+				598.0
+			],
+			"frame": "carry_southeast_0",
+			"frame_index": 0,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "east",
+			"elapsed": 28.5141949999999,
+			"foot_point": [
+				670.0,
+				599.0
+			],
+			"frame": "carry_east_0",
+			"frame_index": 0,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "southeast",
+			"elapsed": 28.5430279999999,
+			"foot_point": [
+				671.0,
+				601.0
+			],
+			"frame": "carry_southeast_0",
+			"frame_index": 0,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "east",
+			"elapsed": 28.5692909999999,
+			"foot_point": [
+				673.0,
+				602.0
+			],
+			"frame": "carry_east_1",
+			"frame_index": 1,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "southeast",
+			"elapsed": 28.5946919999999,
+			"foot_point": [
+				674.0,
+				603.0
+			],
+			"frame": "carry_southeast_1",
+			"frame_index": 1,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "east",
+			"elapsed": 28.6238586666666,
+			"foot_point": [
+				676.0,
+				604.0
+			],
+			"frame": "carry_east_1",
+			"frame_index": 1,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "southeast",
+			"elapsed": 28.6521919999999,
+			"foot_point": [
+				677.0,
+				605.0
+			],
+			"frame": "carry_southeast_1",
+			"frame_index": 1,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "east",
+			"elapsed": 28.6805253333333,
+			"foot_point": [
+				679.0,
+				606.0
+			],
+			"frame": "carry_east_2",
+			"frame_index": 2,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "southeast",
+			"elapsed": 28.7088586666666,
+			"foot_point": [
+				680.0,
+				607.0
+			],
+			"frame": "carry_southeast_2",
+			"frame_index": 2,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "east",
+			"elapsed": 28.7400403333333,
+			"foot_point": [
+				682.0,
+				608.0
+			],
+			"frame": "carry_east_2",
+			"frame_index": 2,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "southeast",
+			"elapsed": 28.7683736666666,
+			"foot_point": [
+				684.0,
+				610.0
+			],
+			"frame": "carry_southeast_2",
+			"frame_index": 2,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "southeast",
+			"elapsed": 28.7967069999999,
+			"foot_point": [
+				685.0,
+				611.0
+			],
+			"frame": "carry_southeast_3",
+			"frame_index": 3,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "east",
+			"elapsed": 28.8250403333333,
+			"foot_point": [
+				687.0,
+				612.0
+			],
+			"frame": "carry_east_3",
+			"frame_index": 3,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "southeast",
+			"elapsed": 28.8533736666666,
+			"foot_point": [
+				688.0,
+				613.0
+			],
+			"frame": "carry_southeast_3",
+			"frame_index": 3,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "east",
+			"elapsed": 28.8817069999999,
+			"foot_point": [
+				690.0,
+				614.0
+			],
+			"frame": "carry_east_3",
+			"frame_index": 3,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "southeast",
+			"elapsed": 28.9100403333333,
+			"foot_point": [
+				691.0,
+				615.0
+			],
+			"frame": "carry_southeast_0",
+			"frame_index": 0,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "east",
+			"elapsed": 28.9383736666666,
+			"foot_point": [
+				693.0,
+				616.0
+			],
+			"frame": "carry_east_0",
+			"frame_index": 0,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "southeast",
+			"elapsed": 28.9952784285714,
+			"foot_point": [
+				696.0,
+				619.0
+			],
+			"frame": "carry_southeast_0",
+			"frame_index": 0,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "east",
+			"elapsed": 29.0236117619047,
+			"foot_point": [
+				698.0,
+				620.0
+			],
+			"frame": "carry_east_1",
+			"frame_index": 1,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "southeast",
+			"elapsed": 29.051945095238,
+			"foot_point": [
+				699.0,
+				621.0
+			],
+			"frame": "carry_southeast_1",
+			"frame_index": 1,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "east",
+			"elapsed": 29.0805165238094,
+			"foot_point": [
+				701.0,
+				622.0
+			],
+			"frame": "carry_east_1",
+			"frame_index": 1,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "southeast",
+			"elapsed": 29.1090879523809,
+			"foot_point": [
+				702.0,
+				623.0
+			],
+			"frame": "carry_southeast_1",
+			"frame_index": 1,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "southeast",
+			"elapsed": 29.1438023333333,
+			"foot_point": [
+				704.0,
+				625.0
+			],
+			"frame": "carry_southeast_2",
+			"frame_index": 2,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "east",
+			"elapsed": 29.1756153333333,
+			"foot_point": [
+				706.0,
+				626.0
+			],
+			"frame": "carry_east_2",
+			"frame_index": 2,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "southeast",
+			"elapsed": 29.2447793333333,
+			"foot_point": [
+				710.0,
+				629.0
+			],
+			"frame": "carry_southeast_3",
+			"frame_index": 3,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "east",
+			"elapsed": 29.2773213333333,
+			"foot_point": [
+				712.0,
+				630.0
+			],
+			"frame": "carry_east_3",
+			"frame_index": 3,
+			"source_remaining": 30,
+			"state": "to_base",
+			"visual_kind": "carry"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "east",
+			"elapsed": 29.3088028148147,
+			"foot_point": [
+				712.0,
+				630.0
+			],
+			"frame": "unload_2",
+			"frame_index": 2,
+			"source_remaining": 30,
+			"state": "dock_wait",
+			"visual_kind": "unload"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "east",
+			"elapsed": 29.4027718148147,
+			"foot_point": [
+				712.0,
+				630.0
+			],
+			"frame": "unload_0",
+			"frame_index": 0,
+			"source_remaining": 30,
+			"state": "dock_wait",
+			"visual_kind": "unload"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "east",
+			"elapsed": 29.5259119999999,
+			"foot_point": [
+				712.0,
+				630.0
+			],
+			"frame": "unload_1",
+			"frame_index": 1,
+			"source_remaining": 30,
+			"state": "dock_wait",
+			"visual_kind": "unload"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 3,
+			"conservation_ok": true,
+			"depot": 6,
+			"direction": "east",
+			"elapsed": 29.6050719999999,
+			"foot_point": [
+				712.0,
+				630.0
+			],
+			"frame": "unload_2",
+			"frame_index": 2,
+			"source_remaining": 30,
+			"state": "dock_wait",
+			"visual_kind": "unload"
+		},
+		{
+			"actor_id": "worker:0",
+			"carried": 0,
+			"conservation_ok": true,
+			"depot": 9,
+			"direction": "east",
+			"elapsed": 29.6328497777777,
+			"foot_point": [
+				712.0,
+				630.0
+			],
+			"frame": "idle_west_0",
+			"frame_index": 0,
+			"source_remaining": 30,
+			"state": "to_resource",
+			"visual_kind": "idle"
+		}
+	],
+	"trace_conservation_ok": true
+}

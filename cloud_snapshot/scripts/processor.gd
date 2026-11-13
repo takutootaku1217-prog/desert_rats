@@ -1,0 +1,464 @@
+class_name BaseProcessor
+extends Node2D
+## 加工設備（上の階の加工室）。レシピ単位の「注文」を受けて加工する。
+##   運搬: 倉庫から材料一式を運び込む → orders に積まれる
+##   加工: 作業者が orders を順に加工 → output（完成品）→ 作業者が倉庫へ運ぶ
+## 精錬のように炉を使うレシピは、拠点の燃料タンクから燃料を使う。
+## 見た目（文字ではなく、絵と動きで状態が分かる）: 待っている材料は投入口の上に並ぶ → 材料が投入口へ落ちる（砂ぼこり）→ 機械が動き、煙突から湯気が出る →
+##   作っている物のアイコンが下から明るく満ちていく（進み具合）→ 完成すると「きらり」と光り、出口のトレイに完成品が弾んで置かれる。
+##   燃料が足りず止まっているときは、燃料のアイコンが赤く点滅する。湯気・砂ぼこり・きらめきは効果の素材（data/effects.gd）で、図形はコードで描かない。
+
+const ORDER_CAP := 3
+## 機械まわりの位置（足元の中心からのワールドのpx。機械の絵 assets/base/machine.png に合わせた場所）
+const HOPPER := Vector2(-32.0, -96.0)      # 投入口（左上のじょうご）の口
+const VENT := Vector2(20.0, -92.0)         # 煙突の先（湯気）
+const CHUTE := Vector2(46.0, -14.0)        # 出口（完成品が出てくる所）
+const TRAY_X := 70.0                       # 出力トレイの左端
+const GAUGE_POS := Vector2(90.0, -72.0)    # 「作っている物」のアイコン（進み具合）の中心
+const STOCK_POS := Vector2(76.0, -36.0)    # 作業場の材料（手で運ばれた材料）のアイコンを並べる先頭の中心
+const STOCK_DX := 28.0
+const STOCK_SLOTS := 3                     # 並べる種類の数（それ以上は「＋n」）
+const DROP_SECONDS := 0.4                  # 材料が投入口へ落ちるアニメの長さ
+const POP_SECONDS := 0.35                  # 完成品がトレイに弾んで現れる長さ
+
+# 共有キューに対し作業中の材料・進捗・出力・担当者は枠ごとに独立。
+var primary: BaseProcessor = null
+var second: BaseProcessor = null
+var orders: Array = []       # 加工待ちのレシピ（Dictionary）
+var incoming: Array = []     # 運搬中のレシピ（予約）
+var current := {}            # 加工中のレシピ（空 = なし）
+var progress := 0.0
+var batch_output := false    # 現在の出力は複数回の手動注文由来。単発/自動回収の挙動は維持。
+var output: Array = []       # 完成して取り出し待ちの加工品（Item）
+var worker = null            # 作業中の Worker
+var total_done := 0          # 加工した回数（確認用）
+var waiting_fuel := false    # 燃料がなくて炉のレシピが止まっている
+var _last_work_ms := -10000
+var _last_station := ""      # いま（直前に）作業していた設備（"" = 加工設備。レシピの "station"）
+## 作業場の材料置き場（加工室＝加工設備＋ワークベンチ）。倉庫とは別の置き場で、仲間が運ぶまで材料は移らない（Main.request_transfer）。
+## 手動の制作（制作画面。Main.request_craft）は、ここの材料だけを使う。自動の加工（choose_recipe → 運搬 → orders）は、これを使わない（これまでのまま）。
+var stock := Inventory.new()
+var _steam: FxSprite         # 煙突の湯気（加工中だけ出る。効果の素材）
+var _drops: Array = []       # 投入口へ落ちている材料 [{item, t0（ms）}]（見た目だけ）
+var _out_times: Array = []   # output と同じ並び。その完成品が出てきた時刻（ms。弾んで現れる動き用。見た目だけ）
+
+
+func _init() -> void:
+	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+
+
+func _ready() -> void:
+	if primary == null:
+		second = BaseProcessor.new()
+		second.primary = self
+		get_parent().add_child.call_deferred(second)
+		second.hide()
+		share_queues()
+	_steam = FxSprite.spawn(self, "proc_steam", VENT)
+	if _steam != null:
+		_steam.set_playing(false)
+
+
+
+func share_queues() -> void:
+	if second != null:
+		second.orders = orders
+		second.incoming = incoming
+		second.stock = stock
+
+func lanes() -> Array:
+	var p: BaseProcessor = primary if primary != null else self
+	return [p, p.second] if p.second != null else [p]
+
+func lane(index: int) -> BaseProcessor:
+	return lanes()[clampi(index,0,lanes().size()-1)]
+
+func free_lane() -> int:
+	for i in lanes().size():
+		if i == 1 and not base().game.has_facility("parallel_bench"): continue
+		if lane(i).has_work_for_worker(): return i
+	return -1
+
+func active_recipes() -> Array:
+	var result := []
+	for p in lanes():
+		if not p.current.is_empty(): result.append(p.current)
+	return result
+
+func all_output() -> Array:
+	var result := []
+	for p in lanes(): result.append_array(p.output)
+	return result
+
+func base():
+	return get_parent()
+
+
+## 空き枠。燃料待ちで止まっている注文は数えない（燃料を作る注文が入れなくなって詰むのを防ぐ）。
+func free_slots() -> int:
+	var active := 0
+	for r in orders:
+		if r["tank_fuel"] <= 0.0 or base().fuel >= r["tank_fuel"]:
+			active += 1
+	return ORDER_CAP - active - incoming.size()
+
+
+func reserve(recipe: Dictionary) -> void:
+	incoming.append(recipe)
+
+
+## 運搬をやめた（材料は倉庫に残る／戻る）。建設の依頼は、待ちに戻す（依頼が消えないように）。
+func cancel_reservation(recipe: Dictionary) -> void:
+	_drop_reservation(recipe)
+	if recipe.get("player_order",false): base().game.restore_order(recipe)
+	if recipe.has("build"):
+		base().game.requeue_build(recipe["build"])
+
+
+func _drop_reservation(recipe: Dictionary) -> void:
+	var i := incoming.find(recipe)
+	if i >= 0:
+		incoming.remove_at(i)
+
+
+func receive(recipe: Dictionary) -> void:
+	_drop_reservation(recipe)
+	_accept(recipe)
+
+
+## 手動の制作の注文（作業場の材料は、呼ぶ側が stock から取り出してある）。加工の仕組みは、自動の注文と同じ。
+func receive_manual(recipe: Dictionary) -> void:
+	recipe["manual"] = true
+	_accept(recipe)
+
+
+## 注文を積む（材料は届いている）
+func _accept(recipe: Dictionary) -> void:
+	orders.append(recipe)
+	# 材料が入った見た目（投入口へ落ちる／設備の場所で砂ぼこり）
+	if recipe.get("station", "") == "":
+		_drops.append({"item": _first_input(recipe), "t0": Time.get_ticks_msec()})
+		FxSprite.spawn(self, "proc_drop", HOPPER + Vector2(0.0, 8.0))
+	else:
+		FxSprite.spawn(self, "proc_drop", to_local(station_point(recipe)))
+
+
+## 注文（加工待ち・加工中）に割り当て済みの材料の合計 {Item: 個数}（作業場の見せ方用。stock は、まだ注文になっていない材料）
+func committed_inputs() -> Dictionary:
+	var d := {}
+	var all: Array = orders.duplicate()
+	all.append_array(active_recipes())
+	for r in all:
+		for it in r["in"]:
+			d[it] = int(d.get(it, 0)) + int(r["in"][it])
+	return d
+
+
+## これから出来上がる予定の数（作りすぎないための計算に使う）
+func pending_of(item: int) -> int:
+	var n := 0
+	for r in orders + incoming:
+		if r["out"] == item:
+			n += r["n"]
+	for r in active_recipes():
+		if r["out"] == item: n += r["n"]
+	for o in all_output():
+		if o == item:
+			n += 1
+	return n
+
+
+## 運搬中・加工待ち・作業中の、設備 id の建設の数（建てすぎないための計算に使う）
+func pending_build(id: String) -> int:
+	var n := 0
+	for r in orders + incoming:
+		if r.get("build", "") == id:
+			n += 1
+	for r in active_recipes():
+		if r.get("build", "") == id: n += 1
+	return n
+
+
+## 設備 station で作業する場所（足元）。"" は加工設備。
+func station_point(recipe: Dictionary) -> Vector2:
+	var st: String = recipe.get("station", "")
+	return base().facility_point("parallel_bench") if primary != null else (global_position if st == "" else base().facility_point(st))
+
+
+## 作業者がいま向かう場所（作業中のレシピ、なければ次に始まるレシピの設備）
+func work_point() -> Vector2:
+	var r: Dictionary = current if not current.is_empty() else _peek_next()
+	return station_point(r)
+
+
+func packed_output_blocked() -> bool:
+	return false # 出力は既に保有重量に含む。内部収納を満載で止めない。
+
+
+func has_work_for_worker() -> bool:
+	if packed_output_blocked(): return false
+	if worker != null:
+		return false
+	if not output.is_empty() or not current.is_empty():
+		return true
+	return not orders.is_empty() and not only_blocked()
+
+
+func take_output() -> int:
+	if not _out_times.is_empty():
+		_out_times.pop_front()
+	var item: int = output.pop_front()
+	if output.is_empty(): batch_output = false
+	return item
+
+
+## 同一品目のまとめ注文は、持てる数に近づくまで単位加工を続ける。
+## 燃料待ち/別レシピ/注文終了なら完成品を持ち帰り、待ち続けない。
+func continue_batch(limit: int) -> bool:
+	if output.is_empty() or not batch_output: return false
+	var item: int = output[0]
+	var n := 0
+	for it in output:
+		if it != item: break
+		n += 1
+	if n >= limit: return false
+	var r: Dictionary = current if not current.is_empty() else _peek_next()
+	return r.get("batch", false) and r.get("out", -1) == item
+
+
+## 保有済みの同種完成品を、担当者の個数上限までまとめて回収する。
+func take_output_stack(limit: int) -> Dictionary:
+	if output.is_empty(): return {}
+	limit = limit if batch_output else 1
+	var item: int = output[0]
+	var n := 0
+	while not output.is_empty() and output[0] == item and n < maxi(1,limit):
+		take_output()
+		n += 1
+	return {"item":item,"n":n}
+
+
+func manual_status(id: String) -> Dictionary:
+	var d := {"queued":0,"loaded":0,"active":0,"progress":0.0,"time":0.0,"output":0}
+	for q in base().game.craft_queue + base().game.production_orders:
+		if q["id"] == id: d.queued += int(q["n"])
+	for r in orders:
+		if r.get("manual",false) and r["id"] == id: d.loaded += 1
+	for p in lanes():
+		if p.current.get("manual",false) and p.current.get("id","") == id:
+			d.active += 1; d.progress += p.progress; d.time += p.current["time"]
+	var recipe := GameData.recipe_by_id(id)
+	for it in all_output():
+		if it == recipe.get("out",-1): d.output += 1
+	return d
+
+
+## 作業者がいる間だけ呼ばれる。speed_of(field) = 作業者の腕前などの倍率。
+func work(delta: float, speed_of: Callable) -> void:
+	_last_work_ms = Time.get_ticks_msec()
+	if current.is_empty():
+		_start_next()
+		if current.is_empty():
+			return
+	_last_station = current.get("station", "")
+	var b = base()
+	var mult: float = speed_of.call(current["field"])
+	if b.condition(GameData.Part.MACHINE) < GameData.PART_BAD:
+		mult *= 0.5                      # 加工設備が傷んでいると遅い
+	progress += delta * mult
+	b.wear(GameData.Part.MACHINE, GameData.MACHINE_WEAR_PER_SEC * delta)
+	if progress >= current["time"]:
+		var done: Dictionary = current
+		if done.has("build"):
+			b.game.finish_build(done["build"])            # 建設: 設備が拠点にできる（アイテムは出ない）
+		else:
+			var grouped: bool = done.get("manual",false) and done.get("batch",false)
+			batch_output = grouped if output.is_empty() else (batch_output and grouped)
+			for i in done["n"]:
+				output.append(done["out"])
+				_out_times.append(Time.get_ticks_msec())
+			# 完成の見た目（きらり）。加工設備なら出口、ワークベンチなどならその設備の場所
+			if done.get("station", "") == "":
+				FxSprite.spawn(self, "proc_done", CHUTE + Vector2(0.0, -6.0))
+			else:
+				FxSprite.spawn(self, "proc_done", to_local(station_point(done)) + Vector2(0.0, -30.0))
+		if primary != null: primary.total_done += 1
+		else: total_done += 1
+		if done.get("manual", false):
+			b.game.total_crafted_by_hand += 1
+		current = {}
+		progress = 0.0
+		b.game.world.record_recipe_completed(done)
+
+
+## 次に始まる注文（燃料が足りて、すぐ始められる先頭のもの。なければ空）。作業者が向かう設備を決めるのに使う。
+func _peek_next() -> Dictionary:
+	orders.sort_custom(func(a,b): return ProductionPlan.rank(base().game,a)>ProductionPlan.rank(base().game,b))
+	for r in orders:
+		if r["tank_fuel"] <= 0.0 or base().fuel >= r["tank_fuel"]:
+			return r
+	return {}
+
+
+## 次に加工する注文を選ぶ。炉を使うレシピは燃料が足りる時だけ。
+func _start_next() -> void:
+	_peek_next()
+	waiting_fuel = false
+	for i in orders.size():
+		var r: Dictionary = orders[i]
+		if r["tank_fuel"] > 0.0 and base().fuel < r["tank_fuel"]:
+			waiting_fuel = true
+			continue
+		if r["tank_fuel"] > 0.0:
+			base().consume_fuel(r["tank_fuel"])
+		current = r
+		progress = 0.0
+		orders.remove_at(i)
+		return
+
+
+## 燃料待ちの注文しか残っていないか（作業者が張り付かないように）
+func only_blocked() -> bool:
+	if not current.is_empty() or not output.is_empty():
+		return false
+	for r in orders:
+		if r["tank_fuel"] <= 0.0 or base().fuel >= r["tank_fuel"]:
+			return false
+	return true
+
+
+func is_active() -> bool:
+	return Time.get_ticks_msec() - _last_work_ms < 250
+
+
+## いま設備 id（"" = 加工設備）で作業中か（設備の動きの表示に使う）
+func is_active_at(id: String) -> bool:
+	return is_active() and _last_station == id
+
+
+func access_point() -> Vector2:
+	return global_position
+
+
+func _process(_delta: float) -> void:
+	var presentation: Dictionary = base().large_interior_presentation_at(global_position)
+	var high_art_replaces_processor: bool = base().high_fidelity_workshop_art_active()
+	if _steam != null:
+		# FxSprite is a child with the logical node transform.  Hide this one
+		# purely visual effect while the processor itself is projected into the
+		# large cutaway, rather than leaving steam at the old coordinate.
+		_steam.visible = presentation.is_empty() and not high_art_replaces_processor
+		_steam.set_playing(is_active_at("") and presentation.is_empty() and not high_art_replaces_processor)
+	queue_redraw()
+
+
+func _first_input(r: Dictionary) -> int:
+	return r["in"].keys()[0]
+
+
+func _draw() -> void:
+	var presentation: Dictionary = base().large_interior_presentation_at(global_position)
+	var high_art_replaces_machine: bool = base().high_fidelity_workshop_art_active()
+	if not presentation.is_empty():
+		var visual_position: Vector2 = presentation["position"]
+		var visual_scale := float(presentation["scale"])
+		draw_set_transform(visual_position - global_position, 0.0, Vector2.ONE * visual_scale)
+	var active := is_active_at("")               # ワークベンチで作業しているときは、加工設備は動かさない
+	var frame := 0
+	if active:
+		frame = 1 + (int(Time.get_ticks_msec() / 220) % 2)
+	if not high_art_replaces_machine:
+		var sheet := GameData.tex("res://assets/base/machine.png")
+		var mspec := ArtSpec.MACHINE                                    # 基準の大きさ（ユニット）。絵の細かさは絵の幅から自動で決まる
+		var msize := ArtSpec.px_size(mspec["cell"])
+		draw_texture_rect_region(sheet, Rect2(Vector2(-msize.x / 2.0, -msize.y), msize), ArtSpec.frame_src(sheet, mspec, frame))
+	# The high-resolution workshop art replaces only the old machine sprite.
+	# Keep live progress, input, output and fuel signals projected into the same
+	# bay so real processing is still visible and never masquerades as a static
+	# decorative room.
+	# 進捗バー（作業している設備の足元。加工設備なら床の上、ワークベンチならその足元）
+	var r := progress / float(current["time"]) if not current.is_empty() else 0.0
+	var bx := 0.0
+	var bw := 112.0
+	var bar_y := -12.0 if not presentation.is_empty() else 3.0
+	if not current.is_empty() and current.get("station", "") != "":
+		bx = station_point(current).x - global_position.x
+		bw = 64.0
+	draw_rect(Rect2(bx - bw / 2.0, bar_y, bw, 8), Color(0.08, 0.07, 0.06, 0.9))
+	draw_rect(Rect2(bx - bw / 2.0 + 4.0, bar_y + 2.0, (bw - 8.0) * r, 4), Color("7be07b"))
+	var now := Time.get_ticks_msec()
+	# 待っている材料: 投入口（じょうご）の中に並ぶ（アイコン。文字ではない）
+	for i in mini(orders.size(), 4):
+		GameData.draw_item(self, _first_input(orders[i]), HOPPER + Vector2(-15.0 + i * 15.0, 12.0), 0.5)
+	# 材料が投入口へ落ちていく
+	for d in _drops.duplicate():
+		var age := float(now - int(d["t0"])) / 1000.0
+		if age >= DROP_SECONDS:
+			_drops.erase(d)
+			continue
+		var u := age / DROP_SECONDS
+		var sz := ArtSpec.px_size(ArtSpec.ITEM) * 0.5 * (1.0 - 0.4 * u)
+		var at := HOPPER + Vector2(0.0, -12.0 + 30.0 * u * u)
+		draw_texture_rect(GameData.item_tex(int(d["item"])), Rect2(at - sz / 2.0, sz), false, Color(1, 1, 1, 1.0 - 0.6 * u))
+	# 作っている物: アイコンそのものが進み具合（下から明るく満ちる）。個数は下の点。
+	# 燃料が足りず止まっているときは、燃料のアイコンが赤く点滅する。
+	if not current.is_empty() and int(current["out"]) >= 0:
+		_draw_gauge_plate(Color(0.99, 0.9, 0.55, 0.9))
+		GameData.draw_item_fill(self, int(current["out"]), GAUGE_POS, 0.75, r)
+		var n := int(current["n"])
+		for k in n:
+			draw_rect(Rect2(GAUGE_POS.x + (float(k) - (n - 1) / 2.0) * 8.0 - 2.0, GAUGE_POS.y + 27.0, 4, 4), Color("fde68a"))
+	elif current.is_empty() and waiting_fuel and not orders.is_empty():
+		var blink := 0.5 + 0.5 * sin(float(now) / 130.0)
+		_draw_gauge_plate(Color(0.95, 0.35, 0.28, 0.9))
+		GameData.draw_item_fill(self, GameData.Item.FUEL, GAUGE_POS, 0.75, 1.0, Color(1.0, 0.45 + 0.4 * blink, 0.4 + 0.3 * blink))
+	# 出力トレイの完成品: 出てきたときに弾んで現れ、取りに来るまで、ゆらゆら揺れて目立つ
+	for i in mini(output.size(), 4):
+		var age2 := 999.0
+		if i < _out_times.size():
+			age2 = float(now - int(_out_times[i])) / 1000.0
+		var scale := 0.6
+		var lift := 0.0
+		if age2 < POP_SECONDS:
+			var u2 := age2 / POP_SECONDS
+			scale = 0.6 * (0.3 + 0.7 * u2) + 0.1 * sin(u2 * PI)
+			lift = -10.0 * sin(u2 * PI)
+		else:
+			lift = -2.0 * sin(float(now) / 260.0 + float(i))
+		GameData.draw_item(self, output[i], Vector2(TRAY_X + i * 26.0, -14.0 + lift), scale)
+	_draw_stock()
+	if not presentation.is_empty():
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+
+## 作業場の材料（手で運ばれて stock に入っている材料）を、出口のそばに、アイテムのアイコンと個数で見せる（見るだけ。倉庫とは別の置き場）。
+## 数字はアイコンの右下の中。数字の表示は UIKit.show_icon_numbers に従う。
+func _draw_stock() -> void:
+	var shown := 0
+	var extra := 0
+	var isz := ArtSpec.px_size(ArtSpec.ITEM) * 0.5
+	for it in ItemDB.all():
+		var n: int = stock.count(it)
+		if n <= 0:
+			continue
+		if shown >= STOCK_SLOTS:
+			extra += 1
+			continue
+		var at := STOCK_POS + Vector2(STOCK_DX * float(shown), 0.0)
+		GameData.draw_item(self, it, at, 0.5)
+		if UIKit.show_icon_numbers:
+			var txt := str(n)
+			var f := GameData.font()
+			var p := at + Vector2(-isz.x / 2.0, isz.y / 2.0)
+			draw_string_outline(f, p, txt, HORIZONTAL_ALIGNMENT_RIGHT, isz.x + 2.0, 11, 4, Color(0.1, 0.06, 0.04, 0.9))
+			draw_string(f, p, txt, HORIZONTAL_ALIGNMENT_RIGHT, isz.x + 2.0, 11, Color("fff7dc"))
+		shown += 1
+	if extra > 0 and UIKit.show_icon_numbers:
+		GameData.draw_text(self, STOCK_POS + Vector2(STOCK_DX * float(STOCK_SLOTS) - 4.0, 6.0), "＋%d" % extra, 12, Color("fde68a"), 30.0, HORIZONTAL_ALIGNMENT_LEFT)
+
+
+## 「作っている物」のアイコンの下地（仮。将来、画像の枠に差し替えられる）。edge = 枠の色
+func _draw_gauge_plate(edge: Color) -> void:
+	var box := Rect2(GAUGE_POS - Vector2(22.0, 22.0), Vector2(44.0, 44.0))
+	draw_rect(box, Color(0.08, 0.09, 0.11, 0.7))
+	draw_rect(box, edge, false, 2.0)

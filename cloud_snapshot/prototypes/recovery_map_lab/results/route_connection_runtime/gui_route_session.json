@@ -1,0 +1,306 @@
+{
+	"actors": {
+		"worker:0": {
+			"attack_per_second": 15.3615,
+			"calm": 0.0,
+			"carry_item": -1,
+			"carry_limit": 3,
+			"carry_n": 0,
+			"combat_target": "",
+			"direct_depot_loop": false,
+			"down": false,
+			"entry_fatigue": 17.7945218592604,
+			"entry_field_tool_kit": {},
+			"entry_gather_ability": 1.388625,
+			"entry_gather_rank": 3,
+			"entry_hp": 100.0,
+			"entry_stress": 0.0,
+			"entry_tools": {},
+			"entry_weapon": -1,
+			"entry_work_support": -1,
+			"fatigue": 40.7572950092611,
+			"field_tool_kit": {},
+			"hp": 100.0,
+			"hunger": 55.1570205135276,
+			"life_move_mult": 0.95,
+			"mental": 1,
+			"name": "ネズ吉",
+			"path": [
+				[
+					430.0,
+					335.0
+				],
+				[
+					150.0,
+					535.0
+				]
+			],
+			"path_index": 2,
+			"path_speed": 230.0,
+			"presentation_hidden": false,
+			"resource_id": "",
+			"resume_state": "",
+			"role": "harvest",
+			"route": "backpack_step",
+			"seen_route_revision": 0,
+			"state": "idle",
+			"stress": 0.0,
+			"tools": {},
+			"wait_reason": "",
+			"weapon": -1,
+			"weapon_range": 42.0,
+			"work_left": -0.0355919999999999,
+			"work_support": -1,
+			"worker_index": 0,
+			"x": 150.0,
+			"y": 535.0
+		},
+		"worker:1": {
+			"attack_per_second": 16.9785,
+			"calm": 0.0,
+			"carry_item": -1,
+			"carry_limit": 3,
+			"carry_n": 0,
+			"combat_target": "",
+			"direct_depot_loop": false,
+			"down": false,
+			"entry_fatigue": 14.7390177111118,
+			"entry_field_tool_kit": {},
+			"entry_gather_ability": 1.267875,
+			"entry_gather_rank": 2,
+			"entry_hp": 100.0,
+			"entry_stress": 0.0,
+			"entry_tools": {},
+			"entry_weapon": -1,
+			"entry_work_support": -1,
+			"fatigue": 27.0332656541613,
+			"field_tool_kit": {},
+			"hp": 100.0,
+			"hunger": 55.1570205135276,
+			"life_move_mult": 0.95,
+			"mental": 1,
+			"name": "チュー太",
+			"path": [
+				[
+					430.0,
+					335.0
+				],
+				[
+					150.0,
+					535.0
+				]
+			],
+			"path_index": 2,
+			"path_speed": 230.0,
+			"presentation_hidden": false,
+			"resource_id": "",
+			"resume_state": "",
+			"role": "carry",
+			"route": "backpack_step",
+			"seen_route_revision": 0,
+			"state": "idle",
+			"stress": 0.0,
+			"tools": {},
+			"wait_reason": "",
+			"weapon": -1,
+			"weapon_range": 42.0,
+			"work_left": 0.0,
+			"work_support": -1,
+			"worker_index": 1,
+			"x": 150.0,
+			"y": 535.0
+		},
+		"worker:2": {
+			"attack_per_second": 13.4211,
+			"calm": 0.0,
+			"carry_item": -1,
+			"carry_limit": 3,
+			"carry_n": 0,
+			"combat_target": "",
+			"direct_depot_loop": false,
+			"down": false,
+			"entry_fatigue": 14.1674342888899,
+			"entry_field_tool_kit": {},
+			"entry_gather_ability": 1.002225,
+			"entry_gather_rank": 0,
+			"entry_hp": 100.0,
+			"entry_stress": 0.0,
+			"entry_tools": {},
+			"entry_weapon": -1,
+			"entry_work_support": -1,
+			"fatigue": 99.6740986444504,
+			"field_tool_kit": {},
+			"hp": 100.0,
+			"hunger": 55.1570205135276,
+			"life_move_mult": 0.6,
+			"mental": 4,
+			"name": "モモ",
+			"path": [
+				[
+					430.0,
+					335.0
+				],
+				[
+					150.0,
+					535.0
+				]
+			],
+			"path_index": 2,
+			"path_speed": 230.0,
+			"presentation_hidden": false,
+			"resource_id": "",
+			"resume_state": "",
+			"role": "escort",
+			"route": "backpack_step",
+			"seen_route_revision": 0,
+			"state": "idle",
+			"stress": 0.0,
+			"tools": {},
+			"wait_reason": "",
+			"weapon": -1,
+			"weapon_range": 42.0,
+			"work_left": 0.0,
+			"work_support": -1,
+			"worker_index": 2,
+			"x": 150.0,
+			"y": 535.0
+		}
+	},
+	"all_routes_closed": false,
+	"capacity_paused": false,
+	"commit_summary": {},
+	"committed": false,
+	"depot_stock": {
+		"4": 7,
+		"5": 24,
+		"6": 6
+	},
+	"dock_busy": {},
+	"dock_count": 1,
+	"dock_queue": [],
+	"elapsed": 393.307925333341,
+	"entry_director_elapsed": 54.4211909999983,
+	"event_log": [
+		{
+			"at": 0.0,
+			"text": "C 古い採石場へ既存仲間3人で入場"
+		},
+		{
+			"at": 4.99241166666667,
+			"text": "worker:0 が有限資源を3個回収"
+		},
+		{
+			"at": 12.040341,
+			"text": "worker:0 が有限資源を3個回収"
+		},
+		{
+			"at": 19.0701396666667,
+			"text": "worker:0 が有限資源を3個回収"
+		},
+		{
+			"at": 26.1449486666667,
+			"text": "worker:0 が有限資源を3個回収"
+		},
+		{
+			"at": 33.150045,
+			"text": "worker:0 が有限資源を3個回収"
+		},
+		{
+			"at": 40.3787586666666,
+			"text": "worker:0 が有限資源を3個回収"
+		},
+		{
+			"at": 47.7037586666666,
+			"text": "worker:0 が有限資源を3個回収"
+		},
+		{
+			"at": 55.0762229999998,
+			"text": "worker:0 が有限資源を3個回収"
+		},
+		{
+			"at": 62.445425333333,
+			"text": "worker:0 が有限資源を3個回収"
+		},
+		{
+			"at": 69.7380179259257,
+			"text": "worker:0 が有限資源を3個回収"
+		},
+		{
+			"at": 77.1287586666665,
+			"text": "worker:0 が有限資源を3個回収"
+		},
+		{
+			"at": 84.485275,
+			"text": "worker:0 が有限資源を3個回収"
+		},
+		{
+			"at": 91.8550986666668,
+			"text": "worker:0 が有限資源を1個回収"
+		},
+		{
+			"at": 386.624558000007,
+			"text": "全班に現地帰還を指示"
+		},
+		{
+			"at": 393.307925333341,
+			"text": "現地の手持ち・予約・relay・入口列を解消。横視点への復帰待ち"
+		}
+	],
+	"field_capacity_limit_weight": 1000000000,
+	"field_frame_exchange": {},
+	"field_tool_swap": {},
+	"gate_closed": false,
+	"intermediate_access": "blocked",
+	"life_clock_paid": 393.307925333341,
+	"life_clock_token": "1793824844:778240360:122993771978",
+	"maintenance_actor_id": "",
+	"mine_path_engineering": true,
+	"outpost_cleared": true,
+	"outpost_enabled": false,
+	"outpost_enemies": {},
+	"outpost_retreats": 0,
+	"parking_slot": "entry",
+	"path_requests": 57,
+	"phase": "ready_to_exit",
+	"relay_stock": {},
+	"reposition_seconds_left": 0.0,
+	"reposition_target_slot": "",
+	"reservations": {},
+	"resources": {
+		"entity_29": {
+			"initial": 12,
+			"item": 5,
+			"kind": "rock",
+			"remaining": 0,
+			"reservation": ""
+		},
+		"entity_30": {
+			"initial": 12,
+			"item": 5,
+			"kind": "rock",
+			"remaining": 0,
+			"reservation": ""
+		},
+		"entity_31": {
+			"initial": 6,
+			"item": 6,
+			"kind": "vein",
+			"remaining": 0,
+			"reservation": ""
+		},
+		"entity_32": {
+			"initial": 7,
+			"item": 4,
+			"kind": "tree",
+			"remaining": 0,
+			"reservation": ""
+		}
+	},
+	"return_handcart_exchange": {},
+	"route_revision": 0,
+	"schema": 8,
+	"session_id": "mine-arrival-001",
+	"single_worker_actor_id": "",
+	"single_worker_demo": false,
+	"vertical_slice": false
+}

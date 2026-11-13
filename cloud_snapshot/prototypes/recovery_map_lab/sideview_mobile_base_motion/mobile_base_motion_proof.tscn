@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://prototypes/recovery_map_lab/sideview_mobile_base_motion/mobile_base_motion_proof.gd" id="1_renderer"]
+
+[node name="MobileBaseMotionProof" type="Node2D"]
+texture_filter = 1
+script = ExtResource("1_renderer")

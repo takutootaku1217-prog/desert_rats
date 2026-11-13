@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "kind": "cloud_delta_v11_normal_haul_frame_progression",
+  "created_utc": "2026-10-28T07:19:36Z",
+  "baseline": {
+    "branch": "codex/recovery-map-scale-lab",
+    "commit": "1348700c775822108df91ed48a21ea73bbd9792a",
+    "restoration_zip": "recovery-route-bridge-1348700.zip",
+    "restoration_zip_sha256": "72dd15252606eeae67e8b55c8a4cbaf8bcc2fc9c72c366771b91457f5350c79d",
+    "restoration_manifest_files_verified": 532,
+    "history_note": "The restored archive contains no .git. This is a checked v11 overlay against the preserved v10 checkpoint, not reconstructed history."
+  },
+  "revision": {
+    "name": "v11-normal-haul-frame-progression",
+    "supersedes": "v10 only for this new normal-role progression overlay; it does not replace v10 single-worker evidence",
+    "status": "Normal-role progression verification complete; final character art, animation, vehicle work, Windows validation, and OS-level input remain outside this checkpoint.",
+    "mode_scope": "Normal harvest/carry/escort only. single_worker_demo is neither enabled nor used as this evidence."
+  },
+  "benchmark": {
+    "seed": 104729,
+    "fixed_tick_seconds": 0.2,
+    "benchmark_seconds": 20.0,
+    "benchmark_ticks": 100,
+    "outpost_enabled": false,
+    "dock_count": 1,
+    "prepared_checkpoint": "existing hide=1 and wood=5; first normal C return supplies real iron ore; no hide is claimed as quarry loot",
+    "cost": {
+      "workbench_wood": 3,
+      "haul_frame_wood": 2,
+      "haul_frame_hide": 1,
+      "haul_frame_iron": 1,
+      "smelt_tank_fuel": 3
+    },
+    "all_case_results": {
+      "baseline": {"depot": 4, "source_remaining": 7, "carrier_wait_relay_seconds": 14.0},
+      "harvester_frame": {"depot": 9, "source_remaining": 0, "carrier_wait_relay_seconds": 8.2},
+      "carrier_frame": {"depot": 4, "source_remaining": 7, "carrier_wait_relay_seconds": 14.0}
+    },
+    "selection": "harvester_frame only for this equal-condition finite-source scenario; it is not an unlimited/general balance claim"
+  },
+  "presentation": {
+    "authority": "CanyonCrewViews and the normal HUD read immutable session.actor snapshots only; no Main or RouteSession authority was changed.",
+    "temporary_asset": "existing assets/resources/item_haul_frame.png, transparent 48x48, nearest filter, scale 1x, integer position, Sprite2D behind the normal v2 worker",
+    "not_final_art": true
+  },
+  "accepted_evidence": {
+    "runtime": "Linux Godot 4.6.3 X11 viewport, 1280x720 post-draw PNG stills. Deterministic 0.2-second session stepping; no real-time video or animation claim.",
+    "normal_hud": {
+      "path": "project/prototypes/recovery_map_lab/evidence/normal_haul_frame_runtime_v11/normal_haul_frame_hud_departure.png",
+      "sha256": "c73c13860297d01542639351edc837c24ff954e83dc9c67f6b9e670e54624b16"
+    },
+    "harvester_loaded": {
+      "path": "project/prototypes/recovery_map_lab/evidence/normal_haul_frame_runtime_v11/normal_haul_frame_harvester_loaded.png",
+      "sha256": "d925d0817d5c005351ccf2d8f76d80a8b041a882fdacce4e52748c842471debd"
+    },
+    "depot_after_unload": {
+      "path": "project/prototypes/recovery_map_lab/evidence/normal_haul_frame_runtime_v11/normal_haul_frame_depot_after_unload.png",
+      "sha256": "095b29ae1a03b0940049f7afef69c6090b72fecfce4e06555db66998fb3360b2"
+    },
+    "benchmark_json": {
+      "path": "project/prototypes/recovery_map_lab/results/route_connection_runtime/normal_haul_frame_progression.json",
+      "sha256": "1d66e942010ae5ee745eb66d6c6ceee3687fae18cec0ff614e3828182ede1075"
+    },
+    "capture_json": {
+      "path": "project/prototypes/recovery_map_lab/results/route_connection_runtime/normal_haul_frame_render_capture_v11.json",
+      "sha256": "ced7ee051ba261af764ed493eb2933e3532b9ff0df1501db69a583d328431ad5"
+    }
+  },
+  "verification": {
+    "godot_linux": "4.6.3",
+    "passed": [
+      "tools/test_normal_haul_frame_progression.gd",
+      "tools/test_canyon_recovery_hub.gd",
+      "tools/test_a_recovery_bridge.gd",
+      "tools/test_normal_haul_frame_capture_contract.gd",
+      "tools/test_normal_haul_frame_capture_result.gd",
+      "tools/capture_normal_haul_frame_progression.gd on X11"
+    ],
+    "covered_boundaries": ["conservation", "capture entry resource/role/dock/seed linkage", "closure/reopen", "project-local save/load", "full storage rejection", "recall", "single commit", "normal-role regression"],
+    "unverified": ["Windows/Godot 4.7.2", "OS-level mouse input", "audio", "performance", "normal user save after equip then process restart/load/C re-entry", "final worker-art adoption", "final all-direction animation"]
+  },
+  "archive": {
+    "expected_filename": "canyon_recovery_hub_cloud_delta_v11_normal_haul_frame_20261028.zip",
+    "delivery_status": "A checksum-verified workspace ZIP plus sibling SHA256 sidecar exists for PC synchronization. The versioned personal Library update is blocked before transfer by authentication; the existing v10 Library item remains version 9.",
+    "layout": "Every content entry is rooted at project/. SHA256SUMS.txt is archive-root metadata; the ZIP SHA-256 is stored in a sibling .zip.sha256 file rather than recursively inside the ZIP.",
+    "included_project_file_count": 17,
+    "excludes": [".git", ".godot", "normal user saves", "v10 accepted MP4/JSON", "rejected legacy capture material", "Linux 4.6.3 generated import rewrites outside this overlay"]
+  },
+  "source_delta_sha256": {
+    "project/bridge/route_connection_adapter.gd": "a324a6aa15d1e8ea1ee3083e994a6fc3cd5cc5c39f752bf750c74c9b6ec9585f",
+    "project/scenes/canyon/components/canyon_crew_views.gd": "82a38763f996a8a90c2d449a7166c17eda593d129e11149439f5a1d499df7af2",
+    "project/tools/test_canyon_recovery_hub.gd": "fe93c9ae226746d4e45e5751ed3a59e0b21b13683e09dd7ef1e153df046e1cfd",
+    "project/tools/test_normal_haul_frame_progression.gd": "c25e7aa1dcadc138984439ac41719e95d58d53dfba29e475299eeed7e7933460",
+    "project/tools/test_normal_haul_frame_capture_contract.gd": "29f797b9bfa09cb8e551269efa412cae56f8ee1bfa6e7c2611ab49eba695c5ae",
+    "project/tools/test_normal_haul_frame_capture_result.gd": "9640d86b37713338126e10c488833e3a44f79a1f8a89e9baa8c17696c899f117",
+    "project/tools/capture_normal_haul_frame_progression.gd": "48f410d06f6cf0e38c56c1d4ef80acf1e7258f73c4008ff3649f185f0c62e240",
+    "project/docs/superpowers/specs/2026-10-28-normal-haul-frame-progression-design.md": "650bf2975912283c19e06df515d95ebd6533a2f241d8f5702bb3b07d1138915f",
+    "project/docs/superpowers/plans/2026-10-28-normal-haul-frame-progression.md": "9a9de27780888a243d009f8f096bf3ee157503aa06b141143c1114988d07bf6d",
+    "project/docs/superpowers/ledgers/2026-10-28-normal-haul-frame-progression.md": "822a62e64a89c148c406e6daff52b0bcabf9b2e11e715f6a9a57af43f7ac91f2",
+    "project/docs/cloud_handoff/NORMAL_HAUL_FRAME_PROGRESSION_VERIFICATION.md": "e317635281f3f26da548276da7026c643e67282f01f984e9e4512e453fb04241"
+  },
+  "resume": {
+    "preserve": ["v10 accepted evidence", "baseline restoration archive/history note", "normal user saves", "existing worker/v3 animation assets"],
+    "next_stage": "After PC integration, validate Windows inputs and use a separately approved final worker-art/animation pass. Do not treat this temporary support icon as final art."
+  }
+}

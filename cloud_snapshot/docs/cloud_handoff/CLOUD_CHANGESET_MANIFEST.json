@@ -1,0 +1,59 @@
+{
+  "schema_version": 4,
+  "kind": "cloud_delta_v4_single_worker_continuous_capture",
+  "created_utc": "2026-10-28T05:00:52Z",
+  "baseline": {
+    "branch": "codex/recovery-map-scale-lab",
+    "commit": "1348700c775822108df91ed48a21ea73bbd9792a",
+    "restoration_zip": "recovery-route-bridge-1348700.zip",
+    "restoration_zip_sha256": "72dd15252606eeae67e8b55c8a4cbaf8bcc2fc9c72c366771b91457f5350c79d",
+    "restoration_manifest_files_verified": 532,
+    "history_note": "The restored archive intentionally contains no .git. This is a checked overlay manifest, not reconstructed history."
+  },
+  "archive": {
+    "expected_filename": "canyon_recovery_hub_cloud_delta_v4_continuous_capture_20261028.zip",
+    "layout": "Every source entry is rooted at project/. SHA256SUMS.txt is archive-root metadata; the project manifest is intentionally not self-hashed.",
+    "sha256_manifest": "SHA256SUMS.txt",
+    "unhashed_metadata": [
+      "SHA256SUMS.txt",
+      "project/docs/cloud_handoff/CLOUD_CHANGESET_MANIFEST.json"
+    ]
+  },
+  "revision": {
+    "name": "v4-single-worker-continuous-runtime-capture",
+    "supersedes": "v3-single-worker-visible-loop",
+    "preserved_v3_local_archive": "canyon_recovery_hub_cloud_delta_v3_single_worker_20261028.zip",
+    "preserved_v3_local_archive_sha256": "00159103005345dfe88b8d19c7b9a48e22c2e133b52907a6be892739b50e156c",
+    "mode_scope": "The opt-in single_worker_demo is a verification mode. Normal multi-role session creation, world/map content, and growth rules remain unchanged."
+  },
+  "included_project_file_count": 197,
+  "selection": {
+    "includes": [
+      "final v2 canyon scene/content overlay and v3 one-worker implementation required by the original recovery-base scene",
+      "v4 capture contract and direct X11 capture source, including a guard that requires the visual loop to complete inside the movie duration",
+      "36 provisional replaceable v3 one-worker art PNGs with their existing import sidecars",
+      "v6 raw Godot X11 state PNG evidence and its JSON trace retained from v3",
+      "accepted v4 direct 1280x720 X11 10fps H.264 movie, its original same-session JSON, and eight unchanged decoded review PNGs",
+      "restoration, v2, v3, and v4 handoff/design/plan/verification documents"
+    ],
+    "excludes": [
+      ".git, .godot, normal user:// saves, and unrelated route fixtures",
+      "Godot 4.6.3-generated baseline import rewrites outside selected canyon art; review-frame import sidecars are regenerated and omitted",
+      "unused v2 diagonal bridge/sand trials and unused v1 industrial-ravine trial art",
+      "rejected continuous-capture v1 raw PNG, v2/v3 12fps metadata-gap, and v5 timing-gap artifacts",
+      "historical v2 runtime evidence already retained in the preserved v2 archive"
+    ]
+  },
+  "verification": {
+    "focused_single_worker": "Godot 4.6.3 headless focused test exited 0: three conserved cycles, save/restore, closure/reopen, recall, capacity rejection, normal-mode isolation, and video-window rejection of a cycle that occurs after a movie ends.",
+    "selected_checks": [
+      "import",
+      "canyon_recovery_hub",
+      "a_recovery_bridge",
+      "a_recovery_outpost"
+    ],
+    "selected_check_result": "Each selected Godot diagnostic exited 0 on 2026-10-28. tools/run_checks.py reports overall metadata verification failed only because the supplied baseline lacks .git.",
+    "continuous_runtime_evidence": "Accepted v4 is a real Linux X11 Godot 4.6.3 viewport movie: ffprobe decodes 130 frames at 1280x720, 10/1 fps, 13.000 seconds. The same-session trace has 134 observations, 10.033Hz mean, 146ms maximum, bridge/state phase complete, and one conserved 0-to-3 depot delivery within the movie window.",
+    "unverified": "Windows/Godot 4.7.2, OS-level mouse input, audio, final art adoption, all unload poses, high-frame-rate smoothness, and multi-cycle continuous-video stability remain unverified."
+  }
+}

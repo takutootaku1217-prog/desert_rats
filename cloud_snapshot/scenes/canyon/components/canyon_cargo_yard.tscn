@@ -1,0 +1,12 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/canyon_recovery/cargo_repair_yard.png" id="1_yard"]
+
+[node name="CanyonCargoYard" type="Node2D"]
+texture_filter = 1
+z_index = 5
+
+[node name="CargoRepairAwningAndTools" type="Sprite2D" parent="."]
+texture_filter = 1
+position = Vector2(1080, 570)
+texture = ExtResource("1_yard")

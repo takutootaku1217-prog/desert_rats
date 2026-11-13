@@ -1,0 +1,808 @@
+{
+	"baseline": {
+		"case": "baseline",
+		"entry_resources": {
+			"entity_29": {
+				"initial": 1,
+				"item": 5,
+				"remaining": 1
+			},
+			"entity_30": {
+				"initial": 0,
+				"item": 5,
+				"remaining": 0
+			},
+			"entity_31": {
+				"initial": 5,
+				"item": 6,
+				"remaining": 5
+			},
+			"entity_32": {
+				"initial": 8,
+				"item": 4,
+				"remaining": 8
+			}
+		},
+		"entry_roles": {
+			"worker:0": {
+				"carry_limit": 3,
+				"direct_depot_loop": false,
+				"presentation_hidden": false,
+				"role": "harvest",
+				"support": -1
+			},
+			"worker:1": {
+				"carry_limit": 3,
+				"direct_depot_loop": false,
+				"presentation_hidden": false,
+				"role": "carry",
+				"support": -1
+			},
+			"worker:2": {
+				"carry_limit": 3,
+				"direct_depot_loop": false,
+				"presentation_hidden": false,
+				"role": "escort",
+				"support": -1
+			}
+		},
+		"equipped_worker": -1,
+		"first_sortie": {
+			"conservation_ok": true,
+			"depot": {
+				"5": 22,
+				"6": 3
+			},
+			"elapsed": 60.8000000000003,
+			"mode": "normal_roles",
+			"ok": true,
+			"source_after": {
+				"entity_29": {
+					"initial": 11,
+					"item": 5,
+					"remaining": 0
+				},
+				"entity_30": {
+					"initial": 11,
+					"item": 5,
+					"remaining": 0
+				},
+				"entity_31": {
+					"initial": 8,
+					"item": 6,
+					"remaining": 5
+				},
+				"entity_32": {
+					"initial": 8,
+					"item": 4,
+					"remaining": 8
+				}
+			},
+			"source_before": {
+				"entity_29": {
+					"initial": 11,
+					"item": 5,
+					"remaining": 11
+				},
+				"entity_30": {
+					"initial": 11,
+					"item": 5,
+					"remaining": 11
+				},
+				"entity_31": {
+					"initial": 8,
+					"item": 6,
+					"remaining": 8
+				},
+				"entity_32": {
+					"initial": 8,
+					"item": 4,
+					"remaining": 8
+				}
+			},
+			"storage_delta": 25
+		},
+		"metrics": {
+			"carried": 3,
+			"carrier_loaded_departures": 4,
+			"carrier_wait_relay_seconds": 16.8,
+			"conservation_ok": true,
+			"depot": 7,
+			"depot_gain_events": 7,
+			"dock_queue": 0,
+			"dock_unloads": 4,
+			"elapsed": 28.9999999999999,
+			"harvester_loaded_departures": 5,
+			"path_requests": 18,
+			"peak_dock_queue": 1,
+			"peak_relay": 0,
+			"post_sample_round_trip_complete": true,
+			"relay": 0,
+			"sample20": {
+				"carrier_returns": 2,
+				"carrier_state": "to_base",
+				"dock_unloads": 2,
+				"summary": {
+					"capacity_limit_weight": 1000000000,
+					"capacity_paused": false,
+					"capacity_used_weight": 36,
+					"carried": 3,
+					"conservation_ok": true,
+					"depot": 2,
+					"dock_queue": 0,
+					"encounter_entry": {},
+					"encounter_id": "",
+					"intermediate_access": "blocked",
+					"mine_path_engineering": false,
+					"outpost_cleared": true,
+					"outpost_enabled": false,
+					"outpost_remaining": 0,
+					"outpost_retreats": 0,
+					"outpost_total": 0,
+					"parking_slot": "entry",
+					"path_requests": 12,
+					"phase": "local",
+					"relay": 0,
+					"reposition_seconds_left": 0.0,
+					"reposition_target_slot": "",
+					"reservations": 0,
+					"source_remaining": 10,
+					"tracked_worker_id": "",
+					"vertical_slice": false,
+					"workflow_mode": "normal_roles"
+				}
+			},
+			"source_remaining": 5,
+			"state_seconds": {
+				"carry:dock_wait": 0.8,
+				"carry:to_base": 5.0,
+				"carry:to_relay": 6.4,
+				"carry:wait_relay": 16.8,
+				"escort:escort": 28.9999999999999,
+				"harvest:harvesting": 4.0,
+				"harvest:to_relay": 10.6,
+				"harvest:to_resource": 14.4
+			},
+			"ticks": 145,
+			"transitions": {
+				"carry:dock_wait→to_relay": 4,
+				"carry:to_base→dock_wait": 4,
+				"carry:to_relay→wait_relay": 4,
+				"carry:wait_relay→to_base": 4,
+				"harvest:harvesting→to_relay": 5,
+				"harvest:to_relay→to_resource": 4,
+				"harvest:to_resource→harvesting": 5
+			}
+		},
+		"ok": true,
+		"upgrade": {
+			"mode": "baseline",
+			"ok": true
+		}
+	},
+	"boundaries": {
+		"equipment_snapshot": true,
+		"fresh_process_restore": "既存test_a_recovery_bridge.gdを別途実行して確認する",
+		"full_storage_reject": true,
+		"ok": true,
+		"project_local_save_restore": true,
+		"recall_and_single_commit": true,
+		"route_closure_safe_wait": true,
+		"route_reopen": true
+	},
+	"carrier_frame": {
+		"case": "carrier_frame",
+		"entry_resources": {
+			"entity_29": {
+				"initial": 1,
+				"item": 5,
+				"remaining": 1
+			},
+			"entity_30": {
+				"initial": 0,
+				"item": 5,
+				"remaining": 0
+			},
+			"entity_31": {
+				"initial": 5,
+				"item": 6,
+				"remaining": 5
+			},
+			"entity_32": {
+				"initial": 8,
+				"item": 4,
+				"remaining": 8
+			}
+		},
+		"entry_roles": {
+			"worker:0": {
+				"carry_limit": 3,
+				"direct_depot_loop": false,
+				"presentation_hidden": false,
+				"role": "harvest",
+				"support": -1
+			},
+			"worker:1": {
+				"carry_limit": 5,
+				"direct_depot_loop": false,
+				"presentation_hidden": false,
+				"role": "carry",
+				"support": 22
+			},
+			"worker:2": {
+				"carry_limit": 3,
+				"direct_depot_loop": false,
+				"presentation_hidden": false,
+				"role": "escort",
+				"support": -1
+			}
+		},
+		"equipped_worker": 1,
+		"first_sortie": {
+			"conservation_ok": true,
+			"depot": {
+				"5": 22,
+				"6": 3
+			},
+			"elapsed": 60.8000000000003,
+			"mode": "normal_roles",
+			"ok": true,
+			"source_after": {
+				"entity_29": {
+					"initial": 11,
+					"item": 5,
+					"remaining": 0
+				},
+				"entity_30": {
+					"initial": 11,
+					"item": 5,
+					"remaining": 0
+				},
+				"entity_31": {
+					"initial": 8,
+					"item": 6,
+					"remaining": 5
+				},
+				"entity_32": {
+					"initial": 8,
+					"item": 4,
+					"remaining": 8
+				}
+			},
+			"source_before": {
+				"entity_29": {
+					"initial": 11,
+					"item": 5,
+					"remaining": 11
+				},
+				"entity_30": {
+					"initial": 11,
+					"item": 5,
+					"remaining": 11
+				},
+				"entity_31": {
+					"initial": 8,
+					"item": 6,
+					"remaining": 8
+				},
+				"entity_32": {
+					"initial": 8,
+					"item": 4,
+					"remaining": 8
+				}
+			},
+			"storage_delta": 25
+		},
+		"metrics": {
+			"carried": 3,
+			"carrier_loaded_departures": 4,
+			"carrier_wait_relay_seconds": 16.8,
+			"conservation_ok": true,
+			"depot": 7,
+			"depot_gain_events": 7,
+			"dock_queue": 0,
+			"dock_unloads": 4,
+			"elapsed": 28.9999999999999,
+			"harvester_loaded_departures": 5,
+			"path_requests": 18,
+			"peak_dock_queue": 1,
+			"peak_relay": 0,
+			"post_sample_round_trip_complete": true,
+			"relay": 0,
+			"sample20": {
+				"carrier_returns": 2,
+				"carrier_state": "to_base",
+				"dock_unloads": 2,
+				"summary": {
+					"capacity_limit_weight": 1000000000,
+					"capacity_paused": false,
+					"capacity_used_weight": 36,
+					"carried": 3,
+					"conservation_ok": true,
+					"depot": 2,
+					"dock_queue": 0,
+					"encounter_entry": {},
+					"encounter_id": "",
+					"intermediate_access": "blocked",
+					"mine_path_engineering": false,
+					"outpost_cleared": true,
+					"outpost_enabled": false,
+					"outpost_remaining": 0,
+					"outpost_retreats": 0,
+					"outpost_total": 0,
+					"parking_slot": "entry",
+					"path_requests": 12,
+					"phase": "local",
+					"relay": 0,
+					"reposition_seconds_left": 0.0,
+					"reposition_target_slot": "",
+					"reservations": 0,
+					"source_remaining": 10,
+					"tracked_worker_id": "",
+					"vertical_slice": false,
+					"workflow_mode": "normal_roles"
+				}
+			},
+			"source_remaining": 5,
+			"state_seconds": {
+				"carry:dock_wait": 0.8,
+				"carry:to_base": 5.0,
+				"carry:to_relay": 6.4,
+				"carry:wait_relay": 16.8,
+				"escort:escort": 28.9999999999999,
+				"harvest:harvesting": 4.0,
+				"harvest:to_relay": 10.6,
+				"harvest:to_resource": 14.4
+			},
+			"ticks": 145,
+			"transitions": {
+				"carry:dock_wait→to_relay": 4,
+				"carry:to_base→dock_wait": 4,
+				"carry:to_relay→wait_relay": 4,
+				"carry:wait_relay→to_base": 4,
+				"harvest:harvesting→to_relay": 5,
+				"harvest:to_relay→to_resource": 4,
+				"harvest:to_resource→harvesting": 5
+			}
+		},
+		"ok": true,
+		"upgrade": {
+			"cost": {
+				"haul_frame_hide": 1,
+				"haul_frame_iron": 1,
+				"haul_frame_wood": 2,
+				"smelt_tank_fuel": 3,
+				"workbench_wood": 3
+			},
+			"equipped_limit": 5,
+			"equipped_name": "チュー太",
+			"equipped_worker": 1,
+			"ok": true,
+			"workbench": true
+		}
+	},
+	"comparability": {
+		"baseline_non_saturated": true,
+		"benchmark_seconds": 29.0,
+		"boundary": "Finish the in-flight 20-second baseline carrier leg, then one full pickup/dock/return. No positive-delta stopping rule.",
+		"dock_count": 1,
+		"first_sortie_source_equal": true,
+		"fixed_tick": 0.2,
+		"normal_role_contract_equal": true,
+		"ok": true,
+		"outpost_enabled": false,
+		"post_sample_round_trips_complete": true,
+		"second_sortie_source_equal": true,
+		"seed": 104729,
+		"timing_equal": true
+	},
+	"cost": {
+		"haul_frame": {
+			"hide": 1,
+			"iron": 1,
+			"tank_fuel_for_iron": 3,
+			"wood": 2
+		},
+		"workbench": {
+			"wood": 3
+		}
+	},
+	"first_sortie": {
+		"baseline": {
+			"conservation_ok": true,
+			"depot": {
+				"5": 22,
+				"6": 3
+			},
+			"elapsed": 60.8000000000003,
+			"mode": "normal_roles",
+			"ok": true,
+			"source_after": {
+				"entity_29": {
+					"initial": 11,
+					"item": 5,
+					"remaining": 0
+				},
+				"entity_30": {
+					"initial": 11,
+					"item": 5,
+					"remaining": 0
+				},
+				"entity_31": {
+					"initial": 8,
+					"item": 6,
+					"remaining": 5
+				},
+				"entity_32": {
+					"initial": 8,
+					"item": 4,
+					"remaining": 8
+				}
+			},
+			"source_before": {
+				"entity_29": {
+					"initial": 11,
+					"item": 5,
+					"remaining": 11
+				},
+				"entity_30": {
+					"initial": 11,
+					"item": 5,
+					"remaining": 11
+				},
+				"entity_31": {
+					"initial": 8,
+					"item": 6,
+					"remaining": 8
+				},
+				"entity_32": {
+					"initial": 8,
+					"item": 4,
+					"remaining": 8
+				}
+			},
+			"storage_delta": 25
+		},
+		"carrier_frame": {
+			"conservation_ok": true,
+			"depot": {
+				"5": 22,
+				"6": 3
+			},
+			"elapsed": 60.8000000000003,
+			"mode": "normal_roles",
+			"ok": true,
+			"source_after": {
+				"entity_29": {
+					"initial": 11,
+					"item": 5,
+					"remaining": 0
+				},
+				"entity_30": {
+					"initial": 11,
+					"item": 5,
+					"remaining": 0
+				},
+				"entity_31": {
+					"initial": 8,
+					"item": 6,
+					"remaining": 5
+				},
+				"entity_32": {
+					"initial": 8,
+					"item": 4,
+					"remaining": 8
+				}
+			},
+			"source_before": {
+				"entity_29": {
+					"initial": 11,
+					"item": 5,
+					"remaining": 11
+				},
+				"entity_30": {
+					"initial": 11,
+					"item": 5,
+					"remaining": 11
+				},
+				"entity_31": {
+					"initial": 8,
+					"item": 6,
+					"remaining": 8
+				},
+				"entity_32": {
+					"initial": 8,
+					"item": 4,
+					"remaining": 8
+				}
+			},
+			"storage_delta": 25
+		},
+		"harvester_frame": {
+			"conservation_ok": true,
+			"depot": {
+				"5": 22,
+				"6": 3
+			},
+			"elapsed": 60.8000000000003,
+			"mode": "normal_roles",
+			"ok": true,
+			"source_after": {
+				"entity_29": {
+					"initial": 11,
+					"item": 5,
+					"remaining": 0
+				},
+				"entity_30": {
+					"initial": 11,
+					"item": 5,
+					"remaining": 0
+				},
+				"entity_31": {
+					"initial": 8,
+					"item": 6,
+					"remaining": 5
+				},
+				"entity_32": {
+					"initial": 8,
+					"item": 4,
+					"remaining": 8
+				}
+			},
+			"source_before": {
+				"entity_29": {
+					"initial": 11,
+					"item": 5,
+					"remaining": 11
+				},
+				"entity_30": {
+					"initial": 11,
+					"item": 5,
+					"remaining": 11
+				},
+				"entity_31": {
+					"initial": 8,
+					"item": 6,
+					"remaining": 8
+				},
+				"entity_32": {
+					"initial": 8,
+					"item": 4,
+					"remaining": 8
+				}
+			},
+			"storage_delta": 25
+		}
+	},
+	"harvester_frame": {
+		"case": "harvester_frame",
+		"entry_resources": {
+			"entity_29": {
+				"initial": 1,
+				"item": 5,
+				"remaining": 1
+			},
+			"entity_30": {
+				"initial": 0,
+				"item": 5,
+				"remaining": 0
+			},
+			"entity_31": {
+				"initial": 5,
+				"item": 6,
+				"remaining": 5
+			},
+			"entity_32": {
+				"initial": 8,
+				"item": 4,
+				"remaining": 8
+			}
+		},
+		"entry_roles": {
+			"worker:0": {
+				"carry_limit": 5,
+				"direct_depot_loop": false,
+				"presentation_hidden": false,
+				"role": "harvest",
+				"support": 22
+			},
+			"worker:1": {
+				"carry_limit": 3,
+				"direct_depot_loop": false,
+				"presentation_hidden": false,
+				"role": "carry",
+				"support": -1
+			},
+			"worker:2": {
+				"carry_limit": 3,
+				"direct_depot_loop": false,
+				"presentation_hidden": false,
+				"role": "escort",
+				"support": -1
+			}
+		},
+		"equipped_worker": 0,
+		"first_sortie": {
+			"conservation_ok": true,
+			"depot": {
+				"5": 22,
+				"6": 3
+			},
+			"elapsed": 60.8000000000003,
+			"mode": "normal_roles",
+			"ok": true,
+			"source_after": {
+				"entity_29": {
+					"initial": 11,
+					"item": 5,
+					"remaining": 0
+				},
+				"entity_30": {
+					"initial": 11,
+					"item": 5,
+					"remaining": 0
+				},
+				"entity_31": {
+					"initial": 8,
+					"item": 6,
+					"remaining": 5
+				},
+				"entity_32": {
+					"initial": 8,
+					"item": 4,
+					"remaining": 8
+				}
+			},
+			"source_before": {
+				"entity_29": {
+					"initial": 11,
+					"item": 5,
+					"remaining": 11
+				},
+				"entity_30": {
+					"initial": 11,
+					"item": 5,
+					"remaining": 11
+				},
+				"entity_31": {
+					"initial": 8,
+					"item": 6,
+					"remaining": 8
+				},
+				"entity_32": {
+					"initial": 8,
+					"item": 4,
+					"remaining": 8
+				}
+			},
+			"storage_delta": 25
+		},
+		"metrics": {
+			"carried": 3,
+			"carrier_loaded_departures": 5,
+			"carrier_wait_relay_seconds": 14.4,
+			"conservation_ok": true,
+			"depot": 10,
+			"depot_gain_events": 10,
+			"dock_queue": 0,
+			"dock_unloads": 5,
+			"elapsed": 28.9999999999999,
+			"harvester_loaded_departures": 5,
+			"path_requests": 20,
+			"peak_dock_queue": 1,
+			"peak_relay": 5,
+			"post_sample_round_trip_complete": true,
+			"relay": 2,
+			"sample20": {
+				"carrier_returns": 2,
+				"carrier_state": "to_base",
+				"dock_unloads": 2,
+				"summary": {
+					"capacity_limit_weight": 1000000000,
+					"capacity_paused": false,
+					"capacity_used_weight": 36,
+					"carried": 3,
+					"conservation_ok": true,
+					"depot": 2,
+					"dock_queue": 0,
+					"encounter_entry": {},
+					"encounter_id": "",
+					"intermediate_access": "blocked",
+					"mine_path_engineering": false,
+					"outpost_cleared": true,
+					"outpost_enabled": false,
+					"outpost_remaining": 0,
+					"outpost_retreats": 0,
+					"outpost_total": 0,
+					"parking_slot": "entry",
+					"path_requests": 12,
+					"phase": "local",
+					"relay": 2,
+					"reposition_seconds_left": 0.0,
+					"reposition_target_slot": "",
+					"reservations": 0,
+					"source_remaining": 8,
+					"tracked_worker_id": "",
+					"vertical_slice": false,
+					"workflow_mode": "normal_roles"
+				}
+			},
+			"source_remaining": 0,
+			"state_seconds": {
+				"carry:dock_wait": 1.0,
+				"carry:to_base": 6.6,
+				"carry:to_relay": 7.0,
+				"carry:wait_relay": 14.4,
+				"escort:escort": 28.9999999999999,
+				"harvest:harvesting": 4.0,
+				"harvest:to_relay": 10.6,
+				"harvest:to_resource": 14.4
+			},
+			"ticks": 145,
+			"transitions": {
+				"carry:dock_wait→to_relay": 5,
+				"carry:to_base→dock_wait": 5,
+				"carry:to_relay→wait_relay": 4,
+				"carry:wait_relay→to_base": 5,
+				"harvest:harvesting→to_relay": 5,
+				"harvest:to_relay→to_resource": 4,
+				"harvest:to_resource→harvesting": 5
+			}
+		},
+		"ok": true,
+		"upgrade": {
+			"cost": {
+				"haul_frame_hide": 1,
+				"haul_frame_iron": 1,
+				"haul_frame_wood": 2,
+				"smelt_tank_fuel": 3,
+				"workbench_wood": 3
+			},
+			"equipped_limit": 5,
+			"equipped_name": "ネズ吉",
+			"equipped_worker": 0,
+			"ok": true,
+			"workbench": true
+		}
+	},
+	"mode": "normal_roles",
+	"ok": true,
+	"prepared_checkpoint": {
+		"fuel": "初期の既存車体タンクをC由来鉄鉱石の精錬で3消費",
+		"not_quarry_loot": [
+			"hide",
+			"iron"
+		],
+		"seeded_before_first_sortie": {
+			"hide": 1,
+			"wood": 5
+		},
+		"source": "既存進行の狩猟由来の皮と、ワークベンチ＋フレーム用に残した木材を持つ開始状態",
+		"workbench": "最初の帰還後に既存request_buildで建設"
+	},
+	"schema": 1,
+	"selection": {
+		"baseline_depot": 7,
+		"candidates": [
+			{
+				"carrier_wait_relay_delta": 2.39999999999999,
+				"case": "harvester_frame",
+				"depot": 10,
+				"depot_delta": 3,
+				"source_remaining_delta": 5
+			},
+			{
+				"carrier_wait_relay_delta": 0.0,
+				"case": "carrier_frame",
+				"depot": 7,
+				"depot_delta": 0,
+				"source_remaining_delta": 0
+			}
+		],
+		"case": "harvester_frame",
+		"criterion": "同一29.0秒で本編へ確定可能なdepot量がbaselineを上回ること",
+		"no_improvement_reason": "",
+		"ok": true,
+		"recorded": true
+	}
+}

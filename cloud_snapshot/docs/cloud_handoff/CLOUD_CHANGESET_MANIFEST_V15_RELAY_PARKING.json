@@ -1,0 +1,78 @@
+{
+  "schema_version": 2,
+  "kind": "cloud_cumulative_v15_4_relay_parking_presentation",
+  "created_utc": "2026-10-28T18:26:45Z",
+  "baseline": {
+    "branch": "codex/recovery-map-scale-lab",
+    "commit": "1348700c775822108df91ed48a21ea73bbd9792a",
+    "restoration_zip": "recovery-route-bridge-1348700.zip",
+    "restoration_zip_sha256": "72dd15252606eeae67e8b55c8a4cbaf8bcc2fc9c72c366771b91457f5350c79d",
+    "history_note": "The restoration archive contains no .git. This v15.4 cumulative overlay does not reconstruct history."
+  },
+  "dependency": {
+    "preserved_v14_archive": "canyon_recovery_hub_pc_cumulative_v14_vertical_slice_20261028.zip",
+    "preserved_v14_archive_sha256": "3c79b9bceb5be74224d48b210abb778339151e74cdd9097c0a4b88b59cb6fb45",
+    "assembly": "v15.4 retains the prior cumulative v15 payload over v14 and replaces its final parking evidence with v9; v14 itself is unchanged."
+  },
+  "scope": {
+    "entry_scene": "res://scenes/recovery_route_bridge_launcher.tscn",
+    "entry": "中継停車 縦切りでA→C（検証）",
+    "behavior": "Vertical-slice-only presentation contract: same-facing truck parked poses, shared unload dock projection, nearest-centreline relay continuity, conditional bypass drawing, and compact HUD. Session/cargo/resource/collision/save authority remains unchanged.",
+    "not_in_scope": ["free driving", "3D", "rotation transforms", "directional truck art", "vehicle travel animation", "new role/resource/save schema", "normal-mode behavior changes"]
+  },
+  "runtime_evidence": {
+    "root": "project/prototypes/recovery_map_lab/evidence/canyon_parking_vertical_slice_v9",
+    "result": "project/prototypes/recovery_map_lab/results/route_connection_runtime/canyon_parking_vertical_slice_capture_v9.json",
+    "capture": "Linux/X11 direct viewport only: 1280x720, 64.000 seconds, 639 decoded frames, 639/64 fps; no generated, interpolated, cropped, scaled, or speed-altered frames.",
+    "input": "Programmatic Button.pressed invokes production callbacks; it is not physical mouse evidence.",
+    "final_relay_contact": [865, 455],
+    "final_truck_offset": [-139, -139]
+  },
+  "verification": {
+    "godot_linux": "4.6.3",
+    "passed": [
+      "tools/test_canyon_parking_vertical_slice.gd",
+      "tools/test_canyon_parking_vertical_ui.gd",
+      "tools/test_canyon_parking_vertical_v9_capture_result.gd",
+      "tools/test_canyon_parking_vertical_capture_probe.gd",
+      "tools/test_canyon_recovery_hub.gd",
+      "tools/test_normal_crew_motion_v12.gd",
+      "tools/test_normal_haul_frame_progression.gd",
+      "tools/test_a_recovery_bridge.gd"
+    ],
+    "clean_restore": "Baseline 1348700 plus the cumulative overlay: 323 SHA256SUMS rows, fresh Godot 4.6.3 import, and the listed eight acceptance scripts passed in a disposable copy.",
+    "unverified": ["Windows/Godot 4.7.2", "physical mouse/keyboard", "audio", "performance", "final vehicle art and movement animation", "final environment/route polish", "closed-gate delivery completion video"]
+  },
+  "delivery": {
+    "library_status": "No Library write attempted; known 401 was not bypassed.",
+    "pc_status": "Not transferred to or applied on PC.",
+    "excludes": [".git", ".godot", "user://", "personal saves", "credentials", "caches", "interim v5-v8 parking evidence"]
+  },
+  "payload_sha256_excluding_this_manifest": {
+    "project/bridge/route_connection_adapter.gd": "70ad20690b842402ccf858c3fd1568002a4710e43a7b7a3ba0050b49a974c402",
+    "project/bridge/route_connection_harness.gd": "667f6861ee36cabf3192723a05117545b4bfbb4349a8504f2d0b0e9c38332564",
+    "project/scenes/canyon/canyon_recovery_hub.gd": "f0d33fc336c80abc987021d57db335f9e1558a34157177cff88651b57e86f187",
+    "project/scenes/canyon/components/canyon_crew_views.gd": "8b1e5759cc7ffcdffdc87a7114febae4c29d3f6a62ec0cb1c351fe1621ea362d",
+    "project/scenes/canyon/components/canyon_parking_overlay.gd": "8f8112485d44995ea253b8723ff8d44005cb684a0c993ce11b34d12ce1ea8b90",
+    "project/scenes/canyon/components/canyon_terrain.gd": "c05decf4aaed5851aacfc5b36936ab48ec0dcc4e3a4ebbc818ebb8acba24c7e3",
+    "project/tools/capture_canyon_parking_vertical_slice.gd": "6c4293bc332018e4a41b95e5d4d0fdbddbce17fd04e14ace54ca1fd720bd8bb2",
+    "project/tools/test_canyon_parking_vertical_slice.gd": "4484066f435b452cd93ee061ec05280762cb0958e8ab29819ed2a14fe11ca203",
+    "project/tools/test_canyon_parking_vertical_ui.gd": "1bea7dabb3bacf3f54b8642a77635650dd655f4b274cddee922b2c78eb46397c",
+    "project/tools/test_canyon_parking_vertical_capture_probe.gd": "f7765593a7e0e41e47502f73c02ce99f50d9e6386a558a379732307d3685784c",
+    "project/tools/test_canyon_parking_vertical_v9_capture_result.gd": "26d00f7237ad668a902e68694c5e1141311509a67c538a168cd1cc39446ce387",
+    "project/tools/test_canyon_recovery_hub.gd": "b8ac0054f443ea8afff12d2983ec4f531aaaf040495a4b073ec1d8d960bb2174",
+    "project/prototypes/recovery_map_lab/VERTICAL_SLICE_START_HERE.md": "0a6b4a1a2fe5f1ed1070b85ba0e6ff523afd6a09197c1c542485192ce2db8389",
+    "project/docs/superpowers/specs/2026-10-28-canyon-relay-parking-presentation-v15-design.md": "82560c990ca50f1bb85f276a80cb50e0ff5d3faf10378870cc84b7d356dc2d29",
+    "project/docs/superpowers/plans/2026-10-28-canyon-relay-parking-presentation-v15.md": "7332f8b51daf79cf999b058ccc8815d1c3f689726ad4b8c21d7a32372328b6ad",
+    "project/docs/superpowers/ledgers/2026-10-28-canyon-relay-parking-presentation-v15.md": "46b0a38df8239eb3d2d009bac489d48ac24abd801b9b2562d0d2537edb0cb29d",
+    "project/docs/cloud_handoff/C_QUARRY_RELAY_PARKING_PRESENTATION_V15_HANDOFF.md": "5a4041bfd7339d45eac8839b6a31d86a8c9558cdd780ac7904849dfc94c11991",
+    "project/prototypes/recovery_map_lab/evidence/canyon_parking_vertical_slice_v9/canyon_parking_vertical_slice.mp4": "04715d95bf0b3481b18fe8577393e9d0a1142bd9deefdf7958a75b6292341201",
+    "project/prototypes/recovery_map_lab/evidence/canyon_parking_vertical_slice_v9/parking_cleared_hud.png": "8bc0fb2d5e902557a953149e0b720a01cb7b5421ba95b248ab0eb4f90da41139",
+    "project/prototypes/recovery_map_lab/evidence/canyon_parking_vertical_slice_v9/parking_closed_bypass_hud.png": "4699e93193c3c9d52efe415055fce35b9ac1ea1571bbf77b1db33d0d40320545",
+    "project/prototypes/recovery_map_lab/evidence/canyon_parking_vertical_slice_v9/parking_entry_hud.png": "c7dbc3fefb36bf332f4f58244ad63ca9ae50214a4d6b67147d1e7d1680c8bb85",
+    "project/prototypes/recovery_map_lab/evidence/canyon_parking_vertical_slice_v9/parking_first_delivery_hud.png": "007494c3e5b52dede83280ec1717ef926382169f2ae1db8a5aec44f2687d599c",
+    "project/prototypes/recovery_map_lab/evidence/canyon_parking_vertical_slice_v9/parking_relay_hud.png": "3bc281d6381134ef826af936367e224c667804a1f560d39a763a615ca3327318",
+    "project/prototypes/recovery_map_lab/evidence/canyon_parking_vertical_slice_v9/parking_reposition_hud.png": "a6277d4e4327e41826d80bc84ecee85d08ea8f5b4023164d850ac17a437d7c71",
+    "project/prototypes/recovery_map_lab/results/route_connection_runtime/canyon_parking_vertical_slice_capture_v9.json": "477304058c65f1eb518f49db5f625c554c5da6641d06ca4099508b6db5780006"
+  }
+}

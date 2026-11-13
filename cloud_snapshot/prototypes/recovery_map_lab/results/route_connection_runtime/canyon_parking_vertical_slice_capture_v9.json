@@ -1,0 +1,606 @@
+{
+	"actual_viewport": true,
+	"capture_method": "direct X11 1280x720 viewport PNGs and x11grab MP4 at 10 fps; no generated, interpolated, cropped, scaled, or speed-altered frames",
+	"conservation_ok": true,
+	"display_server": "X11",
+	"engine_version": "4.6.3-stable (official)",
+	"events": [
+		{
+			"name": "maintenance_button",
+			"state": {
+				"intermediate_access": "clearing"
+			},
+			"wall_elapsed_msec": 7
+		},
+		{
+			"name": "reposition_button",
+			"state": {
+				"phase": "reposition_recall"
+			},
+			"wall_elapsed_msec": 11408
+		},
+		{
+			"name": "gate_close_button",
+			"state": {
+				"gate_closed": true
+			},
+			"wall_elapsed_msec": 25777
+		},
+		{
+			"name": "gate_reopen_button",
+			"state": {
+				"gate_closed": false
+			},
+			"wall_elapsed_msec": 26137
+		},
+		{
+			"name": "first_delivery",
+			"state": {
+				"capacity_limit_weight": 336,
+				"capacity_paused": false,
+				"capacity_used_weight": 18,
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 3,
+				"dock_queue": 0,
+				"intermediate_access": "cleared",
+				"outpost_cleared": true,
+				"outpost_enabled": false,
+				"outpost_remaining": 0,
+				"outpost_retreats": 0,
+				"outpost_total": 0,
+				"parking_slot": "relay",
+				"path_requests": 13,
+				"phase": "local",
+				"relay": 0,
+				"reposition_seconds_left": 0.0,
+				"reposition_target_slot": "",
+				"reservations": 0,
+				"source_remaining": 36,
+				"tracked_worker_id": "",
+				"vertical_slice": true,
+				"workflow_mode": "normal_roles"
+			},
+			"wall_elapsed_msec": 56248
+		}
+	],
+	"final_session": {
+		"capacity_limit_weight": 336,
+		"capacity_paused": false,
+		"capacity_used_weight": 18,
+		"carried": 0,
+		"conservation_ok": true,
+		"depot": 3,
+		"dock_queue": 0,
+		"intermediate_access": "cleared",
+		"outpost_cleared": true,
+		"outpost_enabled": false,
+		"outpost_remaining": 0,
+		"outpost_retreats": 0,
+		"outpost_total": 0,
+		"parking_slot": "relay",
+		"path_requests": 13,
+		"phase": "local",
+		"relay": 0,
+		"reposition_seconds_left": 0.0,
+		"reposition_target_slot": "",
+		"reservations": 0,
+		"source_remaining": 36,
+		"tracked_worker_id": "",
+		"vertical_slice": true,
+		"workflow_mode": "normal_roles"
+	},
+	"input_method": "programmatic_button_signal",
+	"input_note": "No installed, supported OS-level X11 click injector in this cloud environment; Button.pressed exercises the same production callbacks but is not physical-click evidence.",
+	"normal_user_save_touched": false,
+	"physical_pointer": false,
+	"schema": 6,
+	"screenshots": {
+		"cleared-hud": {
+			"error": 0,
+			"state": {
+				"all_routes_closed": false,
+				"capacity_limit_weight": 336,
+				"capacity_paused": false,
+				"capacity_used_weight": 0,
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"gate_closed": false,
+				"intermediate_access": "cleared",
+				"outpost_cleared": true,
+				"outpost_enabled": false,
+				"outpost_remaining": 0,
+				"outpost_retreats": 0,
+				"outpost_total": 0,
+				"parking_slot": "entry",
+				"path_requests": 3,
+				"phase": "local",
+				"relay": 0,
+				"reposition_seconds_left": 0.0,
+				"reposition_target_slot": "",
+				"reservations": 0,
+				"source_remaining": 39,
+				"tracked_worker_id": "",
+				"vertical_slice": true,
+				"workflow_mode": "normal_roles"
+			},
+			"uri": "res://prototypes/recovery_map_lab/evidence/canyon_parking_vertical_slice_v9/parking_cleared_hud.png",
+			"visual": {
+				"active_transport_path": [
+					[
+						1004,
+						594
+					],
+					[
+						790,
+						405
+					],
+					[
+						580,
+						325
+					],
+					[
+						250,
+						235
+					]
+				],
+				"active_unload_contact": [
+					1004,
+					594
+				],
+				"base_front_offset": [
+					0,
+					0
+				],
+				"base_rear_offset": [
+					0,
+					0
+				],
+				"crew_feet": {
+					"worker:0": [
+						715,
+						376
+					],
+					"worker:1": [
+						983,
+						611
+					],
+					"worker:2": [
+						792,
+						407
+					]
+				},
+				"dock_crate_offset": [
+					1087,
+					531
+				]
+			}
+		},
+		"closed-bypass-hud": {
+			"error": 0,
+			"state": {
+				"all_routes_closed": false,
+				"capacity_limit_weight": 336,
+				"capacity_paused": false,
+				"capacity_used_weight": 0,
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"gate_closed": true,
+				"intermediate_access": "cleared",
+				"outpost_cleared": true,
+				"outpost_enabled": false,
+				"outpost_remaining": 0,
+				"outpost_retreats": 0,
+				"outpost_total": 0,
+				"parking_slot": "relay",
+				"path_requests": 8,
+				"phase": "local",
+				"relay": 0,
+				"reposition_seconds_left": 0.0,
+				"reposition_target_slot": "",
+				"reservations": 0,
+				"source_remaining": 39,
+				"tracked_worker_id": "",
+				"vertical_slice": true,
+				"workflow_mode": "normal_roles"
+			},
+			"uri": "res://prototypes/recovery_map_lab/evidence/canyon_parking_vertical_slice_v9/parking_closed_bypass_hud.png",
+			"visual": {
+				"active_transport_path": [
+					[
+						865,
+						455
+					],
+					[
+						580,
+						535
+					],
+					[
+						250,
+						235
+					]
+				],
+				"active_unload_contact": [
+					865,
+					455
+				],
+				"base_front_offset": [
+					-139,
+					-139
+				],
+				"base_rear_offset": [
+					-139,
+					-139
+				],
+				"crew_feet": {
+					"worker:0": [
+						851,
+						455
+					],
+					"worker:1": [
+						837,
+						475
+					],
+					"worker:2": [
+						821,
+						458
+					]
+				},
+				"dock_crate_offset": [
+					948,
+					392
+				]
+			}
+		},
+		"entry-hud": {
+			"error": 0,
+			"state": {
+				"all_routes_closed": false,
+				"capacity_limit_weight": 336,
+				"capacity_paused": false,
+				"capacity_used_weight": 0,
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"gate_closed": false,
+				"intermediate_access": "blocked",
+				"outpost_cleared": true,
+				"outpost_enabled": false,
+				"outpost_remaining": 0,
+				"outpost_retreats": 0,
+				"outpost_total": 0,
+				"parking_slot": "entry",
+				"path_requests": 1,
+				"phase": "local",
+				"relay": 0,
+				"reposition_seconds_left": 0.0,
+				"reposition_target_slot": "",
+				"reservations": 0,
+				"source_remaining": 39,
+				"tracked_worker_id": "",
+				"vertical_slice": true,
+				"workflow_mode": "normal_roles"
+			},
+			"uri": "res://prototypes/recovery_map_lab/evidence/canyon_parking_vertical_slice_v9/parking_entry_hud.png",
+			"visual": {
+				"active_transport_path": [
+					[
+						1004,
+						594
+					],
+					[
+						790,
+						405
+					],
+					[
+						580,
+						325
+					],
+					[
+						250,
+						235
+					]
+				],
+				"active_unload_contact": [
+					1004,
+					594
+				],
+				"base_front_offset": [
+					0,
+					0
+				],
+				"base_rear_offset": [
+					0,
+					0
+				],
+				"crew_feet": {
+					"worker:0": [
+						1000,
+						591
+					],
+					"worker:1": [
+						983,
+						611
+					],
+					"worker:2": [
+						970,
+						588
+					]
+				},
+				"dock_crate_offset": [
+					1087,
+					531
+				]
+			}
+		},
+		"first-delivery-hud": {
+			"error": 0,
+			"state": {
+				"all_routes_closed": false,
+				"capacity_limit_weight": 336,
+				"capacity_paused": false,
+				"capacity_used_weight": 18,
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 3,
+				"dock_queue": 0,
+				"gate_closed": false,
+				"intermediate_access": "cleared",
+				"outpost_cleared": true,
+				"outpost_enabled": false,
+				"outpost_remaining": 0,
+				"outpost_retreats": 0,
+				"outpost_total": 0,
+				"parking_slot": "relay",
+				"path_requests": 13,
+				"phase": "local",
+				"relay": 0,
+				"reposition_seconds_left": 0.0,
+				"reposition_target_slot": "",
+				"reservations": 0,
+				"source_remaining": 36,
+				"tracked_worker_id": "",
+				"vertical_slice": true,
+				"workflow_mode": "normal_roles"
+			},
+			"uri": "res://prototypes/recovery_map_lab/evidence/canyon_parking_vertical_slice_v9/parking_first_delivery_hud.png",
+			"visual": {
+				"active_transport_path": [
+					[
+						865,
+						455
+					],
+					[
+						580,
+						325
+					],
+					[
+						250,
+						235
+					]
+				],
+				"active_unload_contact": [
+					865,
+					455
+				],
+				"base_front_offset": [
+					-139,
+					-139
+				],
+				"base_rear_offset": [
+					-139,
+					-139
+				],
+				"crew_feet": {
+					"worker:0": [
+						799,
+						425
+					],
+					"worker:1": [
+						865,
+						455
+					],
+					"worker:2": [
+						850,
+						456
+					]
+				},
+				"dock_crate_offset": [
+					948,
+					392
+				]
+			}
+		},
+		"relay-hud": {
+			"error": 0,
+			"state": {
+				"all_routes_closed": false,
+				"capacity_limit_weight": 336,
+				"capacity_paused": false,
+				"capacity_used_weight": 0,
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"gate_closed": false,
+				"intermediate_access": "cleared",
+				"outpost_cleared": true,
+				"outpost_enabled": false,
+				"outpost_remaining": 0,
+				"outpost_retreats": 0,
+				"outpost_total": 0,
+				"parking_slot": "relay",
+				"path_requests": 7,
+				"phase": "local",
+				"relay": 0,
+				"reposition_seconds_left": 0.0,
+				"reposition_target_slot": "",
+				"reservations": 0,
+				"source_remaining": 39,
+				"tracked_worker_id": "",
+				"vertical_slice": true,
+				"workflow_mode": "normal_roles"
+			},
+			"uri": "res://prototypes/recovery_map_lab/evidence/canyon_parking_vertical_slice_v9/parking_relay_hud.png",
+			"visual": {
+				"active_transport_path": [
+					[
+						865,
+						455
+					],
+					[
+						580,
+						325
+					],
+					[
+						250,
+						235
+					]
+				],
+				"active_unload_contact": [
+					865,
+					455
+				],
+				"base_front_offset": [
+					-139,
+					-139
+				],
+				"base_rear_offset": [
+					-139,
+					-139
+				],
+				"crew_feet": {
+					"worker:0": [
+						859,
+						452
+					],
+					"worker:1": [
+						837,
+						475
+					],
+					"worker:2": [
+						814,
+						456
+					]
+				},
+				"dock_crate_offset": [
+					948,
+					392
+				]
+			}
+		},
+		"reposition-hud": {
+			"error": 0,
+			"state": {
+				"all_routes_closed": false,
+				"capacity_limit_weight": 336,
+				"capacity_paused": false,
+				"capacity_used_weight": 0,
+				"carried": 0,
+				"conservation_ok": true,
+				"depot": 0,
+				"dock_queue": 0,
+				"gate_closed": false,
+				"intermediate_access": "cleared",
+				"outpost_cleared": true,
+				"outpost_enabled": false,
+				"outpost_remaining": 0,
+				"outpost_retreats": 0,
+				"outpost_total": 0,
+				"parking_slot": "entry",
+				"path_requests": 6,
+				"phase": "reposition_recall",
+				"relay": 0,
+				"reposition_seconds_left": 0.0,
+				"reposition_target_slot": "relay",
+				"reservations": 0,
+				"source_remaining": 39,
+				"tracked_worker_id": "",
+				"vertical_slice": true,
+				"workflow_mode": "normal_roles"
+			},
+			"uri": "res://prototypes/recovery_map_lab/evidence/canyon_parking_vertical_slice_v9/parking_reposition_hud.png",
+			"visual": {
+				"active_transport_path": [
+					[
+						1004,
+						594
+					],
+					[
+						790,
+						405
+					],
+					[
+						580,
+						325
+					],
+					[
+						250,
+						235
+					]
+				],
+				"active_unload_contact": [
+					1004,
+					594
+				],
+				"base_front_offset": [
+					0,
+					0
+				],
+				"base_rear_offset": [
+					0,
+					0
+				],
+				"crew_feet": {
+					"worker:0": [
+						720,
+						378
+					],
+					"worker:1": [
+						987,
+						609
+					],
+					"worker:2": [
+						796,
+						410
+					]
+				},
+				"dock_crate_offset": [
+					1087,
+					531
+				]
+			}
+		}
+	},
+	"validation_scope": "Linux/X11 evidence only; Windows/Godot 4.7.2, physical input, audio, and performance remain unverified",
+	"vehicle_art_note": "v15.4 moves the same-facing existing truck layers only after the authoritative parking slot settles. The relay dock is authored right of the bridge foot; worker formations and the selected main/bypass ground path share that dock. Relay route projection chooses the nearest source centreline through overlapping formation corridors, preventing an edge snap. This is a replaceable parked-pose contract, not free driving or finished vehicle animation.",
+	"video": "res://prototypes/recovery_map_lab/evidence/canyon_parking_vertical_slice_v9/canyon_parking_vertical_slice.mp4",
+	"video_probe": {
+		"decoded_duration_seconds": 64.0,
+		"decoded_frame_count": 639,
+		"decoded_frame_rate": 9.984375,
+		"ffprobe": {
+			"format": {
+				"duration": "64.000000",
+				"size": "4286767"
+			},
+			"programs": [],
+			"stream_groups": [],
+			"streams": [
+				{
+					"avg_frame_rate": "639/64",
+					"codec_type": "video",
+					"height": 720.0,
+					"nb_read_frames": "639",
+					"width": 1280.0
+				}
+			]
+		},
+		"ok": true
+	}
+}

@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "kind": "cloud_delta_v12_normal_crew_motion",
+  "created_utc": "2026-10-28T07:57:53Z",
+  "baseline": {
+    "branch": "codex/recovery-map-scale-lab",
+    "commit": "1348700c775822108df91ed48a21ea73bbd9792a",
+    "restoration_zip": "recovery-route-bridge-1348700.zip",
+    "restoration_zip_sha256": "72dd15252606eeae67e8b55c8a4cbaf8bcc2fc9c72c366771b91457f5350c79d",
+    "history_note": "The restoration package has no .git. No history was reconstructed."
+  },
+  "dependencies": {
+    "apply_order": ["verified v10 cumulative checkpoint", "verified v11 normal-haul-frame overlay", "this v12 normal-crew-motion overlay"],
+    "v11_archive": "canyon_recovery_hub_cloud_delta_v11_normal_haul_frame_20261028.zip",
+    "v11_archive_sha256": "3357de7b4b7222348759b9d47ccedb5d5078ecdd929b0d231bf22bc979e5387c",
+    "not_standalone": true,
+    "dependency_reason": "v10 supplies the existing v2/v3 art; v11 supplies the preceding normal-role HUD/support changes. v12 changes only the bounded normal crew presentation and its evidence."
+  },
+  "revision": {
+    "name": "v12-normal-crew-motion",
+    "status": "Bounded normal-role presentation and direct-runtime verification complete; this is not final animation/art or whole-game completion.",
+    "mode_scope": "ordinary normal_roles only; single_worker_demo is not used as v12 evidence",
+    "character_art": "Existing replaceable v3 verification art only; user candidate art is not adopted."
+  },
+  "behavior": {
+    "v2_foot_anchors": {"idle": [28, 52], "walk": [28, 49], "harvest": [32, 55], "carry": [28, 50]},
+    "v3_allowed_only": "empty-handed normal harvest role while walking or harvesting",
+    "v3_timing": {"walk_fps": 9, "harvest_fps": 8},
+    "v2_retained_for": ["all normal carrying states", "normal dock_wait", "carrier", "escort", "normal unload"],
+    "authority": "CanyonCrewViews reads RouteSession actor snapshots only; it does not mutate session, Main, save, route, resource, balance, vehicle, or six-room state."
+  },
+  "runtime_evidence": {
+    "entry": {"seed": 104729, "outpost_enabled": false, "gate_closed": true, "dock_count": 1, "mode": "normal_roles", "single_worker_demo": false},
+    "capture": "direct X11 1280x720 H.264 video at 10fps plus post-draw observation; 10fps is observer cadence, not gameplay FPS",
+    "before": {"renderer": "verified v11 crew-view source in an isolated current-project copy", "video_frames": 120, "video_duration_seconds": 12.0, "post_draw_samples": 119, "session_elapsed_span_seconds": 11.87, "engine_process_frame_span": 330},
+    "after": {"renderer": "live v12 bounded harvest-v3 source", "video_frames": 120, "video_duration_seconds": 12.0, "post_draw_samples": 119, "session_elapsed_span_seconds": 11.9, "engine_process_frame_span": 285, "walk_frames": ["walk_east_1", "walk_northwest_0", "walk_northwest_1", "walk_northwest_2", "walk_northwest_3", "walk_west_0", "walk_west_1", "walk_west_2", "walk_west_3"], "harvest_frames": ["harvest_0", "harvest_1", "harvest_2", "harvest_3"]},
+    "integrity": "Both MP4s independently decode through ffprobe and framemd5 as 1280x720 / 10fps / 120-frame / 12-second files, without a three-frame frozen digest run."
+  },
+  "verification": {
+    "red_green": ["runtime contract RED before v11 provenance, runtime boundary marker, and direct archive-entry validation", "runtime contract GREEN after all three were added"],
+    "fresh_linux_godot_4_6_3_passed": [
+      "tools/test_normal_crew_motion_v12.gd",
+      "tools/test_normal_crew_motion_runtime_contract_v12.gd",
+      "tools/test_canyon_recovery_hub.gd",
+      "tools/test_normal_haul_frame_progression.gd",
+      "tools/test_a_recovery_bridge.gd",
+      "tools/test_normal_haul_frame_capture_contract.gd",
+      "tools/test_normal_haul_frame_capture_result.gd"
+    ],
+    "unverified": ["Windows/Godot 4.7.2", "OS-level mouse input", "audio", "performance", "final worker-art adoption", "all-direction carry/unload animation", "new mobile-base motion/art"]
+  },
+  "archive": {
+    "expected_filename": "canyon_recovery_hub_cloud_delta_v12_normal_crew_motion_20261028.zip",
+    "layout": "Project payloads are rooted at project/. Archive-root SHA256SUMS.txt verifies every payload including this manifest; this manifest intentionally does not self-hash.",
+    "included_project_file_count": 21,
+    "excludes": [".git", "project/.godot", "normal user saves", "unrelated result fixtures", "v10/v11 accepted evidence not needed by this overlay", "Linux-generated import rewrites outside this overlay"],
+    "delivery_status": "Local archive only. The existing personal Library update remains blocked by prior authentication; no retry or alternate upload route was used."
+  },
+  "payload_sha256_excluding_this_manifest": {
+    "project/scenes/canyon/components/canyon_crew_views.gd": "6c0c55d9c349c0358ee8b93ba41ee842d518a06b99e311e4aa3f2f3141403184",
+    "project/tools/test_normal_crew_motion_v12.gd": "6b1be00f756a849a7375b4cfe7b550a00156550cb2778a0ef198322003a8c525",
+    "project/tools/capture_normal_crew_motion_runtime_v12.gd": "766686682fb929d8771a373706bc43a01dd88d536274b7242756e64e746e7f4b",
+    "project/tools/test_normal_crew_motion_runtime_contract_v12.gd": "9e119e7a4ca418c7bf6f43249aac30551774bc0388745cde116738611f851055",
+    "project/docs/superpowers/specs/2026-10-28-normal-crew-motion-v12-design.md": "65551b28f47070d77a4095f6938f33ee38245a93763ea4783cd87b3efa67d419",
+    "project/docs/superpowers/plans/2026-10-28-normal-crew-motion-v12.md": "e3631302889c3e5ac30b496b95a34b1dbcfcafa0ae435851be9e41e0f4dc1bfe",
+    "project/docs/superpowers/ledgers/2026-10-28-normal-crew-motion-v12.md": "edd9f5437fed879e8c6088f48ba25c63cd173abc97f3d147b8ee6d7d9ba24539",
+    "project/docs/cloud_handoff/NORMAL_CREW_MOTION_V12_VERIFICATION.md": "859506cabcd046c142fbc3bed6ef96ebb631a91f26f18fe07bc2614893e0bd7f",
+    "project/prototypes/recovery_map_lab/results/route_connection_runtime/normal_crew_motion_runtime_v12_before.json": "26d52b3ba9320de50fd3e8fbd7a314b3e3b0ab4d12dabd0b739fe3e7ea3060e0",
+    "project/prototypes/recovery_map_lab/results/route_connection_runtime/normal_crew_motion_runtime_v12_after.json": "a02bb057bfb8c20b25b57eb305d9b40739f9589562aa67eeafb6adaf0a6e62d3",
+    "project/prototypes/recovery_map_lab/evidence/normal_crew_motion_runtime_v12/before/normal_crew_motion_before.mp4": "7a8928f5aad2b89efe93147063d6189d9f67851f67fd3473b999f4816989b7dc",
+    "project/prototypes/recovery_map_lab/evidence/normal_crew_motion_runtime_v12/before/normal_crew_motion_before_walk.png": "15952a6f847f4e97773b81367e005501ef6f842ceac55c6e06ebc6c848ffb54f",
+    "project/prototypes/recovery_map_lab/evidence/normal_crew_motion_runtime_v12/before/normal_crew_motion_before_harvest.png": "50c323c4981b97a85608d0d31f0d60da0e6243295d35b233a20d4330f1f0508a",
+    "project/prototypes/recovery_map_lab/evidence/normal_crew_motion_runtime_v12/before/normal_crew_motion_before_carry.png": "2035494f06032e1cc53c100c160b8601adac83a547558d5013996a372aca1689",
+    "project/prototypes/recovery_map_lab/evidence/normal_crew_motion_runtime_v12/before/normal_crew_motion_before_depot.png": "190478bdc37af521541eb24b4218fa218b1374deae9336b4eda3131202122054",
+    "project/prototypes/recovery_map_lab/evidence/normal_crew_motion_runtime_v12/after/normal_crew_motion_after.mp4": "6a23f4a41a9af03325de51eab64fdff104f8395bedaef531fef0e915366b1c8a",
+    "project/prototypes/recovery_map_lab/evidence/normal_crew_motion_runtime_v12/after/normal_crew_motion_after_walk.png": "3c194552597989c2bb34a645764bd66160cf7e89c51d17e3c3f71514fd0cd2fd",
+    "project/prototypes/recovery_map_lab/evidence/normal_crew_motion_runtime_v12/after/normal_crew_motion_after_harvest.png": "e7c3bb0af49b03d7eb2ac83c351a5de5bb1f97b379f04cb81ee6ebc5ede5f284",
+    "project/prototypes/recovery_map_lab/evidence/normal_crew_motion_runtime_v12/after/normal_crew_motion_after_carry.png": "8f81d9114664199c12a2065033bd1486124127c27147adac73492741344ecaed",
+    "project/prototypes/recovery_map_lab/evidence/normal_crew_motion_runtime_v12/after/normal_crew_motion_after_depot.png": "db53c8b0ddf2356066284bb656a68abb4a777db70f331dd1fb7d19c4131df079"
+  }
+}

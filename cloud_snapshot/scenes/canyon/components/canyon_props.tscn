@@ -1,0 +1,26 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scenes/canyon/components/canyon_props.gd" id="1_props"]
+[ext_resource type="Texture2D" path="res://assets/canyon_recovery/v2/props/item_handcart.png" id="2_cart"]
+[ext_resource type="Texture2D" path="res://assets/canyon_recovery/v2/props/item_storage_box.png" id="3_box"]
+[ext_resource type="Texture2D" path="res://assets/canyon_recovery/v2/props/item_iron_ore.png" id="4_ore"]
+
+[node name="CanyonProps" type="Node2D"]
+texture_filter = 1
+z_index = 3
+script = ExtResource("1_props")
+
+[node name="RelayHandcart" type="Sprite2D" parent="."]
+texture_filter = 1
+position = Vector2(760, 432)
+texture = ExtResource("2_cart")
+
+[node name="DockCrate" type="Sprite2D" parent="."]
+texture_filter = 1
+position = Vector2(1087, 531)
+texture = ExtResource("3_box")
+
+[node name="LooseOre" type="Sprite2D" parent="."]
+texture_filter = 1
+position = Vector2(391, 270)
+texture = ExtResource("4_ore")

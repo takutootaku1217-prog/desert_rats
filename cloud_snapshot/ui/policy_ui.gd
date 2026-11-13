@@ -1,0 +1,386 @@
+class_name PolicyUI
+extends CanvasLayer
+## 運営の方針（Pキー）。仲間は自動で動くので、プレイヤーは「何を優先するか」だけを決める。
+##  - 消耗品の補充: 品目ごとのON/OFFと目標在庫
+##  - 回収の優先: 木材・石・鉄鉱石ごとの★（0 = 拾わない。獲物は常に拾う）
+##  - 狩る生物: 生物ごとに 狩る / 見逃す
+##  - テスト用の購入（ショップは第1段階では作らない）
+
+var game
+var _repair_reason: Label
+var _reason_clock := 0.0
+var _overlay: Control
+var _body: VBoxContainer
+var _page := 0                   # 0 = 方針（回収・加工・狩猟） / 1 = 積載の割り当て（data/cargo.gd）
+
+
+func _ready() -> void:
+	layer = 21
+	var btn := UIKit.button("運営の方針 (P)", toggle)
+	btn.position = Vector2(1000, 290)
+	btn.custom_minimum_size = Vector2(272, 32)
+	add_child(btn)
+	_overlay = Control.new()
+	_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_overlay.visible = false
+	add_child(_overlay)
+	var dim := ColorRect.new()
+	dim.color = Color(0, 0, 0, 0.6)
+	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
+	dim.gui_input.connect(func(ev):
+		if ev is InputEventMouseButton and ev.pressed:
+			close())
+	_overlay.add_child(dim)
+	var panel := PanelContainer.new()
+	panel.add_theme_stylebox_override("panel", UIKit.box(Color("1b1e24", 0.98), Color("636b7a"), 4, 12))
+	panel.position = Vector2(40, 18)
+	panel.custom_minimum_size = Vector2(1200, 660)
+	_overlay.add_child(panel)
+	var root := VBoxContainer.new()
+	root.add_theme_constant_override("separation", 6)
+	panel.add_child(root)
+	var top := HBoxContainer.new()
+	root.add_child(top)
+	var title := UIKit.lbl("運営の方針", 22, UIKit.C_ACCENT)
+	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	top.add_child(title)
+	top.add_child(UIKit.button("閉じる (P / Esc)", close))
+	root.add_child(UIKit.lbl("仲間は自動で動きます。ここでは「何を優先するか」を決めます。★0 はやらない。", 13, UIKit.C_DIM))
+	_body = VBoxContainer.new()
+	_body.add_theme_constant_override("separation", 3)
+	root.add_child(_body)
+
+
+func toggle() -> void:
+	if _overlay.visible:
+		close()
+	else:
+		game.close_other_panels(self)
+		_overlay.visible = true
+		_rebuild()
+
+
+func close() -> void:
+	_overlay.visible = false
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo:
+		if event.keycode == KEY_P:
+			toggle()
+		elif event.keycode == KEY_ESCAPE and _overlay.visible:
+			close()
+
+
+func _rebuild() -> void:
+	_repair_reason=null
+	UIKit.clear(_body)
+	_body.add_child(_tabs())
+	if _page == 1:
+		_build_cargo_page()
+		return
+	if _page == 2:
+		_build_tools_page()
+		return
+	var cols := HBoxContainer.new()
+	cols.add_theme_constant_override("separation", 30)
+	_body.add_child(cols)
+	var left := VBoxContainer.new()
+	left.add_theme_constant_override("separation", 3)
+	cols.add_child(left)
+	var right := VBoxContainer.new()
+	right.add_theme_constant_override("separation", 3)
+	cols.add_child(right)
+
+	left.add_child(UIKit.lbl("道具・装備・設備・精錬はF/Bで注文。自動補充は消耗品だけ。",13,UIKit.C_DIM))
+	left.add_child(UIKit.lbl("危険水準の補充→プレイヤー注文→通常補充の順。",13,UIKit.C_DIM))
+	for it in game.refill_settings:
+		var setting:Dictionary=game.refill_settings[it]
+		var row:=HBoxContainer.new();left.add_child(row)
+		var enabled:=CheckBox.new();enabled.name="PolicyRefill%d"%it;enabled.text=ItemDB.name_of(it);enabled.button_pressed=setting.enabled;row.add_child(enabled)
+		enabled.toggled.connect(func(v):setting.enabled=v;_refresh_repair_reason())
+		row.add_child(UIKit.lbl("目標在庫",13))
+		var target:=SpinBox.new();target.min_value=0;target.max_value=999;target.value=setting.target;row.add_child(target)
+		target.value_changed.connect(func(v):setting.target=int(v);_refresh_repair_reason())
+	var repair_info:=UIKit.lbl(ProductionPlan.refill_reason(game,GameData.Item.REPAIR_KIT),13,UIKit.C_DIM)
+	repair_info.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+	repair_info.custom_minimum_size=Vector2(540,0)
+	repair_info.name="RepairRefillReason"
+	_repair_reason=repair_info
+	left.add_child(repair_info)
+	left.add_child(UIKit.button("製作・採取目標を開く (F)",func():close();game.craft_ui.open()))
+
+	# 回収の優先
+	right.add_child(UIKit.lbl("── 回収の優先（獲物は常に拾う） ──", 14, UIKit.C_DIM))
+	for it in GameData.GROUND_ITEMS:
+		var item: int = it
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 6)
+		right.add_child(row)
+		row.add_child(UIKit.lbl(GameData.ITEM_NAMES[item], 15, UIKit.C_TEXT, 90))
+		row.add_child(_stepper(func(): return game.gather_policy.get(item, 0),
+				func(v): game.gather_policy[item] = v))
+
+	# 狩る生物
+	var sp := Control.new()
+	sp.custom_minimum_size = Vector2(0, 8)
+	right.add_child(sp)
+	right.add_child(UIKit.lbl("── 狩る生物（すべて無害。追うと逃げる） ──", 14, UIKit.C_DIM))
+	for s in GameData.CREATURES:
+		var species: String = s
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 6)
+		right.add_child(row)
+		row.add_child(UIKit.lbl(GameData.CREATURES[species]["name"], 15, UIKit.C_TEXT, 90))
+		var remaining: int = game.hunt_request_remaining(species)
+		var on: bool = game.hunt_allowed(species)
+		var target_species: String = species
+		var request_button := UIKit.button("狩猎取消 (%d)" % remaining if on else "狩猎依頼なし", func():
+			if game.hunt_request_remaining(target_species) > 0:
+				game.cancel_hunt(target_species)
+			_rebuild())
+		request_button.alignment = HORIZONTAL_ALIGNMENT_CENTER
+		request_button.custom_minimum_size = Vector2(118, 28)
+		request_button.disabled = not on
+		request_button.tooltip_text = "狩猎依頼は制作カードの生物素材から明示的に出します。" if not on else "この生物への狩猎依頼を取り消します。"
+		UIKit.style(request_button, on)
+		row.add_child(request_button)
+		row.add_child(UIKit.lbl(GameData.drops_text(species), 13, UIKit.C_DIM))
+		continue
+		var legacy_on: bool = game.hunt_allowed(species)
+		var b := UIKit.button("狩る" if on else "見逃す", func():
+			game.hunt_policy[species] = not game.hunt_policy.get(species, false)
+			_rebuild())
+		b.alignment = HORIZONTAL_ALIGNMENT_CENTER
+		b.custom_minimum_size = Vector2(84, 28)
+		UIKit.style(b, on)
+		row.add_child(b)
+		row.add_child(UIKit.lbl(GameData.drops_text(species), 13, UIKit.C_DIM))
+
+	if not game.developer_mode(): return
+	# テスト用の購入（明示的な開発者モードのみ）
+	var sp2 := Control.new()
+	sp2.custom_minimum_size = Vector2(0, 8)
+	right.add_child(sp2)
+	right.add_child(UIKit.lbl("── テスト用: 生物を購入（ショップは今後） ──", 14, UIKit.C_DIM))
+	var br := HBoxContainer.new()
+	br.add_theme_constant_override("separation", 6)
+	right.add_child(br)
+	for s in GameData.CREATURES:
+		var species: String = s
+		var b := UIKit.button(GameData.CREATURES[species]["name"], func(): game.test_purchase(species))
+		b.alignment = HORIZONTAL_ALIGNMENT_CENTER
+		b.custom_minimum_size = Vector2(96, 28)
+		br.add_child(b)
+	right.add_child(UIKit.lbl("押すと、その生物を解体した素材が倉庫に入ります", 12, UIKit.C_DIM))
+
+
+## 上のページ切り替え（方針 / 積載の割り当て）
+func _tabs() -> Control:
+	var h := HBoxContainer.new()
+	h.add_theme_constant_override("separation", 6)
+	for spec in [[0, "方針（加工・回収・狩猟）"], [1, "積載状況"], [2, "採取の道具"]]:
+		var p: int = spec[0]
+		var b := UIKit.button(spec[1], func():
+			_page = p
+			_rebuild())
+		b.alignment = HORIZONTAL_ALIGNMENT_CENTER
+		b.custom_minimum_size = Vector2(220, 30)
+		UIKit.style(b, _page == p)
+		h.add_child(b)
+	return h
+
+
+## 積載状況（重量制。data/cargo.gd）: 素材ごとの枠ではなく、拠点全体の「重さ」で積載を管理する。見るだけの画面（操作はない）。
+func _build_cargo_page() -> void:
+	var st = game.storage
+	_body.add_child(UIKit.lbl("倉庫は、素材ごとの上限ではなく、拠点全体の「重さ」で積載量を管理します。重い素材（石・鉄鉱石など）を積みすぎると、"
+			+ "\nほかの物（食料・燃料など）が入らなくなります。道具は対象外です。「荷台の増設」（建設）で最大の重さを増やせます。", 13, UIKit.C_DIM))
+	_body.add_child(UIKit.lbl("いまの重さ　%d / %d" % [st.current_weight(), st.max_weight()], 16, UIKit.C_ACCENT))
+	_body.add_child(_weight_bar(st.weight_ratio(), 560))
+	var cols := HBoxContainer.new()
+	cols.add_theme_constant_override("separation", 40)
+	_body.add_child(cols)
+	for bay in [CargoDB.Bay.RAW, CargoDB.Bay.PRODUCT]:
+		var col := VBoxContainer.new()
+		col.add_theme_constant_override("separation", 4)
+		col.custom_minimum_size = Vector2(560, 0)
+		cols.add_child(col)
+		col.add_child(UIKit.lbl("── %s（重さ %d） ──" % [CargoDB.BAY_NAMES[bay], st.used_in(bay)], 15, UIKit.C_ACCENT))
+		for it in CargoDB.items_of(bay):
+			col.add_child(_weight_row(it))
+	_body.add_child(UIKit.lbl("捨てた累計: %d 個" % game.total_wasted, 13, UIKit.C_DIM))
+	_body.add_child(UIKit.lbl("食料・燃料・修理板の目標在庫は方針画面で変更できます。道具・装備はFから必要な数を注文します。", 12, UIKit.C_DIM))
+
+
+func _weight_bar(ratio: float, w: float) -> Control:
+	var bar := ProgressBar.new()
+	bar.max_value = 1.0
+	bar.value = ratio
+	bar.show_percentage = false
+	bar.custom_minimum_size = Vector2(w, 12)
+	var col := Color("7be07b")
+	if ratio >= 0.95:
+		col = Color("e0533d")
+	elif ratio >= CargoDB.WARN_RATIO:
+		col = Color("f0c040")
+	bar.add_theme_stylebox_override("background", UIKit.box(Color("0d0f12"), Color("0d0f12"), 0, 0))
+	bar.add_theme_stylebox_override("fill", UIKit.box(col, col, 0, 0))
+	return bar
+
+
+## 採取の道具: 誰に何を持たせるか・道具の性能・結果の目安。採取の結果は「採取ポイント × 道具 × 仲間の能力」で決まる（data/gathering.gd）。
+func _build_tools_page() -> void:
+	var st = game.storage
+	_body.add_child(UIKit.lbl("木材・石・鉄鉱石は、採取ポイント（岩場・鉱床・枯れ木）から道具で掘ります。取れる量は「採取ポイント × 道具 × 仲間の能力」で決まります。"
+			+ "\n道具はFから注文してつくります。良い道具は、回収ランクの高い仲間に持たせると活きます。", 13, UIKit.C_DIM))
+	var auto_btn := UIKit.button("道具の自動割り当て: %s" % ("ON（倉庫の道具を、効果の大きい仲間へ自動で持たせる）" if game.tool_auto else "OFF（個体情報で手動）"), func():
+		game.tool_auto = not game.tool_auto
+		_rebuild())
+	auto_btn.custom_minimum_size = Vector2(560, 28)
+	UIKit.style(auto_btn, game.tool_auto)
+	_body.add_child(auto_btn)
+	var cols := HBoxContainer.new()
+	cols.add_theme_constant_override("separation", 30)
+	_body.add_child(cols)
+	var left := VBoxContainer.new()
+	left.add_theme_constant_override("separation", 4)
+	left.custom_minimum_size = Vector2(640, 0)
+	cols.add_child(left)
+	var right := VBoxContainer.new()
+	right.add_theme_constant_override("separation", 3)
+	cols.add_child(right)
+
+	# ---- 左: 仲間ごとの道具と、結果の目安 ----
+	left.add_child(UIKit.lbl("── 仲間の道具（採取量/秒の目安） ──", 14, UIKit.C_DIM))
+	for w in game.workers:
+		var rank: int = w.ranks.get(GameData.Field.GATHERER, 0)
+		var ab: float = w.field_mult(GameData.Field.GATHERER)
+		left.add_child(UIKit.lbl("%s　回収ランク %s（能力値 %.2f）%s" % [w.char_name, GameData.RANKS[rank], ab,
+				"" if game._uses_tools(w) else "　※回収をしない設定"], 15, UIKit.C_ACCENT))
+		var manage := UIKit.button("個体情報で管理", func(): game.detail.open_worker(w))
+		manage.custom_minimum_size = Vector2(180, 28)
+		left.add_child(manage)
+		for slot in GatherDB.SLOTS:
+			var s: String = slot
+			var cur: int = int(w.tools.get(s, -1))
+			var row := HBoxContainer.new()
+			row.add_theme_constant_override("separation", 4)
+			left.add_child(row)
+			row.add_child(UIKit.lbl("　%s: %s" % [GatherDB.SLOTS[s], GatherDB.tool_def(cur)["name"]], 14, UIKit.C_TEXT, 200))
+			# 個体への付け替え・解除は「個体情報」で行う。
+			# この枠で掘れる採取ポイントごとの結果の目安
+			var parts: Array = []
+			for k in GatherDB.POINTS:
+				if GatherDB.POINTS[k]["slot"] != s:
+					continue
+				parts.append(GatherDB.result_text(k, cur, w.ranks.get(GameData.Field.GATHERER, 0), w.field_mult(GameData.Field.GATHERER)))
+			left.add_child(UIKit.lbl("　　　" + "　".join(PackedStringArray(parts)), 13, UIKit.C_DIM))
+
+	# ---- 右: 道具の性能・在庫・作り方 ----
+	right.add_child(UIKit.lbl("── 道具の性能（基準時間あたりの採取量倍率） ──", 14, UIKit.C_DIM))
+	right.add_child(UIKit.lbl("素手は木のみ。木製採掘具→石、石のハンマー→鉄鉱石。作業台は木3個。", 13, UIKit.C_DIM))
+	for it in GameData.TOOL_ITEMS:
+		var item: int = it
+		var t: Dictionary = GatherDB.TOOLS[item]
+		var effs: Array = []
+		for k in GatherDB.POINTS:
+			if t["eff"].has(k):
+				effs.append("%s×%.1f" % [GatherDB.POINTS[k]["name"], float(t["eff"][k])])
+		var bonus := ""
+		for k in t["bonus"]:
+			for bi in t["bonus"][k]:
+				bonus += "　副産物: %s→%s" % [GatherDB.POINTS[k]["name"], GameData.ITEM_NAMES[bi]]
+		right.add_child(UIKit.lbl("%s（在庫%d）" % [t["name"], st.count_of(item)], 14, UIKit.C_TEXT))
+		right.add_child(UIKit.lbl("　%s　速さ×%.1f　必要ランク %s%s" % [" ".join(PackedStringArray(effs)), t["speed"],
+				GameData.RANKS[int(t["need_rank"])], bonus], 12, UIKit.C_DIM))
+		for r in GameData.RECIPES:
+			if r["out"] == item:
+				right.add_child(UIKit.lbl("　作り方: " + GameData.recipe_text(r), 12, UIKit.C_DIM))
+	right.add_child(UIKit.lbl("回収ランクが「必要ランク」に届かないと、取れる割合が下がります。", 12, UIKit.C_DIM))
+	if not game.developer_mode(): return
+	# テスト用（生物の購入と同じ扱い）: 道具を倉庫に入れて、性能の違いをすぐ試せる
+	var sp := Control.new()
+	sp.custom_minimum_size = Vector2(0, 6)
+	right.add_child(sp)
+	right.add_child(UIKit.lbl("── テスト用: 道具を倉庫に入れる（加工でも作れます） ──", 14, UIKit.C_DIM))
+	var flow := HFlowContainer.new()
+	flow.add_theme_constant_override("h_separation", 6)
+	flow.add_theme_constant_override("v_separation", 4)
+	flow.custom_minimum_size = Vector2(520, 0)
+	right.add_child(flow)
+	for it in GameData.TOOL_ITEMS:
+		var item: int = it
+		var b := UIKit.button(GameData.ITEM_NAMES[item], func():
+			game.test_add_tool(item)
+			_rebuild())
+		b.alignment = HORIZONTAL_ALIGNMENT_CENTER
+		b.custom_minimum_size = Vector2(124, 28)
+		flow.add_child(b)
+
+
+## 素材ひとつぶんの行（見るだけ）: 名前・いまの個数・重さ・バー（そのまま集め続けると、あとどれだけ置けるかの目安）
+func _weight_row(item: int) -> Control:
+	var st = game.storage
+	var h := HBoxContainer.new()
+	h.add_theme_constant_override("separation", 6)
+	h.add_child(UIKit.lbl(GameData.ITEM_NAMES[item], 15, UIKit.C_TEXT, 84))
+	var n: int = st.count_of(item)
+	h.add_child(UIKit.lbl("×%d" % n, 15, Color("ffd24a"), 56))
+	h.add_child(UIKit.lbl("重さ %d" % (n * CargoDB.size_of(item)), 13, UIKit.C_DIM, 72))
+	# バー: 「いまの個数」÷「このまま集めたら最大何個まで置けるか（quota_of。拠点全体の残りの重さから決まる）」
+	var q: int = st.quota_of(item)
+	var bar := ProgressBar.new()
+	bar.max_value = float(maxi(1, q))
+	bar.value = minf(float(n), bar.max_value)
+	bar.show_percentage = false
+	bar.custom_minimum_size = Vector2(150, 9)
+	bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	var col := Color("7be07b")
+	if st.is_full(item):
+		col = Color("e0533d")
+	elif float(n) >= float(q) * CargoDB.WARN_RATIO:
+		col = Color("f0c040")
+	bar.add_theme_stylebox_override("background", UIKit.box(Color("0d0f12"), Color("0d0f12"), 0, 0))
+	bar.add_theme_stylebox_override("fill", UIKit.box(col, col, 0, 0))
+	h.add_child(bar)
+	if st.is_full(item):
+		h.add_child(UIKit.lbl("（いっぱい）", 13, UIKit.C_DIM))
+	return h
+
+
+## ★0〜5 を －／＋ で変える部品。
+func _stepper(getter: Callable, setter: Callable) -> Control:
+	var h := HBoxContainer.new()
+	h.add_theme_constant_override("separation", 2)
+	var stars := UIKit.lbl("", 15, Color("ffd24a"), 92)
+	stars.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var refresh := func():
+		var n: int = getter.call()
+		stars.text = ("★".repeat(n) + "☆".repeat(GameData.MAX_PRIORITY - n)) if n > 0 else "─ しない ─"
+	var minus := UIKit.button("－", func():
+		setter.call(clampi(getter.call() - 1, 0, GameData.MAX_PRIORITY))
+		refresh.call())
+	var plus := UIKit.button("＋", func():
+		setter.call(clampi(getter.call() + 1, 0, GameData.MAX_PRIORITY))
+		refresh.call())
+	for b in [minus, plus]:
+		b.custom_minimum_size = Vector2(30, 26)
+		b.alignment = HORIZONTAL_ALIGNMENT_CENTER
+	h.add_child(minus)
+	h.add_child(stars)
+	h.add_child(plus)
+	refresh.call()
+	return h
+
+
+func _refresh_repair_reason() -> void:
+	if is_instance_valid(_repair_reason):
+		_repair_reason.text=ProductionPlan.refill_reason(game,GameData.Item.REPAIR_KIT)
+
+func _process(delta:float) -> void:
+	if not _overlay.visible or _page!=0:return
+	_reason_clock+=delta
+	if _reason_clock>=0.25:
+		_reason_clock=0.0
+		_refresh_repair_reason()
