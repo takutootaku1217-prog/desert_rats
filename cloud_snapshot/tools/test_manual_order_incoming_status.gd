@@ -125,7 +125,7 @@ func _scenario_haul() -> void:
 	# 除外の検査（ここだけ incoming へ直接足す。成功の根拠には使わない）
 	var auto_r: Dictionary = GameData.recipe_by_id("firewood").duplicate(true)
 	auto_r["automatic"] = true
-	var build_r := {"id": ID, "build": "bed", "in": {}, "out": -1}
+	var build_r := {"id": ID, "manual": true, "build": "bed", "in": {}, "out": -1}   # manual でも建設なら数えない
 	p.incoming.append(auto_r)
 	p.incoming.append(build_r)
 	_check(int(p.manual_status("firewood").get("incoming", 0)) == 0, "除外: 自動補充の搬入は数えない")
@@ -139,9 +139,13 @@ func _scenario_haul() -> void:
 	var worst_high := 1
 	var arrived := false
 	var saw_move := false
+	var completed := false
+	var pick_before: int = main.storage.count_of(GameData.Item.WOOD_PICK)
 	while Time.get_ticks_msec() - t0 < WALL_LIMIT_MS:
 		var now: Dictionary = p.manual_status(ID)
-		if int(now.output) > 0 or main.storage.count_of(GameData.Item.WOOD_PICK) > 0: break
+		if int(now.output) > 0 or main.storage.count_of(GameData.Item.WOOD_PICK) > pick_before:
+			completed = true
+			break
 		var hw = _hauler()
 		if hw != null and hw.ai.state == CharacterAI.State.HAUL_MOVE: saw_move = true
 		worst_low = mini(worst_low, _total(now))
@@ -154,6 +158,8 @@ func _scenario_haul() -> void:
 	_check(arrived, "搬入が完了した（必須到達）")
 	_check(worst_low == 1 and worst_high == 1, "引受けから完成まで、内訳の合計は常に1（最小 %d・最大 %d）" % [worst_low, worst_high])
 	var done: Dictionary = p.manual_status(ID)
+	_check(completed, "制限時間内に完成品が実際に出た（出力トレイまたは倉庫。必須到達）")
+	_check(int(done.active) == 0 and (int(done.output) > 0 or main.storage.count_of(GameData.Item.WOOD_PICK) > pick_before), "完成後: 加工中0で、完成品が出力トレイか倉庫にある（実測 %s）" % str(done))
 	_check(int(done.get("incoming", 0)) == 0 and int(done.queued) == 0 and int(done.loaded) == 0, "完成後: 搬入中・未投入・投入済は0")
 
 
