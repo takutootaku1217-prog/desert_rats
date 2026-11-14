@@ -167,6 +167,17 @@ func _run_cycle() -> Dictionary:
 	var insufficient: Dictionary = main.town.quote("buy", GameData.Item.FUEL, 1)
 	if bool(insufficient.get("ok", false)):
 		return {"ok": false, "reason": "insufficient-credit purchase was incorrectly quoted"}
+	# Boundary save (isolated test home only) for the restart test: after the real quarry recovery, the sales and the purchase.
+	main.town_ui.close()
+	await process_frame
+	SaveGame.disabled = false
+	var saved: bool = not OS.get_environment("FLUID_TEST_HOME").is_empty() and SaveGame.write(main, "user://recovery-town-market-test.json", true)
+	SaveGame.disabled = true
+	if not saved:
+		return {"ok": false, "reason": "boundary save after the market purchase was refused: %s" % SaveGame.last_error}
+	var expect_file := FileAccess.open("user://recovery-town-market-expect.json", FileAccess.WRITE)
+	expect_file.store_string(JSON.stringify({"credits": int(main.town.credits), "ore": main.storage.count_of(GameData.Item.IRON_ORE), "food": main.storage.count_of(GameData.Item.FOOD), "fuel": main.storage.count_of(GameData.Item.FUEL)}))
+	expect_file.close()
 	return {"ok": bool(harvested.get("conservation_ok", false)) and bool(recalled.get("conservation_ok", false)), "depot_ore": depot_ore, "credits": int(main.town.credits), "food": main.storage.count_of(GameData.Item.FOOD)}
 
 func _run() -> void:
