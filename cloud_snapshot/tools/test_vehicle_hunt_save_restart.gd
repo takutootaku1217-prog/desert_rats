@@ -104,6 +104,7 @@ func _run() -> void:
 			if not main.world.request(dest2): break
 			for frame in 3000:
 				_step()
+				max_carcass_nodes = maxi(max_carcass_nodes,_carcass_nodes()); max_unspent_rows = maxi(max_unspent_rows,int(_carcass_rows()[0]))
 				if _alive_source(saved.source): seen_alive_after = true
 				if main.world.phase == "stopped" and main.world.region == dest2: break
 				if frame % 100 == 0: await process_frame
