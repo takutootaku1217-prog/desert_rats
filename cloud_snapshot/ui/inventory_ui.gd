@@ -635,6 +635,13 @@ func _ask_discard() -> void:
 	var wanted := mini(_qty.value, selected_stack().n)
 	var s := _acting_stack()
 	if s == null: return
+	# 選んだ束そのものの最新の数量が、意図した数量に足りない（押している間に減った）。同じ品目の別の束の在庫で
+	# 埋め合わせず、確認を開かない。束の上限と、品目全体の予約を引いた上限の両方を守る。
+	if wanted > s.n:
+		_discard_snapshot = {}
+		_refresh(true)
+		_say("在庫が変わり、この束の数量が足りなくなりました。数量を選び直してください")
+		return
 	_discard_snapshot = game.warehouse_discard_snapshot(s.item, wanted)
 	if _discard_snapshot.is_empty():
 		_say("廃棄できません。数量・在庫・予約を確認してください")
