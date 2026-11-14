@@ -192,8 +192,21 @@ func _process(delta: float) -> void:
 		return
 	_t += delta
 	if _t >= 0.25:
+		# ボタンを押している間は作り直さない（離したあとの次のフレームで更新する。_t は戻さない）
+		if _has_held_button(_overlay):
+			return
 		_t = 0.0
 		_refresh()
+
+
+## 押している最中の操作ボタンがあるか（トグルは押下ではなく状態なので対象外）。作り直しで押下が消えるのを防ぐ。
+func _has_held_button(node: Node) -> bool:
+	if node is BaseButton and not node.toggle_mode and node.is_pressed():
+		return true
+	for child in node.get_children():
+		if _has_held_button(child):
+			return true
+	return false
 
 
 # ---------------------------------------------------------------- 状態
@@ -261,6 +274,8 @@ func _signature() -> String:
 
 
 func _refresh(force := false) -> void:
+	if not force and _has_held_button(_overlay):
+		return
 	if game == null or game.storage == null:
 		return
 	for i in _tab_btns.size():

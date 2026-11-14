@@ -82,7 +82,7 @@ func run() -> void:
  ui._select(idx(WOOD));await process_frame
  var qty_node=ui._qty
  var split_node=ui._split_box
- ui._qty_val=3
+ ui._qty.set_value(3)
  ui._split_btn.pressed.emit();await process_frame
  var split_open:bool=ui._split_box.visible
  ui._split_qty.set_value(2,false)
@@ -97,6 +97,10 @@ func run() -> void:
  check(ui._qty==qty_node and ui._split_box==split_node,"detail is not rebuilt (same quantity picker and split box nodes)")
  check(split_open and ui._split_box.visible and ui._split_qty.value==2,"split input stays open with its value")
  check(ui._qty_val==3 and ui.selected_stack()==sel_before,"chosen quantity and selected stack are kept")
+ var shown:="<none>"
+ for c in ui._qty.get_children():
+  if c is Label: shown=String(c.text)
+ check(ui._qty.value==3 and shown=="3","the quantity picker keeps its real value and displayed text (3)")
  check(dialog_open and ui._discard_dialog.visible and ui._discard_snapshot==snap_before,"discard confirmation stays open with the same snapshot")
  check(find_label(ui._detail,"作業場 ×").get_theme_color("font_color")==col_before,"label emphasis (current tab vs other tab) unchanged")
  ui._cancel_discard()
