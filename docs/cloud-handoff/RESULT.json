@@ -59,16 +59,37 @@
     "permissions": "contents:read; no repository permission settings changed"
   },
   "unverified": [
-    "Real GPT/Claude model transfer",
+    "Automatic GPT/Claude coding-task transfer and general model process supervision",
     "Real rate-limit exhaustion and automatic near-10-percent switchover",
     "Persistent scheduled execution and prior Claude Routines History",
     "Windows, native GUI, full prototype suite and long-duration gameplay"
   ],
   "authentication": {
-    "claude": "not authenticated; official login awaiting user",
+    "claude": "authenticated via official subscription OAuth; read-only instruction/response test passed",
     "codex_quota": "official account/rateLimits/read returns 401 despite logged-in status; remaining unknown; new automatic work blocked"
   },
-  "next_owner": "user for official authentication, then GPT for fresh usage + bounded real Claude dispatch verification",
+  "next_owner": "user for Codex quota authentication if required, then GPT for fresh complete usage evidence and provider-cloud schedule verification",
   "billing_or_permissions_expanded": false,
-  "existing_branches_or_originals_modified": false
+  "existing_branches_or_originals_modified": false,
+  "claude_authentication_update": {
+    "recorded_at_utc": "2026-11-14T02:08:45.778749+00:00",
+    "logged_in": true,
+    "method": "claude.ai",
+    "subscription": "pro",
+    "official_credential_file_mode": "0600",
+    "real_manual_probe_requests": 2,
+    "first_blind_ack": "Not accepted; requested actual evidence. No false acknowledgment recorded.",
+    "read_only_followup": "success; actual Claude Read of handoff, project and provenance snapshots",
+    "files_read": 3,
+    "source_sha": "c297a0ce175c97ddd385bd09e5ce4a8ea297edf4",
+    "state_sha": "63db91785d0fac805e2c2824a5fa028731252884",
+    "reported_completed_units": 56,
+    "correctly_identified_mode": "mock",
+    "main_scene": "res://scenes/first_region_a_launcher.tscn",
+    "response_sha256": "4c00311da6bccb2314d3c49c86e42e388d90b3cb62e5e6a518052c18c31bb00b",
+    "overage_used": false,
+    "overage_status": "rejected; org_level_disabled",
+    "remaining_percent": "not available from returned event; no automatic work authorized",
+    "scope": "Parent fetched GitHub snapshots; Claude read supplied local files. No independent child GitHub fetch, code changes, automatic switch or schedule."
+  }
 }

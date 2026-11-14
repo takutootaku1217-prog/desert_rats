@@ -85,4 +85,4 @@ GitHub runnerの確認用は [専用CIブランチ](https://github.com/takutoota
 
 ## 実証結果（2026-11-14）
 
-短い実結果は [RESULT.json](RESULT.json)。実GitHubで模擬workerの進捗50→別コピーへ引継ぎ→56完了、競合拒否・停止順序・digestを確認。標準GitHub runnerで19検査成功。ソースは `c297a0ce175c97ddd385bd09e5ce4a8ea297edf4` のまま保持した。実モデル交代・実際の上限到達・常駐監視・Claude予定実行は未実証。次は本人認証と新しい公式利用枠の再確認。
+短い実結果は [RESULT.json](RESULT.json)。実GitHubで模擬workerの進捗50→別コピーへ引継ぎ→56完了、競合拒否・停止順序・digestを確認。標準GitHub runnerで19検査成功。ソースは `c297a0ce175c97ddd385bd09e5ce4a8ea297edf4` のまま保持した。実モデル交代・実際の上限到達・常駐監視・Claude予定実行は未実証。Claude本人認証と、実Claudeによる保存済み状態3ファイルの読み取り確認まで追加実証済み。追加クレジット無効の応答も確認。残るのは新しい完全な公式利用枠の取得と、実コーディング作業の自動交代・予定実行の確認。
