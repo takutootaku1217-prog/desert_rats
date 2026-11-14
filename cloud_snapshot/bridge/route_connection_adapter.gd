@@ -1028,14 +1028,16 @@ func _build_vehicle_status() -> void:
 	row.add_child(vehicle_return_button)
 	_update_controls()
 
-func _optional_outpost_return() -> bool:
-	return session != null and session.outpost_enabled and not session.is_region_boss()
+func _same_control_return() -> bool:
+	# Normal C and optional outpost share the deliberate two-stage return.
+	# Boss and legacy diagnostic modes keep their existing controls.
+	return session != null and not session.is_region_boss() and (session.outpost_enabled or session.is_mine_path_engineering())
 
 func _vehicle_return_context_current() -> bool:
 	return not _discarding_for_load and is_inside_tree() and not is_queued_for_deletion() and is_visible_in_tree() and is_instance_valid(game) and not game.game_over and not game.save_ui.is_open() and session != null and not session.committed and life_clock != null and life_clock.is_current()
 
 func _update_vehicle_return() -> void:
-	if vehicle_return_button == null or not _optional_outpost_return(): return
+	if vehicle_return_button == null or not _same_control_return(): return
 	var ready: bool = session.phase == "ready_to_exit"
 	vehicle_return_button.text = "帰還→横視点" if ready else ("帰還準備" if session.phase == "local" else "帰還準備中")
 	vehicle_return_button.tooltip_text = "全員と荷物の帰還を確定し、横視点へ戻ります" if ready else "全員と荷物を呼び戻します。準備完了後、このボタンで帰還を確定してください"
@@ -1045,14 +1047,14 @@ func _capture_vehicle_return() -> void:
 	_vehicle_return_action = ""
 	_vehicle_return_session = null
 	_vehicle_return_clock = null
-	if not _optional_outpost_return() or not _vehicle_return_context_current() or vehicle_return_button.disabled: return
+	if not _same_control_return() or not _vehicle_return_context_current() or vehicle_return_button.disabled: return
 	# Capture the visible choice at press time, never promote recall on release.
 	_vehicle_return_action = "commit" if vehicle_return_button.text == "帰還→横視点" else "recall"
 	_vehicle_return_session = session
 	_vehicle_return_clock = life_clock
 
 func _dispatch_vehicle_return() -> void:
-	if not _optional_outpost_return():
+	if not _same_control_return():
 		if not game.game_over: session.request_recall()
 		return
 	var action := _vehicle_return_action
