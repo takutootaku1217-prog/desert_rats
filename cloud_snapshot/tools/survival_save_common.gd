@@ -128,6 +128,23 @@ func _reservation_issue() -> String:
 	var refuelers: int = main.workers.filter(func(x): return x.ai.state in refuel_states).size()
 	if bool(main.base.refuel_reserved) != (refuelers > 0): return "refuel reservation flag (%s) does not match the refuelling workers (%d)" % [main.base.refuel_reserved,refuelers]
 	return ""
+## Live carcass nodes (ResourceNode with item CARCASS under resources_root), independent of the vehicle hunt state.
+func _carcass_nodes() -> int:
+	var n := 0
+	for r in main.resources_root.get_children():
+		if is_instance_valid(r) and not r.is_queued_for_deletion() and r.get("item") == GameData.Item.CARCASS: n += 1
+	return n
+## Carcass rows of the world ledger over all locations: [unspent, spent].
+func _carcass_rows() -> Array:
+	var unspent := 0
+	var spent := 0
+	for key in main.world.locations:
+		for id in main.world.locations[key]:
+			var row: Dictionary = main.world.locations[key][id]
+			if row.get("type","") == "resource" and row.get("data",{}).get("item",-1) == GameData.Item.CARCASS:
+				if row.get("spent",false): spent += 1
+				else: unspent += 1
+	return [unspent,spent]
 ## Natural market actions only: sell real hunted byproducts, buy food and refuel if the earned credits allow it.
 func _market() -> void:
 	for item in [GameData.Item.HIDE,GameData.Item.BONE]:

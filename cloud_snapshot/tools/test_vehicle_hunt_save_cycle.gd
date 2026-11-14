@@ -27,10 +27,14 @@ func _run() -> void:
 	var key: String = str(main.world.key())
 	var row: Dictionary = main.world.locations.get(main.world.key(),{}).get(vh.cargo_source,{})
 	_check(bool(row.get("spent",false)),"the world ledger marks the killed entity as spent")
+	var respawn_at: float = float(row.get("respawn_at",-1.0))
+	_check(is_finite(respawn_at) and respawn_at > main.director.elapsed,"the respawn time is finite and in the future (%.1f s > now %.1f s)"%[respawn_at,main.director.elapsed])
+	var crows: Array = _carcass_rows()
+	_check(_carcass_nodes() == 0 and int(crows[0]) == 0,"the carcass was taken onto the rope: no live carcass node and no unspent carcass row remain (nodes %d, rows unspent %d / spent %d)"%[_carcass_nodes(),int(crows[0]),int(crows[1])])
 	var ledger := {"cargo":vh.cargo.duplicate(true),"species":vh.cargo_species,"progress":vh.cargo_progress,"source":vh.cargo_source,"key":key,
 		"hunted":main.total_hunted,"butchered":main.storage.total_butchered,"weight":main.storage.current_weight(),
 		"meat":_owned(GameData.Item.MEAT),"hide":_owned(GameData.Item.HIDE),"bone":_owned(GameData.Item.BONE),"elapsed":main.director.elapsed,
-		"respawn_at":float(row.get("respawn_at",-1.0)),"region":main.world.region,"phase":main.world.phase}
+		"respawn_at":float(row.get("respawn_at",-1.0)),"carcass_rows_spent":int(crows[1]),"region":main.world.region,"phase":main.world.phase}
 	SaveGame.disabled = false
 	var saved: bool = SaveGame.write(main,HUNT_SAVE,true)
 	SaveGame.disabled = true

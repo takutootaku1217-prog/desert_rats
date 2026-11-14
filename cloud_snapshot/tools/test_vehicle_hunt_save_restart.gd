@@ -33,12 +33,18 @@ func _run() -> void:
 	var key = main.world.key()
 	_check(str(key) == str(saved.key) and bool(main.world.locations.get(key,{}).get(saved.source,{}).get("spent",false)),"restored: the killed entity is still spent on the same road")
 	_check(not _alive_source(saved.source),"restored: the killed entity is not alive")
+	_check(is_finite(float(saved.respawn_at)) and float(saved.respawn_at) > float(saved.elapsed) and is_equal_approx(float(main.world.locations.get(key,{}).get(saved.source,{}).get("respawn_at",-1.0)),float(saved.respawn_at)),"restored: the respawn time is finite, later than the saved clock (%.1f > %.1f) and unchanged by loading"%[float(saved.respawn_at),float(saved.elapsed)])
+	var rows0: Array = _carcass_rows()
+	_check(_carcass_nodes() == 0 and int(rows0[0]) == 0,"restored: no carcass node and no unspent carcass ledger row came back with the load (nodes %d, rows unspent %d / spent %d)"%[_carcass_nodes(),int(rows0[0]),int(rows0[1])])
+	var max_carcass_nodes := 0
+	var max_unspent_rows := 0
 	# natural completion of the recovery
 	var weight_before: int = main.storage.current_weight()
 	var meat_before: int = _owned(GameData.Item.MEAT) + int(main.processor.committed_inputs().get(GameData.Item.MEAT,0))
 	var steps := 0
 	while not vh.cargo.is_empty() and steps < 100:
 		_step()
+		max_carcass_nodes = maxi(max_carcass_nodes,_carcass_nodes()); max_unspent_rows = maxi(max_unspent_rows,int(_carcass_rows()[0]))
 		steps += 1
 	_check(vh.cargo.is_empty() and steps > 0,"the recovery finishes naturally after %d ordinary steps"%steps)
 	var expected: Array = []
@@ -53,6 +59,7 @@ func _run() -> void:
 	var arrived := false
 	for frame in 3000:
 		_step()
+		max_carcass_nodes = maxi(max_carcass_nodes,_carcass_nodes()); max_unspent_rows = maxi(max_unspent_rows,int(_carcass_rows()[0]))
 		if main.world.phase == "stopped" and main.world.region == "b_forest": arrived = true; break
 		if frame % 100 == 0: await process_frame
 	_check(arrived,"the base arrives at the forest by ordinary travel")
@@ -62,6 +69,7 @@ func _run() -> void:
 	var back := false
 	for frame in 3000:
 		_step()
+		max_carcass_nodes = maxi(max_carcass_nodes,_carcass_nodes()); max_unspent_rows = maxi(max_unspent_rows,int(_carcass_rows()[0]))
 		if str(main.world.key()) == str(saved.key): revisited = true
 		if _alive_source(saved.source) and main.director.elapsed < float(saved.respawn_at): early_revival = true
 		if main.world.phase == "stopped" and main.world.region == "a_start": back = true; break
@@ -82,6 +90,7 @@ func _run() -> void:
 		if not main.world.request(dest): break
 		for frame in 3000:
 			_step()
+			max_carcass_nodes = maxi(max_carcass_nodes,_carcass_nodes()); max_unspent_rows = maxi(max_unspent_rows,int(_carcass_rows()[0]))
 			if _alive_source(saved.source):
 				if main.director.elapsed < float(saved.respawn_at): early_revival = true
 				else: seen_alive_after = true
@@ -102,6 +111,15 @@ func _run() -> void:
 	_check(not early_revival and seen_alive_after,"the entity came back only after its natural respawn time (regeneration), never before")
 	got = hunt_events.duplicate(); got.sort()
 	_check(got == expected and main.total_hunted == int(saved.hunted) and vh.cargo.is_empty() and witness_kills == 0,"the regenerated entity gave nothing without a hunt request: still one stored cargo, same hunt count, no cargo")
+	_check(max_carcass_nodes == 0 and max_unspent_rows == 0,"at every step after the restart (recovery, travel, revisit, regeneration) there was no carcass node and no unspent carcass ledger row (max nodes %d, max rows %d)"%[max_carcass_nodes,max_unspent_rows])
+	# Detector self-test (not game evidence): the node scan really sees a carcass node when one exists.
+	var probe := ResourceNode.new()
+	probe.item = GameData.Item.CARCASS
+	main.resources_root.add_child(probe)
+	var seen: int = _carcass_nodes()
+	main.resources_root.remove_child(probe)
+	probe.free()
+	_check(seen == 1 and _carcass_nodes() == 0,"detector self-test: the carcass node scan detects a carcass node (test-only probe, removed again)")
 	print("INFO " + JSON.stringify({"seconds":seconds,"elapsed":main.director.elapsed,"respawn_at":saved.respawn_at,"natural_respawn_due":natural,"spent":row.get("spent",false),"events":str(hunt_events)}))
 	main.free()
 	print("RESULT checks=%d failures=%d" % [checks,failures])
