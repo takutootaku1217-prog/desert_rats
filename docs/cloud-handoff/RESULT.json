@@ -1,0 +1,74 @@
+{
+  "recorded_at_utc": "2026-11-14T01:50:44.528562+00:00",
+  "scope": "Bounded model-free cloud handoff; real GPT/Claude dispatch remains blocked",
+  "candidate_sha": "fb3494915dd621d5feccc2ed2718bf3947bacd4c",
+  "game_entry": "cloud_snapshot/project.godot",
+  "saved_source_branch": "cloud/handoff-safe-20261114",
+  "saved_source_sha": "c297a0ce175c97ddd385bd09e5ce4a8ea297edf4",
+  "coordination_branch": "cloud/handoff-state-20261114",
+  "final_state_sha": "63db91785d0fac805e2c2824a5fa028731252884",
+  "final_phase": "completed",
+  "transport": "Actual GitHub remote, two independent source clones",
+  "producer": {
+    "owner": "gpt-mock",
+    "saved_progress": 50,
+    "state_sha": "6e6e91707e2cb26489bc9b6fb8a5df9eb9d585a0",
+    "stopped_and_reaped": true,
+    "stop_reason": "simulated-warning"
+  },
+  "consumer": {
+    "owner": "claude-mock",
+    "received_progress": 50,
+    "completed_progress": 56,
+    "stopped_and_reaped": true
+  },
+  "stop_before_successor_start": true,
+  "checkpoint_digest_verified": true,
+  "competing_start": "rejected; no successor worker launched",
+  "tests": {
+    "coordination": {
+      "passed": 19,
+      "failed": 0
+    },
+    "root_python": {
+      "passed": 27,
+      "failed": 0
+    },
+    "snapshot_python": {
+      "passed": 6,
+      "failed": 0
+    },
+    "migration_runtime": {
+      "godot": "4.7.2.stable.official.ed1daf0bf",
+      "cases_passed": 5,
+      "assertions_passed": 185,
+      "source_files_unchanged": 1180,
+      "import_and_entry_startup": "pass",
+      "scope": "Linux headless / Viewport only"
+    }
+  },
+  "github_cloud_runner": {
+    "run_id": 43542757691,
+    "url": "https://github.com/takutootaku1217-prog/desert_rats/actions/runs/43542757691",
+    "tested_commit": "7997ba2ea8719f0b7aa8663a4429256f221c15cd",
+    "conclusion": "success",
+    "tests_passed": 19,
+    "runner": "standard ubuntu-latest in public repository",
+    "model_calls": 0,
+    "artifacts_or_cache": false,
+    "permissions": "contents:read; no repository permission settings changed"
+  },
+  "unverified": [
+    "Real GPT/Claude model transfer",
+    "Real rate-limit exhaustion and automatic near-10-percent switchover",
+    "Persistent scheduled execution and prior Claude Routines History",
+    "Windows, native GUI, full prototype suite and long-duration gameplay"
+  ],
+  "authentication": {
+    "claude": "not authenticated; official login awaiting user",
+    "codex_quota": "official account/rateLimits/read returns 401 despite logged-in status; remaining unknown; new automatic work blocked"
+  },
+  "next_owner": "user for official authentication, then GPT for fresh usage + bounded real Claude dispatch verification",
+  "billing_or_permissions_expanded": false,
+  "existing_branches_or_originals_modified": false
+}

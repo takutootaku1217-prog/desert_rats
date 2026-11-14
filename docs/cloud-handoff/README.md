@@ -81,3 +81,8 @@ GitHub runnerの確認用は [専用CIブランチ](https://github.com/takutoota
 - https://code.claude.com/docs/en/routines
 - https://developers.openai.com/codex/app-server/
 - Notion開発入口・検証台帳は2026-11-14に取得。11/9時点の内容にある過去版の合格は今回の移行候補へ転用しない。今回のユーザー指定SHAを優先し、Notionは変更していない。
+
+
+## 実証結果（2026-11-14）
+
+短い実結果は [RESULT.json](RESULT.json)。実GitHubで模擬workerの進捗50→別コピーへ引継ぎ→56完了、競合拒否・停止順序・digestを確認。標準GitHub runnerで19検査成功。ソースは `c297a0ce175c97ddd385bd09e5ce4a8ea297edf4` のまま保持した。実モデル交代・実際の上限到達・常駐監視・Claude予定実行は未実証。次は本人認証と新しい公式利用枠の再確認。
