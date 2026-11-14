@@ -5,7 +5,10 @@ extends RefCounted
 static func available(g, item:int, claimant = null, _allow_build_buffer := false) -> int:
  var n:int=g.storage.count_of(item)-g._queued_transfer(item,"to_workshop")
  for w in g.workers:
-  if w==claimant:continue
+  # claimant は1人、または出発する隊員たち（自分の予約は出発で解放される）
+  if claimant is Array:
+   if claimant.has(w):continue
+  elif w==claimant:continue
   var a=w.ai
   if a.state==CharacterAI.State.HAUL_TAKE:n-=int(a.haul_recipe.get("in",{}).get(item,0))
   elif a.state==CharacterAI.State.REPAIR_TAKE and item==GameData.Item.REPAIR_KIT:n-=1

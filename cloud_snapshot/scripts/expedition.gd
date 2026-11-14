@@ -80,10 +80,11 @@ func block_reason(members: Array, appr: String, bring_kit: bool) -> String:
 			return "%s はすでに出かけている" % w.char_name
 		if w.down:
 			return "%s は倒れている（戦闘不能）" % w.char_name
-	if game.storage.count_of(GameData.Item.FOOD) < members.size() * ExpeditionDB.FOOD_PER_MEMBER:
-		return "持たせる食料が足りない（%d個必要）" % (members.size() * ExpeditionDB.FOOD_PER_MEMBER)
-	if bring_kit and game.storage.count_of(GameData.Item.REPAIR_KIT) < 1:
-		return "応急修理板がない"
+	# 持ち出せるのは、他の仲間（食事・修理・運搬）や運搬の依頼が予約していない分だけ。隊員自身の予約は出発で解放される。
+	if AutoCraftGuard.available(game, GameData.Item.FOOD, members) < members.size() * ExpeditionDB.FOOD_PER_MEMBER:
+		return "持たせる食料が足りない（%d個必要。他の仲間・運搬の予約分は持ち出せない）" % (members.size() * ExpeditionDB.FOOD_PER_MEMBER)
+	if bring_kit and AutoCraftGuard.available(game, GameData.Item.REPAIR_KIT, members) < 1:
+		return "応急修理板がない（他の仲間が使う予約分は持ち出せない）"
 	return ""
 
 
