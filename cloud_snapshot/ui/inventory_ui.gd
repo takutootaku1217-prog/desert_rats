@@ -24,6 +24,8 @@ var _qty_val := 1                               # 数量の選び方の値（束
 var _qty: QtyPicker
 var _split_box: HBoxContainer
 var _split_qty: QtyPicker
+var _own_store: Label                           # 詳細の「倉庫 ×n」（反対側の置き場の数量もライブ更新するため参照を持つ）
+var _own_work: Label                            # 詳細の「作業場 ×n」
 var _discard_available: Label
 var _discard_btn: Button
 var _discard_dialog: ColorRect
@@ -383,6 +385,8 @@ func _rebuild_detail() -> void:
 	_discard_btn = null
 	_discard_available = null
 	_split_btn = null
+	_own_store = null
+	_own_work = null
 	_msg = null
 	var s := selected_stack()
 	if s == null:
@@ -410,8 +414,11 @@ func _rebuild_detail() -> void:
 	var own := HBoxContainer.new()
 	own.add_theme_constant_override("separation", 14)
 	hv.add_child(own)
-	own.add_child(UIKit.lbl("倉庫 ×%d" % game.storage.count_of(s.item), 16, UIKit.C_TEXT if _tab == 0 else UIKit.C_DIM))
-	own.add_child(UIKit.lbl("作業場 ×%d" % game.workshop_count(s.item), 16, UIKit.C_TEXT if _tab == 1 else UIKit.C_DIM))
+	# 反対側の置き場の数量も、詳細を作り直さずに毎回の更新で合わせる（_update_dynamic）
+	_own_store = UIKit.lbl("倉庫 ×%d" % game.storage.count_of(s.item), 16, UIKit.C_TEXT if _tab == 0 else UIKit.C_DIM)
+	_own_work = UIKit.lbl("作業場 ×%d" % game.workshop_count(s.item), 16, UIKit.C_TEXT if _tab == 1 else UIKit.C_DIM)
+	own.add_child(_own_store)
+	own.add_child(_own_work)
 	# 使い道（作れる物のアイコン）
 	var uses := ItemDB.uses_of(s.item)
 	if not uses.is_empty():
@@ -517,6 +524,10 @@ func _update_dynamic() -> void:
 	if s == null or _qty == null:
 		return
 	_qty.set_max(s.n)
+	if _own_store != null:
+		_own_store.text = "倉庫 ×%d" % game.storage.count_of(s.item)
+	if _own_work != null:
+		_own_work.text = "作業場 ×%d" % game.workshop_count(s.item)
 	if _move_btn != null:
 		_move_btn.disabled = _qty.value < 1
 	if _discard_available != null:
