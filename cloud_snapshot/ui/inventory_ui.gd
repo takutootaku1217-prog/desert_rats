@@ -264,7 +264,19 @@ func _refresh(force := false) -> void:
 	for i in _tab_btns.size():
 		UIKit.style(_tab_btns[i], i == _tab)
 	var m := _model()
+	# 選択は番号ではなく束そのもの（実体）で追う。在庫が動いて前の束が消えても、選んだ束を保つ。
+	var keep := selected_stack()
+	var old_sel := _sel
 	m.sync(_counts())
+	if keep != null:
+		var at := m.stacks.find(keep)
+		if at >= 0:
+			_sel = at
+		else:
+			# 選んだ束そのものが消えた: 同じ品目の残りの束、なければ元の位置の隣へ。数量・廃棄の確認は引き継がない。
+			_sel = _fallback_index(keep.item, old_sel)
+			_qty_val = 1
+			_cancel_discard()
 	if _sel >= m.stacks.size():
 		_sel = m.stacks.size() - 1
 	if _sel < 0 and not m.stacks.is_empty():
@@ -275,6 +287,15 @@ func _refresh(force := false) -> void:
 		_rebuild_list()
 		_rebuild_detail()
 	_update_dynamic()
+
+
+## 選んでいた束が消えたときの代わりの選択（同じ品目の束があればその先頭、なければ元の位置に近い束、空なら -1）
+func _fallback_index(item: int, old_index: int) -> int:
+	var m := _model()
+	for i in m.stacks.size():
+		if m.stacks[i].item == item:
+			return i
+	return mini(old_index, m.stacks.size() - 1)
 
 
 # ---------------------------------------------------------------- 一覧（左）

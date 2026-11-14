@@ -12,6 +12,7 @@ TESTS.insert(0, 'greenway_salvage')
 TESTS.insert(0, 'depot_expedition')
 TESTS.insert(0, 'warehouse_rows')
 TESTS.insert(0, 'inventory_search')
+TESTS.insert(0, 'inventory_selection')
 EXTRA_CASES = [('c_outpost_normal_director_v3','normal-director'),('c_outpost_failure_recovery_v3','failure-recovery'),('c_field_hull_failure_v3','hull-failure')]
 # Exhaustive real-Main readiness fixtures measured ~142s. Other defaults stay
 # at 120s; an explicit CLI timeout continues to override every case.
