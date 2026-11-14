@@ -1,5 +1,7 @@
 extends SceneTree
-## Phase B (a NEW Godot process): load the mid-flight save of test_expedition_party_cycle, check the restored state,
+## Phase B (a NEW Godot process): load the mid-expedition save of test_expedition_party_cycle, check the restored state,
+## Limited check: main runs with process_mode DISABLED and the expedition is advanced by direct tick() calls,
+## so the whole-world clock and consumption are stopped (this is NOT a normal-survival guarantee).
 ## then run the expedition to its end (success or retreat) and check that supplies, members and loot are applied exactly once.
 var main
 var checks := 0
@@ -27,7 +29,7 @@ func run() -> void:
  root.add_child(main);await process_frame
  main.process_mode=Node.PROCESS_MODE_DISABLED
  var before:=FileAccess.get_sha256(path)
- check(SaveGame.apply(main,SaveGame.read(path)),"new process loads the mid-flight save")
+ check(SaveGame.apply(main,SaveGame.read(path)),"new process loads the mid-expedition save")
  check(FileAccess.get_sha256(path)==before,"loading does not rewrite the save file")
  check(main.expedition.state=="running" and main.expedition.party.size()==2 and int(main.expedition.stats["trips"])==int(expect["trips"]),"restored: running, two members, same trip count")
  check(main.workers.map(func(x):return x.away)==expect["away"] and main.workers.map(func(x):return main.expedition.party.has(x))==expect["party"],"restored: the same members are away; the others are not")
@@ -50,7 +52,8 @@ func run() -> void:
  for it in base_counts: keys[it]=true
  for it in keys:
   if int(after.get(it,0))-int(base_counts.get(it,0))!=int(loot.get(it,0)): exact=false
- check(lost.is_empty() and not loot.is_empty() and exact,"every loot item reaches the warehouse exactly once (stock delta equals the reported loot, nothing else changes)")
+ print("INFO outcome: retreated=%s ok=%d ng=%d loot=%s lost=%s" % [main.expedition.retreated,main.expedition.ok_count,main.expedition.ng_count,loot,lost])
+ check(lost.is_empty() and exact,"every loot item reaches the warehouse exactly once (stock delta equals the reported loot, even when the outcome is a retreat with no loot; nothing else changes)")
  check(main.workers.all(func(x):return not x.away),"all members are back (away cleared)")
  check(int(main.expedition.stats["trips"])==int(expect["trips"]),"the trip is counted once")
  var done_counts:=total_counts()

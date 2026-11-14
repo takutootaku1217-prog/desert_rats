@@ -1,7 +1,7 @@
 extends SceneTree
 ## Phase A (process 1): a two-member expedition departs while another worker holds a real repair-kit reservation
 ## and one member holds its own real food reservation (both created by the real AI, not injected).
-## The run is saved mid-flight to user://expedition-party-test.json for the restart phase (a separate Godot process).
+## The run is saved mid-expedition to user://expedition-party-test.json for the restart phase (a separate Godot process).
 ## Fixture note: the stock numbers (food, kits) are set up by the test; no supply is added after the departure.
 var main
 var checks := 0
@@ -48,7 +48,6 @@ func run() -> void:
  main.expedition.offer("ruins_small")
  # food 2 = exactly the 2 members; only the eater's own reservation covers one of them. kit 2, repairer holds 1.
  check(main.expedition.block_reason(party,"normal",true)=="","two members, own reservation released, other worker's kit reservation kept: departure allowed")
- check(main.expedition.block_reason([eater,third,repairer],"normal",true)=="" or true,"(info) three-member party shape is not required")
  var kit_reserved_by_other:int=main.base.repair_reserved.size()
  check(main.expedition.start(party,"normal",true),"two-member expedition departs")
  check(main.storage.count_of(FOOD)==0 and main.storage.count_of(KIT)==1,"exactly 2 food and 1 kit consumed")
@@ -58,7 +57,7 @@ func run() -> void:
  var path:="user://expedition-party-test.json"
  var expect:={"food":main.storage.count_of(FOOD),"kit":main.storage.count_of(KIT),"away":main.workers.map(func(x):return x.away),"party":main.workers.map(func(x):return main.expedition.party.has(x)),"trips":int(main.expedition.stats["trips"]),"kit_flag":main.expedition.kit}
  SaveGame.disabled=false # same as the existing armor save test: writes only to the isolated test home (FLUID_TEST_HOME is set)
- check(SaveGame.write(main,path,true),"mid-flight save written (%s)"%SaveGame.last_error)
+ check(SaveGame.write(main,path,true),"mid-expedition save written (%s)"%SaveGame.last_error)
  SaveGame.disabled=true
  var f:=FileAccess.open("user://expedition-party-expect.json",FileAccess.WRITE)
  f.store_string(JSON.stringify(expect));f.close()
