@@ -14,7 +14,8 @@ var sold_meat := 0
 var purchases := 0
 var earned := 0
 var spent := 0
-var kills := 0
+var witness_kills := 0            # deaths observed independently on the world entity ledger (not derived from total_hunted)
+var witness_ids: Array = []
 var meals := 0
 func _check(ok: bool, message: String) -> void:
 	checks += 1
@@ -54,8 +55,16 @@ func _setup_fixture() -> void:
 		w.stop_work()
 		w.set_priority(GameData.Job.GATHER,0)
 	main.storage.inventory.item_added.connect(_added)
+func _living() -> Dictionary:
+	var living := {}
+	for id in main.world.locations.get(main.world.key(),{}):
+		var row: Dictionary = main.world.locations[main.world.key()][id]
+		if row.get("type","") == "creature" and not row.get("spent",false): living[id] = main.world.key()
+	return living
 func _step() -> void:
-	var hunted_before: int = main.total_hunted
+	# Independent witness (same idea as test_vehicle_hunt_survival_cycle): a creature row of the world ledger that was
+	# alive before the step and is spent after it is one death. This does not read total_hunted.
+	var living := _living()
 	main._process(STEP)
 	for c in main.creatures_root.get_children():
 		if is_instance_valid(c) and not c.is_queued_for_deletion(): c._process(STEP)
@@ -66,7 +75,11 @@ func _step() -> void:
 		var eaten_before: int = main.total_eaten
 		w._process(STEP)
 		if main.total_eaten > eaten_before and w.hunger > hunger_before: meals += 1
-	kills += maxi(0,main.total_hunted - hunted_before)
+	for id in living:
+		var row: Dictionary = main.world.locations.get(living[id],{}).get(id,{})
+		if row.get("spent",false):
+			witness_kills += 1
+			witness_ids.append(id)
 	seconds += STEP
 func _wait(duration: float, retreat_on_damage: bool = false) -> void:
 	for frame in ceili(duration/STEP):
@@ -102,6 +115,19 @@ func _trade(action: String, item: int, n: int = 1) -> bool:
 	if action == "buy" and item == GameData.Item.FOOD: purchases += n
 	if action == "sell" and item == GameData.Item.MEAT: sold_meat += n
 	return true
+## Real owner/release check of the reservations (not just a range check). Returns "" when consistent.
+func _reservation_issue() -> String:
+	var repair_states := [CharacterAI.State.REPAIR_TAKE,CharacterAI.State.REPAIR_MOVE,CharacterAI.State.REPAIR]
+	for part in main.base.repair_reserved:
+		var w = main.base.repair_reserved[part]
+		if not is_instance_valid(w) or not main.workers.has(w): return "repair reservation of part %s has no valid owner" % part
+		if w.ai.state not in repair_states or w.ai.repair_part != part: return "repair reservation of part %s is held by a worker that is not repairing it" % part
+	for w in main.workers:
+		if w.ai.state in repair_states and main.base.repair_reserved.get(w.ai.repair_part) != w: return "%s is repairing without owning the reservation" % w.char_name
+	var refuel_states := [CharacterAI.State.REFUEL_TAKE,CharacterAI.State.REFUEL_MOVE,CharacterAI.State.REFUEL]
+	var refuelers: int = main.workers.filter(func(x): return x.ai.state in refuel_states).size()
+	if bool(main.base.refuel_reserved) != (refuelers > 0): return "refuel reservation flag (%s) does not match the refuelling workers (%d)" % [main.base.refuel_reserved,refuelers]
+	return ""
 ## Natural market actions only: sell real hunted byproducts, buy food and refuel if the earned credits allow it.
 func _market() -> void:
 	for item in [GameData.Item.HIDE,GameData.Item.BONE]:
