@@ -18,6 +18,7 @@ TESTS.insert(0, 'inventory_held_button')
 TESTS.insert(0, 'inventory_split_vanish')
 TESTS.insert(0, 'expedition_reserved_supplies')
 TESTS[0:0] = ['expedition_party_cycle', 'expedition_party_restart']
+TESTS[0:0] = ['survival_save_cycle', 'survival_save_restart']
 EXTRA_CASES = [('c_outpost_normal_director_v3','normal-director'),('c_outpost_failure_recovery_v3','failure-recovery'),('c_field_hull_failure_v3','hull-failure')]
 # Exhaustive real-Main readiness fixtures measured ~142s. Other defaults stay
 # at 120s; an explicit CLI timeout continues to override every case.
