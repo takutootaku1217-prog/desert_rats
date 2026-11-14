@@ -1,5 +1,7 @@
 # 砂漠の移動拠点（仮題）プロジェクトメモ
 
+> 2026-11-14の現在依頼: クラウド連携の再開元は `cloud/migration-20261112` / `fb3494915dd621d5feccc2ed2718bf3947bacd4c`、ゲーム入口は `cloud_snapshot/project.godot`。作業は新規ブランチのみ。下の旧main・旧完了報告でこの指定を置き換えない。`AGENTS.md` 冒頭と `docs/cloud-handoff/README.md` を先に確認する。旧報告の合格は移行候補の今回の合格ではない。
+
 ## 基本
 - Godot 4（GDScript）。ユーザーのGodotは 4.7.2（Windows）。プロジェクトは 4.3 以上で動く書き方にする。
 - 返答は日本語。ユーザーはPC操作を最小限にしたい。作業・確認は自分で済ませ、ユーザーには「Godotを閉じて再度F5」程度の操作だけ頼む。

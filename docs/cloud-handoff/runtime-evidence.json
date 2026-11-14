@@ -1,0 +1,263 @@
+{
+  "schema": "handoff-runtime-check-v1",
+  "recorded_utc": "2026-11-14T01:31:11.052116+00:00",
+  "overall": "PASS_WITH_SCOPE_LIMITS",
+  "candidate_sha": "fb3494915dd621d5feccc2ed2718bf3947bacd4c",
+  "game_entry": "cloud_snapshot/project.godot",
+  "configured_scene": "res://scenes/first_region_a_launcher.tscn",
+  "source_integrity": {
+    "manifest": "PUBLIC_SOURCE_MANIFEST_v2.json",
+    "manifest_sha256": "d927e7d6961b2f616bda01804d7a2d45db574d5e5558bb21b7fdb81a982eb519",
+    "expected_and_actual_file_count": 1180,
+    "missing_files": 0,
+    "extra_files": 0,
+    "hash_mismatches_before": 0,
+    "hash_mismatches_after": 0,
+    "cloud_snapshot_git_status_after": "",
+    "manifest_file_unchanged": true
+  },
+  "engine": {
+    "primary_version": "4.7.2.stable.official.ed1daf0bf",
+    "host": "Linux x86_64",
+    "source": "Official Godot standalone release; task-owned directory only",
+    "download": {
+      "release_url": "https://api.github.com/repos/godotengine/godot-builds/releases/tags/4.7.2-stable",
+      "download_url": "https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip",
+      "zip_sha256": "cadd3204e728a35d3f13adb7fd0d7902636b79f6b95c40c265eb73b6c35329e4",
+      "bytes": 77860424,
+      "seconds": 4.18,
+      "executable": "$RUN/tools/Godot_v4.7.2-stable_linux.x86_64",
+      "executable_sha256": "8d106cbe6144c2dc7e881d61d2429c1a8a76e6b22ef48bd5e48dcf934953f71e"
+    }
+  },
+  "test_method": {
+    "runner": "cloud_snapshot/tools/run_prototype_checks.py",
+    "selection": "Five existing TESTS selected in memory; EXTRA_CASES empty; existing main/make_test_env/cleanup reused without changing runner files.",
+    "driver": "execute_selected.py",
+    "modes": "headless; UI tests inject Godot Viewport input, not native OS input",
+    "isolation": {
+      "HOME": "$RUN/runner-homes/fluid-prototype-qa-6zqexbkw",
+      "USERPROFILE": "$RUN/runner-homes/fluid-prototype-qa-6zqexbkw",
+      "XDG_DATA_HOME": "$RUN/runner-homes/fluid-prototype-qa-6zqexbkw/data",
+      "XDG_CONFIG_HOME": "$RUN/runner-homes/fluid-prototype-qa-6zqexbkw/config",
+      "XDG_CACHE_HOME": "$RUN/runner-homes/fluid-prototype-qa-6zqexbkw/cache",
+      "APPDATA": "$RUN/runner-homes/fluid-prototype-qa-6zqexbkw/appdata/roaming",
+      "LOCALAPPDATA": "$RUN/runner-homes/fluid-prototype-qa-6zqexbkw/appdata/local",
+      "FLUID_TEST_HOME": "$RUN/runner-homes/fluid-prototype-qa-6zqexbkw"
+    },
+    "notion": "No design or implementation performed; live Notion not consulted.",
+    "case_source": "Existing test scripts from exact candidate, executed freshly; historical repository results not counted."
+  },
+  "current_results": [
+    {
+      "test": "import",
+      "exit": 0,
+      "seconds": 5.13,
+      "timeout": 120,
+      "command": [
+        "$RUN/tools/Godot_v4.7.2-stable_linux.x86_64",
+        "--headless",
+        "--path",
+        "$RUN/project",
+        "--editor",
+        "--import",
+        "--quit"
+      ],
+      "log": "logs/selected-4.7.2/import.log",
+      "log_sha256": "f15ffd4c558b01611d562c8c257508942bdc2dc542124f423ae2a592a46edfa6",
+      "ok_assertion_lines": 0,
+      "assertion_markers": [],
+      "error_or_warning_lines": []
+    },
+    {
+      "test": "startup_entry_flow",
+      "exit": 0,
+      "seconds": 7.23,
+      "timeout": 120,
+      "command": [
+        "$RUN/tools/Godot_v4.7.2-stable_linux.x86_64",
+        "--headless",
+        "--path",
+        "$RUN/project",
+        "--script",
+        "res://tools/test_startup_entry_flow.gd"
+      ],
+      "log": "logs/selected-4.7.2/startup_entry_flow.log",
+      "log_sha256": "58f4165321c7c9c881bfc114643328a3b2e3a96fe058b31bb1c24ce098f6d440",
+      "ok_assertion_lines": 38,
+      "assertion_markers": [
+        "STARTUP ENTRY assertions=38 failures=0"
+      ],
+      "error_or_warning_lines": []
+    },
+    {
+      "test": "first_region_checkpoint",
+      "exit": 0,
+      "seconds": 2.47,
+      "timeout": 120,
+      "command": [
+        "$RUN/tools/Godot_v4.7.2-stable_linux.x86_64",
+        "--headless",
+        "--path",
+        "$RUN/project",
+        "--script",
+        "res://tools/test_first_region_checkpoint.gd"
+      ],
+      "log": "logs/selected-4.7.2/first_region_checkpoint.log",
+      "log_sha256": "e78b4bb5b3c7c51606f6901c7e4f71b05d0ffab0988311b0c247345c1128a762",
+      "ok_assertion_lines": 39,
+      "assertion_markers": [
+        "FIRST REGION CHECKPOINT failures=0"
+      ],
+      "error_or_warning_lines": []
+    },
+    {
+      "test": "first_region_checkpoint_restart",
+      "exit": 0,
+      "seconds": 2.67,
+      "timeout": 120,
+      "command": [
+        "$RUN/tools/Godot_v4.7.2-stable_linux.x86_64",
+        "--headless",
+        "--path",
+        "$RUN/project",
+        "--script",
+        "res://tools/test_first_region_checkpoint_restart.gd"
+      ],
+      "log": "logs/selected-4.7.2/first_region_checkpoint_restart.log",
+      "log_sha256": "51f45146a4b19f7078c85fc0e4a2f71125c5f577fe6134ba197e9d8470ad63a0",
+      "ok_assertion_lines": 10,
+      "assertion_markers": [
+        "FIRST REGION CHECKPOINT RESTART failures=0"
+      ],
+      "error_or_warning_lines": []
+    },
+    {
+      "test": "inventory_search",
+      "exit": 0,
+      "seconds": 3.97,
+      "timeout": 120,
+      "command": [
+        "$RUN/tools/Godot_v4.7.2-stable_linux.x86_64",
+        "--headless",
+        "--path",
+        "$RUN/project",
+        "--script",
+        "res://tools/test_inventory_search.gd"
+      ],
+      "log": "logs/selected-4.7.2/inventory_search.log",
+      "log_sha256": "f7904b8671c0f9d4fd5e1a0ff9653e5962c048ad620a8a3a39d9c64e73785ca4",
+      "ok_assertion_lines": 23,
+      "assertion_markers": [
+        "RESULT checks=23 failures=0"
+      ],
+      "error_or_warning_lines": []
+    },
+    {
+      "test": "ui_modal_feedback",
+      "exit": 0,
+      "seconds": 8.81,
+      "timeout": 120,
+      "command": [
+        "$RUN/tools/Godot_v4.7.2-stable_linux.x86_64",
+        "--headless",
+        "--path",
+        "$RUN/project",
+        "--script",
+        "res://tools/test_ui_modal_feedback.gd"
+      ],
+      "log": "logs/selected-4.7.2/ui_modal_feedback.log",
+      "log_sha256": "0fbf9c0d8af69ab59ef8ad12549820f3158fe87a201ea24d62074ee9abf4cbfe",
+      "ok_assertion_lines": 75,
+      "assertion_markers": [
+        "UI FEEDBACK ASSERTIONS 75 FAILURES 0"
+      ],
+      "error_or_warning_lines": []
+    }
+  ],
+  "clean_4_7_2_only_copy": [
+    {
+      "test": "clean-import-4.7.2",
+      "command": [
+        "$RUN/tools/Godot_v4.7.2-stable_linux.x86_64",
+        "--headless",
+        "--path",
+        "$RUN/project-4.7.2-clean",
+        "--editor",
+        "--import",
+        "--quit"
+      ],
+      "exit": 0,
+      "seconds": 8.37,
+      "timeout": 120,
+      "log_sha256": "ff423aa7c4484895440bcb4302a1be419145adff52ed10657441d914508f94d0",
+      "bytes": 68206,
+      "error_markers": []
+    },
+    {
+      "test": "configured-entry-startup-4.7.2",
+      "command": [
+        "$RUN/tools/Godot_v4.7.2-stable_linux.x86_64",
+        "--headless",
+        "--path",
+        "$RUN/project-4.7.2-clean",
+        "--quit-after",
+        "120"
+      ],
+      "exit": 0,
+      "seconds": 3.41,
+      "timeout": 30,
+      "log_sha256": "6d1c065383a27c36804949b6ffa4b09714470b112e5dacc0bd5aeb7b9c147c4e",
+      "bytes": 73,
+      "error_markers": []
+    }
+  ],
+  "preliminary_installed_4_6_3_import": {
+    "test": "import",
+    "engine": "4.6.3.stable.official.7d41c59c4",
+    "command": [
+      "/usr/local/bin/godot",
+      "--headless",
+      "--path",
+      "$RUN/project",
+      "--editor",
+      "--import",
+      "--quit"
+    ],
+    "exit": 0,
+    "seconds": 9.16,
+    "log_sha256": "0c59dbc2fea917a8bd6dbdfc9638afa85ced12433f65103d0b5e8accb7d38af3",
+    "bytes": 68206
+  },
+  "summary": {
+    "existing_cases_passed": 5,
+    "existing_cases_failed": 0,
+    "ok_assertion_lines": 185,
+    "import_and_configured_startup": "Clean 4.7.2-only copy import and configured entry 120 frames both exit 0.",
+    "errors_or_warnings": 0
+  },
+  "cleanup": {
+    "existing_runner": {
+      "ok": true,
+      "attempts": 1,
+      "error": null
+    },
+    "originals_changed_or_deleted": false,
+    "source_changes": false,
+    "save_isolation": "All generated profiles under task-owned scratch directories. Existing runner removed only its own temporary profile. Clean startup and preliminary import profiles retained.",
+    "retained": "Fresh project copies, official standalone engine/ZIP, raw logs and evidence remain outside repository.",
+    "commit_push": false
+  },
+  "raw_log_scan": {
+    "files": 9,
+    "credential_pattern_match_files": [],
+    "absolute_os_path_match_files": [],
+    "limitations": "Pattern scan is not a credential guarantee. Raw logs are not part of the shareable report."
+  },
+  "unverified": [
+    "Windows Godot editor/import and native OS mouse/keyboard",
+    "Rendered GUI appearance, audio and performance",
+    "Full 103-case prototype runner and ordinary long-duration gameplay",
+    "Game completeness and main-branch integration"
+  ]
+}

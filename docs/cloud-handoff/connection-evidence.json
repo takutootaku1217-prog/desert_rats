@@ -1,0 +1,34 @@
+{
+  "recorded_at_utc": "2026-11-14T01:35:59.874163+00:00",
+  "repository": "takutootaku1217-prog/desert_rats",
+  "visibility": "public",
+  "candidate_sha": "fb3494915dd621d5feccc2ed2718bf3947bacd4c",
+  "game_entry": "cloud_snapshot/project.godot",
+  "github_read": "verified",
+  "github_new_branch_push": "pending_round_trip",
+  "claude_cli_version": "2.1.311",
+  "claude_authenticated": false,
+  "claude_live_dispatch": "not_run_auth_required",
+  "claude_schedule_history": "unavailable_no_browser_or_provider_session_access",
+  "codex_cli_version": "0.167.0-alpha.4",
+  "codex_login_status": "ChatGPT",
+  "codex_official_quota_read": {
+    "method": "account/rateLimits/read",
+    "outcome": "401 Unauthorized",
+    "remaining": "unknown",
+    "new_work_gate": "blocked"
+  },
+  "github_actions_existing_settings_read": "403; not changed",
+  "billing_or_permissions_changed": false,
+  "previous_reported_success": "User reports one prior successful GPT-to-Claude dispatch and mock handoff; not independently replayed in this run",
+  "persistent_unattended_dual_model_scheduler": "not_verified",
+  "notion_read": {
+    "development_entry": "407ec2f2a3c181deabafc36a2577ec67",
+    "verification_ledger": "40bec2f2a3c181b3941ee999baf32af2",
+    "source_last_edited": "2026-11-09",
+    "use": "Historical scope and evidence rules only; latest user candidate SHA takes precedence",
+    "modified": false
+  },
+  "external_claude_or_codex_dispatches_in_smoke_tests": 0,
+  "extra_credit_setting_changes": 0
+}
