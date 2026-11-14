@@ -564,8 +564,38 @@ func _say(text: String) -> void:
 
 # ---------------------------------------------------------------- 操作
 ## 選んだ数を、運搬の依頼にする（倉庫 → 作業場、または 作業場 → 倉庫）
-func _move() -> void:
+## 選んだ束の実体が、いまの在庫でも生きているか（実際の束は変えず、写しで確かめる）
+func _alive_in_live_stock(s: ItemStack) -> bool:
+	var probe := InventoryModel.new()
+	var mine: ItemStack = null
+	for st in _model().stacks:
+		var c := ItemStack.new(st.item, st.n, st.data)
+		probe.stacks.append(c)
+		if st == s:
+			mine = c
+	probe.sync(_counts())
+	return mine != null and probe.stacks.has(mine)
+
+
+## 操作（運搬・分割・廃棄）の直前に、選んだ束そのものがいまも在庫にあるかを確かめて返す。
+## 押している間は更新を保留するので、その間に束が消えていることがある。消えていたら何も実行せず、
+## 最新の在庫で選択を直して表示を更新し、null を返す（同じ品目の別の束へ操作を転用しない）。
+## 生きていれば、束の実体と選択を保ったまま最新の在庫に合わせ、その束を返す（数量は最新の数）。
+func _acting_stack() -> ItemStack:
 	var s := selected_stack()
+	if s == null:
+		return null
+	if not _alive_in_live_stock(s):
+		_refresh(true)
+		_say("在庫が変わり、選んでいた束がなくなりました。選び直してください")
+		return null
+	_model().sync(_counts())
+	_sel = _model().stacks.find(s)
+	return s
+
+
+func _move() -> void:
+	var s := _acting_stack()
 	if s == null:
 		return
 	var dir := "to_workshop" if _tab == 0 else "to_storage"
@@ -579,8 +609,10 @@ func _move() -> void:
 
 
 func _do_split() -> void:
-	var s := selected_stack()
-	if s == null or _split_qty == null:
+	if _split_qty == null or selected_stack() == null:
+		return
+	var s := _acting_stack()
+	if s == null:
 		return
 	var n := _split_qty.value
 	var before := s.n
@@ -598,9 +630,12 @@ func _cancel_discard() -> void:
 
 
 func _ask_discard() -> void:
-	var s := selected_stack()
-	if _tab != 0 or s == null or _qty == null: return
-	_discard_snapshot = game.warehouse_discard_snapshot(s.item, mini(_qty.value, s.n))
+	if _tab != 0 or selected_stack() == null or _qty == null: return
+	# 廃棄は取り返せないので、意図した数量を黙って減らさない。押した時点の数量のまま、最新の在庫で検査する。
+	var wanted := mini(_qty.value, selected_stack().n)
+	var s := _acting_stack()
+	if s == null: return
+	_discard_snapshot = game.warehouse_discard_snapshot(s.item, wanted)
 	if _discard_snapshot.is_empty():
 		_say("廃棄できません。数量・在庫・予約を確認してください")
 		return
