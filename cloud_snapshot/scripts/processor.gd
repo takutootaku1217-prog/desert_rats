@@ -239,9 +239,12 @@ func take_output_stack(limit: int) -> Dictionary:
 
 
 func manual_status(id: String) -> Dictionary:
-	var d := {"queued":0,"loaded":0,"active":0,"progress":0.0,"time":0.0,"output":0}
+	var d := {"queued":0,"incoming":0,"loaded":0,"active":0,"progress":0.0,"time":0.0,"output":0}
 	for q in base().game.craft_queue + base().game.production_orders:
 		if q["id"] == id: d.queued += int(q["n"])
+	# 仲間が引受けて材料を確保・搬入している手動注文（自動補充・建設は含めない）。到着すると orders へ移る。
+	for r in incoming:
+		if r.get("manual",false) and not r.has("build") and r.get("id","") == id: d.incoming += 1
 	for r in orders:
 		if r.get("manual",false) and r["id"] == id: d.loaded += 1
 	for p in lanes():
