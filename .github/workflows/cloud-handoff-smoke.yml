@@ -1,0 +1,24 @@
+name: Cloud handoff smoke
+on:
+  push:
+    branches: [cloud/handoff-ci-probe-20261114]
+    paths:
+      - .github/workflows/cloud-handoff-smoke.yml
+      - tools/cloud_handoff.py
+      - tools/test_cloud_handoff.py
+permissions:
+  contents: read
+concurrency:
+  group: cloud-handoff-smoke
+  cancel-in-progress: false
+jobs:
+  protocol:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Test quota gates, exclusive claims, and stopped-process handoff
+        run: python3 tools/test_cloud_handoff.py -v
