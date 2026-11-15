@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>流動拠点サバイバル 機械爆発・ボルトと装甲片</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;background:#15131a;color:#e8e2d6;font-family:system-ui,-apple-system,"Hiragino Sans","Noto Sans JP",sans-serif;font-size:14px}
+#app{max-width:1296px;margin:0 auto;padding:8px}
+h1{font-size:15px;margin:2px 0 8px;font-weight:600;letter-spacing:.04em}
+h1 small{font-weight:400;color:#a79f92;font-size:12px;margin-left:6px}
+#stage{position:relative;line-height:0;background:#000;border:1px solid #3a3644}
+#view{display:block;width:100%;height:auto;aspect-ratio:16/9;image-rendering:crisp-edges;image-rendering:pixelated;touch-action:manipulation;cursor:crosshair;user-select:none;-webkit-user-select:none}
+#phase{position:absolute;left:6px;top:6px;line-height:1.3;font:12px ui-monospace,Menlo,Consolas,monospace;background:rgba(10,8,14,.72);color:#ffe9a8;padding:2px 6px;pointer-events:none}
+.row{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:8px}
+button,.tg{appearance:none;border:1px solid #57516a;background:#2a2734;color:#efe9dc;border-radius:4px;min-height:40px;padding:6px 10px;font:inherit;cursor:pointer;flex:0 1 auto}
+button:hover{background:#353144}
+button.on{background:#c8642c;border-color:#eda05a;color:#fff}
+.tg{display:inline-flex;align-items:center;gap:6px;user-select:none}
+.tg input{width:18px;height:18px;margin:0;accent-color:#eda05a}
+#seek{flex:1 1 160px;min-width:0;height:32px;accent-color:#eda05a}
+#tlabel{font:12px ui-monospace,Menlo,Consolas,monospace;min-width:150px;color:#cfc7b8}
+#seed{width:84px;min-height:40px;background:#1d1b25;color:#efe9dc;border:1px solid #57516a;border-radius:4px;padding:4px 6px;font:inherit}
+#stats{font:12px ui-monospace,Menlo,Consolas,monospace;color:#a9d8c0;flex:1 1 220px;min-width:0}
+.hint{color:#a79f92;font-size:12px;margin-top:8px;line-height:1.6}
+@media (max-width:520px){#app{padding:6px}button,.tg{padding:6px 8px;font-size:13px}#tlabel{min-width:0;flex:1 1 100%}}
+</style>
+</head>
+<body>
+<div id="app">
+  <h1>機械爆発・ボルトと装甲片<small>流動拠点サバイバル / 320×180 → 1280×720 (×4 最近傍)</small></h1>
+  <div id="stage"><canvas id="view" width="1280" height="720"></canvas><div id="phase"></div></div>
+  <div class="row">
+    <button id="bReplay">⟲ リプレイ</button>
+    <button id="bPlay">⏸ 一時停止</button>
+    <button id="bPrev">◀ 1コマ</button>
+    <button id="bNext">1コマ ▶</button>
+    <button id="bSpeed">速度 1×</button>
+    <button id="bBg">背景: 暗</button>
+  </div>
+  <div class="row">
+    <input id="seek" type="range" min="0" max="180" step="1" value="0" aria-label="再生位置">
+    <span id="tlabel"></span>
+  </div>
+  <div class="row">
+    <label class="tg"><input type="checkbox" id="lFlash" checked>閃光</label>
+    <label class="tg"><input type="checkbox" id="lShock" checked>衝撃波</label>
+    <label class="tg"><input type="checkbox" id="lFlame" checked>炎</label>
+    <label class="tg"><input type="checkbox" id="lDebris" checked>火花・破片</label>
+    <label class="tg"><input type="checkbox" id="lSmoke" checked>煙・残り火</label>
+  </div>
+  <div class="row">
+    <label class="tg">シード <input id="seed" type="number" value="7" step="1"></label>
+    <button id="bDice">🎲 シード変更</button>
+    <span id="stats"></span>
+  </div>
+  <div class="hint">画面をクリック／タップ、または Space で本爆発。← → で1コマ送り。同じシード・同じ時刻は常に同じ絵になります。</div>
+</div>
+<script>
+'use strict';
+/* ============================================================
+   基本設定
+   ============================================================ */
+const W=320,H=180,SC=4,TAU=Math.PI*2;
+const MAX_BLASTS=8;                 // 同時に保持する本爆発の上限
+const view=document.getElementById('view'),dctx=view.getContext('2d');
+const low=document.createElement('canvas');low.width=W;low.height=H;
+const lctx=low.getContext('2d');
+const img=lctx.createImageData(W,H),px=img.data;
+for(let i=3;i<px.length;i+=4)px[i]=255;
+
+function h32(a){a|=0;a=Math.imul(a^(a>>>16),0x7feb352d);a=Math.imul(a^(a>>>15),0x846ca68b);return(a^(a>>>16))>>>0}
+function rnd(s,i){return h32(Math.imul(s|0,0x9e3779b1)^Math.imul((i+1)|0,0x85ebca6b))/4294967296}
+const clamp=(v,a,b)=>v<a?a:v>b?b:v,lerp=(a,b,t)=>a+(b-a)*t,sat=v=>v<0?0:v>1?1:v;
+const smooth=(a,b,v)=>{v=sat((v-a)/(b-a));return v*v*(3-2*v)};
+const eo=v=>{v=sat(v);return 1-(1-v)*(1-v)*(1-v)};
+
+/* ---- タイル可能な値ノイズ（128×128、起動時に1回生成） ---- */
+function mkNoise(layers,seed){
+  const out=new Float32Array(16384);
+  for(const [cell,wt] of layers){
+    const n=128/cell,g=new Float32Array(n*n);
+    for(let i=0;i<n*n;i++)g[i]=rnd(seed+cell,i);
+    for(let y=0;y<128;y++)for(let x=0;x<128;x++){
+      const fx=x/cell,fy=y/cell,ix=fx|0,iy=fy|0;
+      let tx=fx-ix,ty=fy-iy;tx=tx*tx*(3-2*tx);ty=ty*ty*(3-2*ty);
+      const a=g[iy*n+ix],b=g[iy*n+(ix+1)%n],c=g[((iy+1)%n)*n+ix],d=g[((iy+1)%n)*n+(ix+1)%n];
+      out[y*128+x]+=wt*(a+(b-a)*tx+(c-a)*ty+(a-b-c+d)*tx*ty);
+    }
+  }
+  let mn=1e9,mx=-1e9;for(const v of out){if(v<mn)mn=v;if(v>mx)mx=v}
+  for(let i=0;i<out.length;i++)out[i]=(out[i]-mn)/(mx-mn);
+  return out;
+}
+const NA=mkNoise([[32,1],[16,.5],[8,.25]],11);
+const NB=mkNoise([[16,1],[8,.5],[4,.25]],23);
+const NC=mkNoise([[8,1],[4,.5]],37);
+const BAYER=[0,8,2,10,12,4,14,6,3,11,1,9,15,7,13,5].map(v=>(v+.5)/16);
+
+/* ---- ピクセル操作 ---- */
+function P(x,y,c){x|=0;y|=0;if(x<0||y<0||x>=W||y>=H)return;const i=(y*W+x)<<2;px[i]=c>>16;px[i+1]=c>>8&255;px[i+2]=c&255}
+function PB(x,y,c,a){x|=0;y|=0;if(x<0||y<0||x>=W||y>=H)return;const i=(y*W+x)<<2;px[i]+=((c>>16)-px[i])*a;px[i+1]+=((c>>8&255)-px[i+1])*a;px[i+2]+=((c&255)-px[i+2])*a}
+function PA(x,y,c,a){x|=0;y|=0;if(x<0||y<0||x>=W||y>=H)return;const i=(y*W+x)<<2;px[i]+=(c>>16)*a;px[i+1]+=(c>>8&255)*a;px[i+2]+=(c&255)*a}
+function line(x0,y0,x1,y1,c0,c1){x0=Math.round(x0);y0=Math.round(y0);x1=Math.round(x1);y1=Math.round(y1);
+  const n=Math.max(Math.abs(x1-x0),Math.abs(y1-y0),1);
+  for(let i=0;i<=n;i++)P(x0+(x1-x0)*i/n+.5,y0+(y1-y0)*i/n+.5,i*2<n?c0:c1)}
+function groundEllipse(cx,cy,rx,ry,c,a){
+  for(let y=Math.max(0,Math.floor(cy-ry));y<=Math.min(H-1,Math.ceil(cy+ry));y++){const dy=(y-cy)/ry;
+    for(let x=Math.max(0,Math.floor(cx-rx));x<=Math.min(W-1,Math.ceil(cx+rx));x++){const dx=(x-cx)/rx;
+      if(dx*dx+dy*dy<=1)PB(x,y,c,a)}}
+}
+
+/* ============================================================
+   スプライト（矩形で描いて輪郭を自動付与。外部画像なし）
+   ============================================================ */
+function mkSprite(w,h,fn){
+  const c=document.createElement('canvas');c.width=w+2;c.height=h+2;const g=c.getContext('2d');
+  g.translate(1,1);fn((x,y,ww,hh,col)=>{g.fillStyle=col;g.fillRect(x,y,ww,hh)});
+  const d=g.getImageData(0,0,w+2,h+2),s=d.data,o=new Uint8ClampedArray(s),ww=w+2,hh=h+2;
+  for(let y=0;y<hh;y++)for(let x=0;x<ww;x++){const i=(y*ww+x)*4;if(s[i+3])continue;
+    const nb=(x>0&&s[i-1])||(x<ww-1&&s[i+7])||(y>0&&s[i-ww*4+3])||(y<hh-1&&s[i+ww*4+3]);
+    if(nb){o[i]=26;o[i+1]=16;o[i+2]=22;o[i+3]=255}}
+  return{w:ww,h:hh,d:o};
+}
+function rotSprite(sp,deg){
+  const a=document.createElement('canvas');a.width=sp.w;a.height=sp.h;
+  a.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(sp.d),sp.w,sp.h),0,0);
+  const n=Math.ceil(Math.hypot(sp.w,sp.h))+2,b=document.createElement('canvas');b.width=n;b.height=n;
+  const g=b.getContext('2d');g.imageSmoothingEnabled=false;g.translate(n/2,n/2);g.rotate(deg*Math.PI/180);
+  g.drawImage(a,-sp.w/2,-sp.h/2);
+  const d=g.getImageData(0,0,n,n).data;for(let i=3;i<d.length;i+=4)d[i]=d[i]>=128?255:0;
+  return{w:n,h:n,d};
+}
+function blit(sp,x,y){x=Math.round(x);y=Math.round(y);
+  for(let j=0;j<sp.h;j++){const yy=y+j;if(yy<0||yy>=H)continue;
+    for(let i=0;i<sp.w;i++){const xx=x+i;if(xx<0||xx>=W)continue;const s=(j*sp.w+i)*4;if(!sp.d[s+3])continue;
+      const t=(yy*W+xx)<<2;px[t]=sp.d[s];px[t+1]=sp.d[s+1];px[t+2]=sp.d[s+2]}}
+}
+// 底辺中央基準で描く
+function blitFoot(sp,x,y){blit(sp,x-sp.w/2,y-sp.h+1)}
+
+function machineArt(R,withPilot){
+  R(6,8,16,8,'#c8642c');R(5,10,18,4,'#c8642c');R(6,8,16,1,'#eda05a');R(6,15,16,1,'#8a3e1c');R(5,13,18,1,'#a44e22');
+  R(8,11,12,2,'#f2c230');R(10,11,2,2,'#2a2228');R(14,11,2,2,'#2a2228');R(18,11,2,2,'#2a2228');
+  R(1,12,5,6,'#6a6e78');R(22,12,5,6,'#6a6e78');R(1,12,5,1,'#a8aeb8');R(22,12,5,1,'#a8aeb8');
+  R(2,18,3,1,'#34363e');R(23,18,3,1,'#34363e');
+  R(4,3,1,5,'#a8aeb8');R(3,2,3,1,'#6a6e78');
+  R(23,8,3,2,'#6a6e78');R(26,7,1,4,'#a8aeb8');
+  if(withPilot){R(10,3,9,5,'#6cc8c4');R(11,2,7,1,'#6cc8c4');R(11,3,3,1,'#e0fff8');R(10,4,1,2,'#e0fff8');
+    R(13,4,4,4,'#f2e2b0');R(13,6,4,1,'#2a2a3a');}
+  else{R(10,6,9,2,'#2a1a14');R(9,5,1,3,'#a8aeb8');R(19,4,1,4,'#a8aeb8');R(19,3,3,1,'#6cc8c4');R(11,7,2,1,'#f2c230')}
+}
+const SP={};
+SP.machine=mkSprite(28,19,R=>machineArt(R,true));
+SP.empty=[0,14,28,44].map(a=>{const s=mkSprite(28,19,R=>machineArt(R,false));return a?rotSprite(s,a):s});
+SP.pilot=mkSprite(8,10,R=>{R(2,0,4,4,'#f2e2b0');R(2,2,4,1,'#2a2a3a');R(1,4,6,4,'#3c6cd8');R(1,4,6,1,'#e84a3a');
+  R(0,5,1,2,'#f2e2b0');R(7,5,1,2,'#f2e2b0');R(2,8,1,2,'#2a3a7a');R(5,8,1,2,'#2a3a7a')});
+SP.chute=mkSprite(16,7,R=>{R(3,0,10,1,'#e84a3a');R(1,1,14,2,'#e84a3a');R(0,3,16,1,'#b8322a');
+  R(5,0,2,4,'#fff4e0');R(9,0,2,4,'#fff4e0');R(1,4,1,1,'#5a4a40');R(2,5,1,1,'#5a4a40');R(3,6,1,1,'#5a4a40');
+  R(14,4,1,1,'#5a4a40');R(13,5,1,1,'#5a4a40');R(12,6,1,1,'#5a4a40')});
+function buddyArt(c1,c2,c3){return R=>{R(2,0,6,5,c1);R(1,1,8,3,c1);R(2,0,6,1,c3);R(3,2,4,3,'#f6d8b0');
+  R(4,3,1,1,'#2a2228');R(6,3,1,1,'#2a2228');R(2,5,6,5,c2);R(0,6,2,4,'#8a5a2c');R(2,8,6,1,'#f2c230');
+  R(3,10,1,3,'#3a2e2a');R(6,10,1,3,'#3a2e2a')}}
+SP.buddyA=mkSprite(10,13,buddyArt('#5cbf5c','#2f8a4a','#9ce89a'));
+SP.buddyB=mkSprite(10,13,buddyArt('#a878e8','#6a44b0','#d4b4ff'));
+function oreArt(a,b,c,d){return R=>{R(1,6,13,6,'#6e5a52');R(3,5,9,1,'#8a7468');R(1,10,13,2,'#4a3c38');R(2,7,4,1,'#8a7468');
+  R(3,1,3,6,a);R(4,0,1,1,c);R(3,1,1,5,c);R(8,3,3,5,b);R(8,3,1,4,c);R(11,5,2,3,a);R(6,4,2,4,d)}}
+SP.oreA=mkSprite(15,12,oreArt('#58e0d8','#3ab0c8','#d0fff8','#2a8aa8'));
+SP.oreB=mkSprite(15,12,oreArt('#f0b848','#d88a2c','#fff0b0','#a8641c'));
+
+/* ============================================================
+   背景（暗／砂）: 起動時に1回だけ生成してバッファへ保持
+   ============================================================ */
+const HORIZON=30;
+const BGPAL=[
+  {sky:[0x10101c,0x161626,0x1e1c30],mesa:0x1a1824,mesa2:0x221f2e,g:[0x25212c,0x2c2834,0x34303e],peb:0x16131b,pebh:0x48425a,star:0x8a86a8,
+   shadow:0x08060c,scorch:0x0a080c,rimA:.75,rim:0xc8601a,ringOut:0x1c3a6a,ringOutA:.0},
+  {sky:[0xf3e6c4,0xeedcb2,0xe8d0a0],mesa:0xc09a6c,mesa2:0xae8658,g:[0xcdb27a,0xdcc48e,0xe8d4a2],peb:0xa88a5a,pebh:0xf6e8c0,star:0,
+   shadow:0x6a5232,scorch:0x35261a,rimA:.9,rim:0x6e3410,ringOut:0x2c4a80,ringOutA:.7}
+];
+function mkBg(m){
+  const p=BGPAL[m],b=new Uint8ClampedArray(W*H*4);
+  const set=(x,y,c)=>{const i=(y*W+x)*4;b[i]=c>>16;b[i+1]=c>>8&255;b[i+2]=c&255;b[i+3]=255};
+  for(let x=0;x<W;x++){
+    const m1=HORIZON-4-Math.round(NA[(x*2)&127]*4)*3, m2=HORIZON-2-Math.round(NB[5*128+((x+40)&127)]*3)*2;
+    for(let y=0;y<H;y++){
+      let c;
+      if(y<HORIZON){c=p.sky[y<10?0:y<20?1:2];if(m===0&&rnd(91,y*W+x)>.992)c=p.star;if(y>=m1)c=p.mesa;if(y>=m2)c=p.mesa2}
+      else{const n=NA[(((y-HORIZON)*2)&127)*128+(x&127)]*.7+NB[((y*3)&127)*128+((x+31)&127)]*.3;
+        c=p.g[n<.4?0:n<.68?1:2];
+        const r=rnd(77,y*W+x);if(r>.988)c=p.peb;else if(r>.981)c=p.pebh;
+        if(y===HORIZON)c=p.g[0]}
+      set(x,y,c);
+    }
+  }
+  // 轍（床面に沿った楕円弧）
+  for(let a=0;a<400;a++){const t=a/400*TAU,x=Math.round(150+Math.cos(t)*128),y=Math.round(112+Math.sin(t)*56);
+    if(y>HORIZON+1&&y<H&&x>=0&&x<W&&rnd(5,a>>2)>.35)set(x,y,p.g[0])}
+  return b;
+}
+const BG=[mkBg(0),mkBg(1)];
+
+/* ============================================================
+   状態
+   ============================================================ */
+const L={flash:true,shock:true,flame:true,debris:true,smoke:true};
+let mode=0;                 // 0=暗 1=砂
+let tf=0;                   // 現在時刻（60Hzフレーム単位。0.25倍速時は1/4刻み）
+let playing=true,speed=1;
+let events=[],clickN=0,baseSeed=7;
+let lastPt={x:167,y:104};
+const HOME={x:160,y:104},HOVER=30,ESC=30,FALL0=38,IMPACT=70,SEQ_LEN=182,BLAST_LEN=88;
+
+function timelineEnd(){let e=60;for(const v of events)e=Math.max(e,v.start+v.len);return Math.ceil(e)}
+
+/* ---- 本爆発のパラメータ（シードから決定的に生成） ---- */
+function mkBlast(x,y,start,seed){
+  const r=i=>rnd(seed,i),b={type:'blast',x,y,start,len:BLAST_LEN,seed,nx:(r(1)*128)|0,ny:(r(2)*128)|0};
+  b.lobes=[];for(let i=0;i<6;i++)b.lobes.push({a:-Math.PI/2+i/6*TAU+(r(10+i)-.5)*.8,amp:.28+.5*r(20+i),w:.2+.22*r(30+i),d:.05*r(40+i),wig:(r(50+i)-.5)*1.4});
+  b.masses=[{a:-Math.PI/2,dist:5,R:17,asp:1,rise:46,birth:.04,life:1.4,front:false}];
+  for(let i=1;i<14;i++){const front=i%2===1,a=i/13*TAU+(r(60+i)-.5)*.7,birth=front?.2+.22*r(100+i):.03+.12*r(100+i);
+    b.masses.push({a,dist:(front?17:12)+15*r(70+i),R:8+7*r(80+i),asp:.7+.5*r(85+i),rise:14+20*r(90+i)+(Math.sin(a)<0?26:0),
+      birth,life:Math.min(1+.4*r(110+i),1.44-birth),front})}
+  b.debris=[];for(let i=0;i<14;i++)b.debris.push({a:i/14*TAU+(r(120+i)-.5)*.4,sp:55+80*r(140+i),vz:70+110*r(160+i),s:2+((r(180+i)*3)|0)});
+  b.sparks=[];for(let i=0;i<20;i++)b.sparks.push({a:r(200+i)*TAU,sp:150+150*r(220+i),vz:10+150*r(240+i),life:.12+.3*r(260+i)});
+  b.embers=[];for(let i=0;i<26;i++)b.embers.push({a:r(280+i)*TAU,rad:3+20*r(300+i),rise:8+16*r(320+i),life:.7+.68*r(340+i),ph:r(360+i)*TAU,top:i%2===0,big:i%4===1});
+  b.rays=[[0,46,2.6],[Math.PI,46,2.6],[-Math.PI/2,30,2.4],[Math.PI/2,11,2],
+          [-.75+(r(3)-.5)*.3,22,1.6],[-2.4+(r(4)-.5)*.3,22,1.6],[.6+(r(5)-.5)*.3,14,1.4],[2.5+(r(6)-.5)*.3,14,1.4]]
+          .map(([a,len,w])=>({c:Math.cos(a),s:Math.sin(a),len,w}));
+  return b;
+}
+function addBlast(x,y){
+  x=clamp(Math.round(x),8,W-8);y=clamp(Math.round(y),HORIZON+14,H-6);
+  if(tf>=timelineEnd()){events=[];tf=0;clickN=0}
+  events.push(mkBlast(x,y,tf,baseSeed+100+(clickN++)));
+  // 上限: 最も古い本爆発から破棄
+  let bl=events.filter(e=>e.type==='blast');
+  while(bl.length>MAX_BLASTS){const o=bl.reduce((a,b)=>a.start<=b.start?a:b);events.splice(events.indexOf(o),1);bl=events.filter(e=>e.type==='blast')}
+  playing=true;lastPt={x,y};syncUI();dirty=true;
+}
+function replay(){
+  events=[];tf=0;clickN=0;
+  events.push({type:'seq',start:0,len:SEQ_LEN});
+  events.push({type:'escape',start:ESC,len:48,seed:baseSeed+1});                       // 脱出
+  events.push({type:'fall',start:ESC+2,len:IMPACT-ESC+32,seed:baseSeed+2});            // 機体に追従する予兆
+  events.push(mkBlast(HOME.x+7,HOME.y,IMPACT,baseSeed));                               // 爆発地点に残る本爆発
+  playing=true;syncUI();dirty=true;
+}
+
+/* ---- 機体・搭乗者の位置（ローカルフレームの純関数） ---- */
+function machineAt(lf){
+  if(lf<0)return{x:HOME.x,z:HOVER+Math.round(Math.sin(tf*.07)*1.5),tilt:0,pilot:true,lamp:(tf%40)<20,thr:true};
+  if(lf<ESC)return{x:HOME.x+(lf>8?((lf>>1)&1?1:-1):0),z:HOVER+Math.round(Math.sin(lf*.5)),tilt:0,pilot:true,lamp:(lf%6)<3,thr:(lf%5)<3};
+  if(lf<FALL0){const k=(lf-ESC)/(FALL0-ESC);return{x:HOME.x,z:HOVER-3*Math.sin(k*Math.PI),tilt:0,pilot:false,lamp:true,thr:false}}
+  if(lf<IMPACT){const k=(lf-FALL0)/(IMPACT-FALL0);return{x:HOME.x+7*k,z:HOVER*(1-k*k),tilt:Math.min(3,(k*4)|0),pilot:false,lamp:(lf%4)<2,thr:false}}
+  return null;
+}
+function pilotAt(l){
+  if(l<22)return{x:HOME.x+1,gy:HOME.y,z:HOVER+10+48*eo(l/22),jet:true,chute:false};
+  if(l<112){const k=(l-22)/90;return{x:lerp(161,100,smooth(0,1,k))+Math.sin(l*.12)*2,gy:lerp(104,116,k),z:lerp(88,0,k),jet:false,chute:l>=25}}
+  return{x:100,gy:116,z:0,jet:false,chute:false};
+}
+
+/* ============================================================
+   面で描く煙（連結した不規則な面。穴が開き、部分ごとにほどける）
+   pal=[輪郭,暗,中,明]
+   ============================================================ */
+function drawMass(cx,cy,rx,ry,erode,hole,dith,ox,oy,pal){
+  const reach=Math.min(1.5,1.85-erode);if(reach<=0)return;      // 侵食が進んだ面は走査範囲も縮める
+  const x0=Math.max(0,Math.floor(cx-rx*reach)),x1=Math.min(W-1,Math.ceil(cx+rx*reach));
+  const y0=Math.max(0,Math.floor(cy-ry*reach)),y1=Math.min(H-1,Math.ceil(cy+ry*reach)),r2=reach*reach;
+  const irx=1/rx,iry=1/ry,o1x=ox|0,o1y=oy|0,o2x=(37-ox*.6)|0,o2y=(oy*.5+91)|0,o3x=(ox*.3+11)|0,o3y=(oy*1.4+53)|0;
+  const e=pal[0],dk=pal[1],md=pal[2],hi=pal[3];
+  for(let y=y0;y<=y1;y++){const dy=(y-cy)*iry;
+    for(let x=x0;x<=x1;x++){const dx=(x-cx)*irx,d2=dx*dx+dy*dy;if(d2>r2)continue;
+      const nA=NA[((y+o1y)&127)<<7|((x+o1x)&127)],nB=NB[((y+o2y)&127)<<7|((x+o2x)&127)];
+      const nD=NC[((y+o3y)&127)<<7|((x+o2x)&127)];
+      const rB=Math.abs(nB-.5)*2;   // 畝ノイズ: 0=もこもこの谷筋, 1=房の中心
+      let f=1-Math.sqrt(d2)+(nA-.5)*.8+(rB-.35)*.42+(nD-.5)*.3-erode;
+      if(hole>0){const nC=NB[((y+o3y)&127)<<7|((x+o3x)&127)];if(nC>.42)f-=hole*(nC-.42)*4.2}
+      if(f<=0)continue;
+      if(dith>0&&f<dith*BAYER[(y&3)<<2|(x&3)])continue;
+      // 濃淡は位置ではなく渦ノイズで決める（岩のような同心円の陰影を避ける）。暗い縁は下側だけ。
+      const s=(rB-.3)*1.3+(nD-.5)*.55-dy*.38-dx*.2;
+      const c=(f<.05&&dy+dx*.4>.1)?e:(f<.12&&dy+dx*.4>-.2)?dk:s>.42?hi:s>-.04?md:dk,i=(y*W+x)<<2;
+      px[i]=c>>16;px[i+1]=c>>8&255;px[i+2]=c&255;
+    }}
+}
+const SM_HOT =[0x2a0f08,0x4a1c0c,0x8a3c14,0xc8641c];
+const SM_WARM=[0x1a1110,0x3a2a24,0x5e4638,0x8c6c50];
+const SM_COOL=[[0x15131a,0x38343c,0x5a5560,0x86808c],[0x1a1616,0x2e2a2a,0x4c4646,0x726c68]];
+const SM_THIN=[[0x2a2730,0x45414c,0x625d68,0x86808c],[0x4a4440,0x5c5652,0x77716c,0x969088]];
+const SM_MID=[[0x1e1c24,0x403c46,0x5f5a66,0x8a8490],[0x2e2a2a,0x403b3a,0x5e5856,0x857e78]];
+const SM_WHITE=[0x7c8894,0xaab4c0,0xdfe6ec,0xffffff];
+
+/* ============================================================
+   面で描く炎（裂け目・舌状突起・内部の色面）
+   PROF: 角度ごとの半径倍率（舌状突起）
+   ============================================================ */
+const PROF=new Float32Array(64);
+const FL=[0x7a1e10,0xc43c14,0xf07818,0xffb52e,0xffe873,0xfffbe0],FL_RIM=0x45120c;
+function drawFlame(cx,cy,R,heat,erode,tear,flow,ox,oy,inner){
+  const ext=R*1.95;
+  const x0=Math.max(0,Math.floor(cx-ext)),x1=Math.min(W-1,Math.ceil(cx+ext));
+  const y0=Math.max(0,Math.floor(cy-ext)),y1=Math.min(H-1,Math.ceil(cy+ext*.8));
+  for(let y=y0;y<=y1;y++){const dyr=y-cy,dy=dyr*1.1;
+    for(let x=x0;x<=x1;x++){const dx=x-cx,d=Math.sqrt(dx*dx+dy*dy);if(d>ext)continue;
+      const u=(Math.atan2(dy,dx)/TAU+.5)*64,i0=u|0,fr=u-i0,Rr=R*(PROF[i0&63]*(1-fr)+PROF[(i0+1)&63]*fr);
+      const inv=d>.5?flow/d:0,ux=(x-dx*inv)|0,uy=(y-dyr*inv)|0,vx=(x-dx*inv*.45)|0,vy=(y-dyr*inv*.45)|0;
+      const nA=NB[((uy+oy)&127)<<7|((ux+ox)&127)],nC=NC[((vy+oy+57)&127)<<7|((vx+ox+19)&127)];
+      let f=1-d/Rr+(nA-.5)*.9-erode,hp=0;
+      const rid=Math.abs(nC-.5);
+      if(rid<.09){if(d>Rr*inner)f-=tear*(.09-rid)*14;else hp=tear*(.09-rid)*9}   // 外側は裂け目、内側は色面の差に留める
+      if(f<=0)continue;
+      const h=f*1.5+heat+(nC-.5)*.5-hp;
+      const c=f<.06?FL_RIM:h>1.1?FL[5]:h>.85?FL[4]:h>.58?FL[3]:h>.32?FL[2]:h>.1?FL[1]:FL[0],i=(y*W+x)<<2;
+      px[i]=c>>16;px[i+1]=c>>8&255;px[i+2]=c&255;
+    }}
+}
+
+/* ---- 星形の閃光（芯＋光線）。砂地でも読めるよう外縁に暗い縁を添える ---- */
+function starM(dx,dy,rays,s,rc,grow){
+  let m=1-Math.sqrt(dx*dx+dy*dy*1.3)/(rc+grow);
+  for(const r of rays){const Lr=r.len*s+grow,al=dx*r.c+dy*r.s;if(al<=0||al>=Lr)continue;
+    const w=(r.w*Math.sqrt(s)+grow)*(1-al/Lr)+.35,v=1-Math.abs(dx*r.s-dy*r.c)/w;if(v>m)m=v}
+  return m;
+}
+function drawStar(cx,cy,rays,s,rc,cCore,cEdge,dith){
+  const p=BGPAL[mode],ex=Math.ceil(46*s+rc+3),ey=Math.ceil(30*s+rc+3);
+  for(let y=Math.max(0,cy-ey);y<=Math.min(H-1,cy+ey);y++)for(let x=Math.max(0,cx-ex);x<=Math.min(W-1,cx+ex);x++){
+    const dx=x-cx,dy=y-cy,m=starM(dx,dy,rays,s,rc,0);
+    if(m>0){if(dith&&BAYER[(y&3)<<2|(x&3)]<dith)continue;P(x,y,m>.4?cCore:cEdge)}
+    else if(starM(dx,dy,rays,s,rc,1.7)>0)PB(x,y,p.rim,p.rimA*(dith?.5:1));
+  }
+}
+
+/* ============================================================
+   本爆発: 地面レイヤー（焦げ跡・地面の照り返し・床面に沿う衝撃波）
+   ============================================================ */
+function blastGround(b,t){
+  const p=BGPAL[mode];
+  if(L.smoke&&t>.05){ // 焦げ跡
+    const g=smooth(.05,.3,t),rx=20*g+2,ry=rx*.5;
+    for(let y=Math.max(HORIZON,Math.floor(b.y-ry-3));y<=Math.min(H-1,b.y+ry+3);y++)for(let x=Math.max(0,Math.floor(b.x-rx-5));x<=Math.min(W-1,b.x+rx+5);x++){
+      const dx=(x-b.x)/rx,dy=(y-b.y)/ry,f=1-Math.sqrt(dx*dx+dy*dy)+(NB[((y*2+b.ny)&127)<<7|((x+b.nx)&127)]-.5)*.7;
+      if(f>0&&(f>.25||BAYER[(y&3)<<2|(x&3)]<.5))PB(x,y,p.scorch,f>.45?.62:.42)}
+  }
+  if(L.flash&&t<.1){ // 地面の照り返し（加算はここだけ）
+    const a=.55*(1-t/.1),rx=30+160*t,ry=rx*.5;
+    for(let y=Math.max(HORIZON,Math.floor(b.y-ry));y<=Math.min(H-1,b.y+ry);y++)for(let x=Math.max(0,Math.floor(b.x-rx));x<=Math.min(W-1,b.x+rx);x++){
+      const dx=(x-b.x)/rx,dy=(y-b.y)/ry,d=dx*dx+dy*dy;if(d>1)continue;
+      if(d<.35||BAYER[(y&3)<<2|(x&3)]>d)PA(x,y,0xffdc8c,a*(d<.35?1:.6))}
+  }
+  if(L.shock&&t>=.02&&t<.25){ // 青白い衝撃波
+    const q=(t-.02)/.18,k=sat(q),R=8+70*(1-(1-k)*(1-k))+Math.max(0,q-1)*10,w=3.6*(1-k)+1.1,ry=R*.5+3;
+    const fade=q>1?(q-1)/.28:0;
+    for(let y=Math.max(HORIZON,Math.floor(b.y-ry));y<=Math.min(H-1,Math.ceil(b.y+ry));y++)for(let x=Math.max(0,Math.floor(b.x-R-4));x<=Math.min(W-1,Math.ceil(b.x+R+4));x++){
+      const dx=x-b.x,dy=(y-b.y)*2,dd=Math.sqrt(dx*dx+dy*dy)-R;
+      if(dd>w+1.2||dd<-w)continue;
+      const n=NC[((y*2+b.ny)&127)<<7|((x+b.nx)&127)];
+      if(k>.5&&n<(k-.5)*1.1+fade*.6)continue;                // 後半は輪が千切れる
+      if(fade>0&&BAYER[(y&3)<<2|(x&3)]<fade)continue;
+      if(dd>w){if(p.ringOutA>0)PB(x,y,p.ringOut,p.ringOutA);continue}
+      const c=dd>w*.25?(k<.6?0xf4fcff:0xbfe6ff):dd>-w*.4?(k<.6?0x9ad6ff:0x6fb4f6):0x4a8ee0;
+      PB(x,y,c,dd>-w*.4?.95:.6);
+    }
+    if(p.ringOutA>0&&k<1)for(let a=0;a<160;a++){ // 砂地用: 内側の薄い影輪で輪郭を補強
+      const th=a/160*TAU,x=b.x+Math.cos(th)*(R-w-1.5),y=b.y+Math.sin(th)*(R-w-1.5)*.5;if(y>HORIZON)PB(x,y,p.ringOut,.28)}
+  }
+}
+
+/* ============================================================
+   本爆発: 立体レイヤー（奥の煙 → 炎 → 残り火 → 手前の煙 → 破片・火花 → 閃光）
+   ============================================================ */
+function massAt(b,m,i,t){
+  const a=t-m.birth;if(a<0||a>=m.life)return null;
+  const k=eo(a/.45),R=m.R*(.4+.6*k)*(1+.3*a);
+  return{a,x:b.x+Math.cos(m.a)*m.dist*k+a*a*9,y:b.y-9+Math.sin(m.a)*m.dist*.5*k-m.rise*a,R,
+    er:smooth(.8*m.life,m.life,a)*1.8,ho:smooth(.12*m.life,.95*m.life,a)*.9,di:.14+smooth(.5*m.life,m.life,a)*.6,
+    ox:b.nx+i*23+a*10,oy:b.ny+i*41+a*26};
+}
+function drawSmokeLayer(b,t,front){
+  for(let i=0;i<b.masses.length;i++){const m=b.masses[i];if(m.front!==front)continue;
+    const s=massAt(b,m,i,t);if(!s)continue;
+    const pal=(!front&&t<.14)?SM_HOT:t<.42?SM_WARM:s.a>m.life*.74?SM_THIN[mode]:s.a>m.life*.45?SM_MID[mode]:SM_COOL[mode];
+    drawMass(s.x,s.y,s.R,s.R*m.asp,s.er,s.ho,s.di,s.ox,s.oy,pal);
+  }
+}
+function blastVolume(b,t){
+  const ff=t*60;
+  if(L.flash&&t>.035&&t<.24){
+    const k=1-smooth(.06,.24,t);
+    drawStar(b.x,b.y-9,b.rays,1.25*k,8*k,0xfff4a8,0xff6c1c,0);
+  }
+  if(L.smoke)drawSmokeLayer(b,t,false);
+  if(L.flame&&t>=.02&&t<1.08){
+    const R=t<.2?lerp(10,36,eo((t-.02)/.18)):36+(t-.2)*13;
+    const cy=b.y-10-18*smooth(0,.7,t);
+    const heat=t<.05?.75:t<.11?lerp(.75,0,(t-.05)/.06):t<.4?lerp(0,-.35,(t-.11)/.29):-.35+.1*sat((t-.4)/.3);
+    const erode=t<.22?0:t<.7?lerp(0,.9,(t-.22)/.48):.9+(t-.7)*1.5;
+    const tear=sat((t-.04)/.25)+Math.max(0,t-.3)*1.5;
+    for(let k=0;k<64;k++){const th=(k/64-.5)*TAU;let v=.72;
+      for(const lb of b.lobes){const g=sat((t-lb.d)/.12);let d=th-(lb.a+lb.wig*t);d-=Math.round(d/TAU)*TAU;v+=lb.amp*g*Math.exp(-(d*d)/(lb.w*lb.w))}
+      const sn=Math.sin(th);if(sn<0)v*=1+.4*(-sn)*smooth(.05,.45,t);else v*=1-.5*sn;
+      PROF[k]=v}
+    drawFlame(b.x,cy,R,heat,erode,tear,62*Math.pow(t,.7),b.nx,b.ny,lerp(.62,.25,sat((t-.12)/.3)));
+  }
+  if(L.smoke&&t>.25)for(let i=0;i<b.embers.length;i++){const e=b.embers[i];if(e.top||t>e.life)continue;emberPx(b,e,i,t,ff)}
+  if(L.smoke)drawSmokeLayer(b,t,true);
+  if(L.smoke&&t>.25)for(let i=0;i<b.embers.length;i++){const e=b.embers[i];if(!e.top||t>e.life)continue;emberPx(b,e,i,t,ff)}
+  if(L.debris){
+    const p=BGPAL[mode];
+    for(let i=0;i<b.debris.length;i++){const d=b.debris[i],q=t-.04;if(q<0)break;
+      if(t>1.3&&((ff|0)+i)%2)continue;
+      const G=420,tl=(d.vz+Math.sqrt(d.vz*d.vz+2*G*6))/G,qq=Math.min(q,tl);
+      const gx=b.x+Math.cos(d.a)*(8+d.sp*qq),gy=b.y+Math.sin(d.a)*(8+d.sp*qq)*.5,z=Math.max(0,6+d.vz*qq-.5*G*qq*qq);
+      const x=Math.round(gx),y=Math.round(gy-z),tum=q<tl&&((q*18+i)|0)%2,w=tum?d.s:d.s-1||1,h=tum?d.s-1||1:d.s;
+      PB(x,Math.round(gy)+1,p.shadow,.5);PB(x+1,Math.round(gy)+1,p.shadow,.5);
+      if(q<tl&&q<.38){const cx=Math.cos(d.a),sy=d.vz-G*q>0?1:-1;P(x-Math.round(cx*3),y+sy*2,0xc43c14);P(x-Math.round(cx*2),y+sy,0xf07818);P(x-Math.round(cx),y,0xffb52e)}
+      const hot=q<.16;   // 炎の中にいる間は赤熱色（中心に黒点が集まって見えるのを防ぐ）
+      // Rotating original metal silhouettes, not generic dark squares.
+      const angle=q*(i%2?9:-8)+i,co=Math.cos(angle),si=Math.sin(angle);
+      const put=(u,v,c)=>P(x+Math.round(u*co-v*si),y+Math.round(u*si+v*co),hot?0xffdf75:c);
+      if(i%4===0){ // hex nut, visible hollow center
+        for(let v=-3;v<=3;v++)for(let u=-3;u<=3;u++){
+          if(Math.abs(u)+Math.abs(v)>5||Math.max(Math.abs(u),Math.abs(v))<2)continue;
+          put(u,v,v<0?0xffd89a:u<0?0x9b7271:0x3d343f);
+        }
+      }else if(i%4===1){ // threaded bolt with a wide head
+        for(let v=-4;v<=3;v++)for(let u=-2;u<=2;u++){
+          if(v>-2&&Math.abs(u)>1)continue;
+          put(u,v,u<0?0xe7d1ad:v%2?0x9b7970:0x504a59);
+        }
+      }else if(i%4===2){ // toothed gear with a clear bore
+        for(let v=-5;v<=5;v++)for(let u=-5;u<=5;u++){
+          const r=Math.hypot(u,v),ang=Math.atan2(v,u);
+          if(r<2||r>3.6+(Math.cos(ang*8)>0?1.4:0))continue;
+          put(u,v,v<0?0xffd393:u<0?0xb1804f:0x55404b);
+        }
+      }else{ // chipped red armor, dark rim, lit bevel, rivet
+        for(let v=-4;v<=3;v++)for(let u=-4;u<=4;u++){
+          if(u+v>5||u-v < -5)continue;
+          put(u,v,v===-4||u===-4?0xf3be8d:v>1?0x4d3443:0xb84f39);
+        }
+        put(-1,-1,0xffddb0);put(0,-1,0x453747);
+      }
+    }
+    for(let i=0;i<b.sparks.length;i++){const s=b.sparks[i],q=t-.03;if(q<0||q>s.life)continue;
+      const pos=u=>{const dr=(1-Math.exp(-3*u))/3;return[b.x+Math.cos(s.a)*(6+s.sp*dr),b.y-8+Math.sin(s.a)*(6+s.sp*dr)*.5-(s.vz*u-210*u*u)]};
+      const h=pos(q),tl=pos(Math.max(0,q-.035)),late=q>s.life*.6;
+      line(tl[0],tl[1],h[0],h[1],late?0xc43c14:0xf07818,late?0xffb52e:0xfff2a0);
+    }
+  }
+  if(L.flash&&ff<6){
+    const s=ff<1?.55+.45*ff:ff<3?1-(ff-1)*.08:Math.max(0,.84-(ff-3)*.28);
+    if(s>0)drawStar(b.x,b.y-9,b.rays,s,(ff<3?13:9)*s,ff<3?0xffffff:0xfffbe0,ff<3?0xfff3a0:0xffe873,0);
+  }
+}
+function emberPx(b,e,i,t,ff){
+  const a=t-.25,x=b.x+Math.cos(e.a)*e.rad+Math.sin(e.ph+t*5)*2+a*a*7,y=b.y-10+Math.sin(e.a)*e.rad*.5-e.rise*a-6;
+  const fl=rnd(b.seed+i,(ff/3)|0);if(fl<.2)return;
+  const old=t>e.life*.8,c=old?0xe2501a:fl>.6?0xffd060:0xff8a20;
+  P(x,y,c);if(e.big&&!old){P(x+1,y,0xff8a20);P(x,y+1,0xe2501a)}
+  PA(x-1,y,0xa03010,.6);PA(x+1+(e.big?1:0),y,0xa03010,.6);PA(x,y-1,0xa03010,.6);
+}
+
+/* ============================================================
+   脱出（小さな黄白の閃光 + 上へ抜ける白煙 + 左右に分かれる白煙）
+   ============================================================ */
+const ESC_RAYS=[[0,13,1.6],[Math.PI,13,1.6],[-Math.PI/2,12,1.6],[Math.PI/2,5,1.3]].map(([a,len,w])=>({c:Math.cos(a),s:Math.sin(a),len,w}));
+function drawEscape(ev,t){
+  const ex=HOME.x+1,ey=HOME.y-HOVER-13,nx=(rnd(ev.seed,1)*128)|0;
+  if(L.smoke){
+    for(let i=0;i<5;i++){const a=t-i*.03,life=.5+i*.05;if(a<0||a>=life)continue;      // 上へ抜ける柱
+      const k=eo(a/.5),R=(3.5+i*1.1)*(.6+.6*k);
+      drawMass(ex+Math.sin(i*2.1+a*6)*1.5,ey-2-(40-i*7)*k,R*.8,R*1.15,smooth(.5*life,life,a)*1.4,smooth(.25*life,.9*life,a),smooth(.4*life,life,a)*.7,nx+i*17,i*29+a*60,SM_WHITE)}
+    for(let sd=-1;sd<=1;sd+=2)for(let i=0;i<2;i++){const a=t-i*.04,life=.36+i*.06;if(a<0||a>=life)continue;   // 左右
+      const k=eo(a/.32),R=(3+i)*(.6+.5*k);
+      drawMass(ex+sd*(5+(17-i*6)*k),ey+7-5*a,R*1.15,R*.8,smooth(.5*life,life,a)*1.4,smooth(.3*life,.9*life,a),smooth(.4*life,life,a)*.7,nx+50+sd*20+a*sd*-40,i*31,SM_WHITE)}
+  }
+  const ff=t*60;
+  if(L.flash&&ff<4){const s=ff<1?.6+.4*ff:Math.max(0,1-(ff-1)*.3);
+    drawStar(ex,ey+3,ESC_RAYS,s,4.5*s,0xfffbe0,0xffe873,ff>=3?.5:0)}
+}
+
+/* ---- 落下（機体へ追従する小さな橙の炎と暗い煙） ---- */
+function drawFall(ev,lf){ // lf: seq開始からのフレーム
+  const nx=(rnd(ev.seed,1)*128)|0;
+  if(L.smoke)for(let e=ESC+4;e<IMPACT;e+=2){const a=(lf-e)/60,life=.5;if(a<0||a>=life)continue;
+    const m=machineAt(e),R=2.5+8*a;
+    drawMass(m.x-2-3*a+(rnd(ev.seed,e)-.5)*3,HOME.y-m.z-12-16*a,R,R*.9,smooth(.5*life,life,a)*1.4,smooth(.2*life,.9*life,a),smooth(.35*life,life,a)*.7,nx+e*13,e*7+a*40,a<.12?SM_WARM:SM_COOL[mode])}
+  const m=machineAt(lf);
+  if(L.flame&&m&&lf>=ESC+3){
+    const g=sat((lf-ESC-3)/10),up=-Math.PI/2-.35;
+    for(let k=0;k<64;k++){let d=(k/64-.5)*TAU-up;d-=Math.round(d/TAU)*TAU;PROF[k]=.62+1.15*Math.exp(-(d*d)/.3)+.25*Math.sin(k*.9+lf*.9)}
+    drawFlame(m.x+1,HOME.y-m.z-12,(3.6+1.2*Math.sin(lf*1.3))*(.5+.5*g)+1,.15,0,.7,lf*1.4,nx,40,.4);
+  }
+}
+
+/* ============================================================
+   フレーム描画（events と tf だけから決まる純関数）
+   ============================================================ */
+function render(){
+  const p=BGPAL[mode];
+  px.set(BG[mode]);
+  const blasts=[],seq=events.find(e=>e.type==='seq');
+  for(const e of events)if(e.type==='blast'&&tf>=e.start)blasts.push(e);
+  for(const b of blasts)blastGround(b,(tf-b.start)/60);
+  const dl=[];
+  const obj=(sp,x,y)=>{groundEllipse(x,y+1,sp.w*.45,2.5,p.shadow,.4);dl.push({y,f:()=>blitFoot(sp,x,y)})};
+  obj(SP.oreA,222,118);obj(SP.oreB,112,84);obj(SP.oreA,58,142);obj(SP.oreB,270,72);
+  obj(SP.buddyA,132,123);obj(SP.buddyB,206,92);
+  const lf=seq?tf-seq.start:-1,m=machineAt(lf);
+  if(m){
+    const sr=11-m.z*.12;groundEllipse(m.x,HOME.y+1,sr,sr*.42,p.shadow,.28+.25*(1-m.z/HOVER));
+    dl.push({y:HOME.y,f:()=>{
+      const by=HOME.y-m.z;
+      if(m.pilot||m.tilt===0){blitFoot(m.pilot?SP.machine:SP.empty[0],m.x,by);
+        if(m.thr){const fl=((tf|0)>>1)&1;for(const ox of[-11,10]){P(m.x+ox,by+1,0xd8fbff);P(m.x+ox+1,by+1,0x7fe0ff);P(m.x+ox+fl,by+2,0x7fe0ff);if(fl)P(m.x+ox,by+3,0x3a9ad8)}}
+        if(m.lamp){P(m.x-10,by-18,0xff4030);PA(m.x-11,by-18,0xff4030,.5);PA(m.x-9,by-18,0xff4030,.5);PA(m.x-10,by-19,0xff4030,.5)}}
+      else{const s=SP.empty[m.tilt];blit(s,m.x-s.w/2,by-10-s.h/2)}
+    }});
+  }
+  if(seq&&lf>=ESC){const pl=pilotAt(lf-ESC);
+    groundEllipse(pl.x,pl.gy+1,3.5-pl.z*.02,1.5,p.shadow,.35);
+    dl.push({y:pl.gy+.2,f:()=>{const py=pl.gy-pl.z;
+      if(pl.chute)blitFoot(SP.chute,pl.x,py-10);
+      blitFoot(SP.pilot,pl.x,py);
+      if(pl.jet){const fl=(tf|0)&1;P(pl.x-1,py+1,0xfff2a0);P(pl.x,py+1,0xfff2a0);P(pl.x-1+fl,py+2,0xffb52e);P(pl.x-fl,py+3,0xf07818)}
+    }});
+  }
+  for(const e of events){
+    if(e.type==='escape'&&tf>=e.start&&tf<e.start+e.len)dl.push({y:HOME.y+.5,f:()=>drawEscape(e,(tf-e.start)/60)});
+    if(e.type==='fall'&&tf>=e.start&&tf<e.start+e.len)dl.push({y:HOME.y+.4,f:()=>drawFall(e,lf)});
+  }
+  for(const b of blasts){const t=(tf-b.start)/60;if(t<BLAST_LEN/60)dl.push({y:b.y+.6,f:()=>blastVolume(b,t)})}
+  dl.sort((a,b)=>a.y-b.y);
+  for(const d of dl)d.f();
+  // 画面揺れ（時刻の関数なので再現可能）
+  let sx=0,sy=0;
+  for(const b of blasts){const t=(tf-b.start)/60;if(t<.15){const a=2.2*(1-t/.15),f=(t*60)|0;sx+=Math.round(a*Math.cos(f*2.4+b.seed));sy+=Math.round(a*.7*Math.sin(f*3.1+b.seed))}}
+  lctx.putImageData(img,0,0);
+  dctx.imageSmoothingEnabled=false;
+  if(sx||sy){dctx.fillStyle=mode?'#cdb27a':'#16131b';dctx.fillRect(0,0,W*SC,H*SC)}
+  dctx.drawImage(low,clamp(sx,-3,3)*SC,clamp(sy,-3,3)*SC,W*SC,H*SC);
+}
+function frameHash(){let h=2166136261;for(let i=0;i<px.length;i+=4){h=Math.imul(h^px[i],16777619);h=Math.imul(h^px[i+1],16777619);h=Math.imul(h^px[i+2],16777619)}return h>>>0}
+
+/* ============================================================
+   UI・ループ
+   ============================================================ */
+const $=id=>document.getElementById(id);
+const seek=$('seek'),tlabel=$('tlabel'),stats=$('stats'),phase=$('phase');
+let dirty=true,lastNow=0,acc=0,fpsT=0,fpsN=0,fpsShown=0,rMs=0,rMax=0,stepN=0,stepShown=0;
+function phaseText(){
+  const seq=events.find(e=>e.type==='seq'),parts=[];
+  if(seq){const lf=tf-seq.start;parts.push(lf<ESC?'予兆':lf<FALL0?'脱出':lf<IMPACT?'落下':'本爆発')}
+  const bl=events.filter(e=>e.type==='blast'&&tf>=e.start);
+  if(bl.length){const b=bl[bl.length-1];parts.push('本爆発 t='+((tf-b.start)/60).toFixed(3)+'s')}
+  return parts.join(' / ')||'待機';
+}
+function syncUI(){
+  const end=timelineEnd();seek.max=end;seek.value=tf;
+  tlabel.textContent='F '+tf.toFixed(speed===1&&Number.isInteger(tf)?0:2)+' / '+end+'  ('+(tf/60).toFixed(3)+'s)';
+  $('bPlay').textContent=playing?'⏸ 一時停止':'▶ 再生';$('bPlay').classList.toggle('on',!playing);
+  $('bSpeed').textContent='速度 '+(speed===1?'1×':'0.25×');$('bSpeed').classList.toggle('on',speed!==1);
+  $('bBg').textContent='背景: '+(mode?'砂地':'暗');
+  phase.textContent=phaseText();
+}
+function tick(now){
+  requestAnimationFrame(tick);
+  let dt=now-lastNow;lastNow=now;if(dt>250)dt=16.667;
+  fpsN++;if(now-fpsT>=500){fpsShown=fpsN*1000/(now-fpsT);stepShown=stepN*1000/(now-fpsT);fpsN=0;stepN=0;fpsT=now;
+    stats.textContent='表示 '+fpsShown.toFixed(1)+'fps / 更新 '+stepShown.toFixed(0)+'回/s / 描画 '+rMs.toFixed(2)+'ms (最大 '+rMax.toFixed(1)+') / 本爆発 '+events.filter(e=>e.type==='blast').length+'/'+MAX_BLASTS;rMax=0}
+  if(playing){
+    const end=timelineEnd(),unit=speed===1?1:.25;
+    if(Math.abs(dt-16.667)<3)dt=16.667;           // 60Hz表示では毎フレームちょうど1ステップ
+    acc+=dt/16.667*speed/unit;
+    let n=Math.floor(acc+1e-6);acc-=n;if(n>5)n=5;
+    if(n>0&&tf<end){tf=Math.min(end,tf+n*unit);stepN+=n;dirty=true}
+  }
+  if(dirty){dirty=false;const t0=performance.now();render();const d=performance.now()-t0;rMs=rMs*.9+d*.1;if(d>rMax)rMax=d;syncUI()}
+}
+function stepFrame(dir){playing=false;tf=clamp(dir>0?Math.floor(tf)+1:Math.ceil(tf)-1,0,timelineEnd());dirty=true}
+function evToLow(e){const r=view.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width*W,y:(e.clientY-r.top)/r.height*H}}
+
+view.addEventListener('pointerdown',e=>{if(e.button)return;e.preventDefault();const p=evToLow(e);addBlast(p.x,p.y)});
+$('bReplay').onclick=replay;
+$('bPlay').onclick=()=>{if(!playing&&tf>=timelineEnd())tf=0;playing=!playing;acc=0;dirty=true};
+$('bPrev').onclick=()=>stepFrame(-1);
+$('bNext').onclick=()=>stepFrame(1);
+$('bSpeed').onclick=()=>{speed=speed===1?.25:1;acc=0;if(speed===1)tf=Math.round(tf);dirty=true};
+$('bBg').onclick=()=>{mode=1-mode;dirty=true};
+seek.addEventListener('input',()=>{playing=false;tf=+seek.value;dirty=true});
+for(const [id,k] of [['lFlash','flash'],['lShock','shock'],['lFlame','flame'],['lDebris','debris'],['lSmoke','smoke']])
+  $(id).addEventListener('change',e=>{L[k]=e.target.checked;dirty=true});
+$('seed').addEventListener('change',e=>{baseSeed=(+e.target.value|0);replay()});
+$('bDice').onclick=()=>{baseSeed=(Math.random()*99999)|0;$('seed').value=baseSeed;replay()};
+// マウス／タップで押したボタンはフォーカスを外す（その後のSpaceは本爆発になる）。
+// キーボードでフォーカス中のボタン・入力欄ではSpaceは本来の操作だけを行い、爆発を出さない。
+document.addEventListener('click',e=>{const b=e.target.closest('button');if(b&&e.detail>0)b.blur()});
+document.addEventListener('keydown',e=>{
+  const t=e.target,ui=t&&t.closest&&t.closest('button,input,select,textarea,label,a');
+  if(e.code==='Space'){if(ui)return;e.preventDefault();if(!e.repeat)addBlast(lastPt.x,lastPt.y)}
+  else if(!ui&&e.code==='ArrowLeft'){e.preventDefault();stepFrame(-1)}
+  else if(!ui&&e.code==='ArrowRight'){e.preventDefault();stepFrame(1)}
+});
+// 検証用フック（外部依存なし）
+window.__vfx={
+  exportFrame(frame,seed=7){
+    const b=mkBlast(160,124,0,seed),t=frame/60;
+    const pass=white=>{for(let k=0;k<px.length;k+=4){px[k]=px[k+1]=px[k+2]=white;px[k+3]=255;}
+      blastGround(b,t);blastVolume(b,t);return new Uint8ClampedArray(px)};
+    const black=pass(0),white=pass(255);
+    for(let k=0;k<px.length;k+=4){
+      const a=255-Math.min(white[k]-black[k],white[k+1]-black[k+1],white[k+2]-black[k+2]);
+      px[k+3]=a*(1-smooth(1.28,1.68,t));for(let c=0;c<3;c++)px[k+c]=a?Math.min(255,black[k+c]*255/a):0;
+    }
+    lctx.putImageData(img,0,0);return low.toDataURL('image/png');
+  },
+  get state(){return{tf,playing,speed,mode,end:timelineEnd(),blasts:events.filter(e=>e.type==='blast').length,events:events.length,fps:fpsShown,rMs,baseSeed}},
+  setTime(v){playing=false;tf=clamp(v,0,timelineEnd());render();syncUI();return frameHash()},
+  hash(){render();return frameHash()},
+  bench(n){const t0=performance.now();for(let i=0;i<n;i++)render();return(performance.now()-t0)/n},
+  setBg(m){mode=m;dirty=true},replay,addBlast,pause(){playing=false},layers:L,MAX_BLASTS
+};
+replay();
+requestAnimationFrame(t=>{lastNow=fpsT=t;tick(t)});
+</script>
+</body>
+</html>
