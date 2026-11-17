@@ -14,6 +14,7 @@ static func snapshot(game) -> Dictionary:
 		"hide": game.storage.count_of(GameData.Item.HIDE), "food": game.storage.count_of(GameData.Item.FOOD),
 		"repair": game.storage.count_of(GameData.Item.REPAIR_KIT), "fuel": game.base.fuel,
 		"sections": [], "history":game.world.guide_progress.duplicate(true), "next_step": {}, "preparation":{"visible":false},
+		"cargo": {"near_full":false},
 	}
 	for worker in game.workers:
 		if int(worker.work_support) == GameData.Item.HAUL_FRAME: state.frame_equipped += 1
@@ -51,8 +52,26 @@ static func snapshot(game) -> Dictionary:
 		state.sections.push_front({"title":"先に地域目標へ進むなら", "body":regional_recommendation(game, goal).body})
 	if state.preparation.visible:
 		state.sections.push_front({"title":"A帰還後の遠征準備（任意）", "body":state.preparation.body})
+	# 積載の残りが少ないときの注意。次の一手のidと題は変えず、本文と独立した節で知らせるだけ（数値・進行は変えない）。
+	state.cargo = cargo_snapshot(game)
+	if state.cargo.near_full:
+		state.next_step.body = str(state.next_step.body) + "\n" + str(state.cargo.title) + "。下の「積載の残りが少ない」を確認してください。"
+		state.sections.push_front({"title":state.cargo.title, "body":state.cargo.body})
 	state.sections.push_front({"title":"次の一手（任意）: " + state.next_step.title, "body":state.next_step.body + "\nこれは現在の状態からの提案です。順番を強制するものではありません。"})
 	return state
+
+## 車両の積載の残り。読むだけで、在庫・予約・方針は変えない。
+## しきい値は案内用の暫定値（最大積載の1割未満）。採取や持ち帰りの可否そのものは既存の判定のまま。
+const CARGO_NEAR_FULL_RATIO := 0.1
+static func cargo_snapshot(game) -> Dictionary:
+	var max_weight: int = game.storage.max_weight()
+	var free: int = maxi(0, max_weight - game.storage.current_weight() - game.storage.processing_reserve())
+	var near_full: bool = game.storage.enforce and max_weight > 0 and float(free) < float(max_weight) * CARGO_NEAR_FULL_RATIO
+	var rows: PackedStringArray = []
+	for item in [GameData.Item.WOOD, GameData.Item.STONE]:
+		rows.append("%s %d個（1個の重さ%d）" % [GameData.ITEM_NAMES[item], game.storage.count_of(item), CargoDB.size_of(item)])
+	var body := "積載の残りは %d / %d です。このままでは、採取した物や採掘地からの持ち帰りが入りきりません（鉄鉱石は1個の重さ%d）。\n現在の倉庫: %s\n・Aに停車して全員が戻ったら「拠点・街 → 街に入る → 購買店」で余った木材・石を売却できます。\n・「所持品」から廃棄もできます（予約分は廃棄できません）。\n・集めすぎを止めるには「その他 → 方針の変更 (P)」の「回収の優先」で木材・石を★0にします。\n建設・製作に使う分は残してください。収納ボックスを設置すると最大積載が増えます。" % [free, max_weight, CargoDB.size_of(GameData.Item.IRON_ORE), " / ".join(rows)]
+	return {"free":free, "max":max_weight, "near_full":near_full, "title":"積載の残りが少ない（%d / %d）" % [free, max_weight], "body":body}
 
 static func recommendation(game, state: Dictionary) -> Dictionary:
 	# No quest flags or inferred achievements. Existing state remains authority.
