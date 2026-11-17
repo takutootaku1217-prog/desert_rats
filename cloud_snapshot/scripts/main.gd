@@ -776,9 +776,25 @@ func _reconcile_order_stock() -> void:
 			if missing>0:request_transfer(it,mini(missing,workshop_available(it)),"to_storage")
 
 
+## 設置待ちの製作物が作業場にあるとき、通常の運搬で倉庫へ戻す（設置は倉庫の製作物だけを使う）。
+## 倉庫・運搬中・製作中の分で足りる依頼には何もしない。瞬間移動も再製作もしない。
+func _reconcile_build_stock() -> void:
+	var wanted := {}
+	for id in build_queue:
+		var item: int = FacilityDB.packed_item_of(id)
+		if item >= 0: wanted[item] = int(wanted.get(item, 0)) + 1
+	for item in wanted:
+		var coming: int = storage.count_of(item) + _queued_transfer(item, "to_storage") + processor.pending_of(item)
+		for w in workers:
+			if w.carrying == item: coming += w.carry_n
+		var missing: int = int(wanted[item]) - coming
+		if missing > 0: request_transfer(item, mini(missing, workshop_available(item)), "to_storage")
+
+
 ## 作業場で材料がそろった手動注文を加工設備へ投入する。
 func _feed_crafts() -> void:
 	_reconcile_order_stock()
+	_reconcile_build_stock()
 	update_procurement()
 	if quarry.recalling() or not ProductionPlan.refill(self,true).is_empty():
 		return
