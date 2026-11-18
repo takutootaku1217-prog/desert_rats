@@ -123,31 +123,15 @@ func _mine_lap(want_item := -1, want_n := 1, limit := 400.0) -> bool:
 ## (iron ore -> smelt -> storage box -> install -> depart).
 ## Still no injection: every input was gathered or crafted in this run.
 func _second_lap() -> void:
-	# Cargo management a player must do: by now automatic gathering has nearly
-	# filled the vehicle.  Stop gathering wood/stone (policy 0) and sell the
-	# surplus at the A market, keeping what the storage box needs.
-	var free_before: int = main.storage.max_weight() - main.storage.current_weight()
-	print("LAP2 cargo before management: free=%d of %d" % [free_before, main.storage.max_weight()])
-	var crowded: Dictionary = FirstLoopGuide.snapshot(main)
-	var before_capture: Dictionary = SaveGame.capture(main)
-	_check(bool(crowded.cargo.near_full) and str(crowded.next_step.body).contains("積載の残りが少ない") and str(crowded.sections[1].title).begins_with("積載の残りが少ない"), "guide warns that the cargo is nearly full before the second trip (free %d)" % int(crowded.cargo.free))
-	var plain: Dictionary = FirstLoopGuide.recommendation(main, crowded)
-	_check(str(crowded.sections[0].title) == "次の一手（任意）: " + str(plain.title) and str(crowded.next_step.id) == str(plain.id), "the warning does not replace the next step (%s)" % str(plain.id))
-	_check(str(crowded.sections[1].body).contains("購買店") and str(crowded.sections[1].body).contains("回収の優先") and SaveGame.capture(main) == before_capture, "warning names the real remedies and reading it changes nothing")
-	main.gather_policy[GameData.Item.WOOD] = 0
-	main.gather_policy[GameData.Item.STONE] = 0
-	_check(await _wait(func(): return main.town.entry_reason().is_empty(), 600.0), "town usable for selling surplus")
-	var credits_before := int(main.town.credits)
-	var sold := 0
-	for pair in [[GameData.Item.STONE, 2], [GameData.Item.WOOD, 10]]:
-		var extra: int = mini(99, main.town.available(pair[0]) - int(pair[1]))
-		if extra <= 0: continue
-		var ticket: Dictionary = main.town.quote("sell", pair[0], extra)
-		if bool(ticket.get("ok", false)) and main.town.execute(ticket): sold += extra
-	_check(sold > 0 and int(main.town.credits) == credits_before + sold * 2, "surplus wood/stone sold at the A market (%d items, +%d Cr)" % [sold, sold * 2])
-	print("LAP2 cargo after management: free=%d %s" % [main.storage.max_weight() - main.storage.current_weight(), _status()])
-	var relieved: Dictionary = FirstLoopGuide.snapshot(main)
-	_check(not bool(relieved.cargo.near_full) and not str(relieved.next_step.body).contains("積載の残りが少ない"), "warning disappears once there is room")
+	var guide: Dictionary = FirstLoopGuide.snapshot(main)
+	var free_before: int = guide.cargo.free
+	var reserve := ceili(main.storage.max_weight() * CargoDB.AUTO_GATHER_RESERVE_RATIO)
+	var bag_weight := 0
+	for worker in main.workers:
+		bag_weight = maxi(bag_weight, worker.carry_limit() * CargoDB.size_of(GameData.Item.STONE))
+	print("LAP2 cargo before departure: free=%d of %d" % [free_before, main.storage.max_weight()])
+	_check(free_before >= reserve - bag_weight, "automatic gathering keeps room for the second trip")
+	_check(not bool(guide.cargo.near_full) and not str(guide.next_step.body).contains("積載の残りが少ない"), "no near-full warning before the second trip")
 	var ok := await _travel("b_forest") and await _travel("c_quarry")
 	_check(ok, "second trip A -> B -> C (%s)" % _status())
 	if not ok: return

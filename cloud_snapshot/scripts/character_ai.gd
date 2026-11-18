@@ -1083,7 +1083,7 @@ func _try_start(job: int) -> bool:
 				var w: float = game.gather_weight(r.item)
 				if w <= 0.0:
 					continue
-				if not game.has_room_for(r, inflight):
+				if not game.has_room_for(r, inflight, ch):
 					continue               # 倉庫の枠がいっぱい（積載量）。拾っても置き場がない
 				if not _can_reach(r):
 					continue               # 画面の外へ流れ去る前に追いつけない（追っては取り消す往復を防ぐ）
@@ -1111,7 +1111,7 @@ func _try_start(job: int) -> bool:
 			res.claimed_by = ch
 			if res is GatherPoint:
 				# 袋の大きさ: 倉庫の空き枠（ほかの人が運んでいる分を除く）と袋の上限のうち小さいほう
-				bag_limit = clampi(game.gather_free_for(res.item, inflight), 1, ch.carry_limit())
+				bag_limit = clampi(game.gather_point_free_for(res, inflight, ch), 1, ch.carry_limit())
 				res.reserved = bag_limit
 				gather_ev = {}
 				bag_frac = 0.0

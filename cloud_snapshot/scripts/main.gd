@@ -429,13 +429,15 @@ func _gather_point_hint_raw(point) -> String:
 		if procurement_goals.has(point.item):
 			return "共有依頼は達成済み"
 		return "全体の採取優先が0"
-	if not has_room_for(point, gather_room()):
+	var inflight := gather_room()
+	if gather_free_for(point.item, inflight) <= 0:
 		return "収納容量が満杯"
 	var has_gatherer := false
 	var can_depart := false
 	var has_tool := false
 	var can_reach := false
 	var all_returning := true
+	var reserve_blocked := false
 	for worker in workers:
 		if worker.away or worker.priorities.get(GameData.Job.GATHER, 0) <= 0:
 			continue
@@ -451,6 +453,10 @@ func _gather_point_hint_raw(point) -> String:
 		if not worker.ai._can_reach(point):
 			continue
 		can_reach = true
+		if not has_room_for(point, inflight, worker):
+			reserve_blocked = true
+			continue
+		reserve_blocked = false
 		break
 	if not has_gatherer:
 		return "採取担当がいない"
@@ -462,6 +468,8 @@ func _gather_point_hint_raw(point) -> String:
 		return GatherDB.requirement(point.kind)
 	if not can_reach:
 		return "到達できないから次の地点へ"
+	if reserve_blocked:
+		return "積載の空きを残すため自動採取を止めています"
 	if not procurement_goals.has(point.item) and not workers.any(func(worker): return worker.gather_focus_item == point.item):
 		return "採取可"
 	if procurement_goals.has(point.item):
@@ -850,14 +858,14 @@ func gather_room() -> Dictionary:
 
 
 ## 資源 r を回収してよいか（倉庫に置き場があるか）。inflight は gather_room() の結果。
-func has_room_for(r, inflight: Dictionary) -> bool:
+func has_room_for(r, inflight: Dictionary, worker = null) -> bool:
 	if r.item == GameData.Item.CARCASS:
 		return storage.drop_fit(r.species) >= CargoDB.MIN_DROP_FIT
-	return gather_free_for(r.item, inflight) > 0
+	return (gather_point_free_for(r, inflight, worker) if r is GatherPoint else gather_free_for(r.item, inflight)) > 0
 
 
 ## 他の回収予約を共有重量で差し引いた、item の残り個数。道具と制限なしは従来どおり。
-func gather_free_for(item: int, inflight: Dictionary) -> int:
+func gather_free_for(item: int, inflight: Dictionary, keep_reserve := false) -> int:
 	if not storage.enforce or CargoDB.bay_of(item) < 0:
 		return storage.free_for(item)
 	var reserved_weight := 0
@@ -865,9 +873,36 @@ func gather_free_for(item: int, inflight: Dictionary) -> int:
 		if CargoDB.bay_of(it) >= 0:
 			reserved_weight += int(inflight[it]) * CargoDB.size_of(it)
 	var room := storage.max_weight() - storage.current_weight() - storage.processing_reserve() - reserved_weight
+	if keep_reserve:
+		room -= ceili(storage.max_weight() * CargoDB.AUTO_GATHER_RESERVE_RATIO)
 	var space:=maxi(0, floori(float(room) / CargoDB.size_of(item)))
 	if procurement_goals.has(item): space=mini(space,maxi(0,int(procurement_goals[item])-procurement_available(item)-procurement_transit(item)-int(inflight.get(item,0))))
 	return space
+
+
+## 木材・石の採取袋に使える個数。依頼の不足分だけは予備の空きを使える。
+func gather_point_free_for(point: GatherPoint, inflight: Dictionary, worker = null) -> int:
+	var item := point.item
+	var space := gather_free_for(item, inflight)
+	if space <= 0 or not storage.enforce or point.has_meta("quarry_id"):
+		return space
+	if item not in [GameData.Item.WOOD, GameData.Item.STONE]:
+		return space
+	if procurement_goals.has(item) or (worker != null and worker.gather_focus_item == item):
+		return space
+	var build_need := 0
+	for id in build_queue:
+		var packed := FacilityDB.packed_item_of(id)
+		if packed >= 0 and packed_in_transit(packed) > 0:
+			continue
+		build_need += int(build_cost(id).get(item, 0))
+	var order_need := 0
+	for order in production_orders:
+		var recipe := GameData.recipe_by_id(order.id)
+		order_need += int(recipe["in"].get(item, 0)) * int(order.n)
+	var need := build_need + maxi(0, order_need - workshop_available(item))
+	var missing := need - AutoCraftGuard.available(self, item) - procurement_transit(item) - int(inflight.get(item, 0))
+	return mini(space, maxi(gather_free_for(item, inflight, true), missing))
 
 
 ## その生物を狩ってよいか（倒した獲物の素材が倉庫に入るか）

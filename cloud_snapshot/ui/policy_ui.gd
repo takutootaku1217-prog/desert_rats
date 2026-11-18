@@ -89,6 +89,7 @@ func _rebuild() -> void:
 	left.add_theme_constant_override("separation", 3)
 	cols.add_child(left)
 	var right := VBoxContainer.new()
+	right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	right.add_theme_constant_override("separation", 3)
 	cols.add_child(right)
 
@@ -112,6 +113,9 @@ func _rebuild() -> void:
 
 	# 回収の優先
 	right.add_child(UIKit.lbl("── 回収の優先（獲物は常に拾う） ──", 14, UIKit.C_DIM))
+	var reserve_note := UIKit.lbl("木材・石の自動採取は空き%d%%を確保（建設・注文・依頼の不足分は例外）" % roundi(CargoDB.AUTO_GATHER_RESERVE_RATIO * 100), 13, UIKit.C_DIM)
+	reserve_note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	right.add_child(reserve_note)
 	for it in GameData.GROUND_ITEMS:
 		var item: int = it
 		var row := HBoxContainer.new()

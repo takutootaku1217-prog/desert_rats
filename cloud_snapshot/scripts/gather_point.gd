@@ -51,7 +51,8 @@ func _draw() -> void:
 	if game != null:
 		var hint: String = game.gather_point_hint(self)
 		if hint != "":
-			GameData.draw_text(self, snap + Vector2(0, -h - 6.0), hint, 11, Color("d7e5b2"), 170.0)
+			var hint_width := maxf(170.0, GameData.font().get_string_size(hint, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x)
+			GameData.draw_text(self, snap + Vector2(0, -h - 6.0), hint, 11, Color("d7e5b2"), hint_width)
 	if claimed_by == null:
 		# 見つけてもらうまで小さな目印を点滅
 		if int(age * 4.0) % 2 == 0:
