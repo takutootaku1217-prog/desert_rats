@@ -584,6 +584,8 @@ func workshop_available(item: int) -> int:
 
 
 ## 廃棄できるのは倉庫で未予約の物だけ。運び出した材料は倉庫にはない。
+## 道の開通・給油所・装甲・手引きも「未予約の数」としてこの値を使う（ここは変えない）。
+## 倉庫からの廃棄そのものは、さらに注文・建設の依頼の分も守る warehouse_discard_limit を使う。
 func warehouse_discard_available(item: int) -> int:
 	var held := int(reserved_for_builds().get(item, 0)) + _queued_transfer(item, "to_workshop")
 	for w in workers:
@@ -601,11 +603,17 @@ func warehouse_discard_available(item: int) -> int:
 	return maxi(0, storage.count_of(item) - held)
 
 
+## 倉庫から廃棄してよい数。未予約の数から、未着手の製作注文・建設の依頼に取ってある分
+## （街の売却と同じ ProductionPlan.held_for_orders）も除く。プレイヤーが捨てて注文が材料待ちに戻るのを防ぐ。
+func warehouse_discard_limit(item: int) -> int:
+	return maxi(0, warehouse_discard_available(item) - int(ProductionPlan.held_for_orders(self).get(item, 0)))
+
+
 ## 倉庫の一覧用の行。保有数・予約数・使用可能数を区別する（読み取り専用）。
-## 使用可能数は warehouse_discard_available（建設・搬送・食事等の予約を除く）と同じ値。
+## 使用可能数は warehouse_discard_limit（建設・搬送・食事等の予約と、注文・建設の依頼の分を除く）と同じ値。
 func warehouse_stock_row(item: int) -> Dictionary:
 	var owned: int = storage.count_of(item)
-	var usable: int = mini(owned, warehouse_discard_available(item))
+	var usable: int = mini(owned, warehouse_discard_limit(item))
 	return {"item": item, "name": ItemDB.name_of(item), "owned": owned, "reserved": owned - usable, "usable": usable}
 
 
@@ -624,9 +632,9 @@ func warehouse_rows(query := "") -> Array:
 
 ## 確認画面が承認する数量・在庫・予約・重量を固定する。
 func warehouse_discard_snapshot(item: int, n: int) -> Dictionary:
-	if game_over or not item in ItemDB.ORDER or n <= 0 or n > warehouse_discard_available(item): return {}
+	if game_over or not item in ItemDB.ORDER or n <= 0 or n > warehouse_discard_limit(item): return {}
 	return {"item": item, "n": n, "stock": storage.count_of(item),
-		"available": warehouse_discard_available(item), "weight": storage.current_weight()}
+		"available": warehouse_discard_limit(item), "weight": storage.current_weight()}
 
 
 func discard_warehouse(snapshot: Dictionary) -> bool:

@@ -24,6 +24,8 @@ TESTS[0:0] = ['survival_save_cycle', 'survival_save_restart']
 TESTS[0:0] = ['transfer_save_cycle', 'transfer_save_restart']
 TESTS[0:0] = ['vehicle_hunt_save_cycle', 'vehicle_hunt_save_restart']
 TESTS.insert(0, 'manual_order_incoming_status')
+TESTS.insert(0, 'expedition_kit_return')
+TESTS.insert(0, 'discard_order_protection')
 TESTS.insert(0, 'workshop_packed_build_return')
 TESTS.insert(0, 'guided_first_lap')
 TESTS.insert(0, 'auto_gather_reserve')

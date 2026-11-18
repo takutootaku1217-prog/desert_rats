@@ -221,6 +221,10 @@ func _finish() -> void:
 			if blueprint == "":
 				loot[GameData.Item.IRON] = loot.get(GameData.Item.IRON, 0) + 3
 		_add_log("遺跡を踏破した！" if not retreated else "")
+	# 使わなかった応急修理板は、遠征中も所有物として重さに数えていた。戦利品より先に倉庫へ戻す（1枚だけ。消えない・増えない）
+	if kit and not kit_used:
+		game.storage.store_owned(GameData.Item.REPAIR_KIT, 1, Inventory.SOURCE_TRANSFER)
+		_add_log("使わなかった応急修理板を持ち帰った")
 	# 戦利品を倉庫へ。積載量（枠）がいっぱいの分は持ち帰れない
 	lost.clear()
 	for it in loot.keys():

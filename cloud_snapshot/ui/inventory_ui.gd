@@ -549,7 +549,7 @@ func _update_dynamic() -> void:
 		var row: Dictionary = game.warehouse_stock_row(s.item)
 		_discard_available.text = "保有 ×%d / 予約 ×%d / 使用可能・廃棄可能 ×%d（予約分を除く）" % [row.owned, row.reserved, row.usable]
 	if _discard_btn != null:
-		_discard_btn.disabled = _qty.value < 1 or _qty.value > game.warehouse_discard_available(s.item)
+		_discard_btn.disabled = _qty.value < 1 or _qty.value > game.warehouse_discard_limit(s.item)
 	if _split_btn != null:
 		_split_btn.disabled = s.n < 2
 		if s.n < 2 and _split_box != null:

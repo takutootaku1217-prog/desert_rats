@@ -51,9 +51,11 @@ func run() -> void:
  for it in after: keys[it]=true
  for it in base_counts: keys[it]=true
  for it in keys:
-  if int(after.get(it,0))-int(base_counts.get(it,0))!=int(loot.get(it,0)): exact=false
- print("INFO outcome: retreated=%s ok=%d ng=%d loot=%s lost=%s" % [main.expedition.retreated,main.expedition.ok_count,main.expedition.ng_count,loot,lost])
- check(lost.is_empty() and exact,"every loot item reaches the warehouse exactly once (stock delta equals the reported loot, even when the outcome is a retreat with no loot; nothing else changes)")
+  # An unused repair kit carried by the party comes back exactly once on return (it was owned the whole time).
+  var kit_back:int=1 if it==KIT and kit_in_party and not main.expedition.kit_used else 0
+  if int(after.get(it,0))-int(base_counts.get(it,0))!=int(loot.get(it,0))+kit_back: exact=false
+ print("INFO outcome: retreated=%s ok=%d ng=%d loot=%s lost=%s kit_used=%s" % [main.expedition.retreated,main.expedition.ok_count,main.expedition.ng_count,loot,lost,main.expedition.kit_used])
+ check(lost.is_empty() and exact,"every loot item reaches the warehouse exactly once and an unused kit comes back once (stock delta equals loot + returned kit, even for a retreat with no loot; nothing else changes)")
  check(main.workers.all(func(x):return not x.away),"all members are back (away cleared)")
  check(int(main.expedition.stats["trips"])==int(expect["trips"]),"the trip is counted once")
  var done_counts:=total_counts()
