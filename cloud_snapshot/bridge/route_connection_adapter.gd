@@ -5,6 +5,7 @@ extends Control
 
 signal exit_to_horizontal(result: Dictionary)
 
+const ResourceGrowth = preload("res://bridge/c_resource_regeneration.gd")
 const CanyonHubScene = preload("res://scenes/canyon/canyon_recovery_hub.tscn")
 const CanyonRouteGuideScene = preload("res://scenes/canyon/components/canyon_route_guide.gd")
 
@@ -635,13 +636,25 @@ func _normal_collection_capacity_blocked() -> bool:
 	# Match current reservation candidates, not actor.wait_reason: a failed
 	# reservation can also mean every remaining source is already reserved.
 	var has_candidate := false
-	for resource in session.resources.values():
-		if int(resource.get("remaining", 0)) <= 0 or not str(resource.get("reservation", "")).is_empty():
+	for actor in session.actors.values():
+		if actor.role != "harvest":
 			continue
-		has_candidate = true
-		if session.normal_collection_room_for(int(resource.item)) > 0:
-			return false
+		for resource in session.resources.values():
+			if int(resource.get("remaining", 0)) <= 0 or not str(resource.get("reservation", "")).is_empty() or not session.can_collect_resource(actor, resource):
+				continue
+			has_candidate = true
+			if session.normal_collection_room_for(int(resource.item)) > 0:
+				return false
 	return has_candidate
+
+func _ore_tool_wait_reason() -> String:
+	for actor in session.actors.values():
+		if actor.role != "harvest" or actor.state != "idle" or actor.wait_reason != ResourceGrowth.WAIT_REASON:
+			continue
+		for resource in session.resources.values():
+			if resource.get("kind", "") == "vein" and int(resource.remaining) > 0 and not session.can_collect_resource(actor, resource):
+				return "鉱床には" + GatherDB.requirement("vein")
+	return ""
 
 func _normal_decision_detail(summary: Dictionary) -> String:
 	# The current stop/return reason always wins over route availability: a
@@ -654,6 +667,9 @@ func _normal_decision_detail(summary: Dictionary) -> String:
 		return "Stopped: all routes are closed; crew are waiting safely."
 	if _normal_collection_capacity_blocked():
 		return "採取停止: 積載予算不足\n帰還して街で売却し、空き容量を確保"
+	var ore_wait := _ore_tool_wait_reason()
+	if not ore_wait.is_empty():
+		return ore_wait
 	if session != null and session.phase not in ["recall", "ready_to_exit"] and session.has_method("is_mine_path_engineering") and bool(session.call("is_mine_path_engineering")):
 		var access := str(summary.get("intermediate_access", "blocked"))
 		if access == "blocked":

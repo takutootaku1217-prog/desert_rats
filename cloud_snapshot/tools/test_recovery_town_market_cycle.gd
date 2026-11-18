@@ -104,6 +104,10 @@ func _run_cycle() -> Dictionary:
 		return {"ok": false, "reason": "fresh first-region state was unavailable"}
 	if not await _move_to_quarry():
 		return {"ok": false, "reason": "could not travel A -> B -> C"}
+	# The fixture supplies the required equipment; all ore still comes from C.
+	main.storage.store_owned(GameData.Item.HAMMER, 1, Inventory.SOURCE_TRANSFER)
+	if not main.equip_tool(main.workers[0], GameData.Item.HAMMER):
+		return {"ok": false, "reason": "could not equip the harvester's stone pickaxe"}
 	var created: Dictionary = RouteSession.create_from_game(main, "recovery-town-market", {"outpost_enabled": false})
 	if not bool(created.get("ok", false)):
 		return {"ok": false, "reason": str(created.get("reason", "could not start quarry session"))}

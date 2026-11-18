@@ -57,7 +57,7 @@ func _prepare(id: String) -> bool:
 		return false
 	main.storage.store_owned(GameData.Item.HAMMER, 1, Inventory.SOURCE_TRANSFER)
 	main.storage.store_owned(GameData.Item.PICKAXE, 1, Inventory.SOURCE_TRANSFER)
-	_check(main.equip_tool(main.workers[0], GameData.Item.HAMMER), "既存倉庫APIで採掘役へ石のハンマーを装備")
+	_check(main.equip_tool(main.workers[0], GameData.Item.HAMMER), "既存倉庫APIで採掘役へ石のピッケルを装備")
 	var created: Dictionary = RouteSession.create_from_game(main, id, {"outpost_enabled": false, "vertical_slice": true})
 	_check(bool(created.get("ok", false)), "既存C資源と通常3人分業からfield-tool-kit sessionを作成")
 	if not bool(created.get("ok", false)):
@@ -162,7 +162,7 @@ func _run_same_worker_swap_and_commit() -> void:
 
 func _run_recall_priority_and_missing_kit() -> void:
 	print("-- v18: 予約優先と非所持理由")
-	_check(main.equip_tool(main.workers[0], GameData.Item.HAMMER), "既存倉庫APIで次回検証用に採掘役をハンマーへ戻す")
+	_check(main.equip_tool(main.workers[0], GameData.Item.HAMMER), "既存倉庫APIで次回検証用に採掘役を石のピッケルへ戻す")
 	var created: Dictionary = RouteSession.create_from_game(main, "field-tool-kit-v18-recall", {"outpost_enabled": false, "vertical_slice": true})
 	_check(bool(created.get("ok", false)), "帰還優先検証の次回sessionを作成")
 	if not bool(created.get("ok", false)):

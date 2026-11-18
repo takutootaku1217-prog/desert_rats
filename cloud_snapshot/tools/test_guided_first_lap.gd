@@ -119,16 +119,9 @@ func _mine_lap(want_item := -1, want_n := 1, limit := 400.0) -> bool:
 
 
 ## Second lap: choices the guide text describes but does not sequence
-## (stone hammer -> iron ore -> smelt -> storage box -> install -> depart).
+## (iron ore -> smelt -> storage box -> install -> depart).
 ## Still no injection: every input was gathered or crafted in this run.
 func _second_lap() -> void:
-	var hammer := GameData.Item.HAMMER
-	_check(main.request_order("tool_hammer", 1) == 1, "stone hammer order accepted from gathered stone and wood (%s)" % _status())
-	_check(await _wait(func(): return main.storage.count_of(hammer) > 0, 600.0), "stone hammer is crafted and stored (%s)" % _status())
-	var holder = null
-	for w in main.workers:
-		if main.tool_equip_reason(w, hammer).is_empty(): holder = w; break
-	_check(holder != null and main.equip_tool(holder, hammer), "stone hammer equipped")
 	# Cargo management a player must do: by now automatic gathering has nearly
 	# filled the vehicle.  Stop gathering wood/stone (policy 0) and sell the
 	# surplus at the A market, keeping what the storage box needs.
@@ -157,7 +150,7 @@ func _second_lap() -> void:
 	var ok := await _travel("b_forest") and await _travel("c_quarry")
 	_check(ok, "second trip A -> B -> C (%s)" % _status())
 	if not ok: return
-	_check(await _mine_lap(GameData.Item.IRON_ORE, 3, 900.0), "mine delivers 3 iron ore with the hammer (%s)" % _status())
+	_check(await _mine_lap(GameData.Item.IRON_ORE, 3, 900.0), "mine delivers 3 iron ore with the stone pickaxe (%s)" % _status())
 	ok = await _travel("b_forest") and await _travel("a_start")
 	_check(ok, "second return C -> B -> A (%s)" % _status())
 	if not ok: return
@@ -205,8 +198,10 @@ func _run() -> void:
 					stuck = "workbench request refused: " + main.build_blocked_reason("workbench")
 			"workbench_wait":
 				await _wait(func(): return main.has_facility("workbench"), 60.0)
-			"mining_tool":
-				var pick := GameData.Item.WOOD_PICK
+			"mining_tool", "ore_tool":
+				var ore_tool := id == "ore_tool"
+				var pick := GameData.Item.HAMMER if ore_tool else GameData.Item.WOOD_PICK
+				var recipe := "tool_hammer" if ore_tool else "tool_wood_pick"
 				if main.storage.count_of(pick) > 0:
 					var holder = null
 					for w in main.workers:
@@ -215,17 +210,23 @@ func _run() -> void:
 					elif not main.equip_tool(holder, pick): stuck = "equip refused"
 				else:
 					var pending := false
-					for q in main.production_orders: pending = pending or q.id == "tool_wood_pick"
-					pending = pending or main.processor.pending_of(pick) > 0 or not main.craft_queue.is_empty()
-					if not pending and main.request_order("tool_wood_pick", 1) <= 0:
-						stuck = "wood pick order refused"
+					for q in main.production_orders: pending = pending or q.id == recipe
+					for q in main.craft_queue: pending = pending or q.id == recipe
+					pending = pending or main.packed_in_transit(pick) > 0
+					if not pending and main.request_order(recipe, 1) <= 0:
+						stuck = "%s order refused" % recipe
 					else:
 						await _wait(func(): return main.storage.count_of(pick) > 0, 60.0)
 			"visit_c":
 				var next := "b_forest" if main.world.region == "a_start" else "c_quarry"
 				if not await _travel(next): stuck = "travel to %s failed (%s)" % [next, _status()]
 			"enter_c":
-				if not await _mine_lap(): stuck = "mine lap failed"
+				# C fills its cargo with stone first. Leave room for the ore behind it.
+				var surplus: int = main.warehouse_discard_available(GameData.Item.STONE) - 2
+				if surplus > 0:
+					_check(main.discard_warehouse(main.warehouse_discard_snapshot(GameData.Item.STONE, surplus)), "first trip makes room for mine cargo by discarding surplus stone")
+				if not await _mine_lap(GameData.Item.IRON_ORE): stuck = "mine lap failed"
+				_check(main.storage.count_of(GameData.Item.IRON_ORE) > 0, "first mine commit delivered iron ore")
 			"return_a":
 				var back := "b_forest" if main.world.region == "c_quarry" else "a_start"
 				if not await _travel(back): stuck = "travel to %s failed (%s)" % [back, _status()]
@@ -242,6 +243,7 @@ func _run() -> void:
 			_:
 				done = true
 	_note(_guide_id())
+	_check(trail.has("ore_tool") and trail.has("visit_c") and trail.find("ore_tool") < trail.find("visit_c"), "ore tool preparation precedes travel to C")
 	_check(stuck.is_empty(), "guide-following lap is never stuck (%s)" % (stuck if not stuck.is_empty() else "ok"))
 	var completed: Dictionary = main.world.guide_progress.get("completed", {})
 	_check(bool(completed.get("quarry_returned", false)) and bool(completed.get("returned_a", false)), "the game recorded the quarry return and the return to A (%s)" % str(completed))

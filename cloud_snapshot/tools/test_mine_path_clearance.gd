@@ -244,6 +244,9 @@ func _resource_ledger_signature(location: Dictionary) -> Array:
 func _normal_capacity_return() -> void:
 	await _fresh()
 	_check(await _move_leg("b_forest") and await _move_leg("c_quarry"), "Capacity fixture reaches normal C")
+	# This capacity case needs a stone-capable harvester.
+	main.storage.store_owned(GameData.Item.WOOD_PICK, 1, Inventory.SOURCE_TRANSFER)
+	_check(main.equip_tool(main.workers[0], GameData.Item.WOOD_PICK), "Capacity fixture equips a wood pick for stone")
 	var room: int = main.storage.max_weight() - main.storage.current_weight() - main.storage.processing_reserve()
 	main.storage.store_owned(GameData.Item.FOOD, room - 8, Inventory.SOURCE_TRANSFER)
 	var made: Dictionary = RouteSession.create_from_game(main, "mine-capacity", {"mine_path_engineering": true})

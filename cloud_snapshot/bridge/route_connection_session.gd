@@ -359,7 +359,7 @@ func _stage_default_field_tool_kit(game) -> Dictionary:
 	var actor: Dictionary = actors[actor_id]
 	var tools: Dictionary = Dictionary(actor.get("tools", {}))
 	if int(tools.get(FIELD_TOOL_KIT_SLOT, -1)) != FIELD_TOOL_KIT_ENTRY_ITEM:
-		return {"ok": true, "staged": false, "reason": "採掘役が石のハンマーを装備していないため予備ピッケルを積みません"}
+		return {"ok": true, "staged": false, "reason": "採掘役が石のピッケルを装備していないため予備ピッケルを積みません"}
 	if game == null or game.storage == null or not game.storage.has_method("take_item") or not game.storage.has_method("count_of"):
 		return {"ok": false, "reason": "基地倉庫を確認できないため予備採掘具を積めません"}
 	if int(game.storage.count_of(FIELD_TOOL_KIT_CARRIED_ITEM)) <= 0:
@@ -483,7 +483,7 @@ func _field_tool_swap_reason(actor_id: String) -> String:
 	var equipped_item := int(Dictionary(actor.get("tools", {})).get(FIELD_TOOL_KIT_SLOT, -1))
 	var carried_item := int(Dictionary(actor.get("field_tool_kit", {})).get(FIELD_TOOL_KIT_SLOT, -1))
 	if not _field_tool_pair_supported(equipped_item, carried_item):
-		return "採掘役の装備と携行が交換可能な石のハンマー／鉄製ピッケルではありません"
+		return "採掘役の装備と携行が交換可能な石のピッケル／鉄製ピッケルではありません"
 	return ""
 
 
@@ -839,7 +839,7 @@ func refresh_capacity_from_game(game) -> Dictionary:
 				var a: Dictionary = actors[id]
 				if a.state == "idle" and a.get("wait_reason") == NORMAL_CAPACITY_WAIT and not a.down and a.hp > FieldOperations.RETREAT_HP and a.role == "harvest" and rescue_ledger.case_for(id).is_empty() and not expired_recovery.owns(id) and not rescue_approach.has_mine_return(id):
 					for r in resources.values():
-						if r.remaining > 0 and normal_collection_room_for(int(r.item)) > 0:
+						if r.remaining > 0 and can_collect_resource(a, r) and normal_collection_room_for(int(r.item)) > 0:
 							a.state = "to_resource"; a.wait_reason = ""; _refresh_actor_path(id); break
 		return {"ok":true,"limit_weight":field_capacity_limit_weight}
 	if not vertical_slice:
@@ -1191,7 +1191,6 @@ func _update_actor(actor_id: String, delta: float) -> void:
 			var resource_id := _reserve_resource(actor_id)
 			if resource_id.is_empty():
 				actor["state"] = "to_base_empty" if _returning_to_parking() or capacity_paused or (vertical_slice and _source_depleted()) else "idle"
-				if actor.state == "idle": actor.wait_reason = NORMAL_CAPACITY_WAIT if mine_path_engineering and total_source_remaining() > 0 else ResourceGrowth.WAIT_REASON
 				_refresh_actor_path(actor_id)
 			else:
 				actor["resource_id"] = resource_id
@@ -1739,17 +1738,44 @@ func _advance(actor: Dictionary, delta: float) -> bool:
 	actor["path_index"] = index + 1
 	return int(actor["path_index"]) >= points.size()
 
+func can_collect_resource(actor: Dictionary, resource: Dictionary) -> bool:
+	var kind := str(resource.get("kind", ""))
+	if kind not in ["rock", "vein"]:
+		return true
+	var tool := int(actor.get("tools", {}).get("mine", -1))
+	var rank := int(actor.get("entry_gather_rank", 0))
+	var ability := float(actor.get("entry_gather_ability", 1.0))
+	return float(GatherDB.evaluate(kind, tool, rank, ability).eff) >= GatherDB.MIN_EFF
+
+
 func _reserve_resource(actor_id: String) -> String:
 	if vertical_slice and capacity_paused:
 		return ""
+	var actor: Dictionary = actors[actor_id]
+	var blocked_kind := ""
+	var capacity_blocked := false
 	for resource_id in resources:
 		var resource: Dictionary = resources[resource_id]
-		if int(resource.get("remaining", 0)) > 0 and str(resource.get("reservation", "")).is_empty() and normal_collection_room_for(int(resource.item)) > 0:
-			resource["reservation"] = actor_id
-			reservations[resource_id] = actor_id
-			return resource_id
+		if int(resource.get("remaining", 0)) <= 0 or not str(resource.get("reservation", "")).is_empty():
+			continue
+		if not can_collect_resource(actor, resource):
+			var kind := str(resource.get("kind", ""))
+			if blocked_kind.is_empty() or kind == "vein":
+				blocked_kind = kind
+			continue
+		if normal_collection_room_for(int(resource.item)) <= 0:
+			capacity_blocked = true
+			continue
+		resource["reservation"] = actor_id
+		reservations[resource_id] = actor_id
+		return resource_id
+	if capacity_blocked:
+		actor.wait_reason = NORMAL_CAPACITY_WAIT
+	else:
+		actor.wait_reason = ResourceGrowth.WAIT_REASON
+		if not blocked_kind.is_empty():
+			_log("%sには%s" % [GatherDB.POINTS[blocked_kind].name, GatherDB.requirement(blocked_kind)])
 	return ""
-
 
 ## The C session retains its original fixed work time unless the v18 field kit
 ## has actually changed this actor's mine tool.  In that narrow case, reuse

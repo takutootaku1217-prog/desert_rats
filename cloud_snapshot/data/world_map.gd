@@ -5,7 +5,7 @@ const REGIONS := {
  "south_oasis":{"name":"オアシスの交易村","creature":"hare","open":true,"pos":Vector2(80,300),"tint":Color("f3ead0"),"points":["tree","rock","vein"],"description":"安全寄りの村。木36・石と少量の鉄鉱石4。有限で再訪補充なし。基本の鉄道具を準備できます。"},
  "east_sands":{"name":"東部砂原","creature":"lizard","open":true,"pos":Vector2(440,300),"tint":Color("f4dba8"),"points":["tree","tree","rock"],"description":"砂丘と道標。枯れ木と、皮・骨を得られるトゲトカゲ。"},
  "central_trade":{"name":"中央交易都市","creature":"hump","open":true,"pos":Vector2(230,110),"tint":Color("e5d7c3"),"points":["tree","rock"],"description":"門と天幕が目印。街道には皮・骨・脂肪を得られるコブ獣。停泊し全員帰還後、拠点メニューから街へ。"},
- "old_mine":{"name":"大鉱山入口","open":true,"pos":Vector2(520,110),"tint":Color("cfcbd1"),"points":[],"description":"危険な鉱山。採取地点に鉄鉱石84。石のハンマーが必要です（木材→木製採掘具→石2＋木材1）。生物は目視して判断してください。"},
+ "old_mine":{"name":"大鉱山入口","open":true,"pos":Vector2(520,110),"tint":Color("cfcbd1"),"points":[],"description":"危険な鉱山。採取地点に鉄鉱石84。鉱床にはピッケル（石のピッケル以上）が必要です（木材→木製採掘具→石2＋木材1）。生物は目視して判断してください。"},
  "west_salt":{"name":"白い塩湖","open":false},
  "poison_marsh":{"name":"毒沼と錬金術の廃墟","open":false},
  "ancient_gate":{"name":"古代の大水門","open":false},
@@ -31,7 +31,7 @@ const MAP_HINTS := {
  "south_oasis":"オアシスと村。木材・石・少量の鉄鉱石。",
  "east_sands":"砂丘と枯れ木の帯。木材と石を採取。",
  "central_trade":"街道の集まる都市。停泊し、全員帰還後に街へ。",
- "old_mine":"岩山の坑口。鉄鉱石には石のハンマーが必要（木材→木製採掘具→石2＋木材1）。停泊後、採取地点(G)から鉱床へ。",
+ "old_mine":"岩山の坑口。鉄鉱石（鉱床）にはピッケル（石のピッケル以上）が必要（木材→木製採掘具→石2＋木材1）。停泊後、採取地点(G)から鉱床へ。",
 }
 
 ## 同一キャンペーンに次地域の入口だけを接続。地理と距離は暫定。
@@ -42,7 +42,7 @@ const NEXT_REGION_ENTRY := "next_greenway"
 const FIRST_REGION_A_REGIONS := {
  "a_start":{"name":"A はじまりの街","open":true,"pos":Vector2(82,292),"tint":Color("bcd0aa"),"points":["tree","tree","rock"],"creature":"hare","description":"緑に呑まれた旧街。最初の燃料・木製採掘具と、木材・石材を既存の採取でまかなえます。"},
  "b_forest":{"name":"B 近郊の森","open":true,"pos":Vector2(255,105),"tint":Color("9fbd8b"),"points":["tree","tree","rock"],"creature":"hare","description":"倒木の多い森。木材・石材を残したまま、空き地を補給/保管場所へ転用できます。"},
- "c_quarry":{"name":"C 古い採石場","open":true,"pos":Vector2(502,112),"tint":Color("b5b6a0"),"points":["rock","rock","vein","tree"],"creature":"hare","description":"崩れかけた採石場。石材と少量の鉄鉱石、木材を採取できます。"},
+ "c_quarry":{"name":"C 古い採石場","open":true,"pos":Vector2(502,112),"tint":Color("b5b6a0"),"points":["rock","rock","vein","tree"],"creature":"hare","description":"崩れかけた採石場。石材と少量の鉄鉱石、木材を採取できます。鉄鉱石（鉱床）にはピッケル（石のピッケル以上）が必要です。"},
  "d_yard":{"name":"D 廃貨物ヤード","open":true,"pos":Vector2(592,310),"tint":Color("bc9d82"),"points":["tree","rock","rock"],"creature":"hare","description":"錆びた貨物設備が残る終点。採取を残したまま、貨物受渡し設備を復興できます。"},
  "next_greenway":{"name":"次地域入口・旧緑道","open":true,"pos":Vector2(365,350),"tint":Color("8baea0"),"points":["tree","rock","vein"],"creature":"hare","description":"再接続した貨物道の先。旧設備を緑が覆う次地域の入口です。停車して木材・石材・鉄鉱石を回収し、Dへ戻れます。地域の奥と終幕は未実装です。"},
 }
@@ -72,7 +72,7 @@ const FIRST_REGION_A_ROAD_FAUNA := ["dodo"]
 const FIRST_REGION_A_HINTS := {
  "a_start":"採取：木材・石材。出発と帰還の基準地点。",
  "b_forest":"採取：木材・石材。倒木近道の処理、または補給/保管場所への土地転用を選べます。",
- "c_quarry":"採取：石材・鉄鉱石・木材。A〜D周回の中継地点。",
+ "c_quarry":"採取：石材・鉄鉱石・木材。鉄鉱石（鉱床）にはピッケル（石のピッケル以上）が必要。A〜D周回の中継地点。",
  "d_yard":"採取：木材・石材。貨物設備を復興すると地点別の受渡し/保管ができます。",
  "next_greenway":"旧設備の収納ボックス1個を回収（再生なし）。空き42を用意→仲間が倉庫へ運搬→作成/建設で設置して積載+60（最大3個）。木・石・鉱石も採取可。売買・補給はAへ。奥地・終幕は未実装。",
 }

@@ -1,7 +1,7 @@
 extends SceneTree
 ## Deterministic full survival/economy witness (not normal mouse input).
 ## Hunting is in the stopped horizontal B region, NOT the C quarter-view.
-## Save disabled; no currency, meat, carcass, or resource injection.
+## Saves disabled. The quarry fixture supplies the pickaxe; all tested cargo and currency come from play.
 ##
 ## The resource sold below originates in a real C-quarry RouteSession. This
 ## test does not seed currency or inventory and never writes a player save.
@@ -178,6 +178,10 @@ func _run_cycle() -> Dictionary:
 	if not await _move_to_quarry():
 		return {"ok": false, "reason": "could not travel A -> B -> C"}
 	_snapshot("arrive_C_before_quarterview_session")
+	# The fixture supplies the required equipment; all ore still comes from C.
+	main.storage.store_owned(GameData.Item.HAMMER, 1, Inventory.SOURCE_TRANSFER)
+	if not main.equip_tool(main.workers[0], GameData.Item.HAMMER):
+		return {"ok": false, "reason": "could not equip the harvester's stone pickaxe"}
 	var created: Dictionary = RouteSession.create_from_game(main, "recovery-town-market", {"outpost_enabled": false})
 	if not bool(created.get("ok", false)):
 		return {"ok": false, "reason": str(created.get("reason", "could not start quarry session"))}

@@ -168,7 +168,7 @@ const ITEM_NAMES := {
 	Item.WOOD: "木材", Item.STONE: "石", Item.IRON_ORE: "鉄鉱石",
 	Item.IRON: "鉄", Item.FOOD: "食料", Item.FUEL: "燃料", Item.REPAIR_KIT: "応急修理板", Item.BED_PACK: "寝床", Item.STORAGE_BOX: "収納ボックス",
 	Item.CARCASS: "獲物", Item.SIMPLE_SPEAR: "簡易槍", Item.RIFLE: "試作カービン",
-	Item.HAMMER: "石のハンマー", Item.PICKAXE: "鉄製ピッケル", Item.ADV_PICK: "高性能ピッケル",
+	Item.HAMMER: "石のピッケル", Item.PICKAXE: "鉄製ピッケル", Item.ADV_PICK: "高性能ピッケル",
 	Item.AXE: "石の斧", Item.IRON_AXE: "鉄の斧",
 }
 const ITEM_FILES := {
@@ -181,7 +181,7 @@ const ITEM_FILES := {
 	Item.WOOD: "wood", Item.STONE: "stone", Item.IRON_ORE: "iron_ore",
 	Item.IRON: "iron", Item.FOOD: "ration", Item.FUEL: "fuel", Item.REPAIR_KIT: "repair_kit", Item.BED_PACK: "bed", Item.STORAGE_BOX: "storage_box",
 	Item.CARCASS: "carcass", Item.SIMPLE_SPEAR: "simple_spear", Item.RIFLE: "simple_spear", # 試作カービンの新絵は未提供のため既存絵を保持
-	Item.HAMMER: "hammer", Item.PICKAXE: "pickaxe", Item.ADV_PICK: "adv_pick", Item.AXE: "axe", Item.IRON_AXE: "iron_axe",
+	Item.HAMMER: "stone_pick", Item.PICKAXE: "pickaxe", Item.ADV_PICK: "adv_pick", Item.AXE: "axe", Item.IRON_AXE: "iron_axe",
 }
 
 ## Display-only variants for the supplied 48px meat art.  MEAT and FOOD stay
@@ -238,7 +238,7 @@ const RECIPES := [
 	{"id": "tool_wood_axe", "name": "木製の斧", "in": {Item.WOOD: 2}, "out": Item.WOOD_AXE, "n": 1,
 		"time": 3.0, "tank_fuel": 0.0, "field": Field.DEV, "station": "workbench"},
 	# ---- 採取の道具（data/gathering.gd）。誰かの道具の更新になるときだけ作る（Main.tool_wanted）----
-	{"id": "tool_hammer", "name": "石のハンマー", "in": {Item.STONE: 2, Item.WOOD: 1}, "out": Item.HAMMER, "n": 1,
+	{"id": "tool_hammer", "name": "石のピッケル", "in": {Item.STONE: 2, Item.WOOD: 1}, "out": Item.HAMMER, "n": 1,
 		"time": 3.0, "tank_fuel": 0.0, "field": Field.DEV, "station": "workbench"},
 	{"id": "tool_axe", "name": "石の斧", "in": {Item.STONE: 1, Item.WOOD: 2}, "out": Item.AXE, "n": 1,
 		"time": 3.0, "tank_fuel": 0.0, "field": Field.DEV, "station": "workbench"},

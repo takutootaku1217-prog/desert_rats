@@ -48,6 +48,12 @@ func _run() -> void:
 	_check(first.town_ready and not first.at_quarry, "fresh A is currently a town, not a completed quarry visit")
 	_check(first.hunted == 0 and first.frame_equipped == 0, "fresh game has no invented hunt or equipment achievement")
 	_check(first.ore == 0 and not first.workbench, "guide reads the actual empty ore stock and unbuilt workbench")
+	var mining_sections := 0
+	for section in first.sections:
+		if str(section.title).begins_with("1 まずは") or str(section.title).begins_with("3 C で採取"):
+			if str(section.body).contains("石のピッケル"):
+				mining_sections += 1
+	_check(mining_sections == 2, "preparation and C mining sections both explain the stone pickaxe")
 	var rect: Rect2 = nav.popup.get_global_rect()
 	_check(rect.position.x >= 0 and rect.position.y >= 0 and rect.end.x <= 1280 and rect.end.y <= 720, "guide fits the 1280 by 720 game viewport")
 	var scroll: ScrollContainer = nav.groups[GUIDE].find_child("FirstLoopGuideScroll", true, false)

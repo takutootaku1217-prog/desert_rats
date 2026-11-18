@@ -279,7 +279,7 @@ func _build_tools_page() -> void:
 
 	# ---- 右: 道具の性能・在庫・作り方 ----
 	right.add_child(UIKit.lbl("── 道具の性能（基準時間あたりの採取量倍率） ──", 14, UIKit.C_DIM))
-	right.add_child(UIKit.lbl("素手は木のみ。木製採掘具→石、石のハンマー→鉄鉱石。作業台は木3個。", 13, UIKit.C_DIM))
+	right.add_child(UIKit.lbl("素手は木のみ。木製採掘具→石、鉄鉱石（鉱床）にはピッケル（石のピッケル以上）が必要。作業台は木3個。", 13, UIKit.C_DIM))
 	for it in GameData.TOOL_ITEMS:
 		var item: int = it
 		var t: Dictionary = GatherDB.TOOLS[item]

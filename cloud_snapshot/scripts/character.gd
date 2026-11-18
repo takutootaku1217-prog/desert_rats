@@ -405,7 +405,9 @@ func _draw() -> void:
 	match activity:
 		"workbench":
 			var swing := sin(_t * TAU * 4.0) * 4.0
-			GameData.draw_item(self, GameData.Item.HAMMER, snap + Vector2(facing * 24.0, -34.0 + swing), 0.46)
+			var center := snap + Vector2(facing * 24.0, -34.0 + swing)
+			var size := ArtSpec.px_size(ArtSpec.ITEM) * 0.46
+			draw_texture_rect(GameData.tex("res://assets/resources/item_hammer.png"), Rect2(center - size / 2.0, size), false)
 		"eat":
 			var bite := sin(_t * TAU * 2.4) * 2.0
 			GameData.draw_item(self, GameData.Item.FOOD, snap + Vector2(facing * 18.0, -32.0 + bite), 0.42)

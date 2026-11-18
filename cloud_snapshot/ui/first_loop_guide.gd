@@ -7,7 +7,7 @@ static func snapshot(game) -> Dictionary:
 		"location": game.world.status_text(), "workbench": game.has_facility("workbench"),
 		"town_ready": game.town.entry_reason().is_empty(),
 		"at_quarry": game.world.active and game.world.region == "c_quarry" and game.world.phase == "stopped",
-		"hunted": game.total_hunted, "frame_equipped": 0, "mining_equipped": 0,
+		"hunted": game.total_hunted, "frame_equipped": 0, "mining_equipped": 0, "ore_tool_equipped": false,
 		"frame_stock": game.storage.count_of(GameData.Item.HAUL_FRAME),
 		"wood": game.storage.count_of(GameData.Item.WOOD), "stone": game.storage.count_of(GameData.Item.STONE),
 		"ore": game.storage.count_of(GameData.Item.IRON_ORE), "iron": game.storage.count_of(GameData.Item.IRON),
@@ -18,7 +18,11 @@ static func snapshot(game) -> Dictionary:
 	}
 	for worker in game.workers:
 		if int(worker.work_support) == GameData.Item.HAUL_FRAME: state.frame_equipped += 1
-		if int(worker.tools.get("mine", -1)) >= 0: state.mining_equipped += 1
+		var mine_tool: int = worker.tools.get("mine", -1)
+		if mine_tool >= 0:
+			state.mining_equipped += 1
+			if float(GatherDB.tool_def(mine_tool).eff.get("vein", 0.0)) > 0.0:
+				state.ore_tool_equipped = true
 	if not state.supported:
 		state.sections = [{"title": "第一地域 A〜D 用の手引き", "body": "現在は別の地図です。この周回の案内は適用しません。移動先は既存の地図で確認してください。\n現在: " + str(state.location)}]
 		return state
@@ -26,11 +30,11 @@ static func snapshot(game) -> Dictionary:
 	var town_status: String = "街を利用できます" if state.town_ready else (game.world.ready_reason() if game.town.location_ok() else "A に停車し、全員と荷物の帰還後に街へ")
 	state.sections = [
 		{"title": "1 まずは 木材 → 採掘具 → 石 → 修理材", "body":
-			"停車中に木材を採取。作成でワークベンチを建設し、木製採掘具を作って仲間に装備します。石を採取できたら、応急修理板（石＋木材）を作れます。作成画面の不足素材から採取先を確認できます。\n現在の倉庫: 木材 %d / 石 %d / 応急修理板 %d\nワークベンチ: %s / 採掘具の装備者: %d人" % [state.wood, state.stone, state.repair, "設置済み" if state.workbench else "未設置", state.mining_equipped]},
+			"停車中に木材を採取。作成でワークベンチを建設し、木製採掘具を作って仲間に装備します。岩場で石を採取できたら、石のピッケル（石2＋木材1）や応急修理板（石＋木材）を作れます。作成画面の不足素材から採取先を確認できます。\n現在の倉庫: 木材 %d / 石 %d / 応急修理板 %d\nワークベンチ: %s / 採掘具の装備者: %d人" % [state.wood, state.stone, state.repair, "設置済み" if state.workbench else "未設置", state.mining_equipped]},
 		{"title": "2 次に試せる周回: 移動と車上狩猟（任意）", "body":
 			"移動で C を選び、経由地・停車予約・燃料見込みを確認して出発。A → B → C が基本の行き方です。走行中は左上の「車上狩猟」で対象を1体依頼できます。勝手には狩らず、徒歩採取は停車後です。生肉は作成の料理で食料にします。\n現在: %s\nタンク燃料 %.1f / 倉庫の食料 %d / 累計狩猟 %d体（この周回だけの記録ではありません）" % [state.location, state.fuel, state.food, state.hunted]},
 		{"title": "3 C で採取・運搬", "body":
-			"C 到着時に「採掘地に入る」を選択。入口の車体は固定で、クォータービューの採掘役と運搬役が中継を使います。鉄鉱石に備えて石のハンマーなどを用意し、仲間の装備を確認してください。「経路案内図」で背負いの段差近道と手押し車の迂回を確認できます。\n現在: %s / 倉庫の鉄鉱石 %d（産地・採取達成の判定ではありません）" % ["C に停車中" if state.at_quarry else "C 以外、または移動中", state.ore]},
+			"C 到着時に「採掘地に入る」を選択。入口の車体は固定で、クォータービューの採掘役と運搬役が中継を使います。鉄鉱石（鉱床）にはピッケル（石のピッケル以上）が必要です。仲間の装備を確認してください。「経路案内図」で背負いの段差近道と手押し車の迂回を確認できます。\n現在: %s / 倉庫の鉄鉱石 %d（産地・採取達成の判定ではありません）" % ["C に停車中" if state.at_quarry else "C 以外、または移動中", state.ore]},
 		{"title": "4 荷物を確定して街へ戻る", "body":
 			"現地の「帰還準備」で全員と荷物を集め、「帰還→横視点」で搬入を確定します。その後、移動で A を選び、停車後に「拠点・街 → 街に入る」。購買店では資源の売却や必要品の購入ができます。\n現在の街利用: %s\nB–D の倒木近道は開通するまで通れません。地図で通れる経路を確認してください。" % town_status},
 		{"title": "5 持ち帰った物で製作・装備", "body":
@@ -87,11 +91,25 @@ static func recommendation(game, state: Dictionary) -> Dictionary:
 			return {"id":"workbench_wait", "title":"作業台は依頼済み。材料と作業を確認", "body":"「作成 → 建設」で不足材料や作業待ちを確認できます。画面を閉じると仲間が採取・搬入・組み立てを進めます。この手引きを読んでいる間は一時停止しています。"}
 		return {"id":"workbench", "title":"まずは「作成」で作業台を建てよう", "body":"停車中の木材採取から始めます。「作成」でワークベンチを依頼してください。必要な木材は%d個です。依頼後は画面を閉じ、仲間の搬入・組み立てを待ちます。" % int(FacilityDB.def("workbench").cost.get(GameData.Item.WOOD, 0))}
 	if state.mining_equipped == 0:
-		return {"id":"mining_tool", "title":"採掘具を用意して仲間の装備を確認", "body":"「作成 → 道具」で木製採掘具を用意し、「仲間」で装備を確認してください。製作を依頼済みなら完了を待ちます。石が集まったら石のハンマーを用意すると鉄鉱石も狙えます。"}
+		return {"id":"mining_tool", "title":"採掘具を用意して仲間の装備を確認", "body":"「作成 → 道具」で木製採掘具を用意し、「仲間」で装備を確認してください。製作を依頼済みなら完了を待ちます。鉄鉱石（鉱床）にはピッケル（石のピッケル以上）が必要です。"}
 	var completed: Dictionary = state.history.get("completed", {})
 	if completed.get("quarry_returned", false) and not completed.get("returned_a", false):
 		return {"id":"return_a", "title":"荷物を持ってAへ帰り、売買・補給", "body":"「移動」でAへ。停車して全員が戻ったら「拠点・街 → 街に入る」。購買店で余った資源を売り、食料を補充し、車両ヤードで給油できます。現在の所持数と価格を見て必要な分だけ取引してください。"}
 	if not completed.get("quarry_returned", false):
+		if not state.ore_tool_equipped:
+			var title := "「石のピッケル」を作って装備しよう"
+			var action := "作業台の「作成 → 道具」で石2＋木材1を使って作ります。石は木製採掘具で岩場から採れます。"
+			if game.storage.count_of(GameData.Item.HAMMER) > 0:
+				title = "倉庫の石のピッケルを装備しよう"
+				action = "倉庫に石のピッケルがあります。"
+			elif game.workshop_count(GameData.Item.HAMMER) > 0 and game._queued_transfer(GameData.Item.HAMMER, "to_storage") == 0:
+				title = "作業場の石のピッケルを倉庫へ運ぼう"
+				action = "「所持品 → 作業場 → 倉庫へ戻す」で運搬を依頼してください。"
+			elif game.processor.manual_status("tool_hammer").queued > 0 or game.packed_in_transit(GameData.Item.HAMMER) > 0:
+				title = "石のピッケルは依頼済み"
+				action = "石のピッケルは依頼済みです。画面を閉じ、製作・倉庫への運搬を待ってください。"
+			var body := "鉄鉱石（鉱床）にはピッケル（石のピッケル以上）が必要です。%s\n現在の倉庫：石 %d / 木材 %d\n倉庫に入った石のピッケルを「仲間」で装備してから、Cへ向かいましょう。" % [action, state.stone, state.wood]
+			return {"id":"ore_tool", "title":title, "body":body}
 		if state.at_quarry:
 			return {"id":"enter_c", "title":"「採掘地に入る」でCの採取へ", "body":"通常の採掘入口から入ります。選択画面を閉じた後は「移動 → Cの入場選択を開く」で開き直せます。帰るときは「帰還準備」で全員と荷物を集め、「帰還→横視点」で持ち帰りを確定してください。独立ボス挑戦は準備後の目標です。"}
 		return {"id":"visit_c", "title":"「移動」でCを選び、採取に出発", "body":"A → B → Cが基本の行き方です。地図で経路と燃料見込みを確認して出発します。車上狩猟は任意です。Cに着いたら「採掘地に入る」を選びます。"}

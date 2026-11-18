@@ -3,7 +3,7 @@ extends RefCounted
 ## 採取ポイント（岩場・鉱床・枯れ木）と、採取の道具の表（プロトタイプの仮の数値）。数値・計算式の調整はここだけでよい。
 ##
 ## eff は同じ作業時間で採れる主素材量の倍率。残量1から主素材1を移す。
-## 素手は木のみ、木製採掘具で石、石のハンマーで鉄鉱石を解放。
+## 素手は木のみ、木製採掘具で石、鉄鉱石（鉱床）にはピッケル（石のピッケル以上）が必要。
 ## 運搬・狩猟にはこの制限を適用しない。道具耐久は導入しない。
 
 ## 旧版の素手伐採の eff0.40×speed0.8 = 0.32 を基準速度として維持。
@@ -32,7 +32,7 @@ const TOOLS := {
 		"eff": {"rock": 2.0, "vein": 0.0}, "speed": 1.0, "need_rank": 0, "bonus": {}},
 	GameData.Item.WOOD_AXE: {"name": "木製の斧", "tier": 1, "slot": "chop",
 		"eff": {"tree": 2.0}, "speed": 1.0, "need_rank": 0, "bonus": {}},
-	GameData.Item.HAMMER: {"name": "石のハンマー", "tier": 2, "slot": "mine",
+	GameData.Item.HAMMER: {"name": "石のピッケル", "tier": 2, "slot": "mine",
 		"eff": {"rock": 3.0, "vein": 3.0}, "speed": 1.0, "need_rank": 0, "bonus": {}},
 	GameData.Item.AXE: {"name": "石の斧", "tier": 2, "slot": "chop",
 		"eff": {"tree": 3.0}, "speed": 1.0, "need_rank": 0, "bonus": {}},
@@ -122,7 +122,7 @@ static func tool_score(slot: String, tool_item: int, rank: int, ability: float) 
 
 
 static func requirement(kind: String) -> String:
-	return {"rock": "木製採掘具以上が必要", "vein": "石のハンマー以上が必要", "tree": "素手で採取可能"}.get(kind, "")
+	return {"rock": "木製採掘具以上が必要", "vein": "ピッケル（石のピッケル以上）が必要", "tree": "素手で採取可能"}.get(kind, "")
 
 static func result_text(kind: String, item: int, rank: int, ability: float) -> String:
 	var ev := evaluate(kind, item, rank, ability)

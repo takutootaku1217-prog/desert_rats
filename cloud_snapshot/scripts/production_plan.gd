@@ -120,5 +120,5 @@ static func refill_reason(g,item:int) -> String:
 				if n>0:missing.append("%s%d"%[ItemDB.name_of(it),n])
 			reasons.append(r.name+"："+("不足 "+"・".join(missing) if not missing.is_empty() else order_reason(g,r)))
 	if item==GameData.Item.REPAIR_KIT:
-		reasons.append("石・鉱石を採れない場合はFの道具で木製採掘具→石のハンマーを注文。鉄は精錬注文。地域移動・道具製作は任意です")
+		reasons.append("石には木製採掘具以上、鉄鉱石（鉱床）にはピッケル（石のピッケル以上）が必要。Fの道具で注文できます。鉄は精錬注文。地域移動・道具製作は任意です")
 	return " / ".join(reasons)

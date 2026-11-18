@@ -259,6 +259,10 @@ func _normal_role_snapshot(session) -> Dictionary:
 func _first_sortie() -> Dictionary:
 	if not await _move_to_quarry():
 		return {"ok": false, "reason": "A→B→C移動失敗"}
+	# The fixture supplies the required equipment; all ore still comes from C.
+	main.storage.store_owned(GameData.Item.HAMMER, 1, Inventory.SOURCE_TRANSFER)
+	if not main.equip_tool(main.workers[0], GameData.Item.HAMMER):
+		return {"ok": false, "reason": "could not equip the harvester's stone pickaxe"}
 	var created: Dictionary = RouteSession.create_from_game(main, "normal-haul-frame-first", {"outpost_enabled": false})
 	if not bool(created.get("ok", false)):
 		return {"ok": false, "reason": str(created.get("reason", "session作成失敗"))}

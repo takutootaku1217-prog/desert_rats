@@ -41,7 +41,7 @@ func run() -> void:
  main.process_mode=Node.PROCESS_MODE_DISABLED;main.director.enabled=false
  for w in main.workers: w.stop_work()
  main.transfer_queue.clear()
- # 木材, 石, 鉄鉱石, 鉄, 石のハンマー (names chosen so "石" matches at start/middle/end positions)
+ # 木材, 石, 鉄鉱石, 鉄, 石のピッケル (names chosen so "石" matches at start/middle/end positions)
  main.storage.inventory.counts={WOOD:10,STONE:3,IRON_ORE:2,IRON:1,HAMMER:1}
  main.transfer_queue.append({"item":WOOD,"n":4,"dir":"to_workshop"})
  ui=main.inventory_ui
@@ -57,7 +57,7 @@ func run() -> void:
  check(rows()==5 and names().size()==5,"empty query lists every held stack")
  await search("石")
  var n1:=names()
- check(n1.size()==3 and n1.has("石") and n1.has("鉄鉱石") and n1.has("石のハンマー"),"query 石 matches by substring at start/middle/end of the name")
+ check(n1.size()==3 and n1.has("石") and n1.has("鉄鉱石") and n1.has("石のピッケル"),"query 石 matches by substring at start/middle/end of the name")
  check(not n1.has("木材") and not n1.has("鉄"),"query 石 hides non-matching names")
  await search("鉄")
  var n2:=names()

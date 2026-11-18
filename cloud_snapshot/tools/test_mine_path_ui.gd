@@ -122,8 +122,10 @@ func _check_capacity_feedback() -> void:
 		resource.reservation = ""
 	var candidate: Dictionary = field.session.resources.values()[0]
 	candidate.item = GameData.Item.STONE
+	candidate.kind = "rock"
 	candidate.remaining = 2
 	var actor: Dictionary = field.session.actors.values()[0]
+	actor.tools["mine"] = GameData.Item.WOOD_PICK
 	actor.wait_reason = RouteSession.NORMAL_CAPACITY_WAIT
 	for access in ["blocked", "clearing", "cleared"]:
 		field.session.intermediate_access = access
@@ -146,6 +148,7 @@ func _check_capacity_feedback() -> void:
 	field.session.field_capacity_limit_weight = 10
 	var light: Dictionary = field.session.resources.values()[1]
 	light.item = GameData.Item.WOOD
+	light.kind = "tree"
 	light.remaining = 1
 	field._update_controls()
 	_check(not field.detail_label.text.contains("採取停止"), "A fitting unreserved lighter candidate prevents a false global stop")
@@ -167,6 +170,12 @@ func _check_capacity_feedback() -> void:
 		field.session.set(flag, true)
 		_check(not field._normal_decision_detail(field.session.state_summary()).contains("採取停止"), "%s is outside ordinary C capacity guidance" % flag)
 		field.session.set(flag, false)
+	candidate.item = GameData.Item.IRON_ORE
+	candidate.kind = "vein"
+	actor.state = "idle"
+	actor.wait_reason = RouteSession.ResourceGrowth.WAIT_REASON
+	field._update_controls()
+	_check(field.detail_label.text.contains("鉱床にはピッケル（石のピッケル以上）が必要"), "A wood pick facing the remaining vein displays the tool requirement")
 	field.session = original
 	field._update_controls()
 

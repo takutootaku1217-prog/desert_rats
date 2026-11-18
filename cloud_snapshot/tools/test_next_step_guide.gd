@@ -50,6 +50,8 @@ func _run() -> void:
 	main.finish_build("workbench")
 	check(next_id() == "mining_tool", "built workbench advances advice to equipping a mining tool")
 	main.workers[0].tools["mine"] = GameData.Item.WOOD_PICK
+	check(next_id() == "ore_tool", "a wood pick alone leads to ore tool preparation")
+	main.workers[0].tools["mine"] = GameData.Item.HAMMER
 	check(next_id() == "visit_c", "a prepared crew sees first quarry-trip guidance")
 	main.storage.store_owned(GameData.Item.IRON_ORE, 2, Inventory.SOURCE_TRANSFER)
 	check(next_id() == "visit_c", "unproven ore stock never invents a quarry return")

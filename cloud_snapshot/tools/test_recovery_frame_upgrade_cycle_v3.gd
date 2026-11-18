@@ -1,5 +1,6 @@
 extends SceneTree
 ## v3.2 real resource acquisition -> town craft/equip -> next C visit.
+## Fixture: the harvester is given one stone pickaxe before C (ore needs a pickaxe); resources come from play.
 ## Attack-only durability policy: record hull without assuming wear savings.
 ## Normal director on roads and FieldSurvivalClock on C; hunger/fuel/wear advance.
 ## Comparison Main copies are never committed to the original; actual next outing runs separately.
@@ -144,6 +145,10 @@ func _cycle() -> bool:
 	main.set_procurement(GameData.Item.WOOD,0)
 	for w in main.workers: w.set_priority(GameData.Job.GATHER,0)
 	if not _check(await _leg("c_quarry",true),"B -> C with second explicit hide hunt"):return false
+	# Iron ore needs a pickaxe at C. The fixture supplies the harvester's stone pickaxe (equipment only);
+	# every ore, wood and hide counted below still comes from play.
+	main.storage.store_owned(GameData.Item.HAMMER, 1, Inventory.SOURCE_TRANSFER)
+	if not _check(main.equip_tool(main.workers[0], GameData.Item.HAMMER),"fixture equips the harvester's stone pickaxe"):return false
 	if not _check(await _first_recovery(),"first C mineral collection/transport/return"):return false
 	_check(hunt_hide==2,"two actual vehicle hunts supplied frame hides")
 	_snapshot("first_C_committed")
