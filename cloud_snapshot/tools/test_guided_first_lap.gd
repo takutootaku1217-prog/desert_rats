@@ -91,6 +91,7 @@ func _mine_lap(want_item := -1, want_n := 1, limit := 400.0) -> bool:
 	adapter.set_process(false)
 	for unused in 5: await process_frame
 	var session = adapter.session
+	print("MINE entry free=%d" % session.field_capacity_limit_weight)
 	var advance := func(predicate: Callable, limit: float) -> bool:
 		for unused in ceili(limit / STEP):
 			if predicate.call(): return true
@@ -221,12 +222,11 @@ func _run() -> void:
 				var next := "b_forest" if main.world.region == "a_start" else "c_quarry"
 				if not await _travel(next): stuck = "travel to %s failed (%s)" % [next, _status()]
 			"enter_c":
-				# C fills its cargo with stone first. Leave room for the ore behind it.
-				var surplus: int = main.warehouse_discard_available(GameData.Item.STONE) - 2
-				if surplus > 0:
-					_check(main.discard_warehouse(main.warehouse_discard_snapshot(GameData.Item.STONE, surplus)), "first trip makes room for mine cargo by discarding surplus stone")
+				var ore_before: int = main.storage.count_of(GameData.Item.IRON_ORE)
 				if not await _mine_lap(GameData.Item.IRON_ORE): stuck = "mine lap failed"
-				_check(main.storage.count_of(GameData.Item.IRON_ORE) > 0, "first mine commit delivered iron ore")
+				var ore_delivered: int = main.storage.count_of(GameData.Item.IRON_ORE) - ore_before
+				print("LAP1 first trip iron ore delivered=%d" % ore_delivered)
+				_check(ore_delivered > 0, "first mine commit delivered iron ore")
 			"return_a":
 				var back := "b_forest" if main.world.region == "c_quarry" else "a_start"
 				if not await _travel(back): stuck = "travel to %s failed (%s)" % [back, _status()]

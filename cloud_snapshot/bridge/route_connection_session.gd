@@ -1754,21 +1754,29 @@ func _reserve_resource(actor_id: String) -> String:
 	var actor: Dictionary = actors[actor_id]
 	var blocked_kind := ""
 	var capacity_blocked := false
+	var selected_id := ""
 	for resource_id in resources:
 		var resource: Dictionary = resources[resource_id]
 		if int(resource.get("remaining", 0)) <= 0 or not str(resource.get("reservation", "")).is_empty():
 			continue
+		var kind := str(resource.get("kind", ""))
+		if not selected_id.is_empty() and kind != "vein":
+			continue
 		if not can_collect_resource(actor, resource):
-			var kind := str(resource.get("kind", ""))
 			if blocked_kind.is_empty() or kind == "vein":
 				blocked_kind = kind
 			continue
 		if normal_collection_room_for(int(resource.item)) <= 0:
 			capacity_blocked = true
 			continue
-		resource["reservation"] = actor_id
-		reservations[resource_id] = actor_id
-		return resource_id
+		selected_id = resource_id
+		# Keep the first eligible resource unless it is rock and a vein fits.
+		if kind != "rock":
+			break
+	if not selected_id.is_empty():
+		resources[selected_id]["reservation"] = actor_id
+		reservations[selected_id] = actor_id
+		return selected_id
 	if capacity_blocked:
 		actor.wait_reason = NORMAL_CAPACITY_WAIT
 	else:
