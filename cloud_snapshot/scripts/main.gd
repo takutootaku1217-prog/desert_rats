@@ -1502,13 +1502,32 @@ func facility_effect(kind: String) -> float:
 	return sum
 
 
-## 区画 slot に部屋 rtype を建てられない理由（材料の不足は含めない）。建てられるなら ""。
+## 車内と R 画面で共有する判定。撤去は設備の梱包と別に確定する。
 func room_block_reason(slot: String, rtype: String) -> String:
-	return Rooms.block_reason(room_layout, slot, rtype, base_level())
+	if game_over:
+		return "ゲーム終了中は部屋を変更できません"
+	var reason := Rooms.block_reason(room_layout, slot, rtype, base_level())
+	if not reason.is_empty():
+		return reason
+	var current: String = room_layout.get(slot, "empty")
+	if current != "empty":
+		for id in FacilityDB.ids():
+			if FacilityDB.room_of(id) != current:
+				continue
+			if base.facility_count(id) > 0:
+				return "設備を片づけてから解体してください（建設・製作 B）"
+			if build_pending(id) > 0:
+				return "この部屋の設備の建設・運搬を完了または取り消してください"
+		if current == "engine" and (base.refuel_reserved or base.repair_reserved.has(GameData.Part.DRIVE)):
+			return "機関室の補給・修理が終わるまで待ってください"
+	for item in Rooms.TYPES[rtype]["cost"]:
+		if warehouse_stock_row(item).usable < int(Rooms.TYPES[rtype]["cost"][item]):
+			return "使用可能な%sが足りません（予約分は使用不可）" % ItemDB.name_of(item)
+	return ""
 
 
 func can_build_room(slot: String, rtype: String) -> bool:
-	return room_block_reason(slot, rtype) == "" and storage.has_set(Rooms.TYPES[rtype]["cost"])
+	return room_block_reason(slot, rtype).is_empty()
 
 
 ## 区画 slot を rtype にする（空き部屋にして壊す・建てる・建て替える・移設する）。材料は倉庫から使う。できたら true。
@@ -1529,6 +1548,7 @@ func build_room(slot: String, rtype: String) -> bool:
 	if moved_from != "":
 		base.room_built_at[moved_from] = now
 	base.apply_layout()                                    # 加工設備・倉庫を、新しい部屋の位置へ
+	base.queue_redraw()
 	if base.room_slot("bedroom") != bed_slot_before:
 		for w in workers:
 			w.ai.on_bedroom_moved()                        # 眠っていた仲間は、新しいベッドへ歩き直す
@@ -1904,10 +1924,15 @@ func _unhandled_input(event: InputEvent) -> void:
 					get_viewport().set_input_as_handled()
 					return
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		var click_world := get_global_mouse_position()    # カメラが動いても正しい世界座標になる（event.position は画面座標のまま）
+		var click_world: Vector2 = get_canvas_transform().affine_inverse() * event.position
 		var best = _pick_worker_at(click_world)
 		if best != null:
 			_select(best)
+		elif not game_over and not has_open_management_panel():
+			var slot := base.interior_room_slot_at(click_world)
+			if not slot.is_empty():
+				room_ui.open_interior(slot)
+				get_viewport().set_input_as_handled()
 	elif event is InputEventKey and event.pressed:
 		if event.keycode == KEY_UP:
 			target_speed = minf(target_speed + 10.0, 200.0)

@@ -141,6 +141,20 @@ func is_large_three_deck() -> bool:
 	return str(vehicle_loadout.get("chassis", "medium")) in ["large", "reinforced_large"]
 
 
+## Draw-space hit test for the six editable rooms. Fixed rooms and exterior art are excluded.
+func interior_room_slot_at(world_point: Vector2) -> String:
+	if view_exterior:
+		return ""
+	var point := to_local(world_point)
+	for slot in Rooms.SLOT_ORDER:
+		var bounds := Rooms.overlay_rect(slot)
+		if uses_moving_interior_presentation():
+			bounds = LargeVehicleLayout.moving_interior_slot_rect(slot)
+		if bounds.has_point(point):
+			return slot
+	return ""
+
+
 ## The approved moving cutaway has its own art-space rooms.  These helpers are
 ## intentionally draw-only: AI, hit logic, selection state, facility targets,
 ## routes, and saves continue using Rooms' logical world coordinates.

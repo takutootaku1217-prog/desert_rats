@@ -30,6 +30,7 @@ TESTS.insert(0, 'workshop_packed_build_return')
 TESTS.insert(0, 'guided_first_lap')
 TESTS.insert(0, 'auto_gather_reserve')
 TESTS.insert(0, 'ore_tool_guide')
+TESTS.insert(0, "interior_room_ui")
 EXTRA_CASES = [('c_outpost_normal_director_v3','normal-director'),('c_outpost_failure_recovery_v3','failure-recovery'),('c_field_hull_failure_v3','hull-failure')]
 # Exhaustive real-Main readiness fixtures measured ~142s. Other defaults stay
 # at 120s; an explicit CLI timeout continues to override every case.
